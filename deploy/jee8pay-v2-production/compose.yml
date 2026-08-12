@@ -1,0 +1,357 @@
+name: jee8pay-v2-production
+
+x-backend-common: &backend-common
+  restart: unless-stopped
+  environment:
+    PLATFORM_ENVIRONMENT: PRODUCTION
+    SPRING_CONFIG_IMPORT: configtree:/run/secrets/
+    TZ: Asia/Taipei
+  depends_on:
+    volume-init:
+      condition: service_completed_successfully
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+    mq-broker:
+      condition: service_healthy
+  networks:
+    - v2
+
+services:
+  volume-init:
+    image: busybox:1.36
+    restart: "no"
+    command: ["sh", "-c", "chown -R 10001:10001 /volumes/*"]
+    volumes:
+      - payment_logs:/volumes/payment-logs
+      - payment_uploads:/volumes/payment-uploads
+      - manager_logs:/volumes/manager-logs
+      - manager_uploads:/volumes/manager-uploads
+      - merchant_logs:/volumes/merchant-logs
+      - merchant_uploads:/volumes/merchant-uploads
+    mem_limit: 32m
+
+  db:
+    platform: linux/amd64
+    image: ${DB_IMAGE:-mariadb:10.11}
+    restart: unless-stopped
+    environment:
+      LANG: C.UTF-8
+      TZ: Asia/Taipei
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db-root-password
+      MARIADB_DATABASE: jee8pay_v2_production
+      MARIADB_USER: jee8pay_v2_production
+      MARIADB_PASSWORD_FILE: /run/secrets/db-app-password
+    secrets:
+      - source: db_root_password
+        target: db-root-password
+      - source: db_app_password
+        target: db-app-password
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./artifacts/sql/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./config/production-bootstrap.sql:/docker-entrypoint-initdb.d/02-production-bootstrap.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+    mem_limit: 512m
+    networks:
+      - v2
+
+  redis:
+    image: ${REDIS_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/redis:6.2.14}
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    mem_limit: 96m
+    networks:
+      - v2
+
+  mq-namesrv:
+    platform: linux/amd64
+    image: ${ROCKETMQ_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:5.3.1}
+    restart: unless-stopped
+    user: "0:0"
+    command: sh mqnamesrv
+    environment:
+      HEAP_OPTS: -Xms192m -Xmx192m -Xmn96m
+    volumes:
+      - mq_namesrv_logs:/home/rocketmq/logs
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/9876'"]
+      interval: 15s
+      timeout: 10s
+      retries: 12
+      start_period: 40s
+    mem_limit: 320m
+    networks:
+      - v2
+
+  mq-broker:
+    platform: linux/amd64
+    image: ${ROCKETMQ_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:5.3.1}
+    restart: unless-stopped
+    user: "0:0"
+    command: sh mqbroker -n mq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.1/conf/broker.conf
+    environment:
+      NAMESRV_ADDR: mq-namesrv:9876
+      JAVA_OPT_EXT: -Xms448m -Xmx448m -Xmn224m
+    depends_on:
+      mq-namesrv:
+        condition: service_healthy
+    volumes:
+      - mq_broker_logs:/home/rocketmq/logs
+      - mq_broker_store:/home/rocketmq/store
+      - ./config/rocketmq-broker.conf:/home/rocketmq/rocketmq-5.3.1/conf/broker.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/10911'"]
+      interval: 15s
+      timeout: 10s
+      retries: 18
+      start_period: 120s
+    mem_limit: 768m
+    networks:
+      - v2
+
+  payment:
+    <<: *backend-common
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+      args:
+        SERVICE_JAR: jeepay-payment.jar
+    image: jee8pay-v2-production-payment:654df8b6b1ed
+    environment:
+      PLATFORM_ENVIRONMENT: PRODUCTION
+      CCAT_PROVIDER_ENVIRONMENT: PRODUCTION
+      SPRING_CONFIG_IMPORT: configtree:/run/secrets/
+      SPRING_DATA_REDIS_DATABASE: 3
+      JAVA_TOOL_OPTIONS: -Xms192m -Xmx320m -XX:+ExitOnOutOfMemoryError
+      TZ: Asia/Taipei
+    secrets:
+      - source: db_app_password
+        target: spring.datasource.password
+    volumes:
+      - ./config/application.yml:/jeepayhomes/service/app/application.yml:ro
+      - payment_logs:/jeepayhomes/service/logs
+      - payment_uploads:/jeepayhomes/service/uploads
+    ports:
+      - "127.0.0.1:29216:9216"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/9216'"]
+      interval: 15s
+      timeout: 5s
+      retries: 16
+      start_period: 60s
+    mem_limit: 512m
+
+  callback-ingress:
+    image: nginx:alpine
+    restart: unless-stopped
+    depends_on:
+      payment:
+        condition: service_healthy
+    volumes:
+      - ./config/callback-ingress.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+    mem_limit: 64m
+    networks:
+      v2:
+      v2-edge-transit:
+        aliases:
+          - jee8pay-v2-production-callback
+
+  manager:
+    <<: *backend-common
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+      args:
+        SERVICE_JAR: jeepay-manager.jar
+    image: jee8pay-v2-production-manager:654df8b6b1ed
+    environment:
+      PLATFORM_ENVIRONMENT: PRODUCTION
+      SPRING_CONFIG_IMPORT: configtree:/run/secrets/
+      SPRING_DATA_REDIS_DATABASE: 1
+      JAVA_TOOL_OPTIONS: -Xms160m -Xmx256m -XX:+ExitOnOutOfMemoryError
+      TZ: Asia/Taipei
+    secrets:
+      - source: db_app_password
+        target: spring.datasource.password
+      - source: manager_jwt_secret
+        target: isys.jwt-secret
+    volumes:
+      - ./config/application.yml:/jeepayhomes/service/app/application.yml:ro
+      - manager_logs:/jeepayhomes/service/logs
+      - manager_uploads:/jeepayhomes/service/uploads
+    ports:
+      - "127.0.0.1:29217:9217"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/9217'"]
+      interval: 15s
+      timeout: 5s
+      retries: 16
+      start_period: 60s
+    mem_limit: 384m
+
+  merchant:
+    <<: *backend-common
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+      args:
+        SERVICE_JAR: jeepay-merchant.jar
+    image: jee8pay-v2-production-merchant:654df8b6b1ed
+    environment:
+      PLATFORM_ENVIRONMENT: PRODUCTION
+      SPRING_CONFIG_IMPORT: configtree:/run/secrets/
+      SPRING_DATA_REDIS_DATABASE: 2
+      JAVA_TOOL_OPTIONS: -Xms160m -Xmx256m -XX:+ExitOnOutOfMemoryError
+      TZ: Asia/Taipei
+    secrets:
+      - source: db_app_password
+        target: spring.datasource.password
+      - source: merchant_jwt_secret
+        target: isys.jwt-secret
+    volumes:
+      - ./config/application.yml:/jeepayhomes/service/app/application.yml:ro
+      - merchant_logs:/jeepayhomes/service/logs
+      - merchant_uploads:/jeepayhomes/service/uploads
+    ports:
+      - "127.0.0.1:29218:9218"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/9218'"]
+      interval: 15s
+      timeout: 5s
+      retries: 16
+      start_period: 60s
+    mem_limit: 384m
+
+  cashier:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+      args:
+        UI_DIR: ui-cashier
+    image: jee8pay-v2-production-cashier:654df8b6b1ed
+    restart: unless-stopped
+    environment:
+      BACKEND_HOST: payment:9216
+    depends_on:
+      payment:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:29226:80"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+    mem_limit: 64m
+    networks:
+      - v2
+
+  manager-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+      args:
+        UI_DIR: ui-manager
+    image: jee8pay-v2-production-manager-ui:654df8b6b1ed
+    restart: unless-stopped
+    environment:
+      BACKEND_HOST: manager:9217
+    depends_on:
+      manager:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:29227:80"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+    mem_limit: 64m
+    networks:
+      - v2
+
+  merchant-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+      args:
+        UI_DIR: ui-merchant
+    image: jee8pay-v2-production-merchant-ui:654df8b6b1ed
+    restart: unless-stopped
+    environment:
+      BACKEND_HOST: merchant:9218
+    depends_on:
+      merchant:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:29228:80"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+    mem_limit: 64m
+    networks:
+      - v2
+
+secrets:
+  db_root_password:
+    file: ${V2_SECRET_DIR:-./.secrets}/db-root-password
+  db_app_password:
+    file: ${V2_SECRET_DIR:-./.secrets}/db-app-password
+  manager_jwt_secret:
+    file: ${V2_SECRET_DIR:-./.secrets}/manager-jwt-secret
+  merchant_jwt_secret:
+    file: ${V2_SECRET_DIR:-./.secrets}/merchant-jwt-secret
+
+networks:
+  v2:
+    name: jee8pay-v2-production-network
+  v2-edge-transit:
+    name: jee8pay-v2-production-edge-transit
+    internal: true
+
+volumes:
+  db_data:
+    name: jee8pay-v2-production-db-data
+  redis_data:
+    name: jee8pay-v2-production-redis-data
+  mq_namesrv_logs:
+    name: jee8pay-v2-production-mq-namesrv-logs
+  mq_broker_logs:
+    name: jee8pay-v2-production-mq-broker-logs
+  mq_broker_store:
+    name: jee8pay-v2-production-mq-broker-store
+  payment_logs:
+    name: jee8pay-v2-production-payment-logs
+  payment_uploads:
+    name: jee8pay-v2-production-payment-uploads
+  manager_logs:
+    name: jee8pay-v2-production-manager-logs
+  manager_uploads:
+    name: jee8pay-v2-production-manager-uploads
+  merchant_logs:
+    name: jee8pay-v2-production-merchant-logs
+  merchant_uploads:
+    name: jee8pay-v2-production-merchant-uploads
+

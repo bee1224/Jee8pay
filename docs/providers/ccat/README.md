@@ -16,7 +16,10 @@ Live Token Auth: PASS (1/1 request, token not exposed)
 Public Callback: PASS (V2-only exact path; edge restart guard)
 Pre-Live: PASS
 Live E2E: PASS (one TWD 40 order / one human payment / APN / native notify)
-Production Candidate: NOT STARTED
+Production Candidate: DEPLOYED / ACCEPTED
+Production Credential Binding: HUMAN GATE
+Production Token Auth: DEFERRED
+Production Public Callback: PLAN READY / HUMAN GATE
 Production Validation: NOT STARTED
 V1 Cutover: NOT STARTED
 ```
@@ -75,6 +78,8 @@ JEE-C03 已以契約會員取得的 `多元支付平台-WEBAPI介面規格(V1.28
 - [`provider-design.md`](provider-design.md)：P04 已實作的 evidence-backed Provider design。
 - [`contract-evidence.md`](contract-evidence.md)：JEE-C03 authenticated-spec closure report、page provenance、31-item Definition of Ready 與 V1 drift。
 
-JEE-E02 已部署 isolated V2 Development runtime，完成 V2-only PRODUCTION credential row、一次成功 Token authentication，以及只接受 CCAT exact APN path 的 V2-only public HTTPS callback。TD-011 已以 Provider-local native config resolver 修復並通過 cache enabled/disabled regression、完整 backend verification 與 V2 deployment。舊 INIT order 留作不處理的 test artifact；TD-012 為 nonblocking。2026-08-13 經明確授權透過 native unified-order flow 建立 exactly one 新 TWD 40 CCAT ibon order，並由真人完成 exactly one payment。CCAT status `A` / `B` APN 均通過 fail-closed 驗證；paid APN 經 authenticated Query reconciliation 後觸發 native `ING` → `SUCCESS`、Provider `OK` ACK 與 exactly one native Merchant Notify，receiver 首送回覆 `SUCCESS`。Public route 使用符合本次 zero-stop 限制的 runtime mount，任何 edge restart 後必須先重新驗證（TD-010）。Operations 見 [`../../operations/ccat-v2-development.md`](../../operations/ccat-v2-development.md)。
+JEE-E02 已部署 isolated V2 Development runtime，完成 V2-only PRODUCTION credential row、一次成功 Token authentication，以及只接受 CCAT exact APN path 的 V2-only public HTTPS callback。TD-011 已以 Provider-local native config resolver 修復並通過 cache enabled/disabled regression、完整 backend verification 與 V2 deployment。舊 INIT order 留作不處理的 test artifact；TD-012 為 nonblocking。2026-08-13 經明確授權透過 native unified-order flow 建立 exactly one 新 TWD 40 CCAT ibon order，並由真人完成 exactly one payment。CCAT status `A` / `B` APN 均通過 fail-closed 驗證；paid APN 經 authenticated Query reconciliation 後觸發 native `ING` → `SUCCESS`、Provider `OK` ACK 與 exactly one native Merchant Notify，receiver 首送回覆 `SUCCESS`。Public route 使用符合本次 zero-stop 限制的 runtime mount，任何 edge restart 後必須先重新驗證（TD-010）。Development operations 見 [`../../operations/ccat-v2-development.md`](../../operations/ccat-v2-development.md)。
 
-下一階段為 `JEE-E04 CCAT-only Production Candidate Deployment`；不得自動開始。NewebPay 維持 deferred。
+JEE-E04 已將 I04 exact artifact 部署為 `server1.lp33ing.com` 上完全隔離的 `jee8pay-v2-production` Production Candidate；fresh V2 DB、Redis、MQ、三個 backend、三個 UI 與 internal callback ingress 均 healthy，V1 維持 6/6 healthy。JEE-I05 已獨立驗收 source provenance、runtime health、V1/V2 isolation、rollback 與 V1 non-interference。Production CCAT DNS/TCP/TLS/time readiness 通過，未執行 Token 或任何 transaction。Production credential intake、native Merchant/Application config 與 public callback control-plane activation 保留為精確 Human Gate；operations 與 rollback 見 [`../../operations/ccat-v2-production-candidate.md`](../../operations/ccat-v2-production-candidate.md)。
+
+後續可由使用者選擇 `JEE-D01 Downstream Merchant Integration Readiness & UAT Package` 或稍後的 `JEE-M01 V1 → V2 Cutover Rehearsal`；兩者都不自動開始。NewebPay 維持 deferred。

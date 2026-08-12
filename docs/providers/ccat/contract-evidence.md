@@ -22,7 +22,7 @@ CCAT_RUNTIME_IMPLEMENTATION = COMPLETE
 CCAT_OFFLINE_ACCEPTANCE = PASS
 CCAT_DEVELOPMENT_DEPLOYMENT = PASS
 CCAT_LIVE_E2E = PASS
-CCAT_PRODUCTION_CANDIDATE = NOT_STARTED
+CCAT_PRODUCTION_CANDIDATE = DEPLOYED_AND_ACCEPTED
 CCAT_PRODUCTION_VALIDATION = NOT STARTED
 V1_CUTOVER = NOT_STARTED
 ```
@@ -356,7 +356,7 @@ CCAT_RUNTIME_IMPLEMENTATION = COMPLETE
 CCAT_OFFLINE_ACCEPTANCE = PASS
 CCAT_DEVELOPMENT_DEPLOYMENT = PASS
 CCAT_LIVE_E2E = PASS
-CCAT_PRODUCTION_CANDIDATE = NOT_STARTED
+CCAT_PRODUCTION_CANDIDATE = DEPLOYED_AND_ACCEPTED
 CCAT_PRODUCTION_VALIDATION = NOT_STARTED
 V1_CUTOVER = NOT_STARTED
 ```
@@ -364,7 +364,7 @@ V1_CUTOVER = NOT_STARTED
 ## Next Session
 
 ```text
-NEXT = JEE-E04 CCAT-only Production Candidate Deployment
+NEXT = USER-SELECTED JEE-D01 OR LATER JEE-M01
 ```
 
-P04 implemented Create、Provider Query and APN on JeePay's native Provider Extension Contract. JEE-E02 later completed Development live acceptance; JEE-I04 independently reverified 53 CCAT-specific tests and full backend compile/test/package. No Platform Production deployment or validation has started. The three nonblocking contract debts remain open.
+P04 implemented Create、Provider Query and APN on JeePay's native Provider Extension Contract. JEE-E02 later completed Development live acceptance; JEE-I04 independently reverified 53 CCAT-specific tests and full backend compile/test/package. JEE-E04 deployed the isolated Platform Production Candidate and JEE-I05 independently accepted it; Production credential binding、callback activation、pilot transaction and cutover remain unstarted. The three nonblocking contract debts remain open.

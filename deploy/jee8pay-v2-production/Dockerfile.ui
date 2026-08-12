@@ -1,0 +1,6 @@
+FROM nginx:alpine
+
+ARG UI_DIR
+COPY config/nginx-default.conf.template /etc/nginx/templates/default.conf.template
+COPY artifacts/${UI_DIR}/ /usr/share/nginx/html/
+

@@ -1,0 +1,19 @@
+ARG BASE_IMAGE=eclipse-temurin:17-jre-jammy
+FROM ${BASE_IMAGE}
+
+ARG SERVICE_JAR
+ENV LANG=C.UTF-8
+ENV TZ=Asia/Taipei
+
+RUN groupadd --system --gid 10001 jeepay \
+    && useradd --system --uid 10001 --gid jeepay --home-dir /jeepayhomes/service jeepay \
+    && mkdir -p /jeepayhomes/service/app /jeepayhomes/service/logs /jeepayhomes/service/uploads \
+    && chown -R jeepay:jeepay /jeepayhomes/service
+
+COPY --chown=jeepay:jeepay artifacts/${SERVICE_JAR} /jeepayhomes/service/app/service.jar
+
+USER jeepay
+WORKDIR /jeepayhomes/service/app
+
+CMD ["java", "-jar", "service.jar", "--spring.config.additional-location=file:/jeepayhomes/service/app/application.yml"]
+
