@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly edge=nnviopp-sandbox-edge
+readonly container_config=/etc/nginx/nginx.conf
+readonly marker=/opt/jee8pay-v2-dev/state/merchant-uat-edge-hot-applied
+readonly expected_current=0786d6bcba356279f3065f2b33ef97fac84f998e1ff035c901a3a45108acf7f6
+readonly expected_rollback=2dadcef48ac7d992f343d03bdf7a7f6b0e1213e58bdcf136d2c646c5d728d9bb
+
+[[ $EUID -eq 0 ]] || { echo 'ROLLBACK=FAIL_REQUIRES_ROOT' >&2; exit 2; }
+[[ ${SANDBOX_MERCHANT_UAT_EDGE_ROLLBACK_APPROVED:-} == YES ]] || {
+  echo 'ROLLBACK=FAIL_EXPLICIT_APPROVAL_REQUIRED' >&2
+  exit 2
+}
+[[ -f $marker ]] || { echo 'ROLLBACK=FAIL_MARKER_MISSING' >&2; exit 2; }
+[[ $(docker exec "$edge" sha256sum "$container_config" | awk '{print $1}') == "$expected_current" ]] || {
+  echo 'ROLLBACK=FAIL_EDGE_CONFIG_NOT_D01' >&2
+  exit 2
+}
+
+pid=$(docker inspect --format '{{.State.Pid}}' "$edge")
+nsenter -t "$pid" -m -r -- umount "$container_config"
+[[ $(docker exec "$edge" sha256sum "$container_config" | awk '{print $1}') == "$expected_rollback" ]]
+docker exec "$edge" nginx -t
+docker kill --signal HUP "$edge" >/dev/null
+sleep 2
+[[ $(docker inspect --format '{{.State.Status}}|{{.State.Health.Status}}|{{.RestartCount}}' "$edge") == 'running|healthy|0' ]]
+rm -- "$marker"
+echo 'EDGE_HOT_ROLLBACK=PASS'
+echo 'EDGE_STOPPED=NO'
+echo 'EDGE_RESTART_COUNT=0'

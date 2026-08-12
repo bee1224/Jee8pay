@@ -1,0 +1,27 @@
+name: jee8pay-v2-dev-merchant-uat
+
+services:
+  merchant-api-ingress:
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - /opt/jee8pay-v2-dev/merchant-uat/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+    mem_limit: 64m
+    networks:
+      v2:
+      v2-edge-transit:
+        aliases:
+          - jee8pay-v2-merchant-api
+
+networks:
+  v2:
+    external: true
+    name: jee8pay-v2-dev-network
+  v2-edge-transit:
+    external: true
+    name: jee8pay-v2-dev-edge-transit

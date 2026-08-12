@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly edge=nnviopp-sandbox-edge
+readonly source_config=/opt/jee8pay-v2-dev/merchant-uat/nginx.proposed.conf
+readonly container_config=/etc/nginx/nginx.conf
+readonly staged_config=/tmp/jee8pay-v2-merchant-uat-nginx.conf
+readonly marker=/opt/jee8pay-v2-dev/state/merchant-uat-edge-hot-applied
+readonly expected_current=2dadcef48ac7d992f343d03bdf7a7f6b0e1213e58bdcf136d2c646c5d728d9bb
+readonly expected_proposed=0786d6bcba356279f3065f2b33ef97fac84f998e1ff035c901a3a45108acf7f6
+
+[[ $EUID -eq 0 ]] || { echo 'APPLY=FAIL_REQUIRES_ROOT' >&2; exit 2; }
+[[ ${SANDBOX_MERCHANT_UAT_EDGE_CHANGE_APPROVED:-} == YES ]] || {
+  echo 'APPLY=FAIL_EXPLICIT_APPROVAL_REQUIRED' >&2
+  exit 2
+}
+[[ ! -e $marker ]] || { echo 'APPLY=FAIL_ALREADY_APPLIED' >&2; exit 2; }
+[[ $(docker inspect --format '{{.State.Status}}|{{.State.Health.Status}}|{{.RestartCount}}' "$edge") == 'running|healthy|0' ]] || {
+  echo 'APPLY=FAIL_EDGE_HEALTH' >&2
+  exit 2
+}
+[[ $(docker inspect --format '{{.State.Status}}|{{.State.Health.Status}}' jee8pay-v2-dev-merchant-uat-merchant-api-ingress-1) == 'running|healthy' ]] || {
+  echo 'APPLY=FAIL_MERCHANT_INGRESS_HEALTH' >&2
+  exit 2
+}
+[[ $(docker exec "$edge" sha256sum "$container_config" | awk '{print $1}') == "$expected_current" ]] || {
+  echo 'APPLY=FAIL_EDGE_CONFIG_BASELINE' >&2
+  exit 2
+}
+[[ $(sha256sum "$source_config" | awk '{print $1}') == "$expected_proposed" ]] || {
+  echo 'APPLY=FAIL_PROPOSED_CONFIG_BASELINE' >&2
+  exit 2
+}
+openssl x509 -in /etc/nnviopp-sandbox/edge-tls/fullchain.pem -noout -ext subjectAltName |
+  grep -Fq 'DNS:api-v2-dev.nnviopp.com' || {
+    echo 'APPLY=FAIL_TLS_SAN_MISSING' >&2
+    exit 2
+  }
+
+config_mounted=0
+config_reloaded=0
+rollback_on_error() {
+  status=$?
+  if [[ $status -eq 0 ]]; then
+    return
+  fi
+  pid=$(docker inspect --format '{{.State.Pid}}' "$edge" 2>/dev/null || true)
+  if [[ $config_mounted -eq 1 && -n $pid ]]; then
+    nsenter -t "$pid" -m -r -- umount "$container_config" || true
+    if [[ $config_reloaded -eq 1 ]]; then
+      docker exec "$edge" nginx -t >/dev/null 2>&1 || true
+      docker kill --signal HUP "$edge" >/dev/null 2>&1 || true
+    fi
+  fi
+  echo 'APPLY=ROLLED_BACK_AFTER_ERROR' >&2
+  exit "$status"
+}
+trap rollback_on_error EXIT
+
+docker exec -i "$edge" sh -c "cat > '$staged_config' && chmod 0640 '$staged_config'" <"$source_config"
+pid=$(docker inspect --format '{{.State.Pid}}' "$edge")
+nsenter -t "$pid" -m -r -- mount --bind "$staged_config" "$container_config"
+config_mounted=1
+[[ $(docker exec "$edge" sha256sum "$container_config" | awk '{print $1}') == "$expected_proposed" ]]
+docker exec "$edge" nginx -t
+docker kill --signal HUP "$edge" >/dev/null
+config_reloaded=1
+sleep 2
+[[ $(docker inspect --format '{{.State.Status}}|{{.State.Health.Status}}|{{.RestartCount}}' "$edge") == 'running|healthy|0' ]]
+
+install -m 0600 -o root -g root /dev/null "$marker"
+{
+  printf 'applied_at=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  printf 'container_started_at=%s\n' "$(docker inspect --format '{{.State.StartedAt}}' "$edge")"
+  printf 'config_sha256=%s\n' "$expected_proposed"
+} >"$marker"
+
+trap - EXIT
+echo 'EDGE_HOT_APPLY=PASS'
+echo 'EDGE_STOPPED=NO'
+echo 'EDGE_RESTART_COUNT=0'

@@ -9,6 +9,7 @@
 | Architecture | Current system behavior | [`docs/architecture/`](architecture/README.md) |
 | Decisions | Durable architectural decisions | [`docs/decisions/`](decisions/README.md) |
 | Providers | Provider-specific contract/design | [`docs/providers/`](providers/README.md) |
+| Integration | External integration contracts and UAT packages | [`docs/integration/`](integration/README.md) |
 | Operations | Deployment/runtime/operations | [`docs/operations/`](operations/README.md) |
 | Debt | Known unresolved debt | [`docs/debt/`](debt/README.md) |
 

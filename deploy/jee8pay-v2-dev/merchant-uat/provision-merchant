@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly db_container=jee8pay-v2-dev-db-1
+readonly mch_no=M_D01_EXTERNAL_UAT
+readonly app_id=APP_D01_EXTERNAL_UAT
+readonly source_app_id=APP_E02_CCAT_DEV
+readonly handoff=/opt/jee8pay-v2-dev/secrets/d01-external-merchant-uat.env
+
+[[ $EUID -eq 0 ]] || { echo 'PROVISION=FAIL_REQUIRES_ROOT' >&2; exit 2; }
+[[ ${D01_MERCHANT_PROVISION_APPROVED:-} == YES ]] || {
+  echo 'PROVISION=FAIL_EXPLICIT_APPROVAL_REQUIRED' >&2
+  exit 2
+}
+[[ ! -e $handoff ]] || { echo 'PROVISION=FAIL_HANDOFF_EXISTS' >&2; exit 2; }
+[[ $(stat -c '%u:%g:%a' /opt/jee8pay-v2-dev/secrets) == '0:0:700' ]] || {
+  echo 'PROVISION=FAIL_SECRET_DIRECTORY_METADATA' >&2
+  exit 2
+}
+
+db() {
+  docker exec -i "$db_container" sh -lc \
+    'export MYSQL_PWD="$(cat /run/secrets/db-root-password)"; exec mariadb -N -B -uroot jee8pay_v2_dev'
+}
+
+[[ $(db <<SQL
+SELECT
+  (SELECT COUNT(*) FROM t_mch_info WHERE mch_no='$mch_no') +
+  (SELECT COUNT(*) FROM t_mch_app WHERE app_id='$app_id') +
+  (SELECT COUNT(*) FROM t_pay_interface_config WHERE info_type=3 AND info_id='$app_id') +
+  (SELECT COUNT(*) FROM t_mch_pay_passage WHERE app_id='$app_id');
+SQL
+) == 0 ]] || { echo 'PROVISION=FAIL_TARGET_COLLISION' >&2; exit 2; }
+
+[[ $(db <<SQL
+SELECT COUNT(*) FROM t_pay_interface_config
+WHERE info_type=3 AND info_id='$source_app_id' AND if_code='ccat' AND state=1;
+SQL
+) == 1 ]] || { echo 'PROVISION=FAIL_SOURCE_CCAT_CONFIG' >&2; exit 2; }
+
+app_secret=$(openssl rand -hex 32)
+temporary=$(mktemp /opt/jee8pay-v2-dev/secrets/.d01-external-merchant-uat.XXXXXX)
+cleanup() {
+  unset app_secret
+  if [[ -n ${temporary:-} && -e $temporary ]]; then
+    rm -- "$temporary"
+  fi
+}
+trap cleanup EXIT
+chmod 0600 "$temporary"
+{
+  printf 'UAT_BASE_URL=%s\n' 'https://api-v2-dev.nnviopp.com'
+  printf 'UAT_MERCHANT_ID=%s\n' "$mch_no"
+  printf 'UAT_APP_ID=%s\n' "$app_id"
+  printf 'UAT_APP_SECRET=%s\n' "$app_secret"
+} >"$temporary"
+
+db <<SQL
+START TRANSACTION;
+INSERT INTO t_mch_info
+  (mch_no, mch_name, mch_short_name, type, state, remark, created_by)
+VALUES
+  ('$mch_no', 'External Merchant UAT', 'External UAT', 1, 1,
+   'JEE-D01 controlled downstream Merchant UAT', 'JEE-D01');
+INSERT INTO t_mch_app
+  (app_id, app_name, mch_no, state, app_secret, remark, created_by)
+VALUES
+  ('$app_id', 'External Merchant UAT App', '$mch_no', 1, '$app_secret',
+   'JEE-D01 controlled downstream Merchant API credential', 'JEE-D01');
+INSERT INTO t_pay_interface_config
+  (info_type, info_id, if_code, if_params, if_rate, state, remark, created_by, updated_by)
+SELECT
+  3, '$app_id', if_code, if_params, if_rate, 1,
+  'JEE-D01 native CCAT config binding', 'JEE-D01', 'JEE-D01'
+FROM t_pay_interface_config
+WHERE info_type=3 AND info_id='$source_app_id' AND if_code='ccat' AND state=1;
+INSERT INTO t_mch_pay_passage
+  (mch_no, app_id, if_code, way_code, rate, risk_config, state)
+VALUES
+  ('$mch_no', '$app_id', 'ccat', 'CCAT_IBON', 0.000000, NULL, 1);
+COMMIT;
+SQL
+
+mv -- "$temporary" "$handoff"
+temporary=
+chown root:root "$handoff"
+chmod 0600 "$handoff"
+unset app_secret
+trap - EXIT
+
+echo 'PROVISION=PASS'
+echo "UAT_MERCHANT_ID=$mch_no"
+echo "UAT_APP_ID=$app_id"
+echo "UAT_CREDENTIAL_SECURE_PATH=$handoff"
+echo 'UPSTREAM_PROVIDER_SECRET_OUTPUT=0'
