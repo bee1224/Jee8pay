@@ -70,7 +70,7 @@
                 </span>
               </div>
               <div class="paydemo-form-item">
-                <span>转账金额(元)：</span>
+                <span>轉帳金額（新臺幣元）：</span>
                 <a-input-number
                   :max="100000"
                   :min="0.01"

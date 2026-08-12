@@ -74,15 +74,18 @@ body {
 }
 .plus-input .S {
   position: relative;
-  width: 30px;
+  width: 50px;
   height: 40px;
   margin: 15px 15px 15px 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 70px;
 }
 .plus-input .S img {
   position: absolute;
   top: 15px;
   left: 0;
-  width: 100%;
+  width: 29px;
   height: 100%;
   /* margin-top: 10px; */
 }

@@ -4,6 +4,6 @@
 
 ## Index
 
-目前沒有 Taiwan-specific operations document。未來有實際內容時，local development、deployment、runtime、monitoring 與 incident/runbook 應由本頁建立索引；不得用未驗證資訊建立假的操作文件。
+- [`git-delivery-governance.md`](git-delivery-governance.md)：Git collaboration、delivery gates、JEE-G02 integration readiness 與 JEE-I01 durable build acceptance。
 
 Upstream deployment 文件保留在 `jeepay/docs/`，不納入 Taiwan Workspace governance；需要時從 Workspace 文件連結引用。

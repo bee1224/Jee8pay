@@ -1,5 +1,5 @@
 <template>
-  <a-config-provider :locale="zhCN">
+  <a-config-provider :locale="zhTW">
     <a-spin :spinning="userStore.globalLoading">
       <div id="app" style="height: 100vh">
         <router-view />
@@ -9,13 +9,13 @@
 </template>
 
 <script lang="ts" setup>
-import zhCN from 'ant-design-vue/es/locale/zh_CN'
+import zhTW from 'ant-design-vue/es/locale/zh_TW'
 import dayjs from 'dayjs'
-import 'dayjs/locale/zh-cn'
+import 'dayjs/locale/zh-tw'
 import { useUserStore } from '@/store/modules/user'
 const userStore = useUserStore()
 
-dayjs.locale('zh-cn')
+dayjs.locale('zh-tw')
 
 const styleDom = document.createElement('style')
 styleDom.textContent = `

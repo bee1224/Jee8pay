@@ -6,14 +6,10 @@ Provider documentation 只記錄特定 Provider 的 official contract、mapping�
 
 | Provider | ifCode | Status | Current Scope | Entry |
 | --- | --- | --- | --- | --- |
-| CCAT | `ccat` | Design Blocked | ibon | [`ccat/README.md`](ccat/README.md) |
+| CCAT | `ccat` | Design | ibon | [`ccat/README.md`](ccat/README.md) |
 | NewebPay | TBD | Planned | TBD | — |
-| ECPay | TBD | Planned | TBD | — |
-| PAYUNi | TBD | Planned | TBD | — |
-| LINE Pay | TBD | Planned | TBD | — |
-| TapPay | TBD | Planned | TBD | — |
 
-Planned Providers 尚未完成設計；表格只表達 roadmap 與文件入口。
+目前 active Taiwan roadmap 只有 CCAT 與 NewebPay。其他 upstream Provider 可保留為相容性或歷史實作，但不列為 planned Taiwan Provider。
 
 ## Provider Documentation Lifecycle
 

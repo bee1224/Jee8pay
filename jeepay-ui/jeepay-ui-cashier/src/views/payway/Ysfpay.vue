@@ -7,7 +7,7 @@
       </div>
     </header>
     <div class="plus-input">
-      <!-- ￥字符 货币的符号-->
+      <!-- Provider-specific YSF CNY symbol; preserve the Provider contract. -->
       <div class="S">
         <img src="../../assets/icon/S.svg" alt="" />
       </div>

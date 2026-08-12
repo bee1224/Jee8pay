@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git Delivery"
+  short_description: "安全完成 Git commit、push 與 remote SHA 驗證"
+  default_prompt: "使用 $git-delivery 審查、驗證並交付目前工作區的預期變更。"

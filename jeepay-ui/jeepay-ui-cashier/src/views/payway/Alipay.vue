@@ -7,9 +7,9 @@
       </div>
     </header>
     <div class="plus-input">
-      <!-- ￥字符 货币的符号-->
+      <!-- Actual order currency; platform default does not imply TWD-only. -->
       <div class="S">
-        <img src="../../assets/icon/S.svg" alt="" />
+        {{ (payOrderInfo.currency || 'TWD').toUpperCase() }}
       </div>
 
       <!-- 手写输入框 -->

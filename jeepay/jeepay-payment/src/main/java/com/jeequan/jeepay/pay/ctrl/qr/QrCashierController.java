@@ -104,6 +104,7 @@ public class QrCashierController extends AbstractPayOrderController {
         PayOrder resOrder = new PayOrder();
         resOrder.setMchName(payOrder.getMchName());
         resOrder.setAmount(payOrder.getAmount());
+        resOrder.setCurrency(payOrder.getCurrency());
 
         if(StringUtils.isNotEmpty(payOrder.getPayOrderId())){
             resOrder.setPayOrderId(payOrder.getPayOrderId());
@@ -169,7 +170,7 @@ public class QrCashierController extends AbstractPayOrderController {
         rq.setAppId(payOrder.getAppId());
         rq.setMchOrderNo(SeqKit.genMhoOrderId());
         rq.setAmount(getRequiredAmountL("amount"));
-        rq.setCurrency("cny");
+        rq.setCurrency("twd");
         rq.setSubject("静态码支付");
         rq.setBody("静态码支付");
         rq.setSignType("MD5"); // 设置默认签名方式为MD5

@@ -98,10 +98,12 @@
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.key == 'amount'">
-            <b>￥{{ record.amount / 100 }}</b>
+            <b>{{ (record.currency || 'TWD').toUpperCase() }} {{ record.amount / 100 }}</b>
           </template>
           <!-- 自定义插槽 -->
-          <template v-if="column.key == 'refundAmount'">￥{{ record.refundAmount / 100 }}</template>
+          <template v-if="column.key == 'refundAmount'">
+            {{ (record.currency || 'TWD').toUpperCase() }} {{ record.refundAmount / 100 }}
+          </template>
           <!-- 自定义插槽 -->
           <template v-if="column.key == 'state'">
             <a-tag
@@ -139,7 +141,8 @@
           </template>
 
           <template v-if="column.key == 'mchFeeAmount'">
-            ￥{{ record.mchFeeAmount && (record.mchFeeAmount / 100).toFixed(2) }}
+            {{ (record.currency || 'TWD').toUpperCase() }}
+            {{ record.mchFeeAmount && (record.mchFeeAmount / 100).toFixed(2) }}
           </template>
 
           <template v-if="column.key == 'divisionState'">

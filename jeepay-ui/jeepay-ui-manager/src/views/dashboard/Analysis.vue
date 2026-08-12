@@ -26,14 +26,14 @@
             </div>
             <div v-show="vdata.ispayAmount">
               <div class="pay-amount-text">
-                <span class="pay-amount">￥{{ vdata.mainChart.todayAmount }}</span>
+                <span class="pay-amount">NT${{ vdata.mainChart.todayAmount }}</span>
                 <span>共{{ vdata.mainChart.todayPayCount }}笔</span>
               </div>
               <div id="payAmount" style="height: 60px"></div>
             </div>
             <div class="payAmountSpan" v-show="vdata.ispayAmount">
-              <span>昨日交易金额：￥{{ vdata.mainChart.yesterdayAmount }}</span>
-              <span>近七天交易金额：￥{{ vdata.mainChart.payWeek }}</span>
+              <span>昨日交易金额：NT${{ vdata.mainChart.yesterdayAmount }}</span>
+              <span>近七天交易金额：NT${{ vdata.mainChart.payWeek }}</span>
             </div>
             <empty v-show="!vdata.ispayAmount" />
           </div>
@@ -58,7 +58,7 @@
                 <a-statistic
                   style="margin-top: 10px"
                   :precision="2"
-                  :value="'￥' + vdata.mainChart.totalAmount"
+                  :value="'NT$' + vdata.mainChart.totalAmount"
                 />
               </a-skeleton>
             </div>
@@ -198,7 +198,7 @@
               <div style="position: relative">
                 <div v-show="vdata.isPayCount">
                   <div id="payCount"></div>
-                  <span style="right: 30px; position: absolute; top: 0">单位（元）</span>
+                  <span style="right: 30px; position: absolute; top: 0">單位：新臺幣（元）</span>
                 </div>
                 <empty v-show="!vdata.isPayCount" />
               </div>
@@ -641,7 +641,7 @@ onMounted(() => {
     ],
     meta: {
       value: {
-        formatter: (v) => `${v} ¥`,
+        formatter: (v) => `${v} NT$`,
       },
     },
     label: {
@@ -672,7 +672,7 @@ onMounted(() => {
           const { width } = container.getBoundingClientRect()
           // 在这里保留小数点后两位
           const fixedTwo = data!.reduce((r, d) => r + d.typeAmount, 0).toFixed(2)
-          const text = datum ? `¥ ${datum.typeAmount}` : `¥ ${fixedTwo}`
+          const text = datum ? `NT$ ${datum.typeAmount}` : `NT$ ${fixedTwo}`
           return renderStatistic(width, text, { fontSize: 32 })
         },
       },

@@ -66,7 +66,7 @@ public class QueryPayOrderRS extends AbstractRS {
     private Long amount;
 
     /**
-     * 三位货币代码,人民币:cny
+     * ISO 4217 三位貨幣代碼
      */
     private String currency;
 

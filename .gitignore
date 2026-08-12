@@ -1,0 +1,42 @@
+# Build outputs and dependency caches
+node_modules/
+target/
+dist/
+build/
+coverage/
+.cache/
+
+# Logs and runtime data
+*.log
+logs/
+runtime/
+runtime-data/
+*.pid
+*.sqlite
+*.sqlite3
+
+# IDE and operating-system files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+!.env.*.example
+.secrets/
+*.local.key
+*.local.pem
+*.local.p12
+*.local.pfx
+
+# Temporary and backup files
+tmp/
+*.tmp
+*.bak
+*.swp
+*.swo
+*~

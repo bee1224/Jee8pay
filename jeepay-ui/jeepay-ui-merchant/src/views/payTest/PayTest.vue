@@ -202,38 +202,38 @@
             <a-divider></a-divider>
 
             <div class="paydemo-form-item">
-              <span>支付金额(元)：</span>
+              <span>支付金額（新臺幣元）：</span>
 
               <div style="display: flex" @click="vdata.amountInput = false">
                 <a-radio
                   :checked="vdata.paytestAmount === '0.01'"
                   @click="vdata.paytestAmount = '0.01'"
                 >
-                  ￥0.01
+                  NT$0.01
                 </a-radio>
                 <a-radio
                   :checked="vdata.paytestAmount === '0.15'"
                   @click="vdata.paytestAmount = '0.15'"
                 >
-                  ￥0.15
+                  NT$0.15
                 </a-radio>
                 <a-radio
                   :checked="vdata.paytestAmount === '0.21'"
                   @click="vdata.paytestAmount = '0.21'"
                 >
-                  ￥0.21
+                  NT$0.21
                 </a-radio>
                 <a-radio
                   :checked="vdata.paytestAmount === '0.29'"
                   @click="vdata.paytestAmount = '0.29'"
                 >
-                  ￥0.29
+                  NT$0.29
                 </a-radio>
                 <a-radio
                   :checked="vdata.paytestAmount === '0.64'"
                   @click="vdata.paytestAmount = '0.64'"
                 >
-                  ￥0.64
+                  NT$0.64
                 </a-radio>
               </div>
               <a-radio @click="amountInputShow" :checked="vdata.amountInput">

@@ -8,6 +8,10 @@
 | --- | --- | --- | --- |
 | [ADR-0001](ADR-0001-jeepay-as-platform-core.md) | JeePay remains the platform core; Taiwan payment companies are Providers | Accepted | Workspace architecture boundary |
 | [ADR-0002](ADR-0002-native-provider-extension-contract.md) | Taiwan Providers use JeePay native Provider Extension Contract | Accepted | Cross-provider runtime extension contract |
+| [ADR-0003](ADR-0003-single-root-monorepo.md) | Jee8pay uses one root Git monorepo | Accepted | Source and delivery topology |
+| [ADR-0004](ADR-0004-twd-platform-default.md) | TWD is the Taiwan platform default; currency remains explicit | Accepted | Cross-provider currency contract |
+| [ADR-0005](ADR-0005-environment-isolation.md) | Platform environment and Provider connectivity fail closed | Accepted | Security and deployment boundary |
+| [ADR-0006](ADR-0006-taipei-platform-timezone.md) | Asia/Taipei is the Taiwan platform runtime default timezone | Accepted | Cross-service runtime locale |
 
 ## Qualification Rule
 

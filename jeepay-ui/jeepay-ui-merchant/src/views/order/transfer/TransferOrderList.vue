@@ -66,7 +66,7 @@
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'amount'">
-            <b>￥{{ record.amount / 100 }}</b>
+            <b>{{ (record.currency || 'TWD').toUpperCase() }} {{ record.amount / 100 }}</b>
           </template>
           <!-- 自定义插槽 -->
           <template v-if="column.key === 'state'">

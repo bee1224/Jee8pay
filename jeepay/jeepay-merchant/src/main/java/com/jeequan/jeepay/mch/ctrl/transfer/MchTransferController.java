@@ -163,7 +163,7 @@ public class MchTransferController extends CommonCtrl {
         TransferOrderCreateRequest request = new TransferOrderCreateRequest();
         model.setMchNo(this.getCurrentMchNo());
         model.setAppId(mchApp.getAppId());
-        model.setCurrency("CNY");
+        model.setCurrency("TWD");
         DBApplicationConfig dbApplicationConfig = sysConfigService.getDBApplicationConfig();
         model.setNotifyUrl(dbApplicationConfig.getMchSiteUrl() + "/api/anon/transferNotify/transferOrder"); //回调地址
         request.setBizModel(model);

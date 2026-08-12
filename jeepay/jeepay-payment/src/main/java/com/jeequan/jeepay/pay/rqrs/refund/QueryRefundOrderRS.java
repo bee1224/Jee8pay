@@ -66,7 +66,7 @@ public class QueryRefundOrderRS extends AbstractRS {
     private Long refundAmount;
 
     /**
-     * 三位货币代码,人民币:cny
+     * ISO 4217 三位貨幣代碼
      */
     private String currency;
 

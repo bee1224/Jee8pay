@@ -28,12 +28,10 @@ Taiwan Payment Provider
 
 ## Provider Roadmap
 
-- CCAT — current
-- NewebPay — planned
-- ECPay — planned
-- PAYUNi — planned
-- LINE Pay — planned
-- TapPay — planned
+- CCAT / 黑貓 PAY — current；ibon
+- NewebPay / 藍新 — planned
+
+其他 upstream Provider 可作相容性或歷史參考，但不屬於目前 Taiwan Provider roadmap。
 
 ## Current CCAT Scope
 

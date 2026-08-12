@@ -7,3 +7,6 @@ Architecture documents describe current system behavior and runtime boundaries. 
 | Document | Scope |
 | --- | --- |
 | [`provider-extension-model.md`](provider-extension-model.md) | Current Provider resolution, payment, query, callback, configuration, and extension-boundary model |
+| [`taiwan-platform-baseline.md`](taiwan-platform-baseline.md) | Taiwan currency、amount、locale、region 與 transaction/identifier baseline |
+| [`environment-contract.md`](environment-contract.md) | Logical Development/Production isolation and fail-closed configuration contract |
+| [`source-provenance.md`](source-provenance.md) | Flattened backend/frontend upstream source provenance |

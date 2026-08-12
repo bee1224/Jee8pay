@@ -9,7 +9,7 @@ FROM ${BASE_IMAGE}
 LABEL maintainer="Terrfly"
 
 ENV LANG=C.UTF-8
-ENV TZ=Asia/Shanghai
+ENV TZ=Asia/Taipei
 
 EXPOSE 9216
 

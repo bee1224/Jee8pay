@@ -87,7 +87,7 @@ export default ({ mode }) => {
         'v-viewer',
         '@amap/amap-jsapi-loader',
 
-        'ant-design-vue/es/locale/zh_CN',
+        'ant-design-vue/es/locale/zh_TW',
         'ant-design-vue/es/config-provider/style',
         'ant-design-vue/es/form/style',
         'ant-design-vue/es/input/style',

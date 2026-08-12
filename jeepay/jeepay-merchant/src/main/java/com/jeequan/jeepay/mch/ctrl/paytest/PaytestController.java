@@ -141,7 +141,7 @@ public class PaytestController extends CommonCtrl {
         if(wayCode.equalsIgnoreCase("pp_pc")) {
             model.setCurrency("USD");
         }else {
-            model.setCurrency("CNY");
+            model.setCurrency("TWD");
         }
         model.setClientIp(getClientIp());
         model.setSubject(orderTitle + "[" + getCurrentMchNo() + "商户联调]");

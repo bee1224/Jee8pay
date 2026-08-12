@@ -61,7 +61,7 @@
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'calDivisionAmount'">
-            <b>￥{{ record.calDivisionAmount / 100 }}</b>
+            <b>NT${{ record.calDivisionAmount / 100 }}</b>
           </template>
           <!-- 自定义插槽 -->
           <template v-if="column.key === 'state'">
@@ -114,13 +114,13 @@ const tableColumns = [
     key: 'payOrderAmount',
     dataIndex: 'payOrderAmount',
     title: '订单金额',
-    customRender: ({ text }) => '￥' + (text / 100).toFixed(2),
+    customRender: ({ text }) => 'NT$' + (text / 100).toFixed(2),
   },
   {
     key: 'payOrderDivisionAmount',
     dataIndex: 'payOrderDivisionAmount',
     title: '分账基数',
-    customRender: ({ text }) => '￥' + (text / 100).toFixed(2),
+    customRender: ({ text }) => 'NT$' + (text / 100).toFixed(2),
   },
   { key: 'receiverAlias', title: '账号别名', dataIndex: 'receiverAlias' },
   { key: 'accNo', title: '接收账号', dataIndex: 'accNo' },

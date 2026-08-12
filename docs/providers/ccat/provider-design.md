@@ -4,7 +4,7 @@
 
 `BLOCKED-BY-CONTRACT-UNKNOWNS` — 本文件是 P03 設計成果，不是 implementation plan 的批准。
 
-已確認 JeePay extension contract 與部分 CCAT request surface；但可公開取得的 CCAT official SDK／WooCommerce implementation 沒有提供可安全採用的 APN authentication contract、amount unit contract、完整 status/process-code table 或 create idempotency contract。P04 不得用猜測補齊這些欄位。
+JEE-C01 已追回 Development VPS 兩個 V1 source traces，並核對最新 public CCAT SDK／WooCommerce implementation。V1 補足了既有實作做法，但沒有 normative provenance；兩個 V1 variant 對 `process_code=7/8` 更出現互相衝突的 mapping。Amount cross-surface representation、Query status、APN account binding/retry 與 Create idempotency 仍不安全。P04 不得用 V1 假設補齊這些 contract。
 
 ## Scope
 
@@ -17,9 +17,9 @@ Non-goals：Refund、Transfer/Payout、Division、Channel User、Close Order、C
 
 ## Source of Truth
 
-Evidence priority is: CCAT official specification supplied to the merchant, CCAT official SDK, CCAT official WooCommerce repository, then local runtime code. The first item is not available in this workspace. Official source is authoritative for what it explicitly documents; an implementation is not authority for omitted fields or undocumented semantics.
+Evidence priority is: merchant-versioned CCAT WEBAPI specification, CCAT official SDK, CCAT official implementation, observed behavior, prior V1 implementation, then inference. The first item is not available in this workspace; the official SDK guide confirms it wraps a separate WEBAPI specification, and the PHP README routes detailed API/error-code questions to that document or CCAT developers. An implementation is authoritative only for what that version does, not for omitted or undocumented semantics.
 
-`DOCUMENTATION DRIFT`: `docs/providers/ccat/README.md` says no usable official specification exists. That remains true for a complete protocol specification, but CCAT's official download page now links to public SDKs and an official WooCommerce repository. This document does not edit the README because its `Unknowns` are still materially correct.
+`docs/providers/ccat/README.md` 已與本 evidence inventory 對齊：公開 official SDK／implementation 可作有限證據，但不能取代 merchant-versioned normative specification。
 
 ## Evidence Inventory
 
@@ -30,9 +30,11 @@ Evidence priority is: CCAT official specification supplied to the merchant, CCAT
 | `ccatpay/NET_SDK` | Official SDK | `0383d1fa36a9b329beec42db7936aa5b82371cd9` | token, CVS create/query, response model | Primary implementation evidence |
 | `ccatpay/PHP_SDK` | Official SDK | `60e66bb679d015f883d80651d46e92864eebcb2f` | token, `CvsOrderAppend`, `CvsOrderQuery` | Primary implementation evidence |
 | `ccatpay/ccat-for-woocommerce` | Official implementation | `5f3a4357c8c42114676a29acb3b6f1ab18dfcbf3` | ibon create, token caching, APN handling | Official observed behavior; not a complete spec |
+| Development V1 `/opt/payment/payment-service` | Prior implementation | source mtime 2026-08-04; no Git metadata | token/create/query/APN | Prior behavior only |
+| Development V1 `/opt/payment/payment-service-sandbox` | Prior implementation | source mtime 2026-08-08; no Git metadata | hardened query/APN/idempotency | Prior behavior only |
 | `jeepay/jeepay-payment/...` | Local runtime code | workspace baseline | SPI, query/callback ownership, response persistence | Local runtime evidence |
 
-The official repositories were inspected in `/tmp/ccat-p03-ukBxM5/`; no CCAT credentials were read or used. Relevant paths include:
+The official repositories were freshly inspected in `/tmp/jee-c01-official/`; V1 read-only copies were inspected under `/tmp/jee-c01-v1/`. Production did not contain either specified source root. No CCAT credential was read or used. Full provenance and hashes are recorded in `contract-evidence.md`. Relevant official paths include:
 
 - `PHP_SDK/src/pay/api/LoginClient.php`, `OrderClient.php`, `utils/CurlTool.php`, `model/CvsOrderAppendRequest.php`.
 - `NET_SDK/.../Models/Shared/OrderModel.cs`, `Models/CreateOrder/CvsOrder/CvsOrderModel .cs`, `Models/ReturnData/ReturnOrder.cs`, `Models/ReturnData/ReturnToken.cs`.
@@ -99,7 +101,7 @@ The PHP SDK uses an older test URL with `http`; P04 must use HTTPS only. The off
 
 ### APN / Callback
 
-`apn_url` is a create field and the .NET SDK says a missing value uses the service-level default. Official WooCommerce registers a `POST` JSON endpoint and its code expects fields `api_id`, `trans_id`, `amount`, `status`, `nonce`, `checksum`; CVS handling then tries to locate by `order_no`. This is **observed official implementation behavior**, not a confirmed APN specification: `order_no` is not in that required-field list and no relationship of `trans_id`, `order_no`, and `cust_order_no` is documented there.
+`apn_url` is a create field and the .NET SDK says a missing value uses the service-level default. Official WooCommerce registers a `POST` JSON endpoint and validates `api_id`, `trans_id`, `amount`, `status`, `nonce`, `checksum`; CVS handling additionally looks up by `order_no`. The same CVS handler observes `A=waiting`、`B=paid`、`C=merchant cancellation`、`D=expired` and `E=scheduled remittance`. These are **OFFICIAL-IMPLEMENTATION** findings, not a normative APN specification: `order_no` is absent from the required-field list, and the relationship among `trans_id`、`order_no` and `cust_order_no` is undocumented.
 
 | APN item | Status |
 | --- | --- |
@@ -108,8 +110,8 @@ The PHP SDK uses an older test URL with `http`; P04 must use HTTPS only. The off
 | Local order lookup field | `BLOCKING UNKNOWN` |
 | API / merchant identity binding | `BLOCKING UNKNOWN` |
 | Provider transaction identifier semantics | `BLOCKING UNKNOWN` |
-| Signature/checksum protocol | `BLOCKING UNKNOWN`; see below |
-| ACK HTTP/body/retry contract | `BLOCKING UNKNOWN`; observed plugin returns `200 OK`, but no normative proof |
+| Signature/checksum protocol | `PARTIAL`; canonical checksum is confirmed by official implementation + V1 match, but it is secretless and is not origin authentication |
+| ACK HTTP/body/retry contract | `PARTIAL`; official implementation and V1 return HTTP 200 body `OK`, but retry/failure/content-type rules are not normative |
 
 ## Credential Schema
 
@@ -163,13 +165,13 @@ The choice of `payOrderId` for `cust_order_no` is compatible with current JeePay
 
 ## Amount Mapping
 
-JeePay `PayOrder.amount` is explicitly in cents. CCAT SDK declares `order_amount` as `decimal`; the official service page prices in NT dollars, but neither source defines the API unit, decimal scale, rounding, or callback/query formatting. Therefore:
+JeePay `PayOrder.amount` is explicitly in cents. CCAT SDK declares `order_amount` as `decimal` and describes the ibon maximum as 20,000; official WooCommerce sends the TWD order total directly. Both V1 variants send whole TWD (`AmountCents / 100`) and parse Query/APN as integer TWD. These sources consistently suggest major TWD, but none normatively defines scale、rounding or whether Create、Query、`bill_amount`、APN `amount` and `pay_amount` share one representation. Therefore:
 
 ```text
 PayOrder.amount (cents) ↔ CCAT order_amount / callback amount = BLOCKING UNKNOWN
 ```
 
-P04 must obtain a CCAT specification or non-production official test vector that states the unit. It must use integer/`BigDecimal` conversion and exact integer comparison, never floating point. APN acceptance must enforce `callback amount == expected local amount` only after that conversion is formally defined.
+P04 must obtain a CCAT specification or non-production official test vector that states the cross-surface mapping. Until then, reject non-whole-TWD orders rather than round them. Conversion must use integer/`BigDecimal` and exact integer comparison, never floating point.
 
 ## Create Payment
 
@@ -268,11 +270,11 @@ No `api_id` comparison, `trans_id` storage, nonce TTL, or replay store is safe t
 
 ## Signature / Checksum
 
-`BLOCKING UNKNOWN`.
+`PARTIAL — CHECKSUM CONFIRMED, AUTHENTICATION NOT CONFIRMED`.
 
-The official WooCommerce code has incompatible observed approaches: one path computes MD5 over `api_id:trans_id:amount:status:nonce` with no secret; another uses `api_id:notify_time:cust_order_no:...` and a differently named `chk`. Neither proves a production APN contract and a checksum without a merchant-held secret would not provide origin authentication. Do not copy either implementation as security truth.
+Official WooCommerce's shared payment/CVS callback and both V1 variants compute lowercase hexadecimal MD5 over UTF-8 text `api_id:trans_id:amount:status:nonce`. This is `OFFICIAL-IMPLEMENTATION + PRIOR-IMPLEMENTATION MATCH`. The differently named secret-prefixed `$`-joined `chk` belongs to the separate APP product and is not an ibon evidence conflict.
 
-Required CCAT evidence: algorithm, canonical field list/order/separator, character encoding, case/hex format, secret/key source, whether nonce is signed, and one non-secret test vector. Safe test-vector design after receipt: use CCAT-provided public vector, or create a test-only dummy credential/vector whose expected hash is generated from the confirmed canonicalization; never use production material.
+The ibon checksum contains no merchant-held secret, so it detects corruption but cannot authenticate origin. V1 compensates by treating authenticated `CvsOrderQuery` as the trust boundary. V2 may follow that design only after official Query `process_code`、account and transaction semantics are confirmed: APN is an untrusted hint; state transition follows an authoritative Query match. A future test may use a dummy `LOCAL_TEST_VECTOR`, never a fabricated official vector or production material.
 
 ## State Mapping
 
@@ -301,19 +303,19 @@ Options A (`CONFIRM_FAIL`), B (keep `WAITING` for local expiry), and C (core ext
 
 ## Retry / Ambiguous Results
 
-The SDK documents `cust_order_no` uniqueness under `cust_id`, which supports using stable `PayOrder.payOrderId` for every attempt. It does **not** document create idempotency or duplicate-create response behavior. Therefore a transport timeout must not regenerate an ID or blindly resubmit. First query the same `cust_id + cust_order_no`; retry create only after CCAT documents idempotency/duplicate semantics. This is `HIGH-RISK UNKNOWN` and blocks P04's production-safe create behavior.
+The SDK documents `cust_order_no` uniqueness under `cust_id`, which supports using stable `PayOrder.payOrderId` for every attempt. It does **not** document create idempotency or duplicate-create response behavior. Later V1 persists a stable checkout and queries before retry, but decides not-found by matching `msg` text; that is not a safe official guarantee. A transport timeout must not regenerate an ID or blindly resubmit. Retry create only after CCAT documents duplicate/not-found semantics. This remains a `HIGH-RISK UNKNOWN`.
 
 ## Idempotency / Replay
 
 JeePay already guards `STATE_ING` transition and merchant-notify deduplication through its existing processing path. It is not provider replay protection.
 
-- Duplicate legitimate APN: after the callback contract is confirmed and validation still succeeds, core must not re-transition/re-notify; adapter should return the documented successful ACK.
-- Replay attack: `nonce` exists only as observed code. Its uniqueness, timestamp binding, scope, and required persistence are `SECURITY DESIGN OPEN`.
+- Duplicate legitimate APN: later V1 proves an atomic DB/state/ledger pattern that avoids a second transition and merchant callback while returning `OK`; V2 should reuse JeePay core idempotency after the Provider contract is confirmed.
+- Replay attack: official implementation signs `nonce` only with a secretless checksum; V1 derives a replay key and persists uniqueness. Official nonce uniqueness、timestamp binding、scope and required persistence remain `SECURITY DESIGN OPEN`.
 - Do not add Redis replay state in P04 merely because Redis is available; decide after the official APN contract specifies replay semantics.
 
 ## Provider ACK
 
-`BLOCKING UNKNOWN`. The official WooCommerce plugin returns `HTTP 200` and body `OK` for its own handler, but CCAT's specification, content type, case sensitivity, failure ACK, and retry rule are not public in evidence. P04 must fill this table only from the merchant specification:
+`PARTIAL`. Official WooCommerce and V1 both return HTTP 200 body exactly `OK` after a callback they accept; later V1 uses `text/plain; charset=utf-8`. The CCAT specification, normative content type、case sensitivity、failure ACK and retry rule remain unavailable. P04 must fill the remaining table from merchant-versioned evidence:
 
 | Situation | HTTP | Body |
 | --- | ---: | --- |
@@ -430,22 +432,26 @@ Expected GREEN modifications after contract blockers clear: `CS.java` (`IF_CODE.
 
 ## Blocking Unknowns
 
-1. Merchant-versioned official CCAT specification for `CvsOrderAppend`, including exact required fields, customer-data requirements, expiry limits, error codes, and amount unit/scale.
-2. Official query `process_code` table, specifically paid, pending, cancelled, expired, failed, and not-found meanings.
-3. APN specification: payload fields, reliable merchant-order reference, `api_id`/`trans_id` meanings, identity binding, signature/checksum algorithm/key, canonicalization, and safe vector.
-4. APN ACK HTTP/body/content-type and retry semantics.
-5. Create idempotency/duplicate behavior after response-lost timeout.
-6. Merchant-facing ibon artifact presentation contract sufficient to decide whether existing `CommonPayDataRS` can represent it without a YELLOW response-model extension.
+1. Merchant-versioned `CvsOrderAppend` requirements、length/charset、expiry and error contract.
+2. Normative Create/Query/APN amount unit、scale and representation.
+3. Official query `process_code` table; specifically resolve paid/pending/failed/expired/not-found and V1's `7`/`8` conflict.
+4. APN full payload and normative relation among `order_no`、`cust_order_no`、`trans_id`、`pay_amount` and `payment_code`.
+5. APN `api_id` account binding and authoritative Query account/transaction fields. The checksum algorithm is recovered, but it is secretless and cannot supply origin authentication.
+6. APN success/failure ACK、retry、duplicate and nonce/replay semantics.
+7. Create duplicate/response-lost idempotency and exact Query not-found semantic.
 
 ## Non-blocking Unknowns
 
 - CCAT refund, transfer, division, channel user, close order, COCS, DPH, ATM, and other products.
 - Final display icon, color, and optional seed metadata.
-- Token revocation / cross-instance reuse semantics (process-local cache is safe provisional behavior).
+- Token revocation / cross-instance reuse semantics if the adapter fails closed.
+- Merchant-facing ibon artifact representation; this remains at most a YELLOW response-model decision and does not permit runtime before the safety blockers close.
 
 ## Definition of Ready
 
-P04 is **not ready**. It becomes `READY FOR P04` only when the six blocking items above are answered by official CCAT evidence and these acceptance conditions can be checked:
+P03 verdict：`BLOCKED-BY-CONTRACT-UNKNOWNS`。JEE-C01 fresh recovery 確認三個 official repository SHA，並追回兩個 Development V1 source traces。Recovered evidence resolves endpoint、ibon constants、waiting semantic and checksum canonicalization, but V1 `process_code=7/8` drift plus the seven safety unknowns above keep `CCAT_RUNTIME_GATE = CLOSED`。
+
+P04 becomes `READY FOR IMPLEMENTATION` only when the seven blocking items above are answered by official CCAT evidence and all 22 readiness rows in `contract-evidence.md` are `READY`:
 
 1. Create endpoint, auth/token, required ibon fields, outbound order ID, amount unit, success/wait/error semantics, and ibon code response are confirmed.
 2. Query endpoint, lookup ID, and paid plus all terminal/pending status mappings are confirmed.
@@ -453,3 +459,4 @@ P04 is **not ready**. It becomes `READY FOR P04` only when the six blocking item
 4. `CcatNormalMchParams` has a complete evidence-backed schema.
 5. Direct HTTP/client decision is retained or revised with evidence; no RED core modification is required.
 
+Unknown 分類：上述七項為 `BLOCKING UNKNOWN`；非本階段 capability、顯示 metadata、token cross-instance reuse 與 ibon presentation shape 為 `NON-BLOCKING/YELLOW UNKNOWN`；native JeePay extension、issued code maps to `WAITING`、stable identifier reuse、direct HTTP 與 no RED core change 為 `DESIGN DECISION`；endpoint/field/checksum surface 的 `CONFIRMED` 僅限各列 evidence scope，不能擴張成 normative retry/security truth。

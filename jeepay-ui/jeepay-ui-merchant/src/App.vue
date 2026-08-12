@@ -1,5 +1,5 @@
 <template>
-  <a-config-provider :locale="zhCN">
+  <a-config-provider :locale="zhTW">
     <div id="app">
       <router-view />
     </div>
@@ -7,10 +7,10 @@
 </template>
 
 <script lang="ts" setup>
-import zhCN from 'ant-design-vue/es/locale/zh_CN'
+import zhTW from 'ant-design-vue/es/locale/zh_TW'
 import dayjs from 'dayjs'
-import 'dayjs/locale/zh-cn'
-dayjs.locale('zh-cn')
+import 'dayjs/locale/zh-tw'
+dayjs.locale('zh-tw')
 
 const styleDom = document.createElement('style')
 styleDom.textContent = `

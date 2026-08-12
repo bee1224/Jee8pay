@@ -41,7 +41,7 @@ CS.IF_CODE.CCAT
 CCAT / CCAT_IBON DB definitions
 ```
 
-## Unknowns
+## Evidence and Unknowns
 
 - CCAT request mapping
 - query mapping
@@ -51,7 +51,7 @@ CCAT / CCAT_IBON DB definitions
 - expired/closed mapping
 - SDK vs direct HTTP
 
-repository 內目前沒有可用的 CCAT official specification；以上維持 `UNKNOWN`。
+JEE-C01 已追回 Development VPS 的兩個 V1 source traces，並重新核對 CCAT SDK／WooCommerce implementation。Token/Create/Query surface、ibon constants、waiting semantic、checksum canonicalization與 observed `200 OK` ACK 已收斂；但 V1 對 `process_code=7/8` 互相衝突，amount cross-surface mapping、APN account/retry 與 Create idempotency仍缺 merchant-versioned normative evidence。Runtime Gate 維持 `CLOSED`。
 
 ## Security
 
@@ -60,3 +60,4 @@ repository 內目前沒有可用的 CCAT official specification；以上維持 `
 ## Documentation
 
 - [`provider-design.md`](provider-design.md)：目前的 evidence-backed design 與 contract unknowns。
+- [`contract-evidence.md`](contract-evidence.md)：JEE-C01 V1/official evidence inventory、confidence、Definition of Ready 與 blocking unknowns。

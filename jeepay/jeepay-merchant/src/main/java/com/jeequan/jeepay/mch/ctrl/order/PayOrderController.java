@@ -189,7 +189,7 @@ public class PayOrderController extends CommonCtrl {
         model.setMchRefundNo(SeqKit.genMhoOrderId());
         model.setRefundAmount(refundAmount);
         model.setRefundReason(refundReason);
-        model.setCurrency("CNY");
+        model.setCurrency(payOrder.getCurrency());
 
         MchApp mchApp = mchAppService.getById(payOrder.getAppId());
 

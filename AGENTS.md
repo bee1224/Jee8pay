@@ -126,3 +126,17 @@ JeePay Core 負責 callback routing、local PayOrder lookup、state transition�
 3. 確認是否已有同義文件。
 
 禁止新增無索引的 root-level random Markdown。
+
+## GIT COLLABORATION
+
+### Multi-Session Rule
+
+Read-only sessions 可以並行；同一 architectural area 必須 `ONE WRITER AT A TIME`。多個 writer 不得互相覆蓋未整合的 worktree changes。
+
+### Git Integrator
+
+多 Session 工作依 `Parallel Workers → Integration Review → Git Integrator → Commit → Push` 交付。Final integration、acceptance、commit 與 push 由 designated Git Integrator Session 執行；active parallel wave 中的 Worker Session 不得在 shared worktree 自行 commit/push，也不得整合或發布其他 Session 的變更。
+
+### Git Safety
+
+禁止 hidden rebase、破壞現有變更的 forced checkout、force push、未授權 remote replacement、nested repository recreation 與 automatic submodule conversion。交付流程使用 `.agents/skills/git-delivery/SKILL.md`，且不得 blind `git add .`。

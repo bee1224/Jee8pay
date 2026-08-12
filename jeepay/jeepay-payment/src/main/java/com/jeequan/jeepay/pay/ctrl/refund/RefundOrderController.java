@@ -192,7 +192,7 @@ public class RefundOrderController extends ApiController {
         refundOrder.setIfCode(payOrder.getIfCode()); //支付接口代码
         refundOrder.setPayAmount(payOrder.getAmount()); //支付金额,单位分
         refundOrder.setRefundAmount(rq.getRefundAmount()); //退款金额,单位分
-        refundOrder.setCurrency(rq.getCurrency()); //三位货币代码,人民币:cny
+        refundOrder.setCurrency(rq.getCurrency()); // ISO 4217 三位貨幣代碼
         refundOrder.setState(RefundOrder.STATE_INIT); //退款状态:0-订单生成,1-退款中,2-退款成功,3-退款失败
         refundOrder.setClientIp(StringUtils.defaultIfEmpty(rq.getClientIp(), getClientIp())); //客户端IP
         refundOrder.setRefundReason(rq.getRefundReason()); //退款原因
