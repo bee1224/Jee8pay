@@ -1,295 +1,357 @@
 # CCAT ibon Contract Evidence
 
-Status: `PARTIAL — BLOCKING UNKNOWNS`
-Recovery session: `JEE-C01`
-Recovery date: `2026-08-12`
+Status: `JEE-C03 — PASS-WITH-DEBT`
+Closure session: `JEE-C03`
+Closure date: `2026-08-12`
 
 ```text
-EVIDENCE_RECOVERY = PARTIAL
-CCAT_RUNTIME_GATE = CLOSED
+VERDICT = PASS-WITH-DEBT
+CCAT_RUNTIME_GATE = OPEN
+
+B1_AMOUNT = RESOLVED
+B2_PROCESS_CODE = RESOLVED
+B3_APN_IDENTITY = RESOLVED
+B4_APN_RETRY_REPLAY = RESOLVED
+B5_CREATE_IDEMPOTENCY = RESOLVED
+
 REAL_SECRETS_EXPOSED = 0
+REAL_SECRETS_WRITTEN = 0
+RUNTIME_SOURCE_MODIFICATIONS = NONE
+CCAT_RUNTIME_IMPLEMENTATION = NOT STARTED
 ```
 
-本文件只記錄 CCAT ibon Create、Provider Query 與 APN。證據標籤依序為 `OFFICIAL`、`OFFICIAL-SDK`、`OFFICIAL-IMPLEMENTATION`、`OBSERVED`、`PRIOR-IMPLEMENTATION`、`INFERENCE`。Implementation 只能證明該版本如何運作，不能替代未公開的 normative contract。
+本文件只記錄 CCAT／黑貓 PAY ibon CVS Phase 1 的 Token、Create、Provider Query 與 APN contract。Credit card、COCS、refund、payout、transfer 與其他 payment products 不在本階段。JEE-C03 沒有登入契約會員 portal、沒有呼叫 Provider API，也沒有使用任何 credential value。
 
-## Evidence Inventory
+## Evidence Authority
 
-| Source | Revision / provenance | Classification | Scope |
+| Source | Version / provenance | Classification | Scope |
 | --- | --- | --- | --- |
-| [CCAT download page](https://www.ccat.com.tw/Home/Download) | accessed 2026-08-12 | OFFICIAL | CCAT-owned SDK、WooCommerce repository 與登入後串接文件入口 |
-| `ccatpay/PHP_SDK` | `60e66bb679d015f883d80651d46e92864eebcb2f` | OFFICIAL-SDK | Token、CVS Create/Query request surface |
-| `ccatpay/NET_SDK` | `0383d1fa36a9b329beec42db7936aa5b82371cd9` | OFFICIAL-SDK | Request/response models、field comments、SDK guide |
-| `ccatpay/ccat-for-woocommerce` | `5f3a4357c8c42114676a29acb3b6f1ab18dfcbf3` | OFFICIAL-IMPLEMENTATION | ibon constants、Create、APN checksum/status/ACK observed behavior |
-| Development VPS `/opt/payment/payment-service` | no Git metadata; key file SHA-256 recorded below | PRIOR-IMPLEMENTATION | Earlier V1 client/service/notify/tests |
-| Development VPS `/opt/payment/payment-service-sandbox` | no Git metadata; key file SHA-256 recorded below | PRIOR-IMPLEMENTATION | Later V1 client/service/notify/idempotency tests |
-| Production VPS specified source roots | both roots absent | OBSERVED | `V1_PRODUCTION_SOURCE_ACCESS = UNAVAILABLE` |
+| `多元支付平台-WEBAPI介面規格(V1.28.1) (1).pdf` | system version `1.28.1`; updated `2026-05-08`; 97 pages | `MERCHANT_AUTHENTICATED_OFFICIAL_SPEC` | Normative Token、CVS Create/Query、APN、status、duplicate/error contract |
+| `ccatpay/PHP_SDK` | `60e66bb679d015f883d80651d46e92864eebcb2f` | `OFFICIAL_SDK` | Token、Create/Query request surface |
+| `ccatpay/NET_SDK` | `0383d1fa36a9b329beec42db7936aa5b82371cd9` | `OFFICIAL_SDK` | Request/response models |
+| `ccatpay/ccat-for-woocommerce` | `5f3a4357c8c42114676a29acb3b6f1ab18dfcbf3` | `OFFICIAL_IMPLEMENTATION` | ibon constants、APN checksum、observed ACK |
+| Development V1 source traces | C01/C02 recorded hashes | `PRIOR_IMPLEMENTATION` | Prior behavior and drift comparison only |
+| JeePay source at `12852640445e2d7c1cdda55f8b4a1ad9620c8419` | actual C03 baseline | Local runtime evidence | Amount unit、native Provider extension、state/notify idempotency |
 
-Official repository SHAs were freshly verified from GitHub. The .NET SDK guide identifies itself as V1.1 dated 2022-08-31 and explicitly says the SDK wraps the separate `多元支付平台 WEBAPI 規格書`. The PHP README likewise directs API/error-code questions to the integration document or CCAT developers. The CCAT download page makes manuals available only after contract-member login. Therefore the public SDK is intentionally not the complete normative specification.
+Evidence priority：`MERCHANT_AUTHENTICATED_OFFICIAL_SPEC` → `OFFICIAL_SPEC` → `OFFICIAL_SDK` → `OFFICIAL_IMPLEMENTATION` → `OBSERVED_BEHAVIOR` → `PRIOR_IMPLEMENTATION` → `INFERENCE`。V1 implementation 不覆蓋 V1.28.1 authenticated specification。
 
-V1 was inspected read-only. No `.env`、raw container environment、credential value、live Provider call、payment、restart、deployment or data mutation was used. The V1 roots have no `.git`, so provenance uses paths, timestamps and SHA-256 instead of commit IDs:
+Relevant official sections reviewed：p.9「格式說明／網址」、p.10「取得 Token 驗証碼」、p.14–18「CVS／契客新增訂單」、p.19–22「訂單查詢」、p.23–27「訂單日期區間查詢」（cross-surface amount examples）、p.35–39「APN 主動通知」、p.94「訂單程序狀態一覽表」、p.97 `pay_route` appendix。關鍵表格已同時檢視 extracted text 與原始頁面 rendering。
 
-| V1 file | UTC mtime | SHA-256 |
-| --- | --- | --- |
-| `payment-service/internal/provider/ccat/client.go` | 2026-08-04 14:33:30 | `b4f2513338f9975b9d6516bc532f6133196b415457c1273f1a7d697b27d068f7` |
-| `payment-service/internal/provider/ccat/client_test.go` | 2026-08-04 14:33:12 | `003f44f587cd143683611a2643547018857e709c5f114a9917f8c6fe2db71eb3` |
-| `payment-service-sandbox/internal/provider/ccat/client.go` | 2026-08-08 20:21:33 | `3780ae5aa82e67942d168067c208d4c66553904961096c022e8e512cdb4fbfb7` |
-| `payment-service-sandbox/internal/provider/ccat/client_test.go` | 2026-08-08 20:21:33 | `f6fa67537401e8e96599e908912cafb1360b9b06f82e395e3ef07189e74d636e` |
-
-## Contract Verdict
+## Final Contract Matrix
 
 ```text
-TOKEN = PARTIAL
-CREATE = PARTIAL
-AMOUNT = PARTIAL
-IDENTIFIERS = PARTIAL
-QUERY = PARTIAL
-PROCESS_CODE = CONFLICT
-APN_PAYLOAD = PARTIAL
-APN_ORDER_KEY = PARTIAL
-APN_ACCOUNT_BINDING = UNKNOWN
-CHECKSUM_AUTH = PARTIAL
-ACK = PARTIAL
-APN_RETRY = UNKNOWN
-CREATE_IDEMPOTENCY = UNKNOWN
+TOKEN = CONFIRMED
+CREATE = CONFIRMED
+AMOUNT = CONFIRMED
+IDENTIFIERS = CONFIRMED
+QUERY = CONFIRMED
+PROCESS_CODE = CONFIRMED_WITH_SAFE_UNKNOWN_2
+APN_PAYLOAD = CONFIRMED
+APN_ORDER_KEY = CONFIRMED
+APN_PROVIDER_TX_BINDING = CONFIRMED
+APN_ACCOUNT_BINDING = CONFIRMED
+CHECKSUM_AUTH = CONFIRMED_INTEGRITY_ONLY
+ACK = CONFIRMED_BODY_WITH_NONBLOCKING_HTTP_METADATA_DEBT
+APN_DUPLICATE = CONFIRMED
+APN_RETRY = CONFIRMED
+APN_REPLAY = RESOLVED_BY_REVALIDATION_QUERY_AND_NATIVE_IDEMPOTENCY
+CREATE_TIMEOUT_RECOVERY = CONFIRMED
+CREATE_IDEMPOTENCY = CONFIRMED
 ```
 
-## Token Contract
+## B1 — Amount Contract
 
-| Item | Evidence-backed finding | Evidence |
-| --- | --- | --- |
-| Method/path | `POST {base}/Token` (`token` case differs among implementations) | OFFICIAL-SDK、OFFICIAL-IMPLEMENTATION、PRIOR-IMPLEMENTATION |
-| Content type | `application/x-www-form-urlencoded` | OFFICIAL-IMPLEMENTATION、PRIOR-IMPLEMENTATION |
-| Fields | `grant_type=password`、`username`、`password` | OFFICIAL-SDK、OFFICIAL-IMPLEMENTATION、PRIOR-IMPLEMENTATION |
-| Response | `access_token`、`token_type`、`expires_in`、`.issued`、`.expires`; `error`、`error_description` | OFFICIAL-SDK |
-| Collect auth | `Authorization: Bearer <token>` | OFFICIAL-SDK、OFFICIAL-IMPLEMENTATION、PRIOR-IMPLEMENTATION |
-| V1 reuse | process-local cache; reuse until `.expires - 1 minute`; evict and retry once on HTTP 401 | PRIOR-IMPLEMENTATION |
-| Normative reuse/revocation/401 policy | `UNKNOWN` | Public material omits lifecycle rules |
+### Official CCAT fields
 
-`TOKEN_CONTRACT = PARTIAL`. Protocol acquisition is confirmed; V1 cache/retry is prior behavior, not an official lifecycle guarantee. This unknown is non-blocking if V2 fails closed and avoids unsafe repeated business requests.
+| Surface | Field | Type / format | Unit and rule | Provenance |
+| --- | --- | --- | --- | --- |
+| Create | `order_amount` | JSON `number`; integer only | whole TWD dollars (`元`); decimal places rejected | p.15 field table；p.17 abnormal items 13–16 |
+| Create response / Query | `order_amount` | JSON `number` | original order amount, whole TWD dollars | p.19 Query response table |
+| Create response / Query | `bill_amount` | JSON `number` | payer-facing bill amount including externally added fee | p.19 Query response table |
+| Query | `pay_amount` | JSON `number`, `0`/`NULL` before payment | actual paid amount, whole TWD dollars | p.20 Query response table；p.24–26 examples |
+| APN | `amount` | JSON `number` | payment-slip amount, whole TWD dollars | p.35–36 APN table |
+| APN | `pay_amount` | table says JSON `number`; sample encodes a digit string | actual paid amount, whole TWD dollars | p.37 table；p.38 sample |
 
-## Create / CvsOrderAppend
+The official specification describes the ibon cap as `20,000 元`, including any externally added handling fee (p.14). It does not publish one universal minimum because Create validation messages express account/service-dependent bounds. P04 must treat Provider rejection as authoritative for configured min/max and must not pre-invent a fixed minimum.
 
-| Item | Finding | Evidence |
-| --- | --- | --- |
-| Method/path/content | `POST api/Collect`, JSON, Bearer | OFFICIAL-SDK、OFFICIAL-IMPLEMENTATION、PRIOR-IMPLEMENTATION |
-| Command | `cmd=CvsOrderAppend` | OFFICIAL-SDK、OFFICIAL-IMPLEMENTATION、PRIOR-IMPLEMENTATION |
-| SDK field surface | `cust_id`、`cust_order_no`、`order_amount`、`expire_date`、payer name/postcode/address/mobile/email、`payment_type`、`payment_acquirerType`、`apn_url`、`order_detail` | OFFICIAL-SDK |
-| ibon constants | `payment_type=0`, `payment_acquirerType=2` | OFFICIAL-IMPLEMENTATION + PRIOR-IMPLEMENTATION MATCH |
-| ibon limit | amount upper bound 20,000 including added handling fee | OFFICIAL-SDK comment |
-| Result envelope | `status` (`OK`/`ERROR`)、`msg`、`cust_order_no` | OFFICIAL-SDK |
-| Payment artifact | `ibon_shopid`、`ibon_code`、`expire_date`、`bill_amount`; implementation also accepts `short_url` | OFFICIAL-SDK、OFFICIAL-IMPLEMENTATION |
-| Success semantic | `status=OK` leaves order pending and exposes payment instructions; it is not paid | OFFICIAL-IMPLEMENTATION + PRIOR-IMPLEMENTATION MATCH |
-| Complete required/length/expiry/error rules | `UNKNOWN` | Normative integration document unavailable |
-
-V1 sends every SDK core/payer field, whole-TWD `order_amount`, the two ibon constants and its notify URL. The later V1 validates Create response `cust_order_no` and `order_amount`; this is a sound prior safety pattern, not proof that every successful CCAT response contains both fields.
-
-## Amount Contract
-
-| Surface | Representation/evidence |
-| --- | --- |
-| JeePay `PayOrder.amount` | integer smallest currency unit (`Long`); TWD mapping is cents |
-| Official SDK Create/Query model | `decimal? order_amount`; described as collection amount, ibon cap 20,000 |
-| Official WooCommerce Create | passes the TWD order total directly; displays `bill_amount` as an integer |
-| Earlier and later V1 | require whole positive TWD; send `AmountCents / 100`; parse Create/Query/APN integer values and multiply by 100 |
-| APN/query normative unit/scale | `UNKNOWN` |
+JeePay source is definitive on the platform side：`UnifiedOrderRQ.amount` and `PayOrder.amount` are `Long` values in minor units (`分`). Therefore:
 
 ```text
-JeePay amount cents = exact integer
-CCAT V1 mapping = whole TWD integer = JeePay cents / 100
-CCAT_AMOUNT_MAPPING = PARTIAL
+JEEPAY_AMOUNT_UNIT = integer minor units; TWD 100 = NT$1
+CCAT_CREATE_AMOUNT_UNIT = whole TWD dollars; JSON number; scale 0
+CCAT_QUERY_AMOUNT_UNIT = whole TWD dollars for order_amount/bill_amount/pay_amount
+CCAT_APN_AMOUNT_UNIT = whole TWD dollars for amount/pay_amount
+CONVERSION_RULE = require jeepayAmount % 100 == 0; ccatOrderAmount = jeepayAmount / 100 exactly
+AMOUNT_COMPARISON_RULE = never compare APN pay_amount directly to local order_amount when an external fee exists; authenticate Query, require Query.order_amount * 100 == PayOrder.amount, require APN.amount == Query.bill_amount, and for paid state require APN.pay_amount == Query.pay_amount == Query.bill_amount
 ```
 
-The sources consistently point to major TWD units, but the public SDK types the value as decimal and does not define scale、rounding or whether Create、Query、`bill_amount`、APN `amount` and `pay_amount` share an identical representation. V2 must reject non-whole-TWD orders unless the merchant specification supplies a different exact rule. Conversion and comparison must use integer/`BigDecimal`, never float/double. Money correctness remains blocked until one normative CCAT statement or an official non-production vector confirms the cross-surface mapping.
+The p.25 official ibon example demonstrates why this distinction is mandatory：`order_amount` and `bill_amount/pay_amount` may differ when the payer-facing bill includes an external amount. Conversion and comparison use integer/`BigDecimal` exact arithmetic only. For APN `pay_amount`, P04 may accept the two representations shown by the same official document—JSON number or an all-digit string—then normalize to an exact scale-zero value; float/double and rounding are prohibited.
 
-## Identifier Contract
+```text
+B1_AMOUNT = RESOLVED
+```
 
-| Identity | V1 use | V2 mapping | Status |
-| --- | --- | --- | --- |
-| Merchant Order ID | `merchant_order_no`, local idempotency key | `PayOrder.mchOrderNo`, local only | CONFIRMED JeePay responsibility |
-| JeePay PayOrder ID | V1 equivalent is generated platform `order.OrderNo` | `PayOrder.payOrderId` → `cust_order_no` | DESIGN DECISION, conditional on official length/charset acceptance |
-| Provider outbound order ID | V1 `order.OrderNo` → `cust_order_no`; Query uses same value | reuse `PayOrder.payOrderId`; do not add DB table | OFFICIAL-SDK uniqueness + PRIOR behavior |
-| CCAT transaction ID | V1 reads APN/Query `trans_id` into Provider trade number | `PayOrder.channelOrderNo` only after authoritative Query/APN confirms it | PARTIAL; SDK response model does not document it |
+## B2 — `process_code` Contract
 
-The SDK states `cust_order_no` must be unique under one `cust_id`. JeePay generates `payOrderId` as `P` plus a distributed numeric ID (normally 20 characters), which matches V1's later 20-character limit, but that limit itself is only prior implementation evidence. `mchOrderNo` must not be sent as the CCAT ID because its uniqueness domain is merchant-facing, not provider-config-facing.
+The runtime-relevant CVS values in authenticated specification appendix 1 are complete below. Terminal means terminal for the payment state; settlement may continue after payment success.
 
-## Query / CvsOrderQuery
-
-| Item | Finding | Evidence |
-| --- | --- | --- |
-| Method/path/content | same JSON Bearer `POST api/Collect` | OFFICIAL-SDK、PRIOR-IMPLEMENTATION |
-| Command | `CvsOrderQuery` | OFFICIAL-SDK、PRIOR-IMPLEMENTATION |
-| Lookup | `cust_id` + `cust_order_no` | OFFICIAL-SDK、PRIOR-IMPLEMENTATION |
-| Response surface | `status`、`msg`、`cust_order_no`、`order_amount`、`process_code`、`process_code_update_time`、`pay_date` | OFFICIAL-SDK |
-| Additional V1 fields | optional `cust_id`、`api_id`、`trans_id`、`pay_amount` | PRIOR-IMPLEMENTATION only |
-| Not found | substring match on `msg` for `找不到` / `not found` | PRIOR-IMPLEMENTATION; brittle and non-normative |
-
-V1 query validates local order、amount and optional account/transaction fields before accepting state. V2 should retain that pattern, but cannot map payment state until the official `process_code` contract is obtained.
-
-## process_code Contract
-
-| process_code | Official Meaning | Terminal? | Payment Meaning | JeePay Mapping | Evidence |
+| process_code | Official Meaning | Payment Meaning | Terminal? | JeePay Mapping | Evidence |
 | --- | --- | --- | --- | --- | --- |
-| `0` | UNKNOWN | UNKNOWN | V1 later: pending | no transition | PRIOR-IMPLEMENTATION |
-| `1` | UNKNOWN | UNKNOWN | V1 later: pending | no transition | PRIOR-IMPLEMENTATION |
-| `2` | UNKNOWN | UNKNOWN | V1 later: pending; earlier V1 unsupported | no transition | PRIOR-IMPLEMENTATION DRIFT |
-| `3` | UNKNOWN | UNKNOWN | V1 later: pending | no transition | PRIOR-IMPLEMENTATION |
-| `4` | UNKNOWN | UNKNOWN | both V1 variants: paid | `CONFIRM_SUCCESS` only after official confirmation | PRIOR-IMPLEMENTATION |
-| `5` | UNKNOWN | UNKNOWN | both V1 variants: failed | `CONFIRM_FAIL` only after official terminal confirmation | PRIOR-IMPLEMENTATION |
-| `6` | UNKNOWN | UNKNOWN | both V1 variants: expired | `CONFIRM_FAIL` only after official irrevocability confirmation | PRIOR-IMPLEMENTATION |
-| `7` | UNKNOWN | UNKNOWN | earlier V1: paid; later V1: pending | no transition | `EVIDENCE_CONFLICT` |
-| `8` | UNKNOWN | UNKNOWN | earlier V1: paid; later V1: pending | no transition | `EVIDENCE_CONFLICT` |
-| not found | UNKNOWN | UNKNOWN | V1 parses message text | no transition | PRIOR-IMPLEMENTATION |
+| `0` | payment slip pending merchant confirmation | pre-payment | No | `WAITING` | p.94 appendix 1 |
+| `1` | waiting to send payment notification | pre-payment | No | `WAITING` | p.94 appendix 1 |
+| `2` | omitted from appendix; appears only in Query sample | `UNKNOWN` | Unknown | `NO_STATE_TRANSITION`; log and re-query | p.21 sample vs p.94 omission |
+| `3` | waiting for payer | unpaid | No | `WAITING` | p.94 appendix 1 |
+| `4` | payer has paid | paid | Yes | `SUCCESS` | p.94 appendix 1 |
+| `5` | payment slip cancelled | closed/cancelled | Yes | `CLOSED` → JeePay `CONFIRM_FAIL` | p.94 appendix 1 |
+| `6` | payment slip expired | closed/expired | Yes | `CLOSED` → JeePay `CONFIRM_FAIL` | p.94 appendix 1 |
+| `7` | payout to merchant scheduled; reconciliation in progress | paid; settlement pending | Yes for payment | `SUCCESS` | p.94 appendix 1 |
+| `8` | payout to merchant completed | paid; settlement completed | Yes | `SUCCESS` | p.94 appendix 1 |
 
-`PROCESS_CODE = CONFLICT`. Public official source only names the field. The conflict for `7`/`8` exists between two deployed V1 source traces, so V1 cannot supply the missing status table.
+Codes `13+` in the appendix are COCS/card lifecycle values and are outside ibon Phase 1. An unknown code never becomes success or failure by inference.
 
-## APN Contract
+```text
+PROCESS_CODE_7 = paid; scheduled payout; SUCCESS
+PROCESS_CODE_8 = paid; payout completed; SUCCESS
+V1_PROCESS_CODE_7_MAPPING = earlier V1 SUCCESS; later V1 WAITING
+V1_PROCESS_CODE_8_MAPPING = earlier V1 SUCCESS; later V1 WAITING
+V1_PROCESS_CODE_DRIFT = YES; the later V1 mapping for 7/8 contradicts the authenticated specification
+OFFICIAL_CONTRACT_CONFLICT = Query sample p.21 contains code 2 while appendix p.94 omits code 2
+B2_PROCESS_CODE = RESOLVED
+```
 
-### Payload and status
+The code-2 documentation conflict is non-blocking because `NO_STATE_TRANSITION` is a safe exhaustive runtime branch; P04 does not guess payment state and can continue reconciliation through Query.
 
-The official WooCommerce ibon handler observes `POST` JSON. Its shared validation requires `api_id`、`trans_id`、`amount`、`status`、`nonce`、`checksum`; the CVS handler additionally reads `order_no`. Later V1 requires those six plus `pay_amount`、`payment_code=2` and `order_no` or `cust_order_no`, then performs authenticated `CvsOrderQuery` before accepting state.
+## B3 — APN Identity and Security
 
-| APN status | Official implementation meaning | V1 later mapping | V2 action |
-| --- | --- | --- | --- |
-| `A` | waiting for payer | pending | no success transition |
-| `B` | payer paid | paid | accept only after authoritative Query confirms paid |
-| `C` | merchant cancellation | failed | fail only after official/normative terminal semantics |
-| `D` | expired payment slip | expired | fail only after official/normative irrevocability |
-| `E` | scheduled remittance to merchant | pending | no payment-state transition |
-| `I` / `J` | invoice notifications | outside phase-1 payment state | ignore for payment state |
+### Transport and payload
 
-This table is `OFFICIAL-IMPLEMENTATION`, not the normative retry/status specification. `APN_PAYLOAD = PARTIAL` because `order_no` is consumed but omitted from the same implementation's required-field list, and the public material does not define `pay_amount`、`payment_code` or the relationship between `order_no` and `cust_order_no`.
+```text
+APN_METHOD = POST
+APN_CONTENT_TYPE = application/json
+APN_FIELDS = api_id, trans_id, order_no, amount, expire_time, status, payment_code, payment_detail, memo, create_time, modify_time, nonce, checksum, pay_date, pay_amount, optional invoice fields
+```
 
-### Order and account binding
+The APN table does not contain a separate required/optional column. P04 must require the safety-critical ibon subset：`api_id`、`trans_id`、`order_no`、`amount`、`status`、`payment_code=2`、`nonce`、`checksum`; a paid callback also requires `pay_amount` and `pay_date`. Invoice fields remain ignored outside the enabled invoice feature. Evidence：p.35–37「APN 主動通知」。
 
-Official WooCommerce stores generated `cust_order_no` as order metadata and later looks up APN `order_no` by that value. V1 similarly treats `order_no`/`cust_order_no` as its platform order ID. This is matching implementation evidence, but the field-name relationship remains undocumented: `APN_ORDER_KEY = PARTIAL`.
+### Four-layer identity binding
 
-The official handler requires `api_id` but does not bind it to configured `username` or `cust_id`. Later V1 introduces separate `Username`、`CustomerID` and `APIID`, compares APN `api_id` to configured APIID, allowlists local merchant/customer IDs, and optionally validates Query `cust_id`/`api_id`. Those semantics have no official public definition: `APN_ACCOUNT_BINDING = UNKNOWN`.
+| Layer | Official / local identity | Binding rule |
+| --- | --- | --- |
+| A. Configured CCAT account | `username` / `cust_id` | p.10 explicitly states Token `username` and Create `cust_id` are the same customer financial code; store once as configured `custId` plus API password |
+| B. Create outbound | `cust_id + cust_order_no` | `cust_id = configured custId`; `cust_order_no = PayOrder.payOrderId` and must remain stable |
+| C. Incoming APN | `api_id + order_no + trans_id` | `api_id` is the assigned customer financial code; `order_no` is the merchant order number; `trans_id` is unique per payment slip |
+| D. Local JeePay order | `payOrderId + channelOrderNo` | locate by `order_no == payOrderId`; bind the first fully validated `trans_id` to `channelOrderNo`; subsequent callbacks must match |
 
-### Checksum / authentication
+`PayOrder.mchOrderNo` remains merchant-facing and is not sent as CCAT's provider-scoped stable key. No second Provider transaction table or state machine is needed.
 
-For the shared payment/CVS callback, official WooCommerce and both V1 variants match exactly:
+```text
+APN_ORDER_BINDING = order_no ↔ outbound cust_order_no ↔ PayOrder.payOrderId
+APN_PROVIDER_TX_BINDING = trans_id is the unique payment-slip transaction ID; first bind only after account/order/amount/checksum validation and authenticated Query confirmation, then require equality with PayOrder.channelOrderNo
+APN_ACCOUNT_BINDING = compare APN api_id to configured custId; independently authenticate current state by Query using the same account-scoped Bearer token and cust_id
+LOCAL_ORDER_BINDING = PayOrder.payOrderId
+PROVIDER_TRANSACTION_BINDING = PayOrder.channelOrderNo
+B3_APN_IDENTITY = RESOLVED
+```
+
+Query does not echo `trans_id`. Therefore `trans_id` alone never authorizes a state change: APN is an untrusted hint, and the account-scoped authenticated `CvsOrderQuery` for the same `cust_id + cust_order_no` must confirm order amount and an official paid `process_code`. A different first/subsequent `trans_id` is not auto-normalized; it fails closed for controlled reconciliation.
+
+### Checksum
+
+Authenticated specification p.37 defines:
 
 ```text
 canonical = api_id + ":" + trans_id + ":" + amount + ":" + status + ":" + nonce
-checksum = lowercase hexadecimal MD5(UTF-8 bytes of canonical)
+checksum = MD5(UTF-8 bytes of canonical), 32 hexadecimal characters
 ```
 
-This is `OFFICIAL-IMPLEMENTATION + PRIOR-IMPLEMENTATION MATCH`. The separate WooCommerce APP handler's secret-prefixed `$`-joined `chk` belongs to another product and is not an ibon evidence conflict.
+Field order and colon separators are normative. The document-wide encoding is UTF-8 (p.9); the official sample emits lowercase hexadecimal (p.38–39). Case sensitivity is not explicitly stated, so P04 should produce lowercase and compare a validated 32-hex input in constant time after case normalization. `nonce` is 10 characters composed from time plus four random digits; no TTL is specified.
 
-The matched ibon checksum contains no merchant-held secret, so it detects corruption but does not authenticate the sender. V1 comments and code make authenticated OAuth Query the trust boundary. V2 may use APN only as an untrusted reconciliation hint and transition state solely after Query verifies order、account (where returned)、transaction (where returned)、amount and official paid `process_code`. Until the Query status and account/transaction fields are normatively defined, `CHECKSUM_AUTH = PARTIAL`; it must not be described as cryptographic origin authentication.
+This checksum has no merchant-held secret and provides message-integrity checking, not callback-origin authentication. Origin/state authorization comes from the account-scoped Bearer Query. The canonical expression matches official WooCommerce and both V1 traces：`MERCHANT_AUTHENTICATED_OFFICIAL_SPEC + PRIOR_IMPLEMENTATION MATCH`.
 
-A dummy `LOCAL_TEST_VECTOR` may be created from this canonicalization during implementation, but it must not be called official. No production material may be used.
+### APN status, amount and ACK
 
-### ACK, retry, duplicate and replay
-
-Official WooCommerce and V1 return HTTP 200 body exactly `OK` after a valid callback. Later V1 sets `text/plain; charset=utf-8`. Official implementation returns a 400-class response for validation failure. Content type、case sensitivity、Provider retry schedule and required failure response remain undocumented: `ACK = PARTIAL`, `APN_RETRY = UNKNOWN`.
-
-V1 persists a SHA-256 replay key derived from the checksum canonical tuple and uses DB uniqueness plus an atomic state/ledger transaction. Legitimate duplicate paid APNs produce no second state transition、ledger or merchant callback and still receive `200 OK`. This is a sound `PRIOR-IMPLEMENTATION` pattern and aligns with JeePay core idempotency, but official nonce uniqueness、scope、lifetime and retry semantics are absent:
+| APN status | Official meaning | Provider adapter action |
+| --- | --- | --- |
+| `A` | waiting for payer | Query; no success transition |
+| `B` | paid | Query must confirm code `4`, `7`, or `8` and exact amount/identity before success |
+| `C` | merchant cancellation | Query must confirm code `5`; map closed/fail |
+| `D` | expired slip | Query must confirm code `6`; map closed/fail |
+| `E` | payout scheduled | Query must confirm paid code `7` or `8`; success is already established |
+| `I/J` | invoice notifications | outside payment-state scope; no PayOrder transition |
 
 ```text
-APN_REPLAY_CONTRACT = UNKNOWN
+AMOUNT_VERIFICATION = local amount ↔ Query.order_amount; APN.amount ↔ Query.bill_amount; APN.pay_amount ↔ Query.pay_amount ↔ Query.bill_amount for successful full payment
+ACK_BODY = exact uppercase plain text OK
+ACK_HTTP_STATUS = not specified by V1.28.1; HTTP 200 is OFFICIAL_IMPLEMENTATION + PRIOR_IMPLEMENTATION match
+ACK_CONTENT_TYPE = not specified; text/plain is prior/official implementation behavior
+INVALID_CALLBACK_BEHAVIOR = no normative HTTP status/body; fail closed and do not return OK
+DUPLICATE_VALID_CALLBACK_ACK = OK after complete revalidation and exact committed-state check
 ```
 
-V2 must revalidate every duplicate, reuse JeePay's existing state transition / merchant-notify deduplication, and acknowledge only according to a confirmed CCAT rule. Do not add a Redis replay subsystem based solely on V1.
+Evidence：p.35 transport/Return table and p.36–37 payload; p.35 says an `OK` body stops further sends. No actual Provider callback was executed.
 
-## Create Timeout / Idempotency
+## B4 — Retry, Duplicate and Replay Regression
 
-Later V1 persists a stable outbound order ID and checkout claim. On a same-request retry it first calls `CvsOrderQuery`; it creates again only when its message-substring parser concludes not found. This is `PRIOR-IMPLEMENTATION`, not a Provider idempotency guarantee. Official SDK states only uniqueness of `cust_order_no` under `cust_id`; it does not document duplicate-Create response or response-lost retry behavior.
+Authenticated specification p.35 confirms one immediate APN, then every 15 minutes, at most three sends per status code; any plain-text `OK` stops resend. p.39 also documents a manual APN resend control. This strengthens but does not replace the C02 safety design:
+
+1. Revalidate every callback's account、order、transaction、checksum and amounts.
+2. Use authenticated Query as the authoritative state.
+3. Reuse JeePay's conditional `STATE_ING` transition and unique `(order_id, order_type)` merchant-notify record.
+4. For concurrent duplicate callbacks, return `OK` from the Provider-specific update-fail hook only after re-reading exactly the same committed terminal state and `channelOrderNo`.
+5. Treat replay as another untrusted reconciliation hint; no nonce TTL is assumed.
 
 ```text
-CREATE_RETRY_SAFE = UNKNOWN
-HIGH_RISK_BLOCKER = duplicate Create / response-lost semantics
+B4_APN_RETRY_REPLAY = RESOLVED
 ```
 
-V2 must preserve the same `PayOrder.payOrderId`, query before any retry, and must not treat an undocumented not-found message as proof that a retry is safe.
+## B5 — Create Ambiguous Failure and Idempotency
 
-## Payment Code / JeePay Response
+Authenticated specification establishes all necessary guarantees:
 
-SDK fields `ibon_shopid`、`ibon_code`、`expire_date` and `bill_amount` are confirmed. Current official WooCommerce concatenates `ibon_shopid + ibon_code` when `short_url` is absent and otherwise exposes `short_url`. V1 later exposes `short_url`/`url`, or renders local instructions containing `ibon_code`.
+- `cust_order_no` must be unique under the same `cust_id` (p.15).
+- A duplicate `CvsOrderAppend` is rejected：the Create abnormal list states that an already-uploaded merchant order number cannot be uploaded again (p.17).
+- `CvsOrderQuery` looks up `cust_id + cust_order_no` and returns the same response fields as Create (p.17、p.19–20).
+- Query not-found is the documented `ERROR` condition `找不到此筆代繳資訊` (p.22). No machine-readable error code is provided.
 
-For V2, use existing `CommonPayDataRS.payUrl` when an official URL exists. The existing generic response has no confirmed structured tuple for all four ibon fields. This is a YELLOW response-representation decision, but it does not justify a RED core change or CCAT-specific DB table.
+```text
+ORDER_KEY = configured custId + PayOrder.payOrderId as cust_order_no
+ORDER_KEY_UNIQUENESS_SCOPE = one cust_order_no under one cust_id
+CREATE_ORDER_KEY_UNIQUENESS = CONFIRMED
+CREATE_DUPLICATE_BEHAVIOR = REJECT DUPLICATE; never creates a second order under the same key
+QUERY_AFTER_TIMEOUT_SUPPORTED = YES; Query uses the stable key and returns Create-equivalent fields
+QUERY_NOT_FOUND_SEMANTICS = status ERROR + documented not-found message; no numeric error code
+AUTOMATIC_CREATE_RETRY_SAFE = YES, only as a bounded same-key retry after Query not-found; never use a new key
+AMBIGUOUS_FAILURE_RECOVERY = Query first; found recovers; exact not-found permits same-key Append; duplicate response triggers Query again
+B5_CREATE_IDEMPOTENCY = RESOLVED
+```
 
-## V1 vs Official Comparison
+Recommended P04 algorithm:
 
-| Contract Area | Official | V1 Implementation | Match | Confidence |
-| --- | --- | --- | --- | --- |
-| Token | POST form password grant; response fields | same; local cache and one 401 retry | surface match | High surface / low lifecycle |
-| Create | POST JSON `CvsOrderAppend` fields | same field set | match | High surface |
-| ibon constants | official implementation `0` / `2` | `0` / `2` | match | High implementation evidence |
-| Amount | decimal major-amount surface; Woo total direct | whole TWD integer ↔ cents | partial | Blocking |
-| Query | `cust_id + cust_order_no`; response fields | same plus validation | surface match | High surface / low semantics |
-| process_code | field only | two V1 variants disagree on `7`/`8` | `PRIOR_IMPLEMENTATION_DRIFT` | Blocking conflict |
-| APN | POST JSON, shared six fields, CVS `order_no` | same plus extra fields/query confirmation | partial | Blocking completeness |
-| Checksum | secretless colon-joined MD5 in official implementation | exact match | match | High algorithm / not authentication |
-| ACK | observed HTTP 200 `OK` | HTTP 200 text `OK` | match | Medium; normative retry unknown |
-| Duplicate/replay | no normative contract | DB replay/state/ledger guards | prior only | Blocking replay semantics |
-| Create idempotency | uniqueness only | query-before-retry using message substring | incomplete | High-risk blocking |
+```text
+Append once with stable cust_id + cust_order_no
+→ normal OK: validate and persist Provider result
+→ deterministic business error: do not retry unchanged invalid request
+→ ambiguous transport/HTTP result: Query stable key
+   → found: validate account/order/order_amount and recover original Provider result
+   → exact documented not-found: bounded Append retry with the identical key
+      → OK: persist result
+      → duplicate rejection: Query again and recover
+      → other error/ambiguity: stop automatic retry and reconcile later
+```
 
-## P03 Definition of Ready
+| Failure | May CCAT Have Received Request? | Contract-supported safe action | Automatic retry? |
+| --- | ---: | --- | --- |
+| DNS/connect failure proven before send | No; otherwise unknown | Query stable key; on exact not-found retry same key | Bounded same-key only |
+| connection reset | Yes | Query; found recover; exact not-found same-key retry | Bounded same-key only |
+| read timeout | Yes | Query; found recover; exact not-found same-key retry | Bounded same-key only |
+| HTTP error | Yes | Query first; do not infer failure from HTTP alone | Only exact not-found + same key |
+| business error | Request processed | Fix/reject according to documented error; do not blindly retry | No, unless a later Query proves not-found and request is otherwise valid |
+| duplicate order | Yes; original key exists | Query original; never generate a replacement key | No additional blind Append |
+| query not found | No record found at query time | Same-key Append is duplicate-safe because Provider rejects an existing key | Bounded same-key retry |
 
-| # | Readiness item | Result | Blocking reason / evidence |
+Network receipt classification is protocol inference; the duplicate safety conclusion is grounded in the official stable-key uniqueness and rejection rules. A timeout is never treated as proof of failure.
+
+## 31-Item Runtime Definition of Ready
+
+Status vocabulary：`READY`、`NONBLOCKING_PARTIAL`、`BLOCKED`、`CONFLICT`。
+
+| # | Readiness item | Result | Evidence / treatment |
 | ---: | --- | --- | --- |
-| 1 | Token | READY WITH NON-BLOCKING LIFECYCLE UNKNOWN | acquisition confirmed |
-| 2 | Create endpoint | READY | official SDK |
-| 3 | required fields | NOT READY | full normative required/length rules unavailable |
-| 4 | ibon constants | READY | official implementation + V1 match |
-| 5 | outbound ID | PARTIAL | stable `payOrderId` design; official length/charset absent |
-| 6 | amount | NOT READY | cross-surface unit/scale not normative |
-| 7 | payment code | READY | official SDK fields |
-| 8 | Create waiting semantics | READY | official implementation + V1 match |
-| 9 | Query endpoint | READY | official SDK |
-| 10 | Query key | READY | `cust_id + cust_order_no` |
-| 11 | paid state | NOT READY | no official `process_code` meaning |
-| 12 | necessary process_code mapping | NOT READY | V1 `7`/`8` conflict |
-| 13 | APN payload | NOT READY | consumed fields exceed validated/documented fields |
-| 14 | APN local-order key | PARTIAL | implementation uses `order_no`; normative mapping absent |
-| 15 | APN account binding | NOT READY | `api_id` semantics unknown |
-| 16 | checksum/auth | PARTIAL | checksum confirmed; no origin authentication; Query contract incomplete |
-| 17 | APN amount verification | NOT READY | amount representation incomplete |
-| 18 | ACK | PARTIAL | 200 `OK` implementation match; normative retry/failure rules absent |
-| 19 | duplicate behavior | PARTIAL | local idempotency proven; Provider resend/nonce rules unknown |
-| 20 | Create timeout/idempotency | NOT READY | `CREATE_RETRY_SAFE = UNKNOWN` |
-| 21 | JeePay response representation | PARTIAL | URL works; structured ibon tuple unresolved |
-| 22 | no RED core modification | READY | native SPI suffices; response issue is at most YELLOW |
+| 1 | Token endpoint | READY | p.10 `POST /Token` |
+| 2 | Token authentication fields | READY | p.10 password grant、username、password |
+| 3 | Token response semantics | READY | p.10; use `.expires` as explicitly stated authoritative expiry |
+| 4 | Create endpoint | READY | p.15 `POST /api/Collect` |
+| 5 | Create required fields | READY | p.15–17 field tables |
+| 6 | ibon constants | READY | `payment_type=0`, `payment_acquirerType=2`, p.15 |
+| 7 | amount mapping | READY | whole TWD ↔ exact JeePay cents, p.14–20 |
+| 8 | outbound order identity | READY | stable unique `cust_id + cust_order_no`, p.15 |
+| 9 | Provider transaction identity | READY | APN `trans_id` unique per payment slip, p.35 |
+| 10 | ibon payment code | READY | response/query ibon fields, p.19 |
+| 11 | WAITING semantics | READY | code `3` and issuance-before-payment, p.94 |
+| 12 | Query endpoint | READY | p.19 |
+| 13 | Query key | READY | `cust_id + cust_order_no`, p.19 |
+| 14 | Query amount | READY | p.19–20 |
+| 15 | process_code state mapping | NONBLOCKING_PARTIAL | all appendix CVS codes mapped; sample-only code `2` fail-closes with no transition |
+| 16 | APN method | READY | p.35 POST |
+| 17 | APN content type/payload | READY | p.35–37 JSON field table |
+| 18 | local order identity | READY | APN `order_no` ↔ outbound merchant order key |
+| 19 | Provider transaction binding | READY | unique `trans_id`; bind after authenticated Query |
+| 20 | account binding | READY | `username=cust_id`; APN `api_id` account code; account-scoped Query |
+| 21 | checksum/auth | READY | MD5 integrity + Bearer-authenticated Query, p.10、p.37 |
+| 22 | amount verification | READY | local/Query/APN cross-surface comparison above |
+| 23 | ACK | NONBLOCKING_PARTIAL | body `OK` confirmed; HTTP status/content type unspecified normatively |
+| 24 | duplicate semantics | READY | official resend contract + native JeePay idempotency |
+| 25 | retry semantics | READY | immediate + 15-minute + three-per-status, p.35 |
+| 26 | replay/residual-risk treatment | NONBLOCKING_PARTIAL | nonce shape confirmed but TTL absent; revalidation/Query/idempotency is safe |
+| 27 | Create timeout recovery | READY | stable Query returns Create-equivalent response |
+| 28 | duplicate Create behavior | READY | duplicate rejected, p.17 |
+| 29 | retry/idempotency strategy | READY | query-first bounded same-key retry |
+| 30 | JeePay native Provider mapping | READY | native SPI/fields suffice |
+| 31 | no RED core modification required | READY | Provider-specific GREEN path; no RED change evidenced |
 
-## Resolved Blockers
+```text
+READY = 28
+NONBLOCKING_PARTIAL = 3 (#15, #23, #26)
+BLOCKED = 0
+CONFLICT = 0
+```
 
-1. V1 source access recovered on Development VPS and precisely fingerprinted.
-2. Token、Create、Query endpoint and request surfaces match official SDK.
-3. `payment_type=0` and `payment_acquirerType=2` match official ibon implementation.
-4. Create `status=OK` means payment instructions issued / waiting, not paid.
-5. APN checksum canonicalization is an official-implementation + V1 match; the APP `chk` path is a different product, not an ibon conflict.
-6. Official implementation and V1 both observe successful APN response as HTTP 200 body `OK`.
-7. Existing JeePay Provider SPI can implement all three capabilities without RED core changes.
+The code-2 source inconsistency is recorded as `OFFICIAL_CONTRACT_CONFLICT`, but the readiness item is non-blocking rather than runtime `CONFLICT` because P04 has a complete conservative branch that performs no state transition.
+
+## Official vs V1 Drift
+
+| Area | Authenticated V1.28.1 | V1 behavior | Result |
+| --- | --- | --- | --- |
+| Amount | whole `元`, no decimals; order/bill/paid amount are distinct | whole-TWD conversion | `MATCH`, but V1 must preserve external-fee distinction |
+| `process_code=2` | sample-only, absent from appendix | later V1 pending | `OFFICIAL_CONTRACT_CONFLICT`; V1 meaning remains unverified |
+| `process_code=7` | paid, payout scheduled | earlier success; later pending | later variant `PRIOR_IMPLEMENTATION_DRIFT` |
+| `process_code=8` | paid, payout completed | earlier success; later pending | later variant `PRIOR_IMPLEMENTATION_DRIFT` |
+| APN account | account code plus account-scoped Query | later V1 compares configured API ID | concept matches; V2 follows authenticated naming/binding |
+| Query not found | exact official error text | V1 substring matching | V1 is broader/brittle; V2 uses exact official condition |
+| Create retry | duplicate same-key rejected | query-before-retry | safe only with the authenticated same-key algorithm above |
+
+```text
+PRIOR_IMPLEMENTATION_DRIFT = process_code 7/8 in later V1; broad Query not-found matching
+```
 
 ## Remaining Blocking Unknowns
 
-1. Merchant-versioned WEBAPI specification: complete Create requirements、length/charset、expiry and errors.
-2. Normative Create/Query/APN amount unit、scale and string/decimal/integer representation.
-3. Official complete `process_code` table; specifically resolve V1 conflict for `7` and `8`, plus paid、waiting、failed、expired/cancelled and not-found.
-4. APN full payload and normative relationship among `order_no`、`cust_order_no`、`trans_id`、`pay_amount` and `payment_code`.
-5. `api_id` account-binding semantics and authoritative Query identity/transaction fields.
-6. APN retry、failure ACK、duplicate and nonce/replay rules; successful `200 OK` alone is insufficient.
-7. Duplicate Create and response-lost idempotency guarantee; exact Query not-found code/semantic.
+```text
+NONE
+```
 
-## Non-blocking Unknowns
+## Non-Blocking Debt
 
-- Token revocation、cross-instance reuse and official retry-on-401 policy if V2 fails closed.
-- Optional `short_url` availability and display metadata.
-- Refund、transfer、division、channel user、close、COCS、DPH、ATM and other CCAT products, all outside phase 1.
+- `process_code=2` appears in a Query sample but has no appendix meaning; keep `NO_STATE_TRANSITION` and seek written CCAT clarification when convenient.
+- V1.28.1 specifies ACK body but not response HTTP status/content type or invalid-callback response.
+- Nonce uniqueness construction is documented, but freshness lifetime and replay window are not.
+- Token prose says three hours while the response table describes a default duration differently; use `.expires`, which the prose explicitly makes authoritative.
+- Exact account-specific Create minimum/maximum below the global ibon cap is configuration-dependent and remains Provider-validation behavior.
+- Token cross-instance reuse/revocation and retry-on-401 optimization are not needed for correctness.
+- Optional metadata、presentation shape、unused payment methods and all non-ibon capabilities remain outside Phase 1.
+
+## Controlled Live Validation Required
+
+```text
+CONTROLLED_LIVE_VALIDATION_REQUIRED_FOR_RUNTIME_GATE = NONE
+```
+
+Later environment/E2E work should verify sandbox/prod credential binding、exact ACK transport behavior and representative whole-TWD/external-fee vectors, but these checks do not block P04 implementation and were not executed in C03.
 
 ## Runtime Gate
 
 ```text
-CCAT_RUNTIME_GATE = CLOSED
+VERDICT = PASS-WITH-DEBT
+CCAT_RUNTIME_GATE = OPEN
+CCAT_CANONICAL_CONTRADICTIONS = 0
+RUNTIME_SOURCE_MODIFICATIONS = NONE
+CCAT_RUNTIME_IMPLEMENTATION = NOT STARTED
 ```
-
-Remaining unknowns directly affect money correctness、order/account identity、callback trust、idempotency and Provider acknowledgement. V1 code narrows the questions but cannot replace the contract, and its own `process_code=7/8` drift proves it is unsafe as normative truth.
 
 ## Next Session
 
 ```text
-JEE-C02 CCAT Merchant WEBAPI Specification Closure
+NEXT = JEE-P04 CCAT ibon Runtime Implementation
 ```
 
-Required input: the merchant-versioned `多元支付平台 WEBAPI 規格書` or written CCAT confirmation covering the seven remaining blockers above. Evidence may be stored only if credentials and merchant-specific secrets are redacted. Do not start JEE-P04 until this document's blocking items are closed.
+P04 must implement only Create、Provider Query and APN on JeePay's native Provider Extension Contract. C03 does not authorize or begin runtime implementation.

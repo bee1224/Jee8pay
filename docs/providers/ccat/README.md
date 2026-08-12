@@ -5,7 +5,9 @@
 ```text
 Provider: CCAT / 黑貓 PAY
 Status: Design
-Gate: BLOCKED-BY-CONTRACT-UNKNOWNS
+Contract Verdict: PASS-WITH-DEBT
+Runtime Gate: OPEN
+Runtime Implementation: NOT STARTED
 ```
 
 ## Phase 1 Scope
@@ -41,17 +43,17 @@ CS.IF_CODE.CCAT
 CCAT / CCAT_IBON DB definitions
 ```
 
-## Evidence and Unknowns
+## Contract Closure
 
-- CCAT request mapping
-- query mapping
-- APN checksum/signature contract
-- amount/status mapping
-- acknowledgement
-- expired/closed mapping
-- SDK vs direct HTTP
+JEE-C03 已以契約會員取得的 `多元支付平台-WEBAPI介面規格(V1.28.1)` 完成 Token、Create、Query 與 APN contract confirmation：
 
-JEE-C01 已追回 Development VPS 的兩個 V1 source traces，並重新核對 CCAT SDK／WooCommerce implementation。Token/Create/Query surface、ibon constants、waiting semantic、checksum canonicalization與 observed `200 OK` ACK 已收斂；但 V1 對 `process_code=7/8` 互相衝突，amount cross-surface mapping、APN account/retry 與 Create idempotency仍缺 merchant-versioned normative evidence。Runtime Gate 維持 `CLOSED`。
+- B1 amount：JeePay cents 必須整除 100，映射為 CCAT whole-TWD `order_amount`; APN amount 以 authenticated Query 的 order/bill/paid amounts 交叉驗證。
+- B2 state：`4/7/8` 是 payment success；`5/6` 是 closed；`0/1/3` waiting。Sample-only code `2` 保守不轉態。
+- B3 identity：`username=cust_id`；APN `api_id/order_no/trans_id` 分別綁定 configured account、`PayOrder.payOrderId`、`channelOrderNo`，狀態由 account-scoped Query 授權。
+- B4 APN：官方確認即時一次、每 15 分鐘、每狀態最多三次，純文字 `OK` 停止；duplicate/replay 沿用 Query + JeePay native idempotency。
+- B5 Create：同 account 的 `cust_order_no` 唯一且 duplicate Append 明文拒絕；response ambiguity 使用 Query-first、bounded same-key retry。
+
+31-item DoR：`28 READY`、`3 NONBLOCKING_PARTIAL`、`0 BLOCKED`、`0 runtime CONFLICT`。`CCAT_RUNTIME_GATE = OPEN`；下一階段可開始 JEE-P04，但本文件不表示 runtime 已實作。
 
 ## Security
 
@@ -59,5 +61,5 @@ JEE-C01 已追回 Development VPS 的兩個 V1 source traces，並重新核對 C
 
 ## Documentation
 
-- [`provider-design.md`](provider-design.md)：目前的 evidence-backed design 與 contract unknowns。
-- [`contract-evidence.md`](contract-evidence.md)：JEE-C01 V1/official evidence inventory、confidence、Definition of Ready 與 blocking unknowns。
+- [`provider-design.md`](provider-design.md)：JEE-P04 可直接採用的 evidence-backed Provider design。
+- [`contract-evidence.md`](contract-evidence.md)：JEE-C03 authenticated-spec closure report、page provenance、31-item Definition of Ready 與 V1 drift。
