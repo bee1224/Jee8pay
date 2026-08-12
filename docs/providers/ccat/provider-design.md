@@ -4,12 +4,16 @@
 
 ```text
 JEE-C03 = PASS-WITH-DEBT
+CCAT_CONTRACT_PHASE = COMPLETE
 CCAT_RUNTIME_GATE = OPEN
-NEXT = JEE-P04 CCAT ibon Runtime Implementation
-CCAT_RUNTIME_IMPLEMENTATION = NOT STARTED
+CCAT_RUNTIME_IMPLEMENTATION = COMPLETE
+CCAT_OFFLINE_ACCEPTANCE = PASS
+CCAT_LIVE_E2E = NOT STARTED
+CCAT_PRODUCTION_VALIDATION = NOT STARTED
+NEXT = JEE-E02 CCAT Development Environment Binding & Controlled E2E
 ```
 
-Merchant-authenticated official specification `多元支付平台-WEBAPI介面規格(V1.28.1)` closes the C02 amount、status、APN identity and Create-idempotency blockers. P04 may implement the design below, but C03 makes no Java、DB、UI or runtime configuration change.
+Merchant-authenticated official specification `多元支付平台-WEBAPI介面規格(V1.28.1)` closes the C02 amount、status、APN identity and Create-idempotency blockers. P04 implements the design below through JeePay's native Provider extension points; live E2E and production credential binding remain later phases.
 
 ## Scope
 
@@ -312,4 +316,6 @@ B3_APN_IDENTITY = RESOLVED
 B4_APN_RETRY_REPLAY = RESOLVED
 B5_CREATE_IDEMPOTENCY = RESOLVED
 CCAT_RUNTIME_GATE = OPEN
+CCAT_RUNTIME_IMPLEMENTATION = COMPLETE
+CCAT_OFFLINE_ACCEPTANCE = PASS
 ```

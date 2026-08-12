@@ -303,3 +303,15 @@ alter table t_transfer_order add column `channel_res_data` TEXT DEFAULT NULL COM
 
 
 ## -- ++++ [v3.1.0] ===> NEXT
+
+-- CCAT / 黑猫 PAY ibon Phase 1
+DELETE FROM t_pay_way WHERE way_code = 'CCAT_IBON';
+INSERT INTO t_pay_way (way_code, way_name) VALUES ('CCAT_IBON', '黑猫 PAY ibon 缴款');
+DELETE FROM t_pay_interface_define WHERE if_code = 'ccat';
+INSERT INTO t_pay_interface_define (if_code, if_name, is_mch_mode, is_isv_mode, config_page_type, isv_params, isvsub_mch_params, normal_mch_params, way_codes, icon, bg_color, state, remark)
+VALUES ('ccat', '黑猫 PAY', 1, 0, 1,
+        NULL,
+        NULL,
+        '[{"name":"environment","desc":"Provider 环境","type":"radio","verify":"required","values":"TEST,PRODUCTION","titles":"测试环境,生产环境"},{"name":"custId","desc":"契客代号","type":"text","verify":"required"},{"name":"apiPassword","desc":"API 密码","type":"text","verify":"required","star":"1"}]',
+        '[{"wayCode":"CCAT_IBON"}]',
+        '', '#222222', 1, '黑猫 PAY ibon 通道');

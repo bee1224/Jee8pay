@@ -148,6 +148,7 @@ public class CS {
         String XXPAY = "xxpay";     // 小新支付
         String PPPAY = "pppay";     // Paypal 支付
         String PLSPAY = "plspay";     // 计全支付plus
+        String CCAT = "ccat";       // 黑猫 PAY
     }
 
 
@@ -185,6 +186,8 @@ public class CS {
         String UP_JSAPI = "UP_JSAPI"; // 银联JS支付
 
         String PP_PC = "PP_PC"; // Paypal 支付
+
+        String CCAT_IBON = "CCAT_IBON"; // 黑猫 PAY ibon 缴款
     }
 
     //支付数据包 类型

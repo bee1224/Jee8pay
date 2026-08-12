@@ -6,7 +6,7 @@ Provider documentation 只記錄特定 Provider 的 official contract、mapping�
 
 | Provider | ifCode | Status | Current Scope | Entry |
 | --- | --- | --- | --- | --- |
-| CCAT | `ccat` | Design | ibon | [`ccat/README.md`](ccat/README.md) |
+| CCAT | `ccat` | Verification | ibon | [`ccat/README.md`](ccat/README.md) |
 | NewebPay | TBD | Planned | TBD | — |
 
 目前 active Taiwan roadmap 只有 CCAT 與 NewebPay。其他 upstream Provider 可保留為相容性或歷史實作，但不列為 planned Taiwan Provider。

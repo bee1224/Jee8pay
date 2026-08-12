@@ -724,6 +724,7 @@ INSERT INTO t_pay_way (way_code, way_name) VALUES ('YSF_BAR', '云闪付条码')
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('YSF_JSAPI', '云闪付jsapi');
 
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('PP_PC', 'PayPal支付');
+INSERT INTO t_pay_way (way_code, way_name) VALUES ('CCAT_IBON', '黑猫 PAY ibon 缴款');
 
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_APP', '银联App支付');
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('UP_WAP', '银联手机网站支付');
@@ -767,6 +768,14 @@ VALUES ('pppay', 'PayPal支付', 1, 0, 1,
         '[{"wayCode": "PP_PC"}]',
         'http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/paypal.png', '#005ea6', 1, 'PayPal官方通道');
 
+INSERT INTO t_pay_interface_define (if_code, if_name, is_mch_mode, is_isv_mode, config_page_type, isv_params, isvsub_mch_params, normal_mch_params, way_codes, icon, bg_color, state, remark)
+VALUES ('ccat', '黑猫 PAY', 1, 0, 1,
+        NULL,
+        NULL,
+        '[{"name":"environment","desc":"Provider 环境","type":"radio","verify":"required","values":"TEST,PRODUCTION","titles":"测试环境,生产环境"},{"name":"custId","desc":"契客代号","type":"text","verify":"required"},{"name":"apiPassword","desc":"API 密码","type":"text","verify":"required","star":"1"}]',
+        '[{"wayCode":"CCAT_IBON"}]',
+        '', '#222222', 1, '黑猫 PAY ibon 通道');
+
 -- 计全付支付通道
 INSERT INTO t_pay_interface_define (if_code, if_name, is_mch_mode, is_isv_mode, config_page_type, isv_params, isvsub_mch_params, normal_mch_params, way_codes, icon, bg_color, state, remark)
 VALUES ('plspay', '计全付', 1, 0, 1,
@@ -775,4 +784,3 @@ VALUES ('plspay', '计全付', 1, 0, 1,
         '[{"name":"signType","desc":"签名方式","type":"radio","verify":"required","values":"MD5,RSA2","titles":"MD5,RSA2"},{"name":"merchantNo","desc":"计全付商户号","type":"text","verify":"required"},{"name":"appId","desc":"应用ID","type":"text","verify":"required"},{"name":"appSecret","desc":"md5秘钥","type":"textarea","verify":"required","star":"1"},{"name":"rsa2AppPrivateKey","desc":"RSA2: 应用私钥","type":"textarea","verify":"required","star":"1"},{"name":"rsa2PayPublicKey","desc":"RSA2: 支付网关公钥","type":"textarea","verify":"required","star":"1"}]',
         '[{"wayCode": "ALI_APP"}, {"wayCode": "ALI_BAR"}, {"wayCode": "ALI_JSAPI"}, {"wayCode": "ALI_LITE"}, {"wayCode": "ALI_PC"}, {"wayCode": "ALI_QR"}, {"wayCode": "ALI_WAP"}, {"wayCode": "WX_APP"}, {"wayCode": "WX_BAR"}, {"wayCode": "WX_H5"}, {"wayCode": "WX_JSAPI"}, {"wayCode": "WX_LITE"}, {"wayCode": "WX_NATIVE"}]',
         'http://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/plspay.svg', '#0CACFF', 1, '计全付');
-
