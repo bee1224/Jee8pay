@@ -28,8 +28,8 @@ Taiwan Payment Provider
 
 ## Provider Roadmap
 
-- CCAT / 黑貓 PAY — current；ibon
-- NewebPay / 藍新 — planned
+- CCAT / 黑貓 PAY — Phase 1 supported；`CCAT_IBON`
+- NewebPay / 藍新 — deferred；不阻擋 CCAT-only Production Candidate
 
 其他 upstream Provider 可作相容性或歷史參考，但不屬於目前 Taiwan Provider roadmap。
 

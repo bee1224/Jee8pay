@@ -3,7 +3,6 @@ package com.jeequan.jeepay.pay.channel.ccat.payway;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.model.params.ccat.CcatNormalMchParams;
 import com.jeequan.jeepay.pay.channel.ccat.CcatClient;
@@ -11,6 +10,7 @@ import com.jeequan.jeepay.pay.channel.ccat.CcatClient.CcatException;
 import com.jeequan.jeepay.pay.channel.ccat.CcatClient.ErrorType;
 import com.jeequan.jeepay.pay.channel.ccat.CcatIbonOrderRS;
 import com.jeequan.jeepay.pay.channel.ccat.CcatKit;
+import com.jeequan.jeepay.pay.channel.ccat.CcatMchParamsResolver;
 import com.jeequan.jeepay.pay.channel.ccat.CcatPaymentService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
@@ -32,9 +32,11 @@ public class CcatIbon extends CcatPaymentService {
     private static final ZoneId TAIPEI = ZoneId.of("Asia/Taipei");
 
     private final CcatClient client;
+    private final CcatMchParamsResolver paramsResolver;
 
-    public CcatIbon(CcatClient client) {
+    public CcatIbon(CcatClient client, CcatMchParamsResolver paramsResolver) {
         this.client = client;
+        this.paramsResolver = paramsResolver;
     }
 
     @Override
@@ -58,8 +60,7 @@ public class CcatIbon extends CcatPaymentService {
     public AbstractRS pay(UnifiedOrderRQ bizRQ, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
         CcatIbonOrderRS result = new CcatIbonOrderRS();
         try {
-            CcatNormalMchParams params = mchAppConfigContext.getNormalMchParamsByIfCode(
-                    CS.IF_CODE.CCAT, CcatNormalMchParams.class);
+            CcatNormalMchParams params = paramsResolver.resolve(mchAppConfigContext);
             JSONObject request = buildAppendRequest(bizRQ, payOrder, params, getNotifyUrl());
             JSONObject response = executeCreate(params, payOrder, request);
             populateWaitingResult(result, payOrder, response);

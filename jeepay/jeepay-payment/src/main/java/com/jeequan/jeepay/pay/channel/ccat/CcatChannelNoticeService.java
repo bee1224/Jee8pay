@@ -35,10 +35,13 @@ public class CcatChannelNoticeService extends AbstractChannelNoticeService {
 
     private final CcatPayOrderQueryService queryService;
     private final PayOrderService payOrderService;
+    private final CcatMchParamsResolver paramsResolver;
 
-    public CcatChannelNoticeService(CcatPayOrderQueryService queryService, PayOrderService payOrderService) {
+    public CcatChannelNoticeService(CcatPayOrderQueryService queryService, PayOrderService payOrderService,
+                                    CcatMchParamsResolver paramsResolver) {
         this.queryService = queryService;
         this.payOrderService = payOrderService;
+        this.paramsResolver = paramsResolver;
     }
 
     @Override
@@ -85,9 +88,8 @@ public class CcatChannelNoticeService extends AbstractChannelNoticeService {
                 throw new IllegalArgumentException("local order state cannot accept APN");
             }
 
-            CcatNormalMchParams ccatParams = mchAppConfigContext.getNormalMchParamsByIfCode(
-                    CS.IF_CODE.CCAT, CcatNormalMchParams.class);
-            if (ccatParams == null || !payload.apiId.equals(ccatParams.getCustId())) {
+            CcatNormalMchParams ccatParams = paramsResolver.resolve(mchAppConfigContext);
+            if (!payload.apiId.equals(ccatParams.getCustId())) {
                 throw new IllegalArgumentException("api_id mismatch");
             }
             if (!CcatKit.verifyChecksum(payload.apiId, payload.transId, payload.amount,

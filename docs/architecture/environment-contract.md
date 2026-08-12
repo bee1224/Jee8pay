@@ -35,8 +35,10 @@ Reuse the existing Provider `if_params` model for an evidence-backed endpoint/en
 ## Physical binding status
 
 ```text
-ENVIRONMENT_RUNTIME_BINDING = DEFERRED UNTIL PHYSICAL ENVIRONMENT SPEC IS PROVIDED
-PHYSICAL_ENVIRONMENT_CONFIGURATION = DEFERRED
+DEVELOPMENT_RUNTIME_BINDING = JEE-E02 V2 ISOLATED RUNTIME DEPLOYED
+DEVELOPMENT_PROVIDER_CREDENTIAL_BINDING = PASS; CACHE ENABLED/DISABLED VERIFIED (TD-011 RESOLVED)
+DEVELOPMENT_PUBLIC_CALLBACK_BINDING = PASS (V2-ONLY HOST/PATH; EDGE RESTART GUARD REQUIRED)
+PRODUCTION_RUNTIME_BINDING = DEFERRED
 ```
 
-Required later for both Development and Production: domain、VPS/host、DB、Redis/MQ、callback host and Provider connectivity mode. Provider binding additionally requires environment/account assignment and secure credential injection. No values are inferred in this document.
+The V2 Development runtime is bound to `server1.nnviopp.com` as isolated Compose project `jee8pay-v2-dev`; operational details are in [`../operations/ccat-v2-development.md`](../operations/ccat-v2-development.md). Its CCAT connectivity is explicitly `PRODUCTION` using a V2-only secure source; exactly one standalone Token authentication passed. The first controlled order attempt exposed TD-011: with `isys.cache-config=false`, the adapter read an empty context map instead of JeePay's native cache-aware Provider-param source. The deployed Provider-local resolver now uses `ConfigContextQueryService.queryNormalMchParams` for Create、Query and APN; cache-enabled/disabled and fail-closed regressions pass while `t_pay_interface_config.if_params` remains the single source of truth. A separately authorized new TWD 40 order then completed Create、human payment、validated APN、native SUCCESS、Merchant Notify and Query reconciliation. The V2-only public APN hostname routes only `/api/pay/notify/ccat`, and the V2 application origin derives that exact URL. Because the approved zero-stop edge binding is runtime-mounted, it must be revalidated after any edge restart (TD-010). Platform Production remains outside JEE-E02 and no Platform Production values are inferred.

@@ -1,0 +1,54 @@
+server:
+  forward-headers-strategy: framework
+
+spring:
+  datasource:
+    url: jdbc:mysql://db:3306/jee8pay_v2_dev?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+    username: jee8pay_v2
+    password:
+    druid:
+      initial-size: 1
+      min-idle: 1
+      max-active: 10
+      max-wait: 60000
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1 FROM DUAL
+      pool-prepared-statements: false
+  cache:
+    type: redis
+  data:
+    redis:
+      host: redis
+      port: 6379
+      timeout: 1000
+      password:
+
+logging:
+  level:
+    root: info
+    com.jeequan.jeepay: info
+    com.jeequan.jeepay.core.utils.JeepayKit: warn
+    com.jeequan.jeepay.util.JeepayKit: warn
+  path: /jeepayhomes/service/logs
+
+isys:
+  allow-cors: true
+  cache-config: false
+  oss:
+    file-root-path: /jeepayhomes/service/uploads
+    file-public-path: ${isys.oss.file-root-path}/public
+    file-private-path: ${isys.oss.file-root-path}/private
+    service-type: local
+  mq:
+    vender: rocketMQ
+
+rocketmq:
+  name-server: mq-namesrv:9876
+  producer:
+    send-message-timeout: 10000
+    retry-times-when-send-failed: 2
+    retry-times-when-send-async-failed: 2

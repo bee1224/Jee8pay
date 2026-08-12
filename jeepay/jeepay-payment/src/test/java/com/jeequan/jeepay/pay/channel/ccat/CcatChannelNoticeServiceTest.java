@@ -1,7 +1,6 @@
 package com.jeequan.jeepay.pay.channel.ccat;
 
 import com.alibaba.fastjson.JSONObject;
-import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.ResponseException;
 import com.jeequan.jeepay.core.model.params.ccat.CcatNormalMchParams;
@@ -20,23 +19,28 @@ class CcatChannelNoticeServiceTest {
 
     private CcatClient client;
     private PayOrderService payOrderService;
+    private CcatMchParamsResolver paramsResolver;
     private CcatChannelNoticeService service;
     private CcatNormalMchParams params;
     private MchAppConfigContext context;
     private PayOrder payOrder;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         client = mock(CcatClient.class);
         payOrderService = mock(PayOrderService.class);
-        service = new CcatChannelNoticeService(new CcatPayOrderQueryService(client), payOrderService);
+        paramsResolver = mock(CcatMchParamsResolver.class);
+        service = new CcatChannelNoticeService(
+                new CcatPayOrderQueryService(client, paramsResolver), payOrderService, paramsResolver);
 
         params = new CcatNormalMchParams();
         params.setEnvironment(CcatNormalMchParams.ENVIRONMENT_TEST);
         params.setCustId("test-user");
         params.setApiPassword("test-api-password");
         context = new MchAppConfigContext();
-        context.getNormalMchParamsMap().put(CS.IF_CODE.CCAT, params);
+        context.setMchNo("M-TEST");
+        context.setAppId("APP-TEST");
+        when(paramsResolver.resolve(context)).thenReturn(params);
 
         payOrder = new PayOrder();
         payOrder.setPayOrderId("P202608120000000001");

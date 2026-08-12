@@ -7,6 +7,7 @@ import com.jeequan.jeepay.core.model.params.ccat.CcatNormalMchParams;
 import com.jeequan.jeepay.pay.channel.ccat.CcatClient;
 import com.jeequan.jeepay.pay.channel.ccat.CcatClient.CcatException;
 import com.jeequan.jeepay.pay.channel.ccat.CcatIbonOrderRS;
+import com.jeequan.jeepay.pay.channel.ccat.CcatMchParamsResolver;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
@@ -23,19 +24,22 @@ import static org.mockito.Mockito.*;
 class CcatIbonTest {
 
     private CcatClient client;
+    private CcatMchParamsResolver paramsResolver;
     private CcatIbon ibon;
     private CcatNormalMchParams params;
     private PayOrder payOrder;
     private UnifiedOrderRQ request;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         client = mock(CcatClient.class);
-        ibon = new TestCcatIbon(client);
+        paramsResolver = mock(CcatMchParamsResolver.class);
+        ibon = new TestCcatIbon(client, paramsResolver);
         params = new CcatNormalMchParams();
         params.setEnvironment(CcatNormalMchParams.ENVIRONMENT_TEST);
         params.setCustId("test-user");
         params.setApiPassword("test-api-password");
+        when(paramsResolver.resolve(any(MchAppConfigContext.class))).thenReturn(params);
 
         payOrder = new PayOrder();
         payOrder.setPayOrderId("P202608120000000001");
@@ -212,8 +216,8 @@ class CcatIbonTest {
     }
 
     private static final class TestCcatIbon extends CcatIbon {
-        private TestCcatIbon(CcatClient client) {
-            super(client);
+        private TestCcatIbon(CcatClient client, CcatMchParamsResolver paramsResolver) {
+            super(client, paramsResolver);
         }
 
         @Override

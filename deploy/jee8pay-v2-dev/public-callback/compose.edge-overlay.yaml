@@ -1,0 +1,11 @@
+services:
+  sandbox-edge:
+    volumes:
+      - /opt/jee8pay-v2-dev/public-callback/nginx.proposed.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      jee8pay-v2-callback:
+
+networks:
+  jee8pay-v2-callback:
+    external: true
+    name: jee8pay-v2-dev-edge-transit

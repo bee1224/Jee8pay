@@ -20,8 +20,11 @@ REAL_SECRETS_WRITTEN = 0
 JEE_C03_RUNTIME_SOURCE_MODIFICATIONS = NONE
 CCAT_RUNTIME_IMPLEMENTATION = COMPLETE
 CCAT_OFFLINE_ACCEPTANCE = PASS
-CCAT_LIVE_E2E = NOT STARTED
+CCAT_DEVELOPMENT_DEPLOYMENT = PASS
+CCAT_LIVE_E2E = PASS
+CCAT_PRODUCTION_CANDIDATE = NOT_STARTED
 CCAT_PRODUCTION_VALIDATION = NOT STARTED
+V1_CUTOVER = NOT_STARTED
 ```
 
 本文件只記錄 CCAT／黑貓 PAY ibon CVS Phase 1 的 Token、Create、Provider Query 與 APN contract。Credit card、COCS、refund、payout、transfer 與其他 payment products 不在本階段。JEE-C03 沒有登入契約會員 portal、沒有呼叫 Provider API，也沒有使用任何 credential value。
@@ -192,7 +195,7 @@ INVALID_CALLBACK_BEHAVIOR = no normative HTTP status/body; fail closed and do no
 DUPLICATE_VALID_CALLBACK_ACK = OK after complete revalidation and exact committed-state check
 ```
 
-Evidence：p.35 transport/Return table and p.36–37 payload; p.35 says an `OK` body stops further sends. No actual Provider callback was executed.
+Evidence：p.35 transport/Return table and p.36–37 payload; p.35 says an `OK` body stops further sends. JEE-C03 itself did not execute a Provider callback; JEE-E02 later verified real status `A` / `B` APNs against this contract.
 
 ## B4 — Retry, Duplicate and Replay Regression
 
@@ -334,13 +337,13 @@ NONE
 - Token cross-instance reuse/revocation and retry-on-401 optimization are not needed for correctness.
 - Optional metadata、presentation shape、unused payment methods and all non-ibon capabilities remain outside Phase 1.
 
-## Controlled Live Validation Required
+## Controlled Live Validation
 
 ```text
-CONTROLLED_LIVE_VALIDATION_REQUIRED_FOR_RUNTIME_GATE = NONE
+CONTROLLED_LIVE_VALIDATION = PASS (JEE-E02)
 ```
 
-Later environment/E2E work should verify sandbox/prod credential binding、exact ACK transport behavior and representative whole-TWD/external-fee vectors, but these checks do not block P04 implementation and were not executed in C03.
+JEE-E02 subsequently verified V2-only Production credential binding、one real TWD 40 Create/payment、status `A` / `B` APNs、exact `OK` ACK、native state transition、Merchant Notify and authenticated Query reconciliation. This does not constitute Platform Production deployment or Production validation.
 
 ## Runtime Gate
 
@@ -351,12 +354,17 @@ CCAT_CANONICAL_CONTRADICTIONS = 0
 RUNTIME_SOURCE_MODIFICATIONS = CCAT_PROVIDER_ONLY
 CCAT_RUNTIME_IMPLEMENTATION = COMPLETE
 CCAT_OFFLINE_ACCEPTANCE = PASS
+CCAT_DEVELOPMENT_DEPLOYMENT = PASS
+CCAT_LIVE_E2E = PASS
+CCAT_PRODUCTION_CANDIDATE = NOT_STARTED
+CCAT_PRODUCTION_VALIDATION = NOT_STARTED
+V1_CUTOVER = NOT_STARTED
 ```
 
 ## Next Session
 
 ```text
-NEXT = JEE-E02 CCAT Development Environment Binding & Controlled E2E
+NEXT = JEE-E04 CCAT-only Production Candidate Deployment
 ```
 
-P04 implemented Create、Provider Query and APN on JeePay's native Provider Extension Contract. Offline acceptance passed with 46 CCAT-specific tests and full backend compile/test/package; no live Provider call or production validation was performed. The three nonblocking contract debts remain open.
+P04 implemented Create、Provider Query and APN on JeePay's native Provider Extension Contract. JEE-E02 later completed Development live acceptance; JEE-I04 independently reverified 53 CCAT-specific tests and full backend compile/test/package. No Platform Production deployment or validation has started. The three nonblocking contract debts remain open.

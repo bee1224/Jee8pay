@@ -17,9 +17,11 @@ import org.springframework.stereotype.Service;
 public class CcatPayOrderQueryService implements IPayOrderQueryService {
 
     private final CcatClient client;
+    private final CcatMchParamsResolver paramsResolver;
 
-    public CcatPayOrderQueryService(CcatClient client) {
+    public CcatPayOrderQueryService(CcatClient client, CcatMchParamsResolver paramsResolver) {
         this.client = client;
+        this.paramsResolver = paramsResolver;
     }
 
     @Override
@@ -29,9 +31,8 @@ public class CcatPayOrderQueryService implements IPayOrderQueryService {
 
     @Override
     public ChannelRetMsg query(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
-        CcatNormalMchParams params = mchAppConfigContext.getNormalMchParamsByIfCode(
-                CS.IF_CODE.CCAT, CcatNormalMchParams.class);
         try {
+            CcatNormalMchParams params = paramsResolver.resolve(mchAppConfigContext);
             return queryValidated(payOrder, params).toChannelRetMsg(payOrder.getChannelOrderNo());
         } catch (CcatException e) {
             return ChannelRetMsg.unknown(e.getMessage());

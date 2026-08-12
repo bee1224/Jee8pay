@@ -1,0 +1,5 @@
+artifacts/
+.secrets/
+rendered/
+DEPLOYMENT-MANIFEST.sha256
+SOURCE

@@ -8,12 +8,15 @@ CCAT_CONTRACT_PHASE = COMPLETE
 CCAT_RUNTIME_GATE = OPEN
 CCAT_RUNTIME_IMPLEMENTATION = COMPLETE
 CCAT_OFFLINE_ACCEPTANCE = PASS
-CCAT_LIVE_E2E = NOT STARTED
+CCAT_DEVELOPMENT_DEPLOYMENT = PASS
+CCAT_LIVE_E2E = PASS
+CCAT_PRODUCTION_CANDIDATE = NOT STARTED
 CCAT_PRODUCTION_VALIDATION = NOT STARTED
-NEXT = JEE-E02 CCAT Development Environment Binding & Controlled E2E
+V1_CUTOVER = NOT STARTED
+NEXT = JEE-E04 CCAT-only Production Candidate Deployment
 ```
 
-Merchant-authenticated official specification `多元支付平台-WEBAPI介面規格(V1.28.1)` closes the C02 amount、status、APN identity and Create-idempotency blockers. P04 implements the design below through JeePay's native Provider extension points; live E2E and production credential binding remain later phases.
+Merchant-authenticated official specification `多元支付平台-WEBAPI介面規格(V1.28.1)` closes the C02 amount、status、APN identity and Create-idempotency blockers. P04 implements the design below through JeePay's native Provider extension points. JEE-E02 subsequently completed Development deployment and one real TWD 40 CCAT ibon E2E; Platform Production deployment and validation remain unstarted.
 
 ## Scope
 
@@ -303,7 +306,7 @@ The merchant-facing structured ibon instruction shape remains a potential YELLOW
 - Nonce freshness TTL is unspecified; Query/idempotency remains authoritative.
 - Token lifetime prose/table differ; `.expires` is explicitly authoritative.
 - Cross-instance token reuse、display metadata and optional fields are not correctness blockers.
-- Controlled environment/E2E credential binding remains a later phase.
+- Platform Production deployment and validation remain a separate later phase.
 
 ## Definition of Ready
 
@@ -318,4 +321,9 @@ B5_CREATE_IDEMPOTENCY = RESOLVED
 CCAT_RUNTIME_GATE = OPEN
 CCAT_RUNTIME_IMPLEMENTATION = COMPLETE
 CCAT_OFFLINE_ACCEPTANCE = PASS
+CCAT_DEVELOPMENT_DEPLOYMENT = PASS
+CCAT_LIVE_E2E = PASS
+CCAT_PRODUCTION_CANDIDATE = NOT_STARTED
+CCAT_PRODUCTION_VALIDATION = NOT_STARTED
+V1_CUTOVER = NOT_STARTED
 ```

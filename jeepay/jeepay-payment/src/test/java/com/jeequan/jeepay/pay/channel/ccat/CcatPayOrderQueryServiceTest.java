@@ -3,6 +3,7 @@ package com.jeequan.jeepay.pay.channel.ccat;
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.model.params.ccat.CcatNormalMchParams;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.channel.ccat.CcatClient.CcatException;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.*;
 class CcatPayOrderQueryServiceTest {
 
     private CcatClient client;
+    private CcatMchParamsResolver paramsResolver;
     private CcatPayOrderQueryService service;
     private CcatNormalMchParams params;
     private PayOrder payOrder;
@@ -21,7 +23,8 @@ class CcatPayOrderQueryServiceTest {
     @BeforeEach
     void setUp() {
         client = mock(CcatClient.class);
-        service = new CcatPayOrderQueryService(client);
+        paramsResolver = mock(CcatMchParamsResolver.class);
+        service = new CcatPayOrderQueryService(client, paramsResolver);
         params = new CcatNormalMchParams();
         params.setEnvironment(CcatNormalMchParams.ENVIRONMENT_TEST);
         params.setCustId("test-user");
@@ -31,6 +34,18 @@ class CcatPayOrderQueryServiceTest {
         payOrder.setPayOrderId("P202608120000000001");
         payOrder.setAmount(10_000L);
         payOrder.setChannelOrderNo("TX-001");
+    }
+
+    @Test
+    void publicQueryLoadsParamsThroughNativeResolverWhenContextMapIsEmpty() throws Exception {
+        MchAppConfigContext context = new MchAppConfigContext();
+        context.setMchNo("M-TEST");
+        context.setAppId("APP-TEST");
+        when(paramsResolver.resolve(context)).thenReturn(params);
+        when(client.query(params, payOrder.getPayOrderId())).thenReturn(response("3"));
+
+        assertEquals(ChannelRetMsg.ChannelState.WAITING, service.query(payOrder, context).getChannelState());
+        verify(paramsResolver).resolve(context);
     }
 
     @Test
