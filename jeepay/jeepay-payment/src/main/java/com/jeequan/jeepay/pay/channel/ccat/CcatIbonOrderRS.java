@@ -3,6 +3,7 @@ package com.jeequan.jeepay.pay.channel.ccat;
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRS;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 /** Merchant-facing ibon payment instructions carried by UnifiedOrderRS extension methods。 */
 @Data
@@ -21,6 +22,10 @@ public class CcatIbonOrderRS extends UnifiedOrderRS {
 
     @Override
     public String buildPayData() {
+        boolean hasPaymentCode = StringUtils.isNoneBlank(ibonShopId, ibonCode);
+        if (!hasPaymentCode && StringUtils.isBlank(shortUrl)) {
+            throw new IllegalStateException("CCAT payment instruction is unavailable");
+        }
         JSONObject result = new JSONObject(true);
         result.put("ibonShopId", ibonShopId);
         result.put("ibonCode", ibonCode);

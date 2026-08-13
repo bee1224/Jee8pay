@@ -73,6 +73,42 @@ class CcatClientTest {
 
         CcatException error = assertThrows(CcatException.class, () -> client.query(params(), "P1"));
         assertEquals(CcatClient.ErrorType.AMBIGUOUS, error.getType());
+        assertEquals(503, error.getHttpStatus());
+        assertNotNull(error.getLatencyMillis());
+    }
+
+    @Test
+    void classifiesCollectHttpFourHundredAsDeterministicBusinessFailureWithAllowlistedFields() {
+        FakeTransport transport = new FakeTransport();
+        transport.responses.add(new CcatClient.TransportResponse(200,
+                "{\"access_token\":\"synthetic-token\",\".expires\":\"Wed, 12 Aug 2026 03:00:00 GMT\"}"));
+        transport.responses.add(new CcatClient.TransportResponse(400,
+                "{\"status\":\"ERROR\",\"process_code\":\"E10\",\"msg\":\"rejected\","
+                        + "\"cust_id\":\"must-not-be-retained\",\"access_token\":\"must-not-be-retained\"}"));
+        CcatClient client = new CcatClient(transport, Clock.fixed(NOW, ZoneOffset.UTC));
+
+        CcatException error = assertThrows(CcatException.class, () -> client.query(params(), "P1"));
+
+        assertEquals(CcatClient.ErrorType.BUSINESS, error.getType());
+        assertEquals(400, error.getHttpStatus());
+        assertEquals("E10", error.getProviderFields().getString("process_code"));
+        assertFalse(error.getProviderFields().containsKey("cust_id"));
+        assertFalse(error.getProviderFields().containsKey("access_token"));
+    }
+
+    @Test
+    void keepsConflictResponseAmbiguousBecauseProviderOrderMayAlreadyExist() {
+        FakeTransport transport = new FakeTransport();
+        transport.responses.add(new CcatClient.TransportResponse(200,
+                "{\"access_token\":\"synthetic-token\",\".expires\":\"Wed, 12 Aug 2026 03:00:00 GMT\"}"));
+        transport.responses.add(new CcatClient.TransportResponse(409,
+                "{\"status\":\"ERROR\",\"msg\":\"duplicate order\"}"));
+        CcatClient client = new CcatClient(transport, Clock.fixed(NOW, ZoneOffset.UTC));
+
+        CcatException error = assertThrows(CcatException.class, () -> client.query(params(), "P1"));
+
+        assertEquals(CcatClient.ErrorType.AMBIGUOUS, error.getType());
+        assertEquals(409, error.getHttpStatus());
     }
 
     private static CcatNormalMchParams params() {

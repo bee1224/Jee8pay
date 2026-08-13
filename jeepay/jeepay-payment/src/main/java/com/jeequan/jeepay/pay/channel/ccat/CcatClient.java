@@ -51,11 +51,15 @@ public class CcatClient {
         this.clock = clock;
     }
 
-    public JSONObject append(CcatNormalMchParams params, JSONObject payload) throws CcatException {
+    public CollectResponse append(CcatNormalMchParams params, JSONObject payload) throws CcatException {
         return collect(params, payload);
     }
 
     public JSONObject query(CcatNormalMchParams params, String payOrderId) throws CcatException {
+        return queryWithMetadata(params, payOrderId).getBody();
+    }
+
+    public CollectResponse queryWithMetadata(CcatNormalMchParams params, String payOrderId) throws CcatException {
         JSONObject payload = new JSONObject(true);
         payload.put("cmd", "CvsOrderQuery");
         payload.put("cust_id", requireConfig(params).getCustId());
@@ -73,7 +77,8 @@ public class CcatClient {
         throw new CcatException(ErrorType.CONFIGURATION, "CCAT environment must be TEST or PRODUCTION");
     }
 
-    private JSONObject collect(CcatNormalMchParams params, JSONObject payload) throws CcatException {
+    private CollectResponse collect(CcatNormalMchParams params, JSONObject payload) throws CcatException {
+        long startedAt = System.nanoTime();
         CcatNormalMchParams checked = requireConfig(params);
         String baseUrl = resolveBaseUrl(checked.getEnvironment());
         String token = token(checked, baseUrl);
@@ -86,19 +91,34 @@ public class CcatClient {
         try {
             response = transport.post(baseUrl + "api/Collect", headers, payload.toJSONString(), REQUEST_TIMEOUT);
         } catch (IOException e) {
-            throw new CcatException(ErrorType.AMBIGUOUS, "CCAT Collect transport failure", e);
+            throw new CcatException(ErrorType.AMBIGUOUS, "CCAT Collect transport failure", e,
+                    null, elapsedMillis(startedAt), null);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new CcatException(ErrorType.AMBIGUOUS, "CCAT Collect interrupted", e);
+            throw new CcatException(ErrorType.AMBIGUOUS, "CCAT Collect interrupted", e,
+                    null, elapsedMillis(startedAt), null);
         }
 
+        long latencyMillis = elapsedMillis(startedAt);
+        JSONObject providerFields = parseProviderFields(response.body);
         if (response.statusCode == 401 || response.statusCode == 403) {
-            throw new CcatException(ErrorType.AUTHENTICATION, "CCAT Collect authentication failed");
+            throw new CcatException(ErrorType.AUTHENTICATION, "CCAT Collect authentication failed", null,
+                    response.statusCode, latencyMillis, providerFields);
         }
         if (response.statusCode < 200 || response.statusCode >= 300) {
-            throw new CcatException(ErrorType.AMBIGUOUS, "CCAT Collect HTTP " + response.statusCode);
+            ErrorType type = isDeterministicHttpRejection(response.statusCode)
+                    ? ErrorType.BUSINESS : ErrorType.AMBIGUOUS;
+            throw new CcatException(type, "CCAT Collect HTTP " + response.statusCode, null,
+                    response.statusCode, latencyMillis, providerFields);
         }
-        return parseJson(response.body, ErrorType.MALFORMED, "CCAT Collect response is malformed");
+        try {
+            return new CollectResponse(
+                    parseJson(response.body, ErrorType.MALFORMED, "CCAT Collect response is malformed"),
+                    response.statusCode, latencyMillis);
+        } catch (CcatException e) {
+            throw new CcatException(e.getType(), e.getMessage(), e,
+                    response.statusCode, latencyMillis, providerFields);
+        }
     }
 
     private String token(CcatNormalMchParams params, String baseUrl) throws CcatException {
@@ -180,6 +200,44 @@ public class CcatClient {
         }
     }
 
+    private static JSONObject parseProviderFields(String body) {
+        try {
+            JSONObject source = JSON.parseObject(body);
+            if (source == null) {
+                return null;
+            }
+            JSONObject allowed = new JSONObject(true);
+            copyIfPresent(source, allowed, "status");
+            copyIfPresent(source, allowed, "process_code");
+            copyIfPresent(source, allowed, "result_code");
+            copyIfPresent(source, allowed, "code");
+            copyIfPresent(source, allowed, "msg");
+            copyIfPresent(source, allowed, "message");
+            copyIfPresent(source, allowed, "error");
+            copyIfPresent(source, allowed, "error_description");
+            copyIfPresent(source, allowed, "trans_id");
+            copyIfPresent(source, allowed, "transaction_id");
+            return allowed;
+        } catch (RuntimeException ignored) {
+            return null;
+        }
+    }
+
+    private static void copyIfPresent(JSONObject source, JSONObject target, String key) {
+        if (source.containsKey(key)) {
+            target.put(key, source.get(key));
+        }
+    }
+
+    private static long elapsedMillis(long startedAt) {
+        return Duration.ofNanos(System.nanoTime() - startedAt).toMillis();
+    }
+
+    private static boolean isDeterministicHttpRejection(int statusCode) {
+        return statusCode >= 400 && statusCode < 500
+                && statusCode != 408 && statusCode != 409 && statusCode != 425 && statusCode != 429;
+    }
+
     private static String encode(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
@@ -194,19 +252,65 @@ public class CcatClient {
 
     public static class CcatException extends Exception {
         private final ErrorType type;
+        private final Integer httpStatus;
+        private final Long latencyMillis;
+        private final JSONObject providerFields;
 
         public CcatException(ErrorType type, String message) {
-            super(message);
-            this.type = type;
+            this(type, message, null, null, null, null);
         }
 
         public CcatException(ErrorType type, String message, Throwable cause) {
+            this(type, message, cause, null, null, null);
+        }
+
+        public CcatException(ErrorType type, String message, Throwable cause, Integer httpStatus,
+                             Long latencyMillis, JSONObject providerFields) {
             super(message, cause);
             this.type = type;
+            this.httpStatus = httpStatus;
+            this.latencyMillis = latencyMillis;
+            this.providerFields = providerFields;
         }
 
         public ErrorType getType() {
             return type;
+        }
+
+        public Integer getHttpStatus() {
+            return httpStatus;
+        }
+
+        public Long getLatencyMillis() {
+            return latencyMillis;
+        }
+
+        public JSONObject getProviderFields() {
+            return providerFields;
+        }
+    }
+
+    public static final class CollectResponse {
+        private final JSONObject body;
+        private final int httpStatus;
+        private final long latencyMillis;
+
+        public CollectResponse(JSONObject body, int httpStatus, long latencyMillis) {
+            this.body = body;
+            this.httpStatus = httpStatus;
+            this.latencyMillis = latencyMillis;
+        }
+
+        public JSONObject getBody() {
+            return body;
+        }
+
+        public int getHttpStatus() {
+            return httpStatus;
+        }
+
+        public long getLatencyMillis() {
+            return latencyMillis;
         }
     }
 

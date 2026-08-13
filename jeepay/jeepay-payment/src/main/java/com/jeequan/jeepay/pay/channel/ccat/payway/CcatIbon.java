@@ -7,9 +7,11 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.model.params.ccat.CcatNormalMchParams;
 import com.jeequan.jeepay.pay.channel.ccat.CcatClient;
 import com.jeequan.jeepay.pay.channel.ccat.CcatClient.CcatException;
+import com.jeequan.jeepay.pay.channel.ccat.CcatClient.CollectResponse;
 import com.jeequan.jeepay.pay.channel.ccat.CcatClient.ErrorType;
 import com.jeequan.jeepay.pay.channel.ccat.CcatIbonOrderRS;
 import com.jeequan.jeepay.pay.channel.ccat.CcatKit;
+import com.jeequan.jeepay.pay.channel.ccat.CcatLogSanitizer;
 import com.jeequan.jeepay.pay.channel.ccat.CcatMchParamsResolver;
 import com.jeequan.jeepay.pay.channel.ccat.CcatPaymentService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
@@ -17,20 +19,23 @@ import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import org.apache.commons.lang3.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 /** CCAT ibon CVS 建单与 ambiguous-response recovery。 */
 @Service
+@Slf4j
 public class CcatIbon extends CcatPaymentService {
 
     static final String QUERY_NOT_FOUND_MESSAGE = "找不到此筆代繳資訊";
     private static final int ORDER_DETAIL_MAX_LENGTH = 150;
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final ZoneId TAIPEI = ZoneId.of("Asia/Taipei");
-
     private final CcatClient client;
     private final CcatMchParamsResolver paramsResolver;
 
@@ -59,15 +64,23 @@ public class CcatIbon extends CcatPaymentService {
     @Override
     public AbstractRS pay(UnifiedOrderRQ bizRQ, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
         CcatIbonOrderRS result = new CcatIbonOrderRS();
+        Instant requestTimestamp = Instant.now();
+        CcatNormalMchParams params = null;
         try {
-            CcatNormalMchParams params = paramsResolver.resolve(mchAppConfigContext);
+            params = paramsResolver.resolve(mchAppConfigContext);
             JSONObject request = buildAppendRequest(bizRQ, payOrder, params, getNotifyUrl());
-            JSONObject response = executeCreate(params, payOrder, request);
-            populateWaitingResult(result, payOrder, response);
+            CreateResult response = executeCreate(params, payOrder, request);
+            populateWaitingResult(result, payOrder, response.response.getBody());
+            logCreate(payOrder, requestTimestamp, params, response.response, null,
+                    "SUCCESS", response.reconciliation);
         } catch (CcatException e) {
             result.setChannelRetMsg(errorResult(e));
+            logCreate(payOrder, requestTimestamp, params, null, e, outcome(e),
+                    isAmbiguous(e) ? "SCHEDULED_QUERY" : "NONE");
         } catch (IllegalArgumentException e) {
-            result.setChannelRetMsg(errorResult(new CcatException(ErrorType.CONFIGURATION, e.getMessage())));
+            CcatException configuration = new CcatException(ErrorType.CONFIGURATION, e.getMessage());
+            result.setChannelRetMsg(errorResult(configuration));
+            logCreate(payOrder, requestTimestamp, params, null, configuration, "REJECTED", "NONE");
         }
         return result;
     }
@@ -103,60 +116,40 @@ public class CcatIbon extends CcatPaymentService {
         return request;
     }
 
-    JSONObject executeCreate(CcatNormalMchParams params, PayOrder payOrder, JSONObject request)
+    CreateResult executeCreate(CcatNormalMchParams params, PayOrder payOrder, JSONObject request)
             throws CcatException {
         try {
-            JSONObject response = client.append(params, request);
+            CollectResponse response = client.append(params, request);
             requireProviderOk(response);
-            validateCreateResponse(response, payOrder, params);
-            return response;
+            validateCreateResponse(response.getBody(), payOrder, params, response);
+            return new CreateResult(response, "NONE");
         } catch (CcatException e) {
             if (!isAmbiguous(e)) {
                 throw e;
             }
-            return recoverAfterAmbiguity(params, payOrder, request);
+            return recoverAfterAmbiguity(params, payOrder, e);
         }
     }
 
-    private JSONObject recoverAfterAmbiguity(CcatNormalMchParams params, PayOrder payOrder, JSONObject request)
+    private CreateResult recoverAfterAmbiguity(CcatNormalMchParams params, PayOrder payOrder,
+                                               CcatException createFailure)
             throws CcatException {
-        JSONObject query = client.query(params, payOrder.getPayOrderId());
-        if (isProviderOk(query)) {
-            validateCreateResponse(query, payOrder, params);
-            return query;
-        }
-        if (!isExactNotFound(query)) {
-            throw providerError(query);
-        }
-
-        JSONObject retry;
+        CollectResponse query;
         try {
-            retry = client.append(params, request);
-        } catch (CcatException retryFailure) {
-            if (isAmbiguous(retryFailure)) {
-                JSONObject finalQuery = client.query(params, payOrder.getPayOrderId());
-                if (isProviderOk(finalQuery)) {
-                    validateCreateResponse(finalQuery, payOrder, params);
-                    return finalQuery;
-                }
-            }
-            throw retryFailure;
+            query = client.queryWithMetadata(params, payOrder.getPayOrderId());
+        } catch (CcatException queryFailure) {
+            throw withReconciliation(createFailure, "QUERY_ERROR");
         }
-        if (isProviderOk(retry)) {
-            validateCreateResponse(retry, payOrder, params);
-            return retry;
+        if (isProviderOk(query.getBody())) {
+            validateCreateResponse(query.getBody(), payOrder, params, query);
+            return new CreateResult(query, "QUERY_CONFIRMED");
         }
-
-        CcatException retryError = providerError(retry);
-        JSONObject finalQuery = client.query(params, payOrder.getPayOrderId());
-        if (isProviderOk(finalQuery)) {
-            validateCreateResponse(finalQuery, payOrder, params);
-            return finalQuery;
-        }
-        throw retryError;
+        String reconciliation = isExactNotFound(query.getBody()) ? "QUERY_NOT_FOUND" : "QUERY_INCONCLUSIVE";
+        throw withReconciliation(createFailure, reconciliation);
     }
 
-    private static void validateCreateResponse(JSONObject response, PayOrder payOrder, CcatNormalMchParams params)
+    private static void validateCreateResponse(JSONObject response, PayOrder payOrder, CcatNormalMchParams params,
+                                               CollectResponse metadata)
             throws CcatException {
         try {
             if (!payOrder.getPayOrderId().equals(response.getString("cust_order_no"))) {
@@ -180,7 +173,8 @@ public class CcatIbon extends CcatPaymentService {
                 throw new IllegalArgumentException("expire_date is missing");
             }
         } catch (IllegalArgumentException | ArithmeticException e) {
-            throw new CcatException(ErrorType.MALFORMED, "CCAT Create response validation failed", e);
+            throw new CcatException(ErrorType.MALFORMED, "CCAT Create response validation failed", e,
+                    metadata.getHttpStatus(), metadata.getLatencyMillis(), allowlistedProviderFields(response));
         }
     }
 
@@ -198,11 +192,12 @@ public class CcatIbon extends CcatPaymentService {
     }
 
     private static ChannelRetMsg errorResult(CcatException error) {
+        if (error.getType() == ErrorType.BUSINESS) {
+            return ChannelRetMsg.confirmFail("CCAT_BUSINESS", "CCAT Provider rejected request");
+        }
         ChannelRetMsg result = new ChannelRetMsg();
         if (error.getType() == ErrorType.CONFIGURATION || error.getType() == ErrorType.AUTHENTICATION) {
             result.setChannelState(ChannelRetMsg.ChannelState.SYS_ERROR);
-        } else if (error.getType() == ErrorType.BUSINESS) {
-            result.setChannelState(ChannelRetMsg.ChannelState.API_RET_ERROR);
         } else {
             result.setChannelState(ChannelRetMsg.ChannelState.UNKNOWN);
             result.setNeedQuery(true);
@@ -239,8 +234,8 @@ public class CcatIbon extends CcatPaymentService {
         return detail.length() <= ORDER_DETAIL_MAX_LENGTH ? detail : detail.substring(0, ORDER_DETAIL_MAX_LENGTH);
     }
 
-    private static void requireProviderOk(JSONObject response) throws CcatException {
-        if (!isProviderOk(response)) {
+    private static void requireProviderOk(CollectResponse response) throws CcatException {
+        if (!isProviderOk(response.getBody())) {
             throw providerError(response);
         }
     }
@@ -254,13 +249,120 @@ public class CcatIbon extends CcatPaymentService {
                 && QUERY_NOT_FOUND_MESSAGE.equals(response.getString("msg"));
     }
 
-    private static CcatException providerError(JSONObject response) {
-        String message = response == null ? "CCAT Provider rejected request" : response.getString("msg");
+    private static CcatException providerError(CollectResponse response) {
+        String message = response.getBody() == null ? null : response.getBody().getString("msg");
         return new CcatException(ErrorType.BUSINESS,
-                StringUtils.defaultIfBlank(message, "CCAT Provider rejected request"));
+                StringUtils.defaultIfBlank(message, "CCAT Provider rejected request"), null,
+                response.getHttpStatus(), response.getLatencyMillis(), allowlistedProviderFields(response.getBody()));
     }
 
     private static boolean isAmbiguous(CcatException error) {
         return error.getType() == ErrorType.AMBIGUOUS || error.getType() == ErrorType.MALFORMED;
+    }
+
+    private static CcatException withReconciliation(CcatException error, String reconciliation) {
+        JSONObject fields = error.getProviderFields() == null
+                ? new JSONObject(true) : new JSONObject(error.getProviderFields());
+        fields.put("reconciliation", reconciliation);
+        return new CcatException(error.getType(), error.getMessage(), error.getCause(),
+                error.getHttpStatus(), error.getLatencyMillis(), fields);
+    }
+
+    private static JSONObject allowlistedProviderFields(JSONObject source) {
+        if (source == null) {
+            return null;
+        }
+        JSONObject allowed = new JSONObject(true);
+        copyIfPresent(source, allowed, "status");
+        copyIfPresent(source, allowed, "process_code");
+        copyIfPresent(source, allowed, "result_code");
+        copyIfPresent(source, allowed, "code");
+        copyIfPresent(source, allowed, "msg");
+        copyIfPresent(source, allowed, "message");
+        copyIfPresent(source, allowed, "error");
+        copyIfPresent(source, allowed, "error_description");
+        copyIfPresent(source, allowed, "trans_id");
+        copyIfPresent(source, allowed, "transaction_id");
+        return allowed;
+    }
+
+    private static void copyIfPresent(JSONObject source, JSONObject target, String key) {
+        if (source.containsKey(key)) {
+            target.put(key, source.get(key));
+        }
+    }
+
+    private static void logCreate(PayOrder payOrder, Instant requestTimestamp, CcatNormalMchParams params,
+                                  CollectResponse response, CcatException error, String outcome,
+                                  String defaultReconciliation) {
+        JSONObject fields = error == null ? allowlistedProviderFields(response.getBody()) : error.getProviderFields();
+        String reconciliation = value(fields, "reconciliation");
+        if (StringUtils.isBlank(reconciliation)) {
+            reconciliation = defaultReconciliation;
+        }
+        String providerMessage = firstValue(fields, "msg", "message", "error_description", "error");
+        if (StringUtils.isBlank(providerMessage) && error != null) {
+            providerMessage = error.getMessage();
+        }
+        Integer httpStatus = error == null ? Integer.valueOf(response.getHttpStatus()) : error.getHttpStatus();
+        Long latencyMillis = error == null ? Long.valueOf(response.getLatencyMillis()) : error.getLatencyMillis();
+        log.info("event=CCAT_CREATE operation=CREATE outcome={} payOrderId={} mchOrderNo={} "
+                        + "requestTimestamp={} amountTwd={} httpStatus={} providerStatus={} providerCode={} "
+                        + "providerMessage={} providerReference={} latencyMs={} reconciliation={}",
+                outcome, CcatLogSanitizer.sanitize(payOrder.getPayOrderId(), params),
+                CcatLogSanitizer.sanitize(payOrder.getMchOrderNo(), params),
+                requestTimestamp, CcatKit.toCcatTwdAmount(payOrder.getAmount()), value(httpStatus),
+                CcatLogSanitizer.sanitize(value(fields, "status"), params),
+                CcatLogSanitizer.sanitize(firstValue(fields, "process_code", "result_code", "code"), params),
+                CcatLogSanitizer.sanitize(providerMessage, params),
+                CcatLogSanitizer.sanitize(firstValue(fields, "trans_id", "transaction_id"), params),
+                value(latencyMillis), reconciliation);
+    }
+
+    private static String outcome(CcatException error) {
+        if (error.getType() == ErrorType.BUSINESS || error.getType() == ErrorType.AUTHENTICATION
+                || error.getType() == ErrorType.CONFIGURATION) {
+            return "REJECTED";
+        }
+        Throwable cause = error;
+        while (cause != null) {
+            if (cause instanceof IOException || cause instanceof InterruptedException) {
+                return "TRANSPORT_ERROR";
+            }
+            cause = cause.getCause();
+        }
+        return "AMBIGUOUS";
+    }
+
+    private static String firstValue(JSONObject fields, String... keys) {
+        for (String key : keys) {
+            String candidate = value(fields, key);
+            if (StringUtils.isNotBlank(candidate)) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
+    private static String value(JSONObject fields, String key) {
+        return fields == null ? null : fields.getString(key);
+    }
+
+    private static String value(Object value) {
+        return value == null ? "UNAVAILABLE" : String.valueOf(value);
+    }
+
+    static final class CreateResult {
+        private final CollectResponse response;
+        private final String reconciliation;
+
+        private CreateResult(CollectResponse response, String reconciliation) {
+            this.response = response;
+            this.reconciliation = reconciliation;
+        }
+
+        JSONObject body() {
+            return response.getBody();
+        }
     }
 }

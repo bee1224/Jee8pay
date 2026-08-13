@@ -65,7 +65,7 @@ CONTENT-TYPE = application/json; charset=UTF-8
 | `appId` | string | 必填，secure handoff 的 App ID |
 | `mchOrderNo` | string | 必填；同一 Merchant 必須唯一，重複會回「商戶訂單已存在」 |
 | `wayCode` | string | 必填，固定 `CCAT_IBON` |
-| `amount` | integer | 必填，JeePay minor units；TWD 40 = `4000`；CCAT_IBON 另要求可整除 100 |
+| `amount` | integer | 必填，JeePay amount units；`1 TWD = 100 JeePay amount units`；CCAT_IBON 另要求可整除 100 |
 | `currency` | string | 必填，固定 uppercase `TWD` |
 | `subject` | string | 必填，商品／訂單標題 |
 | `body` | string | 必填，商品／訂單描述 |
@@ -77,6 +77,8 @@ CONTENT-TYPE = application/json; charset=UTF-8
 | `extParam` | string | 選填；原樣帶入 Query／Notify |
 | `divisionMode` | integer | 本產品不使用，請省略 |
 | `sign` | string | 必填，依上節計算 |
+
+`amount` 的 JSON type 必須是 integer，金額換算是 exact integer conversion：`1000 = TWD10`、`4000 = TWD40`。因此 `amount=4000` 不是 TWD4000，而是 TWD40。`CCAT_IBON` 另要求 `amount % 100 == 0`。`OFFICIAL_MINIMUM = NOT_SPECIFIED`；TWD40 只是已成功實測金額，不是官方 minimum。
 
 `channelExtra` 必須是字串化 JSON，且包含：
 
@@ -109,13 +111,19 @@ CONTENT-TYPE = application/json; charset=UTF-8
 }
 ```
 
-`payData` 是 JSON 字串，需再 parse 一次。欄位均由 actual runtime response model 產生：`ibonShopId`、`ibonCode`、組合後的 `paymentCode`、`expireDate`、whole-TWD `billAmount`、可選 `shortUrl`。真實 TWD 40 acceptance response 同步回傳付款資訊與非空 `shortUrl`，所以問卷分類為 `3 = 兩者皆同步返回`；程式仍應容許 provider 未回 `shortUrl` 時只使用付款碼。
+`payData` 是 JSON 字串，需再 parse 一次；不得把它當作 nested JSON object。第一次 parse 取得 UnifiedOrder response，第二次 parse `data.payData` 才取得付款指示。欄位均由 actual runtime response model 產生：`ibonShopId`、`ibonCode`、組合後的 `paymentCode`、`expireDate`、whole-TWD `billAmount`、可選 `shortUrl`。真實 TWD 40 acceptance response 同步回傳付款資訊與非空 `shortUrl`，所以問卷分類為 `3 = 兩者皆同步返回`；程式仍應容許 provider 未回 `shortUrl` 時只使用付款碼。
+
+可 machine-read 的 synthetic response 見 [`examples/unified-order-success.json`](examples/unified-order-success.json)。該 fixture 刻意省略可選的 `shortUrl`，但仍包含可實際使用的付款碼、到期日與金額，並由 `verify_vectors.py` 驗證 outer parse、`payData` string type、第二次 JSON parse 與付款指示欄位。
 
 response envelope 的 `sign` 是只針對 `data` object、用同一 App Secret 與同一 canonicalization 計算，不包含 `code`／`msg`。
 
 ### WAITING is not paid
 
 `code=0` 與 `orderState=1` 代表 Create 成功、付款資訊已建立，**不代表付款成功**。Native state：`0=INIT`、`1=ING/WAITING`、`2=SUCCESS`、`3=FAIL`、`4=REVOKED`、`5=REFUND`、`6=CLOSED`。只能在 Merchant Notify 或 Query 確認 `state=2` 後上分。
+
+`CCAT_IBON` 正常成功的 WAITING response 有一項 invariant：`code=0`、`orderState=1` 時，`payData` 必須是 populated JSON string，且第二次 parse 後必須包含可解析、可實際使用的 payment instruction。Deterministic Provider Create failure 不得回傳 `code=0`、`orderState=1`、`payData={}`（wire value 可能表現為空 JSON string `"{}"`）。
+
+若收到違反此 invariant 的 response，尤其 `payData={}` 或沒有可使用的 payment instruction，Merchant 不得將它視為正常可付款訂單或支付成功、不得上分，也不得 blind retry 同一業務交易。請保留原 `mchOrderNo`，依 Query／error contract 處理；必要時聯絡我方查核。
 
 ## E. Query order
 
@@ -245,3 +253,7 @@ UAT Merchant Notify outbound IP 已從 actual `jee8pay-v2-dev-payment` container
 ## J. Security boundary
 
 本 package 與 examples 只有 synthetic secret。它們不包含 upstream Provider credential、真實 UAT App Secret、DB/VPS/Cloudflare credential。外部串接不需要 upstream secret。
+
+## K. External Consumer clarity closure
+
+JEE-EC01 的 NC-01／NC-02／NC-03 closure 與 fresh execution evidence 見 [`JEE-EC01R1-external-consumer-closure.md`](JEE-EC01R1-external-consumer-closure.md)。

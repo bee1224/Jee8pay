@@ -232,7 +232,9 @@ AMBIGUOUS_FAILURE_RECOVERY = Query first; found recovers; exact not-found permit
 B5_CREATE_IDEMPOTENCY = RESOLVED
 ```
 
-Recommended P04 algorithm:
+`AUTOMATIC_CREATE_RETRY_SAFE` is the authenticated contract capability, not the current runtime policy. JEE-P05 deliberately tightened runtime behavior: an ambiguous Append performs one Query-first reconciliation and never sends another Append from the same UnifiedOrder execution. Later native reissue performs Query only.
+
+Contract-supported P04 algorithm (superseded at runtime by JEE-P05's stricter no-Append-retry policy):
 
 ```text
 Append once with stable cust_id + cust_order_no

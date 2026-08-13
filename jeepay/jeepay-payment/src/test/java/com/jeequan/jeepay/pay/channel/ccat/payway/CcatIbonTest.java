@@ -6,6 +6,7 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.model.params.ccat.CcatNormalMchParams;
 import com.jeequan.jeepay.pay.channel.ccat.CcatClient;
 import com.jeequan.jeepay.pay.channel.ccat.CcatClient.CcatException;
+import com.jeequan.jeepay.pay.channel.ccat.CcatClient.CollectResponse;
 import com.jeequan.jeepay.pay.channel.ccat.CcatIbonOrderRS;
 import com.jeequan.jeepay.pay.channel.ccat.CcatMchParamsResolver;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
@@ -13,7 +14,11 @@ import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Date;
 
@@ -21,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(OutputCaptureExtension.class)
 class CcatIbonTest {
 
     private CcatClient client;
@@ -43,6 +49,7 @@ class CcatIbonTest {
 
         payOrder = new PayOrder();
         payOrder.setPayOrderId("P202608120000000001");
+        payOrder.setMchOrderNo("MCH-ORDER-001");
         payOrder.setAmount(10_000L);
         payOrder.setCurrency("TWD");
         payOrder.setSubject("Test order");
@@ -70,7 +77,7 @@ class CcatIbonTest {
 
     @Test
     void providerCreateSuccessProducesWaitingInstructions() throws Exception {
-        when(client.append(eq(params), any(JSONObject.class))).thenReturn(successResponse(100));
+        when(client.append(eq(params), any(JSONObject.class))).thenReturn(response(successResponse(100)));
         MchAppConfigContext context = new MchAppConfigContext();
         context.getNormalMchParamsMap().put(CS.IF_CODE.CCAT, params);
 
@@ -86,14 +93,27 @@ class CcatIbonTest {
 
     @Test
     void deterministicBusinessErrorDoesNotQueryOrRetry() throws Exception {
-        when(client.append(eq(params), any(JSONObject.class))).thenReturn(error("amount rejected"));
+        when(client.append(eq(params), any(JSONObject.class))).thenReturn(response(error("amount rejected")));
 
         CcatException error = assertThrows(CcatException.class,
                 () -> ibon.executeCreate(params, payOrder, new JSONObject()));
 
         assertEquals(CcatClient.ErrorType.BUSINESS, error.getType());
         verify(client, times(1)).append(eq(params), any(JSONObject.class));
-        verify(client, never()).query(any(), anyString());
+        verify(client, never()).queryWithMetadata(any(), anyString());
+    }
+
+    @Test
+    void deterministicBusinessErrorUsesNativeConfirmFailAndCannotBuildEmptyPayData() throws Exception {
+        when(client.append(eq(params), any(JSONObject.class))).thenReturn(response(error("amount rejected")));
+        MchAppConfigContext context = new MchAppConfigContext();
+        context.getNormalMchParamsMap().put(CS.IF_CODE.CCAT, params);
+
+        CcatIbonOrderRS result = (CcatIbonOrderRS) ibon.pay(request, payOrder, context);
+
+        assertEquals(ChannelRetMsg.ChannelState.CONFIRM_FAIL, result.getChannelRetMsg().getChannelState());
+        assertEquals("CCAT_BUSINESS", result.getChannelRetMsg().getChannelErrCode());
+        assertThrows(IllegalStateException.class, result::buildPayData);
     }
 
     @Test
@@ -105,75 +125,114 @@ class CcatIbonTest {
                 () -> ibon.executeCreate(params, payOrder, new JSONObject()));
 
         assertEquals(CcatClient.ErrorType.AUTHENTICATION, error.getType());
-        verify(client, never()).query(any(), anyString());
+        verify(client, never()).queryWithMetadata(any(), anyString());
+        assertThrows(IllegalStateException.class, new CcatIbonOrderRS()::buildPayData);
     }
 
     @Test
     void timeoutThenQueryFoundRecoversWithoutSecondAppend() throws Exception {
         when(client.append(eq(params), any(JSONObject.class))).thenThrow(
                 new CcatException(CcatClient.ErrorType.AMBIGUOUS, "read timeout"));
-        when(client.query(params, payOrder.getPayOrderId())).thenReturn(successResponse(100));
+        when(client.queryWithMetadata(params, payOrder.getPayOrderId()))
+                .thenReturn(response(successResponse(100)));
 
-        JSONObject recovered = ibon.executeCreate(params, payOrder, new JSONObject());
+        CcatIbon.CreateResult recovered = ibon.executeCreate(params, payOrder, new JSONObject());
 
-        assertEquals("OK", recovered.getString("status"));
+        assertEquals("OK", recovered.body().getString("status"));
         verify(client, times(1)).append(eq(params), any(JSONObject.class));
-        verify(client, times(1)).query(params, payOrder.getPayOrderId());
+        verify(client, times(1)).queryWithMetadata(params, payOrder.getPayOrderId());
     }
 
     @Test
-    void timeoutThenExactNotFoundRetriesAppendOnceWithSameRequest() throws Exception {
+    void timeoutThenExactNotFoundDoesNotRetryAppend() throws Exception {
         JSONObject sameRequest = new JSONObject();
         sameRequest.put("cust_order_no", payOrder.getPayOrderId());
-        when(client.append(params, sameRequest))
-                .thenThrow(new CcatException(CcatClient.ErrorType.AMBIGUOUS, "read timeout"))
-                .thenReturn(successResponse(100));
-        when(client.query(params, payOrder.getPayOrderId())).thenReturn(error(CcatIbon.QUERY_NOT_FOUND_MESSAGE));
+        when(client.append(params, sameRequest)).thenThrow(
+                new CcatException(CcatClient.ErrorType.AMBIGUOUS, "read timeout"));
+        when(client.queryWithMetadata(params, payOrder.getPayOrderId()))
+                .thenReturn(response(error(CcatIbon.QUERY_NOT_FOUND_MESSAGE)));
 
-        JSONObject recovered = ibon.executeCreate(params, payOrder, sameRequest);
+        CcatException error = assertThrows(CcatException.class,
+                () -> ibon.executeCreate(params, payOrder, sameRequest));
 
-        assertEquals("OK", recovered.getString("status"));
-        verify(client, times(2)).append(params, sameRequest);
-        verify(client, times(1)).query(params, payOrder.getPayOrderId());
+        assertEquals(CcatClient.ErrorType.AMBIGUOUS, error.getType());
+        assertEquals("QUERY_NOT_FOUND", error.getProviderFields().getString("reconciliation"));
+        verify(client, times(1)).append(params, sameRequest);
+        verify(client, times(1)).queryWithMetadata(params, payOrder.getPayOrderId());
     }
 
     @Test
-    void retryRaceBusinessResponseQueriesAgainAndRecovers() throws Exception {
-        when(client.append(eq(params), any(JSONObject.class)))
-                .thenThrow(new CcatException(CcatClient.ErrorType.AMBIGUOUS, "read timeout"))
-                .thenReturn(error("same-key order already exists"));
-        when(client.query(params, payOrder.getPayOrderId()))
-                .thenReturn(error(CcatIbon.QUERY_NOT_FOUND_MESSAGE))
-                .thenReturn(successResponse(100));
+    void ambiguousTransportReturnsUnknownWithReconciliationAndNoFakeInstruction(CapturedOutput output)
+            throws Exception {
+        when(client.append(eq(params), any(JSONObject.class))).thenThrow(
+                new CcatException(CcatClient.ErrorType.AMBIGUOUS, "read timeout",
+                        new IOException("socket reset"), null, 8L, null));
+        when(client.queryWithMetadata(params, payOrder.getPayOrderId()))
+                .thenReturn(response(error(CcatIbon.QUERY_NOT_FOUND_MESSAGE)));
+        MchAppConfigContext context = new MchAppConfigContext();
+        context.getNormalMchParamsMap().put(CS.IF_CODE.CCAT, params);
 
-        JSONObject recovered = ibon.executeCreate(params, payOrder, new JSONObject());
+        CcatIbonOrderRS result = (CcatIbonOrderRS) ibon.pay(request, payOrder, context);
 
-        assertEquals("OK", recovered.getString("status"));
-        verify(client, times(2)).append(eq(params), any(JSONObject.class));
-        verify(client, times(2)).query(params, payOrder.getPayOrderId());
+        assertEquals(ChannelRetMsg.ChannelState.UNKNOWN, result.getChannelRetMsg().getChannelState());
+        assertTrue(result.getChannelRetMsg().isNeedQuery());
+        assertThrows(IllegalStateException.class, result::buildPayData);
+        verify(client, times(1)).append(eq(params), any(JSONObject.class));
+        assertTrue(output.getAll().contains("outcome=TRANSPORT_ERROR"));
+        assertTrue(output.getAll().contains("reconciliation=QUERY_NOT_FOUND"));
     }
 
     @Test
-    void retryTimeoutQueriesAgainAndRecoversWithoutThirdAppend() throws Exception {
-        when(client.append(eq(params), any(JSONObject.class)))
-                .thenThrow(new CcatException(CcatClient.ErrorType.AMBIGUOUS, "first timeout"))
-                .thenThrow(new CcatException(CcatClient.ErrorType.AMBIGUOUS, "retry timeout"));
-        when(client.query(params, payOrder.getPayOrderId()))
-                .thenReturn(error(CcatIbon.QUERY_NOT_FOUND_MESSAGE))
-                .thenReturn(successResponse(100));
+    void sanitizedCreateLogContainsAllowlistedEvidenceWithoutSecrets(CapturedOutput output) throws Exception {
+        JSONObject rejected = error("password=test-api-password Bearer secret-token cust_id=test-user");
+        rejected.put("process_code", "E10");
+        rejected.put("trans_id", "SAFE-REF-1");
+        when(client.append(eq(params), any(JSONObject.class))).thenReturn(response(rejected));
+        MchAppConfigContext context = new MchAppConfigContext();
+        context.getNormalMchParamsMap().put(CS.IF_CODE.CCAT, params);
 
-        JSONObject recovered = ibon.executeCreate(params, payOrder, new JSONObject());
+        ibon.pay(request, payOrder, context);
 
-        assertEquals("OK", recovered.getString("status"));
-        verify(client, times(2)).append(eq(params), any(JSONObject.class));
-        verify(client, times(2)).query(params, payOrder.getPayOrderId());
+        String logs = output.getAll();
+        assertTrue(logs.contains("event=CCAT_CREATE"));
+        assertTrue(logs.contains("outcome=REJECTED"));
+        assertTrue(logs.contains("payOrderId=P202608120000000001"));
+        assertTrue(logs.contains("amountTwd=100"));
+        assertTrue(logs.contains("httpStatus=200"));
+        assertTrue(logs.contains("providerCode=E10"));
+        assertTrue(logs.contains("providerReference=SAFE-REF-1"));
+        assertTrue(logs.contains("latencyMs=12"));
+        assertFalse(logs.contains("test-api-password"));
+        assertFalse(logs.contains("secret-token"));
+        assertFalse(logs.contains("test-user"));
+    }
+
+    @Test
+    void i07JsonQuotedCredentialVectorCannotEscapeStructuredLog(CapturedOutput output) throws Exception {
+        JSONObject rejected = error("nested={\\\"Token\\\":\\\"I07_TOKEN_SECRET\\\","
+                + "\\\"Authorization\\\":\\\"Bearer I07_AUTH_SECRET\\\"}");
+        rejected.put("raw_request", "I07_RAW_BODY_SECRET");
+        rejected.put("Token", "I07_ROOT_TOKEN_SECRET");
+        when(client.append(eq(params), any(JSONObject.class))).thenReturn(response(rejected));
+        MchAppConfigContext context = new MchAppConfigContext();
+        context.getNormalMchParamsMap().put(CS.IF_CODE.CCAT, params);
+
+        ibon.pay(request, payOrder, context);
+
+        String logs = output.getAll();
+        assertTrue(logs.contains("event=CCAT_CREATE"));
+        assertFalse(logs.contains("I07_TOKEN_SECRET"));
+        assertFalse(logs.contains("I07_AUTH_SECRET"));
+        assertFalse(logs.contains("I07_RAW_BODY_SECRET"));
+        assertFalse(logs.contains("I07_ROOT_TOKEN_SECRET"));
     }
 
     @Test
     void recoveredResponseAmountMismatchIsRejected() throws Exception {
         when(client.append(eq(params), any(JSONObject.class))).thenThrow(
                 new CcatException(CcatClient.ErrorType.AMBIGUOUS, "read timeout"));
-        when(client.query(params, payOrder.getPayOrderId())).thenReturn(successResponse(999));
+        when(client.queryWithMetadata(params, payOrder.getPayOrderId()))
+                .thenReturn(response(successResponse(999)));
 
         CcatException error = assertThrows(CcatException.class,
                 () -> ibon.executeCreate(params, payOrder, new JSONObject()));
@@ -186,13 +245,13 @@ class CcatIbonTest {
     void malformedProviderResponseFailsClosedAfterQueryRecoveryFailure() throws Exception {
         JSONObject malformed = new JSONObject();
         malformed.put("status", "OK");
-        when(client.append(eq(params), any(JSONObject.class))).thenReturn(malformed);
-        when(client.query(params, payOrder.getPayOrderId())).thenThrow(
+        when(client.append(eq(params), any(JSONObject.class))).thenReturn(response(malformed));
+        when(client.queryWithMetadata(params, payOrder.getPayOrderId())).thenThrow(
                 new CcatException(CcatClient.ErrorType.AMBIGUOUS, "query timeout"));
 
         assertThrows(CcatException.class, () -> ibon.executeCreate(params, payOrder, new JSONObject()));
         verify(client, times(1)).append(eq(params), any(JSONObject.class));
-        verify(client, times(1)).query(params, payOrder.getPayOrderId());
+        verify(client, times(1)).queryWithMetadata(params, payOrder.getPayOrderId());
     }
 
     private JSONObject successResponse(long orderAmount) {
@@ -213,6 +272,10 @@ class CcatIbonTest {
         response.put("status", "ERROR");
         response.put("msg", message);
         return response;
+    }
+
+    private static CollectResponse response(JSONObject body) {
+        return new CollectResponse(body, 200, 12);
     }
 
     private static final class TestCcatIbon extends CcatIbon {

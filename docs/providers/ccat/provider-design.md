@@ -170,9 +170,8 @@ Append once with stable key
 → deterministic business error: fail without blind retry
 → ambiguous response: Query stable key
    → found: validate and recover Create-equivalent result
-   → exact not-found: bounded Append retry with identical key
-      → duplicate rejection: Query again
-      → other ambiguity: stop and reconcile later
+   → exact not-found / inconclusive / Query error: stop Create and reconcile later
+→ never issue a second Append from the same UnifiedOrder execution
 ```
 
 Never generate a new `cust_order_no`. The official duplicate rejection makes same-key retry duplicate-safe; Query-first preserves recoverability and avoids unnecessary retries.
@@ -227,7 +226,8 @@ The checksum is secretless and provides integrity only. It is not callback-origi
 | Query official cancellation/expiry | `CONFIRM_FAIL` |
 | sample-only code `2` / unknown code | `UNKNOWN`; no transition |
 | deterministic Create validation/auth error | API error; no payment-failure assertion |
-| timeout/reset/HTTP ambiguity | Query stable key; use bounded same-key recovery |
+| deterministic Provider Create rejection | `CONFIRM_FAIL`; no payData |
+| timeout/reset/HTTP ambiguity | Query stable key once; no second Append; continue native Query reconciliation |
 | malformed/impossible response | `UNKNOWN`, safe redacted logging, no transition |
 
 ## Class Responsibilities

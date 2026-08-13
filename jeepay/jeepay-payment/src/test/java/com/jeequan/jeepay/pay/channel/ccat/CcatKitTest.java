@@ -10,6 +10,8 @@ class CcatKitTest {
     @Test
     void convertsExactWholeTwdAmounts() {
         assertEquals(1, CcatKit.toCcatTwdAmount(100));
+        assertEquals(10, CcatKit.toCcatTwdAmount(1_000));
+        assertEquals(40, CcatKit.toCcatTwdAmount(4_000));
         assertEquals(100, CcatKit.toCcatTwdAmount(10_000));
         assertEquals(Long.MAX_VALUE / 100, CcatKit.toCcatTwdAmount((Long.MAX_VALUE / 100) * 100));
     }
