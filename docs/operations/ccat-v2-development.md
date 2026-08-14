@@ -98,7 +98,7 @@ The pre-apply DNS and routing plans both passed. Root-only snapshots of the abse
 
 P04 sends `apn_url` dynamically on each `CvsOrderAppend`: `CcatIbon.pay` builds the Append request with `getNotifyUrl()`, and the native URL is `DBApplicationConfig.paySiteUrl + /api/pay/notify/ccat`. V2-only `paySiteUrl` is now `https://ccat-v2-dev.nnviopp.com`; no CCAT contractual-member portal mutation is required.
 
-Because the authorization prohibited stopping or recreating the existing V1 edge, the route is active through a zero-stop bind mount in the existing container mount namespace plus a graceful Nginx HUP. The root-only marker is `/opt/jee8pay-v2-dev/state/public-callback-edge-hot-applied`. The V2-owned Compose overlay remains the prepared durable form, but it was not used to recreate the container. An edge container restart/recreation removes the hot route; therefore verify the marker, current config hash and public callback before every real E2E attempt. This operational restart guard is tracked as TD-010.
+The zero-stop runtime mount described above is historical E02 evidence. JEE-N01 recreated only the edge with the V2-owned Compose overlay、durable read-only final config and stable transit network, then passed edge-only recreate and Docker-managed restart regression. TD-010 is resolved. Current reconciliation and External readiness procedures are in [`sandbox-edge-recovery.md`](sandbox-edge-recovery.md).
 
 Read-only validation:
 

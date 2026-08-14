@@ -15,6 +15,12 @@ text = source_bytes.decode("utf-8")
 if "api-v2-dev.nnviopp.com" in text:
     raise SystemExit("PREPARE=FAIL_HOSTNAME_ALREADY_PRESENT")
 
+log_anchor = "  log_format edge '$request_method $host $uri $status $body_bytes_sent $request_time';"
+log_replacement = "  log_format edge '$remote_addr $request_method $host $uri $status $body_bytes_sent $request_time';"
+if text.count(log_anchor) != 1:
+    raise SystemExit("PREPARE=FAIL_LOG_FORMAT_ANCHOR")
+text = text.replace(log_anchor, log_replacement, 1)
+
 upstream_anchor = """  upstream jee8pay_v2_callback {
     server jee8pay-v2-callback:8080;
     keepalive 4;

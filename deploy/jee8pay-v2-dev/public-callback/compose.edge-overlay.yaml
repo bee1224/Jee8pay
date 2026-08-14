@@ -1,9 +1,24 @@
 services:
   sandbox-edge:
     volumes:
-      - /opt/jee8pay-v2-dev/public-callback/nginx.proposed.conf:/etc/nginx/nginx.conf:ro
+      - /opt/jee8pay-v2-dev/merchant-uat/nginx.proposed.conf:/etc/nginx/nginx.conf:ro
     networks:
       jee8pay-v2-callback:
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          nginx -t >/dev/null 2>&1 &&
+          awk '$$4 == "0A" && $$2 ~ /:0050$$/ { p80=1 }
+          $$4 == "0A" && $$2 ~ /:01BB$$/ { p443=1 }
+          END { exit !(p80 && p443) }' /proc/net/tcp &&
+          test "$$(wget -q -O - http://127.0.0.1:80/edge-health)" = OK &&
+          test "$$(wget -q -O - http://jee8pay-v2-callback:8080/healthz)" = OK &&
+          test "$$(wget -q -O - http://jee8pay-v2-merchant-api:8080/healthz)" = OK
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 networks:
   jee8pay-v2-callback:
