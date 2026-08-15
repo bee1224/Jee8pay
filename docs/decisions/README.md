@@ -12,6 +12,7 @@
 | [ADR-0004](ADR-0004-twd-platform-default.md) | TWD is the Taiwan platform default; currency remains explicit | Accepted | Cross-provider currency contract |
 | [ADR-0005](ADR-0005-environment-isolation.md) | Platform environment and Provider connectivity fail closed | Accepted | Security and deployment boundary |
 | [ADR-0006](ADR-0006-taipei-platform-timezone.md) | Asia/Taipei is the Taiwan platform runtime default timezone | Accepted | Cross-service runtime locale |
+| [ADR-0007](ADR-0007-closed-order-paid-apn-reopen.md) | Validated paid-APN may reopen a locally CLOSED PayOrder to SUCCESS | Accepted | Payment state machine / settlement integrity |
 
 ## Qualification Rule
 

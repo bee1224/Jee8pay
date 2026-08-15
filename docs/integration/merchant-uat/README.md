@@ -257,3 +257,16 @@ UAT Merchant Notify outbound IP 已從 actual `jee8pay-v2-dev-payment` container
 ## K. External Consumer clarity closure
 
 JEE-EC01 的 NC-01／NC-02／NC-03 closure 與 fresh execution evidence 見 [`JEE-EC01R1-external-consumer-closure.md`](JEE-EC01R1-external-consumer-closure.md)。
+
+## L. Related documents
+
+| 文件 | 用途 |
+| --- | --- |
+| [`UAT-START-NOTICE.md`](UAT-START-NOTICE.md) | **外部 UAT 啟動前必讀**：精確錯誤訊息表、notifyUrl 陷阱、真人付款安排、freeze 規則、到期行為（CLOSED(6)）與競態風險 |
+| [`JEE-EC01R1-external-consumer-closure.md`](JEE-EC01R1-external-consumer-closure.md) | External consumer NC-01/02/03 closure 與執行證據 |
+| [`examples/`](examples/) | synthetic 簽名向量（`create-vector.json`、`notify-vector.json`、`unified-order-success.json`、`verify_vectors.py`、`run-d01-blackbox.py`） |
+| [`../../operations/merchant-uat-frontend-operator-map.md`](../../operations/merchant-uat-frontend-operator-map.md) | Manager/Merchant/Cashier 頁面對應（operator 操作指引） |
+| [`../../providers/ccat/README.md`](../../providers/ccat/README.md) | CCAT Provider 狀態與契約文件入口 |
+| `deploy/jee8pay-v2-dev/scripts/monitor-uat.sh` | UAT 期間唯讀監控快照（在 nnviopp-sandbox 上以 sudo 執行） |
+
+> 本文件所有請求範例的 `notifyUrl` 均為 placeholder；外部系統商必須使用自己的接收端 URL（見 [`UAT-START-NOTICE.md`](UAT-START-NOTICE.md) §3）。

@@ -1,6 +1,6 @@
 # Project file tree
 
-Generated from `/mnt/c/Users/tim.huang/Documents/Jee8pay` on 2026-08-12.
+Generated from `/mnt/c/Users/tim.huang/Documents/Jee8pay` on 2026-08-16.
 
 Excluded generated/metadata directories: `.git`, `node_modules`, `vendor`, `dist`, `build`, `target`, `.idea`, and `.vscode`.
 
@@ -13,7 +13,458 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 ```text
 .
 ├── .agents
+│   ├── skills
+│   │   ├── git-delivery
+│   │   │   ├── agents
+│   │   │   │   └── openai.yaml
+│   │   │   └── SKILL.md
+│   │   └── jeepay-provider-development
+│   │       └── SKILL.md
+│   └── tmp
+│       ├── n01r1-continuation
+│       │   └── final-medium-report.txt
+│       ├── d01-blackbox-results-20260815.txt
+│       └── run-d01-blackbox.py
 ├── .codex
+│   └── config.toml
+├── deploy
+│   ├── jee8pay-v2-dev
+│   │   ├── .secrets
+│   │   ├── artifacts
+│   │   │   ├── sql
+│   │   │   │   └── init.sql
+│   │   │   ├── ui-cashier
+│   │   │   │   ├── assets
+│   │   │   │   │   ├── Alipay-b499c351.css
+│   │   │   │   │   ├── Alipay-ddd74962.js
+│   │   │   │   │   ├── Cashier-d4d1a3b7.js
+│   │   │   │   │   ├── Error-616e46bd.css
+│   │   │   │   │   ├── Error-c5f54b97.js
+│   │   │   │   │   ├── Hub-12a29291.css
+│   │   │   │   │   ├── Hub-dd892559.js
+│   │   │   │   │   ├── Oauth2Callback-3efe3b41.js
+│   │   │   │   │   ├── S-f63feb6b.svg
+│   │   │   │   │   ├── WeChatSansSS-Bold-41710157.ttf
+│   │   │   │   │   ├── Wxpay-46507991.js
+│   │   │   │   │   ├── Wxpay-ded61352.css
+│   │   │   │   │   ├── Ysfpay-60b34adf.css
+│   │   │   │   │   ├── Ysfpay-ee39b3ce.js
+│   │   │   │   │   ├── api-669d0d7b.js
+│   │   │   │   │   ├── error-a2400a96.svg
+│   │   │   │   │   ├── index-291e8efe.css
+│   │   │   │   │   ├── index-c6178d44.js
+│   │   │   │   │   ├── wx-d01ab358.svg
+│   │   │   │   │   ├── ysf-fe0ceebe.jpg
+│   │   │   │   │   └── zfb-2f9e1442.jpeg
+│   │   │   │   ├── favicon.ico
+│   │   │   │   └── index.html
+│   │   │   ├── ui-manager
+│   │   │   │   ├── assets
+│   │   │   │   │   ├── 404.cd1a2daf.svg
+│   │   │   │   │   ├── 404.f677d1c6.js
+│   │   │   │   │   ├── Analysis.0969540b.css
+│   │   │   │   │   ├── Analysis.2d1c18d0.js
+│   │   │   │   │   ├── Badge.5ccac945.js
+│   │   │   │   │   ├── EntPage.b7a48ba8.js
+│   │   │   │   │   ├── Group.384b07b1.js
+│   │   │   │   │   ├── IsvList.022149ec.js
+│   │   │   │   │   ├── IsvList.0679ddfb.css
+│   │   │   │   │   ├── JeepayCard.38beb612.js
+│   │   │   │   │   ├── JeepayCard.aadc8955.css
+│   │   │   │   │   ├── JeepayTable.33df05d8.js
+│   │   │   │   │   ├── JeepayTable.caf4a94b.css
+│   │   │   │   │   ├── JeepayTableColState.069d3bc3.js
+│   │   │   │   │   ├── JeepayTableColumns.vue_vue_type_script_lang.7cab347f.css
+│   │   │   │   │   ├── JeepayTableColumns.vue_vue_type_script_lang.ec04ce14.js
+│   │   │   │   │   ├── JeepayTextUp.28a14f52.js
+│   │   │   │   │   ├── JeepayTextUp.ce597964.css
+│   │   │   │   │   ├── JeepayUpload.96420dc1.js
+│   │   │   │   │   ├── List.285f74e4.js
+│   │   │   │   │   ├── List.48c20357.js
+│   │   │   │   │   ├── List.d27341cc.css
+│   │   │   │   │   ├── List.dcacd29c.js
+│   │   │   │   │   ├── List.e6024f81.css
+│   │   │   │   │   ├── MchList.53747eb3.css
+│   │   │   │   │   ├── MchList.ff7d0e76.js
+│   │   │   │   │   ├── MchNotifyList.a5afdbee.js
+│   │   │   │   │   ├── PayOrderList.8e3e09a5.css
+│   │   │   │   │   ├── PayOrderList.c1a4d566.js
+│   │   │   │   │   ├── RefundOrderList.07c8945b.js
+│   │   │   │   │   ├── RefundOrderList.40082279.css
+│   │   │   │   │   ├── RolePage.64a3f0f3.js
+│   │   │   │   │   ├── SysConfig.012db407.js
+│   │   │   │   │   ├── SysLog.e0ce6b2f.js
+│   │   │   │   │   ├── SysUserPage.1c45b846.js
+│   │   │   │   │   ├── TabPane.43fa8453.js
+│   │   │   │   │   ├── TransferOrderList.33488a9f.css
+│   │   │   │   │   ├── TransferOrderList.7b8810bb.js
+│   │   │   │   │   ├── UserinfoPage.6ededfd9.css
+│   │   │   │   │   ├── UserinfoPage.b557a19d.js
+│   │   │   │   │   ├── add-icon-hover.f92dc310.svg
+│   │   │   │   │   ├── add-icon.bdbbe2d3.svg
+│   │   │   │   │   ├── background.12aecf48.svg
+│   │   │   │   │   ├── bootstrap-icons.476adf42.woff2
+│   │   │   │   │   ├── bootstrap-icons.bb1de989.woff
+│   │   │   │   │   ├── dayjs.007de484.js
+│   │   │   │   │   ├── empty.cc1bea71.svg
+│   │   │   │   │   ├── favicon.db8e62f3.ico
+│   │   │   │   │   ├── index.3556c4bc.js
+│   │   │   │   │   ├── index.370b9573.css
+│   │   │   │   │   ├── index.8ae799d6.js
+│   │   │   │   │   ├── index.b6fd963a.js
+│   │   │   │   │   ├── index.cfc27556.js
+│   │   │   │   │   ├── index.d63f213e.js
+│   │   │   │   │   ├── index.e447018d.js
+│   │   │   │   │   ├── index.eadfa88f.js
+│   │   │   │   │   ├── index.fd3319f9.js
+│   │   │   │   │   ├── jeepay.e180c5c7.svg
+│   │   │   │   │   ├── logo-j.612b880b.svg
+│   │   │   │   │   ├── logo.070cbf2b.svg
+│   │   │   │   │   ├── manage.4b139a94.js
+│   │   │   │   │   ├── moment.40bc58bf.js
+│   │   │   │   │   ├── more.3d1a3462.svg
+│   │   │   │   │   ├── operate.ebec203e.svg
+│   │   │   │   │   └── useRefs.461c258b.js
+│   │   │   │   └── index.html
+│   │   │   ├── ui-merchant
+│   │   │   │   ├── assets
+│   │   │   │   │   ├── 403.27c3e2bf.js
+│   │   │   │   │   ├── 403.b7b8bff3.svg
+│   │   │   │   │   ├── 404.34857be5.js
+│   │   │   │   │   ├── 404.cd1a2daf.svg
+│   │   │   │   │   ├── 500.f4af831f.svg
+│   │   │   │   │   ├── 500.f9037ef6.js
+│   │   │   │   │   ├── Analysis.4ef6d8e2.js
+│   │   │   │   │   ├── Analysis.97047235.css
+│   │   │   │   │   ├── ChannelUserModal.6f5e6627.js
+│   │   │   │   │   ├── ChannelUserModal.9f76165f.css
+│   │   │   │   │   ├── DivisionReceiverGroupPage.dff58829.js
+│   │   │   │   │   ├── DivisionReceiverPage.79497dd8.js
+│   │   │   │   │   ├── DivisionRecordPage.452384f7.js
+│   │   │   │   │   ├── JeepayTextUp.ba686124.js
+│   │   │   │   │   ├── JeepayTextUp.eba82935.css
+│   │   │   │   │   ├── JeepayUpload.aab5e02a.js
+│   │   │   │   │   ├── List.211d4bd4.js
+│   │   │   │   │   ├── List.c1ce5708.css
+│   │   │   │   │   ├── MchTransferPage.09fce2ee.css
+│   │   │   │   │   ├── MchTransferPage.48449dab.js
+│   │   │   │   │   ├── PayOrderList.044f091f.js
+│   │   │   │   │   ├── PayOrderList.f247aeca.css
+│   │   │   │   │   ├── PayTest.63f30da8.css
+│   │   │   │   │   ├── PayTest.ee8a5039.js
+│   │   │   │   │   ├── RefundOrderList.2cf92e7f.js
+│   │   │   │   │   ├── RefundOrderList.fbf76502.css
+│   │   │   │   │   ├── RolePage.bf116724.js
+│   │   │   │   │   ├── SysUserPage.447b132f.js
+│   │   │   │   │   ├── TransferOrderList.1ed48881.js
+│   │   │   │   │   ├── TransferOrderList.b0368e95.css
+│   │   │   │   │   ├── UserinfoPage.83b78319.css
+│   │   │   │   │   ├── UserinfoPage.9a47f12c.js
+│   │   │   │   │   ├── add-icon.bdbbe2d3.svg
+│   │   │   │   │   ├── ali_app.d95204fd.svg
+│   │   │   │   │   ├── ali_bar.ae8ad12d.svg
+│   │   │   │   │   ├── ali_jsapi.3313770d.svg
+│   │   │   │   │   ├── ali_pc.79c144c7.svg
+│   │   │   │   │   ├── ali_qr.2ac2aff2.svg
+│   │   │   │   │   ├── ali_wap.a96bc28e.svg
+│   │   │   │   │   ├── auto_bar.fe9f7181.svg
+│   │   │   │   │   ├── background.12aecf48.svg
+│   │   │   │   │   ├── bootstrap-icons.476adf42.woff2
+│   │   │   │   │   ├── bootstrap-icons.bb1de989.woff
+│   │   │   │   │   ├── empty.cc1bea71.svg
+│   │   │   │   │   ├── favicon.db8e62f3.ico
+│   │   │   │   │   ├── index.0c7a5709.css
+│   │   │   │   │   ├── index.2cd5f568.js
+│   │   │   │   │   ├── jeepay.e180c5c7.svg
+│   │   │   │   │   ├── logo-j.612b880b.svg
+│   │   │   │   │   ├── logo.070cbf2b.svg
+│   │   │   │   │   ├── manage.4d31c1b2.js
+│   │   │   │   │   ├── more.3d1a3462.svg
+│   │   │   │   │   ├── operate.ebec203e.svg
+│   │   │   │   │   ├── pp_pc.d45d0279.svg
+│   │   │   │   │   ├── qr_cashier.b2e47514.svg
+│   │   │   │   │   ├── reconnecting-websocket.97937d47.js
+│   │   │   │   │   ├── scan.0364cbce.svg
+│   │   │   │   │   ├── wx_app.55df45ee.svg
+│   │   │   │   │   ├── wx_bar.2cc064e8.svg
+│   │   │   │   │   ├── wx_h5.d9e7c5b8.svg
+│   │   │   │   │   ├── wx_jsapi.19339d08.svg
+│   │   │   │   │   └── wx_native.c32e17bc.svg
+│   │   │   │   ├── imgs
+│   │   │   │   │   ├── defava_f.png
+│   │   │   │   │   ├── defava_m.png
+│   │   │   │   │   ├── favicon.ico
+│   │   │   │   │   └── logo.svg
+│   │   │   │   └── index.html
+│   │   │   ├── SHA256SUMS
+│   │   │   ├── jeepay-manager.jar
+│   │   │   ├── jeepay-merchant.jar
+│   │   │   └── jeepay-payment.jar
+│   │   ├── config
+│   │   │   ├── application.yml
+│   │   │   ├── callback-ingress.conf
+│   │   │   ├── nginx-default.conf.template
+│   │   │   └── rocketmq-broker.conf
+│   │   ├── merchant-uat
+│   │   │   ├── apply-edge-hot
+│   │   │   ├── cloudflare-ips-v4.txt
+│   │   │   ├── cloudflare-ips-v6.txt
+│   │   │   ├── compose.yaml
+│   │   │   ├── nginx.conf
+│   │   │   ├── prepare-edge-nginx.py
+│   │   │   ├── provision-merchant
+│   │   │   └── rollback-edge-hot
+│   │   ├── public-callback
+│   │   │   ├── apply-edge-hot
+│   │   │   ├── compose.edge-overlay.yaml
+│   │   │   ├── prepare-edge-nginx.py
+│   │   │   └── rollback-edge-hot
+│   │   ├── scripts
+│   │   │   ├── capture-sandbox-edge-state.sh
+│   │   │   ├── manage-sandbox-api-v2-edge.sh
+│   │   │   ├── manage-sandbox-ccat-v2-dns.sh
+│   │   │   ├── manage-sandbox-merchant-uat-dns.sh
+│   │   │   ├── monitor-uat.sh
+│   │   │   ├── reconcile-sandbox-edge.sh
+│   │   │   ├── refresh-cloudflare-ip-ranges.sh
+│   │   │   └── validate-sandbox-edge.sh
+│   │   ├── .gitignore
+│   │   ├── DEPLOYMENT-MANIFEST.sha256
+│   │   ├── Dockerfile.backend
+│   │   ├── Dockerfile.ui
+│   │   └── compose.yml
+│   └── jee8pay-v2-production
+│       ├── artifacts
+│       │   ├── sql
+│       │   │   └── init.sql
+│       │   ├── ui-cashier
+│       │   │   ├── assets
+│       │   │   │   ├── Alipay-b499c351.css
+│       │   │   │   ├── Alipay-ddd74962.js
+│       │   │   │   ├── Cashier-d4d1a3b7.js
+│       │   │   │   ├── Error-616e46bd.css
+│       │   │   │   ├── Error-c5f54b97.js
+│       │   │   │   ├── Hub-12a29291.css
+│       │   │   │   ├── Hub-dd892559.js
+│       │   │   │   ├── Oauth2Callback-3efe3b41.js
+│       │   │   │   ├── S-f63feb6b.svg
+│       │   │   │   ├── WeChatSansSS-Bold-41710157.ttf
+│       │   │   │   ├── Wxpay-46507991.js
+│       │   │   │   ├── Wxpay-ded61352.css
+│       │   │   │   ├── Ysfpay-60b34adf.css
+│       │   │   │   ├── Ysfpay-ee39b3ce.js
+│       │   │   │   ├── api-669d0d7b.js
+│       │   │   │   ├── error-a2400a96.svg
+│       │   │   │   ├── index-291e8efe.css
+│       │   │   │   ├── index-c6178d44.js
+│       │   │   │   ├── wx-d01ab358.svg
+│       │   │   │   ├── ysf-fe0ceebe.jpg
+│       │   │   │   └── zfb-2f9e1442.jpeg
+│       │   │   ├── favicon.ico
+│       │   │   └── index.html
+│       │   ├── ui-manager
+│       │   │   ├── assets
+│       │   │   │   ├── 404.cd1a2daf.svg
+│       │   │   │   ├── 404.f677d1c6.js
+│       │   │   │   ├── Analysis.0969540b.css
+│       │   │   │   ├── Analysis.2d1c18d0.js
+│       │   │   │   ├── Badge.5ccac945.js
+│       │   │   │   ├── EntPage.b7a48ba8.js
+│       │   │   │   ├── Group.384b07b1.js
+│       │   │   │   ├── IsvList.022149ec.js
+│       │   │   │   ├── IsvList.0679ddfb.css
+│       │   │   │   ├── JeepayCard.38beb612.js
+│       │   │   │   ├── JeepayCard.aadc8955.css
+│       │   │   │   ├── JeepayTable.33df05d8.js
+│       │   │   │   ├── JeepayTable.caf4a94b.css
+│       │   │   │   ├── JeepayTableColState.069d3bc3.js
+│       │   │   │   ├── JeepayTableColumns.vue_vue_type_script_lang.7cab347f.css
+│       │   │   │   ├── JeepayTableColumns.vue_vue_type_script_lang.ec04ce14.js
+│       │   │   │   ├── JeepayTextUp.28a14f52.js
+│       │   │   │   ├── JeepayTextUp.ce597964.css
+│       │   │   │   ├── JeepayUpload.96420dc1.js
+│       │   │   │   ├── List.285f74e4.js
+│       │   │   │   ├── List.48c20357.js
+│       │   │   │   ├── List.d27341cc.css
+│       │   │   │   ├── List.dcacd29c.js
+│       │   │   │   ├── List.e6024f81.css
+│       │   │   │   ├── MchList.53747eb3.css
+│       │   │   │   ├── MchList.ff7d0e76.js
+│       │   │   │   ├── MchNotifyList.a5afdbee.js
+│       │   │   │   ├── PayOrderList.8e3e09a5.css
+│       │   │   │   ├── PayOrderList.c1a4d566.js
+│       │   │   │   ├── RefundOrderList.07c8945b.js
+│       │   │   │   ├── RefundOrderList.40082279.css
+│       │   │   │   ├── RolePage.64a3f0f3.js
+│       │   │   │   ├── SysConfig.012db407.js
+│       │   │   │   ├── SysLog.e0ce6b2f.js
+│       │   │   │   ├── SysUserPage.1c45b846.js
+│       │   │   │   ├── TabPane.43fa8453.js
+│       │   │   │   ├── TransferOrderList.33488a9f.css
+│       │   │   │   ├── TransferOrderList.7b8810bb.js
+│       │   │   │   ├── UserinfoPage.6ededfd9.css
+│       │   │   │   ├── UserinfoPage.b557a19d.js
+│       │   │   │   ├── add-icon-hover.f92dc310.svg
+│       │   │   │   ├── add-icon.bdbbe2d3.svg
+│       │   │   │   ├── background.12aecf48.svg
+│       │   │   │   ├── bootstrap-icons.476adf42.woff2
+│       │   │   │   ├── bootstrap-icons.bb1de989.woff
+│       │   │   │   ├── dayjs.007de484.js
+│       │   │   │   ├── empty.cc1bea71.svg
+│       │   │   │   ├── favicon.db8e62f3.ico
+│       │   │   │   ├── index.3556c4bc.js
+│       │   │   │   ├── index.370b9573.css
+│       │   │   │   ├── index.8ae799d6.js
+│       │   │   │   ├── index.b6fd963a.js
+│       │   │   │   ├── index.cfc27556.js
+│       │   │   │   ├── index.d63f213e.js
+│       │   │   │   ├── index.e447018d.js
+│       │   │   │   ├── index.eadfa88f.js
+│       │   │   │   ├── index.fd3319f9.js
+│       │   │   │   ├── jeepay.e180c5c7.svg
+│       │   │   │   ├── logo-j.612b880b.svg
+│       │   │   │   ├── logo.070cbf2b.svg
+│       │   │   │   ├── manage.4b139a94.js
+│       │   │   │   ├── moment.40bc58bf.js
+│       │   │   │   ├── more.3d1a3462.svg
+│       │   │   │   ├── operate.ebec203e.svg
+│       │   │   │   └── useRefs.461c258b.js
+│       │   │   └── index.html
+│       │   ├── ui-merchant
+│       │   │   ├── assets
+│       │   │   │   ├── 403.27c3e2bf.js
+│       │   │   │   ├── 403.b7b8bff3.svg
+│       │   │   │   ├── 404.34857be5.js
+│       │   │   │   ├── 404.cd1a2daf.svg
+│       │   │   │   ├── 500.f4af831f.svg
+│       │   │   │   ├── 500.f9037ef6.js
+│       │   │   │   ├── Analysis.4ef6d8e2.js
+│       │   │   │   ├── Analysis.97047235.css
+│       │   │   │   ├── ChannelUserModal.6f5e6627.js
+│       │   │   │   ├── ChannelUserModal.9f76165f.css
+│       │   │   │   ├── DivisionReceiverGroupPage.dff58829.js
+│       │   │   │   ├── DivisionReceiverPage.79497dd8.js
+│       │   │   │   ├── DivisionRecordPage.452384f7.js
+│       │   │   │   ├── JeepayTextUp.ba686124.js
+│       │   │   │   ├── JeepayTextUp.eba82935.css
+│       │   │   │   ├── JeepayUpload.aab5e02a.js
+│       │   │   │   ├── List.211d4bd4.js
+│       │   │   │   ├── List.c1ce5708.css
+│       │   │   │   ├── MchTransferPage.09fce2ee.css
+│       │   │   │   ├── MchTransferPage.48449dab.js
+│       │   │   │   ├── PayOrderList.044f091f.js
+│       │   │   │   ├── PayOrderList.f247aeca.css
+│       │   │   │   ├── PayTest.63f30da8.css
+│       │   │   │   ├── PayTest.ee8a5039.js
+│       │   │   │   ├── RefundOrderList.2cf92e7f.js
+│       │   │   │   ├── RefundOrderList.fbf76502.css
+│       │   │   │   ├── RolePage.bf116724.js
+│       │   │   │   ├── SysUserPage.447b132f.js
+│       │   │   │   ├── TransferOrderList.1ed48881.js
+│       │   │   │   ├── TransferOrderList.b0368e95.css
+│       │   │   │   ├── UserinfoPage.83b78319.css
+│       │   │   │   ├── UserinfoPage.9a47f12c.js
+│       │   │   │   ├── add-icon.bdbbe2d3.svg
+│       │   │   │   ├── ali_app.d95204fd.svg
+│       │   │   │   ├── ali_bar.ae8ad12d.svg
+│       │   │   │   ├── ali_jsapi.3313770d.svg
+│       │   │   │   ├── ali_pc.79c144c7.svg
+│       │   │   │   ├── ali_qr.2ac2aff2.svg
+│       │   │   │   ├── ali_wap.a96bc28e.svg
+│       │   │   │   ├── auto_bar.fe9f7181.svg
+│       │   │   │   ├── background.12aecf48.svg
+│       │   │   │   ├── bootstrap-icons.476adf42.woff2
+│       │   │   │   ├── bootstrap-icons.bb1de989.woff
+│       │   │   │   ├── empty.cc1bea71.svg
+│       │   │   │   ├── favicon.db8e62f3.ico
+│       │   │   │   ├── index.0c7a5709.css
+│       │   │   │   ├── index.2cd5f568.js
+│       │   │   │   ├── jeepay.e180c5c7.svg
+│       │   │   │   ├── logo-j.612b880b.svg
+│       │   │   │   ├── logo.070cbf2b.svg
+│       │   │   │   ├── manage.4d31c1b2.js
+│       │   │   │   ├── more.3d1a3462.svg
+│       │   │   │   ├── operate.ebec203e.svg
+│       │   │   │   ├── pp_pc.d45d0279.svg
+│       │   │   │   ├── qr_cashier.b2e47514.svg
+│       │   │   │   ├── reconnecting-websocket.97937d47.js
+│       │   │   │   ├── scan.0364cbce.svg
+│       │   │   │   ├── wx_app.55df45ee.svg
+│       │   │   │   ├── wx_bar.2cc064e8.svg
+│       │   │   │   ├── wx_h5.d9e7c5b8.svg
+│       │   │   │   ├── wx_jsapi.19339d08.svg
+│       │   │   │   └── wx_native.c32e17bc.svg
+│       │   │   ├── imgs
+│       │   │   │   ├── defava_f.png
+│       │   │   │   ├── defava_m.png
+│       │   │   │   ├── favicon.ico
+│       │   │   │   └── logo.svg
+│       │   │   └── index.html
+│       │   ├── jeepay-manager.jar
+│       │   ├── jeepay-merchant.jar
+│       │   └── jeepay-payment.jar
+│       ├── config
+│       │   ├── application.yml
+│       │   ├── callback-ingress.conf
+│       │   ├── nginx-default.conf.template
+│       │   ├── production-bootstrap.sql
+│       │   └── rocketmq-broker.conf
+│       ├── scripts
+│       │   ├── install-v2-infrastructure-secrets
+│       │   └── populate-v2-ccat-secret
+│       ├── .gitignore
+│       ├── DEPLOYMENT-MANIFEST.sha256
+│       ├── Dockerfile.backend
+│       ├── Dockerfile.ui
+│       ├── SOURCE
+│       └── compose.yml
+├── docs
+│   ├── architecture
+│   │   ├── README.md
+│   │   ├── environment-contract.md
+│   │   ├── provider-extension-model.md
+│   │   ├── source-provenance.md
+│   │   └── taiwan-platform-baseline.md
+│   ├── debt
+│   │   ├── README.md
+│   │   └── technical-debt-register.md
+│   ├── decisions
+│   │   ├── ADR-0001-jeepay-as-platform-core.md
+│   │   ├── ADR-0002-native-provider-extension-contract.md
+│   │   ├── ADR-0003-single-root-monorepo.md
+│   │   ├── ADR-0004-twd-platform-default.md
+│   │   ├── ADR-0005-environment-isolation.md
+│   │   ├── ADR-0006-taipei-platform-timezone.md
+│   │   └── README.md
+│   ├── integration
+│   │   ├── merchant-uat
+│   │   │   ├── examples
+│   │   │   │   ├── create-vector.json
+│   │   │   │   ├── notify-vector.json
+│   │   │   │   ├── run-d01-blackbox.py
+│   │   │   │   ├── unified-order-success.json
+│   │   │   │   └── verify_vectors.py
+│   │   │   ├── JEE-EC01R1-external-consumer-closure.md
+│   │   │   ├── README.md
+│   │   │   └── UAT-START-NOTICE.md
+│   │   └── README.md
+│   ├── operations
+│   │   ├── README.md
+│   │   ├── ccat-v2-development.md
+│   │   ├── ccat-v2-production-candidate.md
+│   │   ├── git-delivery-governance.md
+│   │   ├── merchant-uat-frontend-operator-map.md
+│   │   └── sandbox-edge-recovery.md
+│   ├── providers
+│   │   ├── ccat
+│   │   │   ├── JEE-E05-external-create-investigation.md
+│   │   │   ├── JEE-P05-create-failure-semantics.md
+│   │   │   ├── JEE-P05R1-i07-blocker-closure.md
+│   │   │   ├── README.md
+│   │   │   ├── contract-evidence.md
+│   │   │   └── provider-design.md
+│   │   └── README.md
+│   └── README.md
 ├── jeepay
 │   ├── .github
 │   │   └── workflows
@@ -256,6 +707,8 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │                       │   │   │   ├── AlipayIsvParams.java
 │   │   │   │                       │   │   │   ├── AlipayIsvsubMchParams.java
 │   │   │   │                       │   │   │   └── AlipayNormalMchParams.java
+│   │   │   │                       │   │   ├── ccat
+│   │   │   │                       │   │   │   └── CcatNormalMchParams.java
 │   │   │   │                       │   │   ├── plspay
 │   │   │   │                       │   │   │   ├── PlspayConfig.java
 │   │   │   │                       │   │   │   └── PlspayNormalMchParams.java
@@ -306,6 +759,90 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │           └── .gitkeep
 │   │   └── pom.xml
 │   ├── jeepay-manager
+│   │   ├── bin
+│   │   │   ├── .settings
+│   │   │   │   ├── org.eclipse.core.resources.prefs
+│   │   │   │   └── org.eclipse.m2e.core.prefs
+│   │   │   ├── src
+│   │   │   │   ├── main
+│   │   │   │   │   ├── java
+│   │   │   │   │   │   └── com
+│   │   │   │   │   │       └── jeequan
+│   │   │   │   │   │           └── jeepay
+│   │   │   │   │   │               └── mgr
+│   │   │   │   │   │                   ├── aop
+│   │   │   │   │   │                   │   └── MethodLogAop.class
+│   │   │   │   │   │                   ├── bootstrap
+│   │   │   │   │   │                   │   ├── FastJsonHttpMessageConverterEx.class
+│   │   │   │   │   │                   │   ├── InitRunner.class
+│   │   │   │   │   │                   │   ├── JeepayMgrApplication.class
+│   │   │   │   │   │                   │   └── SwaggerJsonSerializer.class
+│   │   │   │   │   │                   ├── config
+│   │   │   │   │   │                   │   ├── RedisConfig.class
+│   │   │   │   │   │                   │   ├── SwaggerConfig.class
+│   │   │   │   │   │                   │   └── SystemYmlConfig.class
+│   │   │   │   │   │                   ├── ctrl
+│   │   │   │   │   │                   │   ├── anon
+│   │   │   │   │   │                   │   │   └── AuthController.class
+│   │   │   │   │   │                   │   ├── common
+│   │   │   │   │   │                   │   │   └── StaticController.class
+│   │   │   │   │   │                   │   ├── config
+│   │   │   │   │   │                   │   │   ├── MainChartController.class
+│   │   │   │   │   │                   │   │   └── SysConfigController.class
+│   │   │   │   │   │                   │   ├── isv
+│   │   │   │   │   │                   │   │   ├── IsvInfoController.class
+│   │   │   │   │   │                   │   │   └── IsvPayInterfaceConfigController.class
+│   │   │   │   │   │                   │   ├── merchant
+│   │   │   │   │   │                   │   │   ├── MchAppController.class
+│   │   │   │   │   │                   │   │   ├── MchInfoController.class
+│   │   │   │   │   │                   │   │   ├── MchPayInterfaceConfigController.class
+│   │   │   │   │   │                   │   │   └── MchPayPassageConfigController.class
+│   │   │   │   │   │                   │   ├── order
+│   │   │   │   │   │                   │   │   ├── MchNotifyController.class
+│   │   │   │   │   │                   │   │   ├── PayOrderController.class
+│   │   │   │   │   │                   │   │   ├── RefundOrderController.class
+│   │   │   │   │   │                   │   │   └── TransferOrderController.class
+│   │   │   │   │   │                   │   ├── payconfig
+│   │   │   │   │   │                   │   │   ├── PayInterfaceDefineController.class
+│   │   │   │   │   │                   │   │   └── PayWayController.class
+│   │   │   │   │   │                   │   ├── sysuser
+│   │   │   │   │   │                   │   │   ├── SysEntController.class
+│   │   │   │   │   │                   │   │   ├── SysLogController.class
+│   │   │   │   │   │                   │   │   ├── SysRoleController.class
+│   │   │   │   │   │                   │   │   ├── SysRoleEntRelaController.class
+│   │   │   │   │   │                   │   │   ├── SysUserController.class
+│   │   │   │   │   │                   │   │   └── SysUserRoleRelaController.class
+│   │   │   │   │   │                   │   ├── CommonCtrl.class
+│   │   │   │   │   │                   │   └── CurrentUserController.class
+│   │   │   │   │   │                   ├── mq
+│   │   │   │   │   │                   │   └── ResetAppConfigMQReceiver.class
+│   │   │   │   │   │                   ├── secruity
+│   │   │   │   │   │                   │   ├── JeeAuthenticationEntryPoint.class
+│   │   │   │   │   │                   │   ├── JeeAuthenticationTokenFilter.class
+│   │   │   │   │   │                   │   ├── JeeUserDetailsServiceImpl.class
+│   │   │   │   │   │                   │   └── WebSecurityConfig.class
+│   │   │   │   │   │                   ├── service
+│   │   │   │   │   │                   │   ├── AuthService.class
+│   │   │   │   │   │                   │   └── CodeSysTypeManager.class
+│   │   │   │   │   │                   └── web
+│   │   │   │   │   │                       ├── ApiResBodyAdvice.class
+│   │   │   │   │   │                       ├── ApiResInterceptor.class
+│   │   │   │   │   │                       ├── ApplicationContextKit.class
+│   │   │   │   │   │                       └── WebmvcConfig.class
+│   │   │   │   │   └── resources
+│   │   │   │   │       ├── static
+│   │   │   │   │       │   └── index.html
+│   │   │   │   │       ├── application.yml
+│   │   │   │   │       ├── banner.txt
+│   │   │   │   │       └── logback-spring.xml
+│   │   │   │   └── test
+│   │   │   │       ├── java
+│   │   │   │       │   └── .gitkeep
+│   │   │   │       └── resources
+│   │   │   │           └── .gitkeep
+│   │   │   ├── .project
+│   │   │   ├── Dockerfile
+│   │   │   └── pom.xml
 │   │   ├── src
 │   │   │   ├── main
 │   │   │   │   ├── java
@@ -380,6 +917,13 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │       └── logback-spring.xml
 │   │   │   └── test
 │   │   │       ├── java
+│   │   │       │   ├── com
+│   │   │       │   │   └── jeequan
+│   │   │       │   │       └── jeepay
+│   │   │       │   │           └── mgr
+│   │   │       │   │               └── ctrl
+│   │   │       │   │                   └── order
+│   │   │       │   │                       └── MchNotifyControllerSendTest.java
 │   │   │       │   └── .gitkeep
 │   │   │       └── resources
 │   │   │           └── .gitkeep
@@ -512,6 +1056,17 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │   │                   │   │   ├── AlipayRefundService.java
 │   │   │   │   │                   │   │   ├── AlipayTransferNoticeService.java
 │   │   │   │   │                   │   │   └── AlipayTransferService.java
+│   │   │   │   │                   │   ├── ccat
+│   │   │   │   │                   │   │   ├── payway
+│   │   │   │   │                   │   │   │   └── CcatIbon.java
+│   │   │   │   │                   │   │   ├── CcatChannelNoticeService.java
+│   │   │   │   │                   │   │   ├── CcatClient.java
+│   │   │   │   │                   │   │   ├── CcatIbonOrderRS.java
+│   │   │   │   │                   │   │   ├── CcatKit.java
+│   │   │   │   │                   │   │   ├── CcatLogSanitizer.java
+│   │   │   │   │                   │   │   ├── CcatMchParamsResolver.java
+│   │   │   │   │                   │   │   ├── CcatPayOrderQueryService.java
+│   │   │   │   │                   │   │   └── CcatPaymentService.java
 │   │   │   │   │                   │   ├── plspay
 │   │   │   │   │                   │   │   ├── payway
 │   │   │   │   │                   │   │   │   ├── AliApp.java
@@ -839,6 +1394,24 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │       └── logback-spring.xml
 │   │   │   └── test
 │   │   │       ├── java
+│   │   │       │   ├── com
+│   │   │       │   │   └── jeequan
+│   │   │       │   │       └── jeepay
+│   │   │       │   │           └── pay
+│   │   │       │   │               ├── channel
+│   │   │       │   │               │   └── ccat
+│   │   │       │   │               │       ├── payway
+│   │   │       │   │               │       │   └── CcatIbonTest.java
+│   │   │       │   │               │       ├── CcatArchitectureTest.java
+│   │   │       │   │               │       ├── CcatChannelNoticeFlowTest.java
+│   │   │       │   │               │       ├── CcatChannelNoticeServiceTest.java
+│   │   │       │   │               │       ├── CcatClientTest.java
+│   │   │       │   │               │       ├── CcatKitTest.java
+│   │   │       │   │               │       ├── CcatLogSanitizerTest.java
+│   │   │       │   │               │       ├── CcatMchParamsResolverTest.java
+│   │   │       │   │               │       └── CcatPayOrderQueryServiceTest.java
+│   │   │       │   │               └── contract
+│   │   │       │   │                   └── MerchantUatContractTest.java
 │   │   │       │   └── .gitkeep
 │   │   │       └── resources
 │   │   │           └── .gitkeep
@@ -946,12 +1519,15 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   └── jeepay-sdk-java-pls-1.2.0.jar
 │   ├── logs
 │   │   ├── manager
+│   │   │   ├── mgr.all.2026-08-12.log
 │   │   │   ├── mgr.all.log
 │   │   │   └── mgr.error.log
 │   │   ├── merchant
+│   │   │   ├── mch.all.2026-08-12.log
 │   │   │   ├── mch.all.log
 │   │   │   └── mch.error.log
 │   │   └── payment
+│   │       ├── pay.all.2026-08-12.log
 │   │       ├── pay.all.log
 │   │       └── pay.error.log
 │   ├── .dockerignore
@@ -968,475 +1544,495 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   ├── pom.xml
 │   ├── upgrade.md
 │   └── version.md
-└── jeepay-ui
-    ├── jeepay-ui-cashier
-    │   ├── public
-    │   │   └── favicon.ico
-    │   ├── src
-    │   │   ├── api
-    │   │   │   └── api.js
-    │   │   ├── assets
-    │   │   │   ├── icon
-    │   │   │   │   ├── S.svg
-    │   │   │   │   ├── error.svg
-    │   │   │   │   └── wx.svg
-    │   │   │   ├── images
-    │   │   │   │   ├── empty.svg
-    │   │   │   │   ├── loading.gif
-    │   │   │   │   ├── ysf.jpg
-    │   │   │   │   └── zfb.jpeg
-    │   │   │   └── wx-zt
-    │   │   │       ├── WeChatSansSS-Bold.ttf
-    │   │   │       ├── WeChatSansSS-Light.ttf
-    │   │   │       ├── WeChatSansSS-Medium.ttf
-    │   │   │       ├── WeChatSansSS-Regular.ttf
-    │   │   │       ├── WeChatSansStd-Bold.ttf
-    │   │   │       ├── WeChatSansStd-Light.ttf
-    │   │   │       ├── WeChatSansStd-Medium.ttf
-    │   │   │       └── WeChatSansStd-Regular.ttf
-    │   │   ├── config
-    │   │   │   ├── index.js
-    │   │   │   └── rem.js
-    │   │   ├── http
-    │   │   │   ├── HttpRequest.js
-    │   │   │   └── request.js
-    │   │   ├── router
-    │   │   │   └── index.js
-    │   │   ├── utils
-    │   │   │   ├── channelUserId.js
-    │   │   │   └── wayCode.js
-    │   │   ├── views
-    │   │   │   ├── dialog
-    │   │   │   │   ├── dialog.vue
-    │   │   │   │   └── index.js
-    │   │   │   ├── keyboard
-    │   │   │   │   └── keyboard.vue
-    │   │   │   ├── payway
-    │   │   │   │   ├── Alipay.vue
-    │   │   │   │   ├── Wxpay.vue
-    │   │   │   │   ├── Ysfpay.vue
-    │   │   │   │   └── pay.css
-    │   │   │   ├── Cashier.vue
-    │   │   │   ├── Error.vue
-    │   │   │   ├── Hub.vue
-    │   │   │   └── Oauth2Callback.vue
-    │   │   ├── App.vue
-    │   │   └── main.js
-    │   ├── .env
-    │   ├── .env.development
-    │   ├── .gitignore
-    │   ├── README.md
-    │   ├── index.html
-    │   ├── package-lock.json
-    │   ├── package.json
-    │   └── vite.config.js
-    ├── jeepay-ui-manager
-    │   ├── imgs
-    │   │   ├── defava_f.png
-    │   │   ├── defava_m.png
-    │   │   ├── favicon.ico
-    │   │   └── logo.svg
-    │   ├── src
-    │   │   ├── api
-    │   │   │   ├── login.js
-    │   │   │   └── manage.js
-    │   │   ├── assets
-    │   │   │   ├── styles
-    │   │   │   │   ├── color.css
-    │   │   │   │   └── color.less
-    │   │   │   ├── svg
-    │   │   │   │   ├── 403.svg
-    │   │   │   │   ├── 404.svg
-    │   │   │   │   ├── 500.svg
-    │   │   │   │   ├── add-icon-hover.svg
-    │   │   │   │   ├── add-icon.svg
-    │   │   │   │   ├── background.svg
-    │   │   │   │   ├── backgroundold.svg
-    │   │   │   │   ├── code.svg
-    │   │   │   │   ├── empty.svg
-    │   │   │   │   ├── jeepay.svg
-    │   │   │   │   ├── lock.svg
-    │   │   │   │   ├── mini-logo.svg
-    │   │   │   │   ├── more.svg
-    │   │   │   │   ├── operate.svg
-    │   │   │   │   ├── scroll_down.svg
-    │   │   │   │   ├── scroll_left.svg
-    │   │   │   │   ├── scroll_right.svg
-    │   │   │   │   ├── scroll_up.svg
-    │   │   │   │   ├── select-code.svg
-    │   │   │   │   ├── select-lock.svg
-    │   │   │   │   ├── select-user.svg
-    │   │   │   │   └── user.svg
-    │   │   │   ├── logo-j.svg
-    │   │   │   └── logo.svg
-    │   │   ├── components
-    │   │   │   ├── GlobalFooter
-    │   │   │   │   └── index.vue
-    │   │   │   ├── GlobalHeader
-    │   │   │   │   ├── AvatarDropdown.vue
-    │   │   │   │   └── RightContent.vue
-    │   │   │   ├── GlobalLoad
-    │   │   │   │   └── GlobalLoad.vue
-    │   │   │   ├── JeepayCard
-    │   │   │   │   └── JeepayCard.vue
-    │   │   │   ├── JeepayLayout
-    │   │   │   │   ├── JeepayLayout.vue
-    │   │   │   │   └── SubMenu.vue
-    │   │   │   ├── JeepayTable
-    │   │   │   │   ├── JeepayDrChildren.vue
-    │   │   │   │   ├── JeepayMenu.vue
-    │   │   │   │   ├── JeepayTable.vue
-    │   │   │   │   ├── JeepayTableColState.vue
-    │   │   │   │   └── JeepayTableColumns.vue
-    │   │   │   ├── JeepayTextUp
-    │   │   │   │   └── JeepayTextUp.vue
-    │   │   │   ├── JeepayUpload
-    │   │   │   │   └── JeepayUpload.vue
-    │   │   │   └── NProgress
-    │   │   │       └── nprogress.less
-    │   │   ├── config
-    │   │   │   └── appConfig.js
-    │   │   ├── core
-    │   │   │   ├── bootstrap.js
-    │   │   │   ├── lazy_use.js
-    │   │   │   └── use.js
-    │   │   ├── http
-    │   │   │   ├── HttpRequest.js
-    │   │   │   └── request.js
-    │   │   ├── layouts
-    │   │   │   ├── BasicLayout.less
-    │   │   │   ├── BasicLayout.vue
-    │   │   │   ├── BlankLayout.vue
-    │   │   │   ├── PageView.vue
-    │   │   │   ├── RouteView.vue
-    │   │   │   ├── UserLayout.vue
-    │   │   │   └── index.js
-    │   │   ├── less
-    │   │   │   ├── color.css
-    │   │   │   └── color.less
-    │   │   ├── router
-    │   │   │   ├── generator-routers.js
-    │   │   │   └── index.js
-    │   │   ├── store
-    │   │   │   └── modules
-    │   │   │       └── user.ts
-    │   │   ├── utils
-    │   │   │   ├── domUtil.js
-    │   │   │   ├── filter.js
-    │   │   │   ├── infoBox.js
-    │   │   │   ├── jeepayStorageWrapper.js
-    │   │   │   ├── screenLog.js
-    │   │   │   ├── throttle.js
-    │   │   │   ├── util.js
-    │   │   │   └── utils.less
-    │   │   ├── views
-    │   │   │   ├── current
-    │   │   │   │   ├── AvatarModal.vue
-    │   │   │   │   └── UserinfoPage.vue
-    │   │   │   ├── dashboard
-    │   │   │   │   ├── Analysis.vue
-    │   │   │   │   ├── empty.vue
-    │   │   │   │   ├── index.css
-    │   │   │   │   └── index.less
-    │   │   │   ├── ent
-    │   │   │   │   ├── AddOrEdit.vue
-    │   │   │   │   └── EntPage.vue
-    │   │   │   ├── exception
-    │   │   │   │   ├── 403.vue
-    │   │   │   │   ├── 404.vue
-    │   │   │   │   └── 500.vue
-    │   │   │   ├── isv
-    │   │   │   │   ├── custom
-    │   │   │   │   │   ├── AlipayPayConfig.vue
-    │   │   │   │   │   └── WxpayPayConfig.vue
-    │   │   │   │   ├── AddOrEdit.vue
-    │   │   │   │   ├── IsvList.vue
-    │   │   │   │   └── IsvPayIfConfigList.vue
-    │   │   │   ├── mch
-    │   │   │   │   ├── AddOrEdit.vue
-    │   │   │   │   ├── Detail.vue
-    │   │   │   │   └── MchList.vue
-    │   │   │   ├── mchApp
-    │   │   │   │   ├── custom
-    │   │   │   │   │   ├── AlipayPayConfig.vue
-    │   │   │   │   │   └── WxpayPayConfig.vue
-    │   │   │   │   ├── AddOrEdit.vue
-    │   │   │   │   ├── AlipayAuth.vue
-    │   │   │   │   ├── List.vue
-    │   │   │   │   ├── MchPayConfigAddOrEdit.vue
-    │   │   │   │   ├── MchPayIfConfigList.vue
-    │   │   │   │   └── MchPayPassageAddOrEdit.vue
-    │   │   │   ├── order
-    │   │   │   │   ├── notify
-    │   │   │   │   │   └── MchNotifyList.vue
-    │   │   │   │   ├── pay
-    │   │   │   │   │   ├── PayOrderList.vue
-    │   │   │   │   │   └── RefundModal.vue
-    │   │   │   │   ├── refund
-    │   │   │   │   │   └── RefundOrderList.vue
-    │   │   │   │   └── transfer
-    │   │   │   │       ├── TransferOrderDetail.vue
-    │   │   │   │       └── TransferOrderList.vue
-    │   │   │   ├── payconfig
-    │   │   │   │   ├── payIfDefine
-    │   │   │   │   │   ├── AddOrEdit.vue
-    │   │   │   │   │   └── List.vue
-    │   │   │   │   └── payWay
-    │   │   │   │       ├── AddOrEdit.vue
-    │   │   │   │       └── List.vue
-    │   │   │   ├── role
-    │   │   │   │   ├── Add.vue
-    │   │   │   │   ├── AddOrEdit.vue
-    │   │   │   │   ├── RoleDist.vue
-    │   │   │   │   └── RolePage.vue
-    │   │   │   ├── sys
-    │   │   │   │   ├── config
-    │   │   │   │   │   └── SysConfig.vue
-    │   │   │   │   └── log
-    │   │   │   │       └── SysLog.vue
-    │   │   │   ├── sysuser
-    │   │   │   │   ├── AddOrEdit.vue
-    │   │   │   │   ├── RoleDist.vue
-    │   │   │   │   └── SysUserPage.vue
-    │   │   │   └── user
-    │   │   │       └── Login.vue
-    │   │   ├── App.vue
-    │   │   ├── global.less
-    │   │   ├── icons.ts
-    │   │   ├── main.ts
-    │   │   └── router.ts
-    │   ├── tests
-    │   │   └── unit
-    │   │       └── .eslintrc.js
-    │   ├── .browserslistrc
-    │   ├── .env
-    │   ├── .env.development
-    │   ├── .eslintrc.js
-    │   ├── .prettierrc.cjs
-    │   ├── components.d.ts
-    │   ├── index.html
-    │   ├── package-lock.json
-    │   ├── package.json
-    │   ├── tsconfig.json
-    │   └── vite.config.ts
-    ├── jeepay-ui-merchant
-    │   ├── indexImgs
-    │   │   ├── defava_f.png
-    │   │   ├── defava_m.png
-    │   │   ├── favicon.ico
-    │   │   └── logo.svg
-    │   ├── public
-    │   │   ├── imgs
-    │   │   │   ├── defava_f.png
-    │   │   │   ├── defava_m.png
-    │   │   │   ├── favicon.ico
-    │   │   │   └── logo.svg
-    │   │   └── index.html
-    │   ├── src
-    │   │   ├── api
-    │   │   │   ├── login.js
-    │   │   │   └── manage.js
-    │   │   ├── assets
-    │   │   │   ├── images
-    │   │   │   │   └── background.png
-    │   │   │   ├── payTestImg
-    │   │   │   │   ├── ali_app.svg
-    │   │   │   │   ├── ali_bar.svg
-    │   │   │   │   ├── ali_jsapi.svg
-    │   │   │   │   ├── ali_pc.svg
-    │   │   │   │   ├── ali_qr.svg
-    │   │   │   │   ├── ali_wap.svg
-    │   │   │   │   ├── auto_bar.svg
-    │   │   │   │   ├── jee-big.svg
-    │   │   │   │   ├── jee-quan.svg
-    │   │   │   │   ├── logo.svg
-    │   │   │   │   ├── pay_h5.png
-    │   │   │   │   ├── pp_pc.svg
-    │   │   │   │   ├── qr_cashier.svg
-    │   │   │   │   ├── scan.png
-    │   │   │   │   ├── scan.svg
-    │   │   │   │   ├── top.svg
-    │   │   │   │   ├── wx_app.svg
-    │   │   │   │   ├── wx_bar.svg
-    │   │   │   │   ├── wx_h5.svg
-    │   │   │   │   ├── wx_jsapi.svg
-    │   │   │   │   └── wx_native.svg
-    │   │   │   ├── styles
-    │   │   │   │   ├── color.css
-    │   │   │   │   └── color.less
-    │   │   │   ├── svg
-    │   │   │   │   ├── 403.svg
-    │   │   │   │   ├── 404.svg
-    │   │   │   │   ├── 500.svg
-    │   │   │   │   ├── add-icon.svg
-    │   │   │   │   ├── background.svg
-    │   │   │   │   ├── backgroundold.svg
-    │   │   │   │   ├── code.svg
-    │   │   │   │   ├── empty.svg
-    │   │   │   │   ├── jeepay.svg
-    │   │   │   │   ├── lock.svg
-    │   │   │   │   ├── mini-logo.svg
-    │   │   │   │   ├── more.svg
-    │   │   │   │   ├── operate.svg
-    │   │   │   │   ├── scroll_down.svg
-    │   │   │   │   ├── scroll_left.svg
-    │   │   │   │   ├── scroll_right.svg
-    │   │   │   │   ├── scroll_up.svg
-    │   │   │   │   ├── select-code.svg
-    │   │   │   │   ├── select-lock.svg
-    │   │   │   │   ├── select-user.svg
-    │   │   │   │   └── user.svg
-    │   │   │   ├── logo-j.svg
-    │   │   │   └── logo.svg
-    │   │   ├── components
-    │   │   │   ├── ChannelUser
-    │   │   │   │   └── ChannelUserModal.vue
-    │   │   │   ├── GlobalFooter
-    │   │   │   │   └── index.vue
-    │   │   │   ├── GlobalHeader
-    │   │   │   │   ├── AvatarDropdown.vue
-    │   │   │   │   └── RightContent.vue
-    │   │   │   ├── GlobalLoad
-    │   │   │   │   └── GlobalLoad.vue
-    │   │   │   ├── JeepayCard
-    │   │   │   │   └── JeepayCard.vue
-    │   │   │   ├── JeepayLayout
-    │   │   │   │   ├── JeepayLayout.vue
-    │   │   │   │   └── SubMenu.vue
-    │   │   │   ├── JeepayTable
-    │   │   │   │   ├── JeepayDrChildren.vue
-    │   │   │   │   ├── JeepayMenu.vue
-    │   │   │   │   ├── JeepayTable.vue
-    │   │   │   │   ├── JeepayTableColState.vue
-    │   │   │   │   └── JeepayTableColumns.vue
-    │   │   │   ├── JeepayTextUp
-    │   │   │   │   └── JeepayTextUp.vue
-    │   │   │   ├── JeepayUpload
-    │   │   │   │   └── JeepayUpload.vue
-    │   │   │   └── NProgress
-    │   │   │       └── nprogress.less
-    │   │   ├── config
-    │   │   │   └── appConfig.js
-    │   │   ├── core
-    │   │   │   ├── bootstrap.js
-    │   │   │   ├── lazy_use.js
-    │   │   │   └── use.js
-    │   │   ├── http
-    │   │   │   ├── HttpRequest.js
-    │   │   │   └── request.js
-    │   │   ├── layouts
-    │   │   │   ├── BasicLayout.less
-    │   │   │   ├── BasicLayout.vue
-    │   │   │   ├── BlankLayout.vue
-    │   │   │   ├── PageView.vue
-    │   │   │   ├── RouteView.vue
-    │   │   │   ├── UserLayout.vue
-    │   │   │   └── index.js
-    │   │   ├── less
-    │   │   │   ├── color.css
-    │   │   │   └── color.less
-    │   │   ├── router
-    │   │   │   ├── generator-routers.js
-    │   │   │   └── index.js
-    │   │   ├── store
-    │   │   │   └── modules
-    │   │   │       └── user.ts
-    │   │   ├── utils
-    │   │   │   ├── domUtil.js
-    │   │   │   ├── filter.js
-    │   │   │   ├── infoBox.js
-    │   │   │   ├── jeepayStorageWrapper.js
-    │   │   │   ├── ruleGenerator.js
-    │   │   │   ├── screenLog.js
-    │   │   │   ├── throttle.js
-    │   │   │   ├── util.js
-    │   │   │   └── utils.less
-    │   │   ├── views
-    │   │   │   ├── current
-    │   │   │   │   ├── AvatarModal.vue
-    │   │   │   │   └── UserinfoPage.vue
-    │   │   │   ├── dashboard
-    │   │   │   │   ├── Analysis.vue
-    │   │   │   │   ├── empty.vue
-    │   │   │   │   ├── index.css
-    │   │   │   │   └── index.less
-    │   │   │   ├── division
-    │   │   │   │   ├── group
-    │   │   │   │   │   ├── AddOrEdit.vue
-    │   │   │   │   │   └── DivisionReceiverGroupPage.vue
-    │   │   │   │   ├── receiver
-    │   │   │   │   │   ├── DivisionReceiverPage.vue
-    │   │   │   │   │   ├── ReceiverAdd.vue
-    │   │   │   │   │   └── ReceiverEdit.vue
-    │   │   │   │   └── record
-    │   │   │   │       ├── Detail.vue
-    │   │   │   │       └── DivisionRecordPage.vue
-    │   │   │   ├── exception
-    │   │   │   │   ├── 403.vue
-    │   │   │   │   ├── 404.vue
-    │   │   │   │   └── 500.vue
-    │   │   │   ├── mchApp
-    │   │   │   │   ├── custom
-    │   │   │   │   │   ├── AlipayPayConfig.vue
-    │   │   │   │   │   └── WxpayPayConfig.vue
-    │   │   │   │   ├── AddOrEdit.vue
-    │   │   │   │   ├── AlipayAuth.vue
-    │   │   │   │   ├── List.vue
-    │   │   │   │   ├── MchPayConfigAddOrEdit.vue
-    │   │   │   │   ├── MchPayIfConfigList.vue
-    │   │   │   │   └── MchPayPassageAddOrEdit.vue
-    │   │   │   ├── mchCode
-    │   │   │   │   └── MchCodePage.vue
-    │   │   │   ├── order
-    │   │   │   │   ├── pay
-    │   │   │   │   │   ├── PayOrderList.vue
-    │   │   │   │   │   └── RefundModal.vue
-    │   │   │   │   ├── refund
-    │   │   │   │   │   └── RefundOrderList.vue
-    │   │   │   │   └── transfer
-    │   │   │   │       ├── TransferOrderDetail.vue
-    │   │   │   │       └── TransferOrderList.vue
-    │   │   │   ├── payTest
-    │   │   │   │   ├── PayTest.vue
-    │   │   │   │   ├── PayTestBarCode.vue
-    │   │   │   │   ├── PayTestModal.vue
-    │   │   │   │   └── payTest.css
-    │   │   │   ├── role
-    │   │   │   │   ├── AddOrEdit.vue
-    │   │   │   │   ├── RoleDist.vue
-    │   │   │   │   └── RolePage.vue
-    │   │   │   ├── sysuser
-    │   │   │   │   ├── AddOrEdit.vue
-    │   │   │   │   ├── RoleDist.vue
-    │   │   │   │   └── SysUserPage.vue
-    │   │   │   ├── transfer
-    │   │   │   │   ├── MchTransferPage.css
-    │   │   │   │   └── MchTransferPage.vue
-    │   │   │   └── user
-    │   │   │       └── Login.vue
-    │   │   ├── App.vue
-    │   │   ├── global.less
-    │   │   ├── icons.ts
-    │   │   ├── main.ts
-    │   │   └── router.ts
-    │   ├── .browserslistrc
-    │   ├── .env
-    │   ├── .env.development
-    │   ├── .eslintrc.js
-    │   ├── .prettierrc.cjs
-    │   ├── components.d.ts
-    │   ├── index.html
-    │   ├── package-lock.json
-    │   ├── package.json
-    │   ├── tsconfig.json
-    │   └── vite.config.ts
-    ├── .dockerignore
-    ├── .gitignore
-    ├── Dockerfile
-    ├── LICENSE
-    ├── README.md
-    └── default.conf.template
+├── jeepay-ui
+│   ├── jeepay-ui-cashier
+│   │   ├── public
+│   │   │   └── favicon.ico
+│   │   ├── src
+│   │   │   ├── api
+│   │   │   │   └── api.js
+│   │   │   ├── assets
+│   │   │   │   ├── icon
+│   │   │   │   │   ├── S.svg
+│   │   │   │   │   ├── error.svg
+│   │   │   │   │   └── wx.svg
+│   │   │   │   ├── images
+│   │   │   │   │   ├── empty.svg
+│   │   │   │   │   ├── loading.gif
+│   │   │   │   │   ├── ysf.jpg
+│   │   │   │   │   └── zfb.jpeg
+│   │   │   │   └── wx-zt
+│   │   │   │       ├── WeChatSansSS-Bold.ttf
+│   │   │   │       ├── WeChatSansSS-Light.ttf
+│   │   │   │       ├── WeChatSansSS-Medium.ttf
+│   │   │   │       ├── WeChatSansSS-Regular.ttf
+│   │   │   │       ├── WeChatSansStd-Bold.ttf
+│   │   │   │       ├── WeChatSansStd-Light.ttf
+│   │   │   │       ├── WeChatSansStd-Medium.ttf
+│   │   │   │       └── WeChatSansStd-Regular.ttf
+│   │   │   ├── config
+│   │   │   │   ├── index.js
+│   │   │   │   └── rem.js
+│   │   │   ├── http
+│   │   │   │   ├── HttpRequest.js
+│   │   │   │   └── request.js
+│   │   │   ├── router
+│   │   │   │   └── index.js
+│   │   │   ├── utils
+│   │   │   │   ├── channelUserId.js
+│   │   │   │   └── wayCode.js
+│   │   │   ├── views
+│   │   │   │   ├── dialog
+│   │   │   │   │   ├── dialog.vue
+│   │   │   │   │   └── index.js
+│   │   │   │   ├── keyboard
+│   │   │   │   │   └── keyboard.vue
+│   │   │   │   ├── payway
+│   │   │   │   │   ├── Alipay.vue
+│   │   │   │   │   ├── Wxpay.vue
+│   │   │   │   │   ├── Ysfpay.vue
+│   │   │   │   │   └── pay.css
+│   │   │   │   ├── Cashier.vue
+│   │   │   │   ├── Error.vue
+│   │   │   │   ├── Hub.vue
+│   │   │   │   └── Oauth2Callback.vue
+│   │   │   ├── App.vue
+│   │   │   └── main.js
+│   │   ├── .env
+│   │   ├── .env.development
+│   │   ├── .gitignore
+│   │   ├── README.md
+│   │   ├── index.html
+│   │   ├── package-lock.json
+│   │   ├── package.json
+│   │   └── vite.config.js
+│   ├── jeepay-ui-manager
+│   │   ├── imgs
+│   │   │   ├── defava_f.png
+│   │   │   ├── defava_m.png
+│   │   │   ├── favicon.ico
+│   │   │   └── logo.svg
+│   │   ├── src
+│   │   │   ├── api
+│   │   │   │   ├── login.js
+│   │   │   │   └── manage.js
+│   │   │   ├── assets
+│   │   │   │   ├── styles
+│   │   │   │   │   ├── color.css
+│   │   │   │   │   └── color.less
+│   │   │   │   ├── svg
+│   │   │   │   │   ├── 403.svg
+│   │   │   │   │   ├── 404.svg
+│   │   │   │   │   ├── 500.svg
+│   │   │   │   │   ├── add-icon-hover.svg
+│   │   │   │   │   ├── add-icon.svg
+│   │   │   │   │   ├── background.svg
+│   │   │   │   │   ├── backgroundold.svg
+│   │   │   │   │   ├── code.svg
+│   │   │   │   │   ├── empty.svg
+│   │   │   │   │   ├── jeepay.svg
+│   │   │   │   │   ├── lock.svg
+│   │   │   │   │   ├── mini-logo.svg
+│   │   │   │   │   ├── more.svg
+│   │   │   │   │   ├── operate.svg
+│   │   │   │   │   ├── scroll_down.svg
+│   │   │   │   │   ├── scroll_left.svg
+│   │   │   │   │   ├── scroll_right.svg
+│   │   │   │   │   ├── scroll_up.svg
+│   │   │   │   │   ├── select-code.svg
+│   │   │   │   │   ├── select-lock.svg
+│   │   │   │   │   ├── select-user.svg
+│   │   │   │   │   └── user.svg
+│   │   │   │   ├── logo-j.svg
+│   │   │   │   └── logo.svg
+│   │   │   ├── components
+│   │   │   │   ├── GlobalFooter
+│   │   │   │   │   └── index.vue
+│   │   │   │   ├── GlobalHeader
+│   │   │   │   │   ├── AvatarDropdown.vue
+│   │   │   │   │   └── RightContent.vue
+│   │   │   │   ├── GlobalLoad
+│   │   │   │   │   └── GlobalLoad.vue
+│   │   │   │   ├── JeepayCard
+│   │   │   │   │   └── JeepayCard.vue
+│   │   │   │   ├── JeepayLayout
+│   │   │   │   │   ├── JeepayLayout.vue
+│   │   │   │   │   └── SubMenu.vue
+│   │   │   │   ├── JeepayTable
+│   │   │   │   │   ├── JeepayDrChildren.vue
+│   │   │   │   │   ├── JeepayMenu.vue
+│   │   │   │   │   ├── JeepayTable.vue
+│   │   │   │   │   ├── JeepayTableColState.vue
+│   │   │   │   │   └── JeepayTableColumns.vue
+│   │   │   │   ├── JeepayTextUp
+│   │   │   │   │   └── JeepayTextUp.vue
+│   │   │   │   ├── JeepayUpload
+│   │   │   │   │   └── JeepayUpload.vue
+│   │   │   │   └── NProgress
+│   │   │   │       └── nprogress.less
+│   │   │   ├── config
+│   │   │   │   └── appConfig.js
+│   │   │   ├── core
+│   │   │   │   ├── bootstrap.js
+│   │   │   │   ├── lazy_use.js
+│   │   │   │   └── use.js
+│   │   │   ├── http
+│   │   │   │   ├── HttpRequest.js
+│   │   │   │   └── request.js
+│   │   │   ├── layouts
+│   │   │   │   ├── BasicLayout.less
+│   │   │   │   ├── BasicLayout.vue
+│   │   │   │   ├── BlankLayout.vue
+│   │   │   │   ├── PageView.vue
+│   │   │   │   ├── RouteView.vue
+│   │   │   │   ├── UserLayout.vue
+│   │   │   │   └── index.js
+│   │   │   ├── less
+│   │   │   │   ├── color.css
+│   │   │   │   └── color.less
+│   │   │   ├── router
+│   │   │   │   ├── generator-routers.js
+│   │   │   │   └── index.js
+│   │   │   ├── store
+│   │   │   │   └── modules
+│   │   │   │       └── user.ts
+│   │   │   ├── utils
+│   │   │   │   ├── domUtil.js
+│   │   │   │   ├── filter.js
+│   │   │   │   ├── infoBox.js
+│   │   │   │   ├── jeepayStorageWrapper.js
+│   │   │   │   ├── screenLog.js
+│   │   │   │   ├── throttle.js
+│   │   │   │   ├── util.js
+│   │   │   │   └── utils.less
+│   │   │   ├── views
+│   │   │   │   ├── current
+│   │   │   │   │   ├── AvatarModal.vue
+│   │   │   │   │   └── UserinfoPage.vue
+│   │   │   │   ├── dashboard
+│   │   │   │   │   ├── Analysis.vue
+│   │   │   │   │   ├── empty.vue
+│   │   │   │   │   ├── index.css
+│   │   │   │   │   └── index.less
+│   │   │   │   ├── ent
+│   │   │   │   │   ├── AddOrEdit.vue
+│   │   │   │   │   └── EntPage.vue
+│   │   │   │   ├── exception
+│   │   │   │   │   ├── 403.vue
+│   │   │   │   │   ├── 404.vue
+│   │   │   │   │   └── 500.vue
+│   │   │   │   ├── isv
+│   │   │   │   │   ├── custom
+│   │   │   │   │   │   ├── AlipayPayConfig.vue
+│   │   │   │   │   │   └── WxpayPayConfig.vue
+│   │   │   │   │   ├── AddOrEdit.vue
+│   │   │   │   │   ├── IsvList.vue
+│   │   │   │   │   └── IsvPayIfConfigList.vue
+│   │   │   │   ├── mch
+│   │   │   │   │   ├── AddOrEdit.vue
+│   │   │   │   │   ├── Detail.vue
+│   │   │   │   │   └── MchList.vue
+│   │   │   │   ├── mchApp
+│   │   │   │   │   ├── custom
+│   │   │   │   │   │   ├── AlipayPayConfig.vue
+│   │   │   │   │   │   └── WxpayPayConfig.vue
+│   │   │   │   │   ├── AddOrEdit.vue
+│   │   │   │   │   ├── AlipayAuth.vue
+│   │   │   │   │   ├── List.vue
+│   │   │   │   │   ├── MchPayConfigAddOrEdit.vue
+│   │   │   │   │   ├── MchPayIfConfigList.vue
+│   │   │   │   │   └── MchPayPassageAddOrEdit.vue
+│   │   │   │   ├── order
+│   │   │   │   │   ├── notify
+│   │   │   │   │   │   └── MchNotifyList.vue
+│   │   │   │   │   ├── pay
+│   │   │   │   │   │   ├── PayOrderList.vue
+│   │   │   │   │   │   └── RefundModal.vue
+│   │   │   │   │   ├── refund
+│   │   │   │   │   │   └── RefundOrderList.vue
+│   │   │   │   │   └── transfer
+│   │   │   │   │       ├── TransferOrderDetail.vue
+│   │   │   │   │       └── TransferOrderList.vue
+│   │   │   │   ├── payconfig
+│   │   │   │   │   ├── payIfDefine
+│   │   │   │   │   │   ├── AddOrEdit.vue
+│   │   │   │   │   │   └── List.vue
+│   │   │   │   │   └── payWay
+│   │   │   │   │       ├── AddOrEdit.vue
+│   │   │   │   │       └── List.vue
+│   │   │   │   ├── role
+│   │   │   │   │   ├── Add.vue
+│   │   │   │   │   ├── AddOrEdit.vue
+│   │   │   │   │   ├── RoleDist.vue
+│   │   │   │   │   └── RolePage.vue
+│   │   │   │   ├── sys
+│   │   │   │   │   ├── config
+│   │   │   │   │   │   └── SysConfig.vue
+│   │   │   │   │   └── log
+│   │   │   │   │       └── SysLog.vue
+│   │   │   │   ├── sysuser
+│   │   │   │   │   ├── AddOrEdit.vue
+│   │   │   │   │   ├── RoleDist.vue
+│   │   │   │   │   └── SysUserPage.vue
+│   │   │   │   └── user
+│   │   │   │       └── Login.vue
+│   │   │   ├── App.vue
+│   │   │   ├── global.less
+│   │   │   ├── icons.ts
+│   │   │   ├── main.ts
+│   │   │   └── router.ts
+│   │   ├── tests
+│   │   │   └── unit
+│   │   │       └── .eslintrc.js
+│   │   ├── .browserslistrc
+│   │   ├── .env
+│   │   ├── .env.development
+│   │   ├── .eslintrc.js
+│   │   ├── .prettierrc.cjs
+│   │   ├── components.d.ts
+│   │   ├── index.html
+│   │   ├── package-lock.json
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   └── vite.config.ts
+│   ├── jeepay-ui-merchant
+│   │   ├── indexImgs
+│   │   │   ├── defava_f.png
+│   │   │   ├── defava_m.png
+│   │   │   ├── favicon.ico
+│   │   │   └── logo.svg
+│   │   ├── public
+│   │   │   ├── imgs
+│   │   │   │   ├── defava_f.png
+│   │   │   │   ├── defava_m.png
+│   │   │   │   ├── favicon.ico
+│   │   │   │   └── logo.svg
+│   │   │   └── index.html
+│   │   ├── src
+│   │   │   ├── api
+│   │   │   │   ├── login.js
+│   │   │   │   └── manage.js
+│   │   │   ├── assets
+│   │   │   │   ├── images
+│   │   │   │   │   └── background.png
+│   │   │   │   ├── payTestImg
+│   │   │   │   │   ├── ali_app.svg
+│   │   │   │   │   ├── ali_bar.svg
+│   │   │   │   │   ├── ali_jsapi.svg
+│   │   │   │   │   ├── ali_pc.svg
+│   │   │   │   │   ├── ali_qr.svg
+│   │   │   │   │   ├── ali_wap.svg
+│   │   │   │   │   ├── auto_bar.svg
+│   │   │   │   │   ├── jee-big.svg
+│   │   │   │   │   ├── jee-quan.svg
+│   │   │   │   │   ├── logo.svg
+│   │   │   │   │   ├── pay_h5.png
+│   │   │   │   │   ├── pp_pc.svg
+│   │   │   │   │   ├── qr_cashier.svg
+│   │   │   │   │   ├── scan.png
+│   │   │   │   │   ├── scan.svg
+│   │   │   │   │   ├── top.svg
+│   │   │   │   │   ├── wx_app.svg
+│   │   │   │   │   ├── wx_bar.svg
+│   │   │   │   │   ├── wx_h5.svg
+│   │   │   │   │   ├── wx_jsapi.svg
+│   │   │   │   │   └── wx_native.svg
+│   │   │   │   ├── styles
+│   │   │   │   │   ├── color.css
+│   │   │   │   │   └── color.less
+│   │   │   │   ├── svg
+│   │   │   │   │   ├── 403.svg
+│   │   │   │   │   ├── 404.svg
+│   │   │   │   │   ├── 500.svg
+│   │   │   │   │   ├── add-icon.svg
+│   │   │   │   │   ├── background.svg
+│   │   │   │   │   ├── backgroundold.svg
+│   │   │   │   │   ├── code.svg
+│   │   │   │   │   ├── empty.svg
+│   │   │   │   │   ├── jeepay.svg
+│   │   │   │   │   ├── lock.svg
+│   │   │   │   │   ├── mini-logo.svg
+│   │   │   │   │   ├── more.svg
+│   │   │   │   │   ├── operate.svg
+│   │   │   │   │   ├── scroll_down.svg
+│   │   │   │   │   ├── scroll_left.svg
+│   │   │   │   │   ├── scroll_right.svg
+│   │   │   │   │   ├── scroll_up.svg
+│   │   │   │   │   ├── select-code.svg
+│   │   │   │   │   ├── select-lock.svg
+│   │   │   │   │   ├── select-user.svg
+│   │   │   │   │   └── user.svg
+│   │   │   │   ├── logo-j.svg
+│   │   │   │   └── logo.svg
+│   │   │   ├── components
+│   │   │   │   ├── ChannelUser
+│   │   │   │   │   └── ChannelUserModal.vue
+│   │   │   │   ├── GlobalFooter
+│   │   │   │   │   └── index.vue
+│   │   │   │   ├── GlobalHeader
+│   │   │   │   │   ├── AvatarDropdown.vue
+│   │   │   │   │   └── RightContent.vue
+│   │   │   │   ├── GlobalLoad
+│   │   │   │   │   └── GlobalLoad.vue
+│   │   │   │   ├── JeepayCard
+│   │   │   │   │   └── JeepayCard.vue
+│   │   │   │   ├── JeepayLayout
+│   │   │   │   │   ├── JeepayLayout.vue
+│   │   │   │   │   └── SubMenu.vue
+│   │   │   │   ├── JeepayTable
+│   │   │   │   │   ├── JeepayDrChildren.vue
+│   │   │   │   │   ├── JeepayMenu.vue
+│   │   │   │   │   ├── JeepayTable.vue
+│   │   │   │   │   ├── JeepayTableColState.vue
+│   │   │   │   │   └── JeepayTableColumns.vue
+│   │   │   │   ├── JeepayTextUp
+│   │   │   │   │   └── JeepayTextUp.vue
+│   │   │   │   ├── JeepayUpload
+│   │   │   │   │   └── JeepayUpload.vue
+│   │   │   │   └── NProgress
+│   │   │   │       └── nprogress.less
+│   │   │   ├── config
+│   │   │   │   └── appConfig.js
+│   │   │   ├── core
+│   │   │   │   ├── bootstrap.js
+│   │   │   │   ├── lazy_use.js
+│   │   │   │   └── use.js
+│   │   │   ├── http
+│   │   │   │   ├── HttpRequest.js
+│   │   │   │   └── request.js
+│   │   │   ├── layouts
+│   │   │   │   ├── BasicLayout.less
+│   │   │   │   ├── BasicLayout.vue
+│   │   │   │   ├── BlankLayout.vue
+│   │   │   │   ├── PageView.vue
+│   │   │   │   ├── RouteView.vue
+│   │   │   │   ├── UserLayout.vue
+│   │   │   │   └── index.js
+│   │   │   ├── less
+│   │   │   │   ├── color.css
+│   │   │   │   └── color.less
+│   │   │   ├── router
+│   │   │   │   ├── generator-routers.js
+│   │   │   │   └── index.js
+│   │   │   ├── store
+│   │   │   │   └── modules
+│   │   │   │       └── user.ts
+│   │   │   ├── utils
+│   │   │   │   ├── domUtil.js
+│   │   │   │   ├── filter.js
+│   │   │   │   ├── infoBox.js
+│   │   │   │   ├── jeepayStorageWrapper.js
+│   │   │   │   ├── ruleGenerator.js
+│   │   │   │   ├── screenLog.js
+│   │   │   │   ├── throttle.js
+│   │   │   │   ├── util.js
+│   │   │   │   └── utils.less
+│   │   │   ├── views
+│   │   │   │   ├── current
+│   │   │   │   │   ├── AvatarModal.vue
+│   │   │   │   │   └── UserinfoPage.vue
+│   │   │   │   ├── dashboard
+│   │   │   │   │   ├── Analysis.vue
+│   │   │   │   │   ├── empty.vue
+│   │   │   │   │   ├── index.css
+│   │   │   │   │   └── index.less
+│   │   │   │   ├── division
+│   │   │   │   │   ├── group
+│   │   │   │   │   │   ├── AddOrEdit.vue
+│   │   │   │   │   │   └── DivisionReceiverGroupPage.vue
+│   │   │   │   │   ├── receiver
+│   │   │   │   │   │   ├── DivisionReceiverPage.vue
+│   │   │   │   │   │   ├── ReceiverAdd.vue
+│   │   │   │   │   │   └── ReceiverEdit.vue
+│   │   │   │   │   └── record
+│   │   │   │   │       ├── Detail.vue
+│   │   │   │   │       └── DivisionRecordPage.vue
+│   │   │   │   ├── exception
+│   │   │   │   │   ├── 403.vue
+│   │   │   │   │   ├── 404.vue
+│   │   │   │   │   └── 500.vue
+│   │   │   │   ├── mchApp
+│   │   │   │   │   ├── custom
+│   │   │   │   │   │   ├── AlipayPayConfig.vue
+│   │   │   │   │   │   └── WxpayPayConfig.vue
+│   │   │   │   │   ├── AddOrEdit.vue
+│   │   │   │   │   ├── AlipayAuth.vue
+│   │   │   │   │   ├── List.vue
+│   │   │   │   │   ├── MchPayConfigAddOrEdit.vue
+│   │   │   │   │   ├── MchPayIfConfigList.vue
+│   │   │   │   │   └── MchPayPassageAddOrEdit.vue
+│   │   │   │   ├── mchCode
+│   │   │   │   │   └── MchCodePage.vue
+│   │   │   │   ├── order
+│   │   │   │   │   ├── pay
+│   │   │   │   │   │   ├── PayOrderList.vue
+│   │   │   │   │   │   └── RefundModal.vue
+│   │   │   │   │   ├── refund
+│   │   │   │   │   │   └── RefundOrderList.vue
+│   │   │   │   │   └── transfer
+│   │   │   │   │       ├── TransferOrderDetail.vue
+│   │   │   │   │       └── TransferOrderList.vue
+│   │   │   │   ├── payTest
+│   │   │   │   │   ├── PayTest.vue
+│   │   │   │   │   ├── PayTestBarCode.vue
+│   │   │   │   │   ├── PayTestModal.vue
+│   │   │   │   │   └── payTest.css
+│   │   │   │   ├── role
+│   │   │   │   │   ├── AddOrEdit.vue
+│   │   │   │   │   ├── RoleDist.vue
+│   │   │   │   │   └── RolePage.vue
+│   │   │   │   ├── sysuser
+│   │   │   │   │   ├── AddOrEdit.vue
+│   │   │   │   │   ├── RoleDist.vue
+│   │   │   │   │   └── SysUserPage.vue
+│   │   │   │   ├── transfer
+│   │   │   │   │   ├── MchTransferPage.css
+│   │   │   │   │   └── MchTransferPage.vue
+│   │   │   │   └── user
+│   │   │   │       └── Login.vue
+│   │   │   ├── App.vue
+│   │   │   ├── global.less
+│   │   │   ├── icons.ts
+│   │   │   ├── main.ts
+│   │   │   └── router.ts
+│   │   ├── .browserslistrc
+│   │   ├── .env
+│   │   ├── .env.development
+│   │   ├── .eslintrc.js
+│   │   ├── .prettierrc.cjs
+│   │   ├── components.d.ts
+│   │   ├── index.html
+│   │   ├── package-lock.json
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   └── vite.config.ts
+│   ├── .dockerignore
+│   ├── .gitignore
+│   ├── Dockerfile
+│   ├── LICENSE
+│   ├── README.md
+│   └── default.conf.template
+├── runtime
+│   ├── JEE-D01-downstream-merchant-uat-report.md
+│   ├── JEE-E02-ccat-development-report.md
+│   ├── JEE-E04-ccat-production-candidate-deployment-report.md
+│   ├── JEE-I04-ccat-live-acceptance-git-delivery-report.md
+│   ├── JEE-I05-production-candidate-acceptance-git-delivery-report.md
+│   ├── JEE-I06-downstream-merchant-uat-integration-git-delivery-report.md
+│   ├── apply-v2-callback-edge-hot
+│   ├── assemble-td011-payment-artifact.py
+│   ├── ccat-token-probe-once
+│   ├── create-authorized-new-ccat-order-once
+│   ├── create-first-real-ccat-order-once
+│   ├── populate-v2-ccat-secret
+│   ├── provision-v2-ccat-config
+│   └── rollback-v2-callback-edge-hot
+├── tmp
+│   └── talend-jeepay-v2-create-guide.png
+├── .gitignore
+├── AGENTS.md
+├── PROJECT_TREE.md
+└── README.md
 
-390 directories, 1035 files
+483 directories, 1539 files
 ```
-
