@@ -85,6 +85,19 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
                 .eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_ING));
     }
 
+    /** 更新订单状态  【订单关闭】 --》 【支付成功】（ADR-0007：经完整验证的 paid-APN 恢复） **/
+    public boolean updateClosed2Success(String payOrderId, String channelOrderNo, String channelUserId){
+
+        PayOrder updateRecord = new PayOrder();
+        updateRecord.setState(PayOrder.STATE_SUCCESS);
+        updateRecord.setChannelOrderNo(channelOrderNo);
+        updateRecord.setChannelUser(channelUserId);
+        updateRecord.setSuccessTime(new Date());
+
+        return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()
+                .eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_CLOSED));
+    }
+
     /** 更新订单状态  【支付中】 --》 【订单关闭】 **/
     public boolean updateIng2Close(String payOrderId){
 

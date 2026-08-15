@@ -241,6 +241,12 @@ public class ChannelNoticeController extends AbstractCtrl {
 
                     updateOrderSuccess = payOrderService.updateIng2Fail(payOrderId, notifyResult.getChannelOrderId(), notifyResult.getChannelUserId(), notifyResult.getChannelErrCode(), notifyResult.getChannelErrMsg());
                 }
+
+            // ADR-0007：已关闭订单，仅接受经完整验证的 paid-APN 转回支付成功
+            }else if(payOrder.getState() == PayOrder.STATE_CLOSED
+                    && ChannelRetMsg.ChannelState.CONFIRM_SUCCESS == notifyResult.getChannelState()) {
+
+                updateOrderSuccess = payOrderService.updateClosed2Success(payOrderId, notifyResult.getChannelOrderId(), notifyResult.getChannelUserId());
             }
 
             // 更新订单 异常

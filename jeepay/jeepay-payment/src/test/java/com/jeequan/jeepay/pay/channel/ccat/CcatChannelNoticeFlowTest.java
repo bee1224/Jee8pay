@@ -138,6 +138,46 @@ class CcatChannelNoticeFlowTest {
         verify(mqSender).send(any(PayOrderMchNotifyMQ.class));
     }
 
+    @Test
+    void closedOrderPaidApnReopensToSuccessAndNotifies() throws Exception {
+        payOrder.setState(PayOrder.STATE_CLOSED);
+        payOrder.setChannelOrderNo("TX-CLOSED-REOPEN");
+        PayOrder committed = terminalSuccessOrder("TX-CLOSED-REOPEN");
+        when(payOrderService.getById(payOrder.getPayOrderId())).thenReturn(payOrder, committed);
+        when(payOrderService.updateClosed2Success(payOrder.getPayOrderId(), "TX-CLOSED-REOPEN", null))
+                .thenReturn(true);
+        when(client.query(params, payOrder.getPayOrderId())).thenReturn(queryResponse("7"));
+        when(notifyRecordService.findByPayOrder(payOrder.getPayOrderId())).thenReturn(null);
+        when(configContextQueryService.queryMchApp("M-TEST", "APP-TEST"))
+                .thenReturn(new MchApp().setMchNo("M-TEST").setAppId("APP-TEST").setAppSecret("TEST_ONLY_SECRET"));
+        when(notifyRecordService.save(any(MchNotifyRecord.class))).thenAnswer(invocation -> {
+            invocation.<MchNotifyRecord>getArgument(0).setNotifyId(2001L);
+            return true;
+        });
+
+        ResponseEntity response = invokeController(apnRequest("TX-CLOSED-REOPEN", "B", "101"));
+
+        assertEquals("OK", response.getBody());
+        assertEquals(PayOrder.STATE_SUCCESS, committed.getState());
+        verify(payOrderService).updateClosed2Success(payOrder.getPayOrderId(), "TX-CLOSED-REOPEN", null);
+        verify(notifyRecordService).save(any(MchNotifyRecord.class));
+        verify(mqSender).send(any(PayOrderMchNotifyMQ.class));
+    }
+
+    @Test
+    void closedOrderWaitingApnStaysClosedWithoutTransitionOrNotify() throws Exception {
+        payOrder.setState(PayOrder.STATE_CLOSED);
+        when(payOrderService.getById(payOrder.getPayOrderId())).thenReturn(payOrder);
+        when(client.query(params, payOrder.getPayOrderId())).thenReturn(queryResponse("3"));
+
+        ResponseEntity response = invokeController(apnRequest("TX-CLOSED-WAITING", "A", null));
+
+        assertEquals("ERROR", response.getBody());
+        verify(payOrderService, never()).updateClosed2Success(any(), any(), any());
+        verify(notifyRecordService, never()).save(any(MchNotifyRecord.class));
+        verifyNoInteractions(mqSender);
+    }
+
     private ResponseEntity invokeController(MockHttpServletRequest request) {
         try (MockedStatic<SpringBeansUtil> beans = mockStatic(SpringBeansUtil.class)) {
             beans.when(() -> SpringBeansUtil.getBean("ccatChannelNoticeService", IChannelNoticeService.class))

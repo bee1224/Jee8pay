@@ -84,7 +84,8 @@ public class CcatChannelNoticeService extends AbstractChannelNoticeService {
             }
             if (payOrder.getState() != PayOrder.STATE_ING
                     && payOrder.getState() != PayOrder.STATE_SUCCESS
-                    && payOrder.getState() != PayOrder.STATE_FAIL) {
+                    && payOrder.getState() != PayOrder.STATE_FAIL
+                    && payOrder.getState() != PayOrder.STATE_CLOSED) {
                 throw new IllegalArgumentException("local order state cannot accept APN");
             }
 
@@ -163,6 +164,12 @@ public class CcatChannelNoticeService extends AbstractChannelNoticeService {
         }
         if (payOrder.getState() == PayOrder.STATE_FAIL && state != ChannelRetMsg.ChannelState.CONFIRM_FAIL) {
             throw new IllegalArgumentException("terminal fail state mismatch");
+        }
+        // ADR-0007：本地 CLOSED 是未諮詢 Provider 的本地關閉；只有經完整驗證的 paid-APN
+        // （authenticated Query 顯示已付款）可轉回 SUCCESS，其餘狀態維持 CLOSED。
+        if (payOrder.getState() == PayOrder.STATE_CLOSED
+                && state != ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
+            throw new IllegalArgumentException("closed order only accepts paid APN");
         }
     }
 

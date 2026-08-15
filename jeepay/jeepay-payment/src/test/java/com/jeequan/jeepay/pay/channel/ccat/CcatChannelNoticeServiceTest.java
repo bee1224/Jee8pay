@@ -189,6 +189,41 @@ class CcatChannelNoticeServiceTest {
         assertFalse(parsed.getRight().toString().contains("pay_amount"));
     }
 
+    @Test
+    void closedOrderWithPaidApnReturnsConfirmSuccessForReopen() throws Exception {
+        payOrder.setState(PayOrder.STATE_CLOSED);
+        payOrder.setChannelOrderNo("TX-REOPEN");
+        when(client.query(params, payOrder.getPayOrderId())).thenReturn(queryResponse("4"));
+
+        ChannelRetMsg result = service.doNotice(new MockHttpServletRequest(),
+                payload("test-user", "TX-REOPEN", payOrder.getPayOrderId(), "101", "B", "101"),
+                payOrder, context, CcatChannelNoticeService.NoticeTypeEnum.DO_NOTIFY);
+
+        assertEquals(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS, result.getChannelState());
+        assertEquals("OK", result.getResponseEntity().getBody());
+        verifyNoInteractions(payOrderService);
+    }
+
+    @Test
+    void closedOrderWithWaitingApnIsRejected() throws Exception {
+        payOrder.setState(PayOrder.STATE_CLOSED);
+        when(client.query(params, payOrder.getPayOrderId())).thenReturn(queryResponse("3"));
+
+        assertThrows(ResponseException.class, () -> service.doNotice(new MockHttpServletRequest(),
+                payload("test-user", "TX-REOPEN", payOrder.getPayOrderId(), "101", "A", null),
+                payOrder, context, CcatChannelNoticeService.NoticeTypeEnum.DO_NOTIFY));
+    }
+
+    @Test
+    void closedOrderWithExpiredApnIsRejected() throws Exception {
+        payOrder.setState(PayOrder.STATE_CLOSED);
+        when(client.query(params, payOrder.getPayOrderId())).thenReturn(queryResponse("6"));
+
+        assertThrows(ResponseException.class, () -> service.doNotice(new MockHttpServletRequest(),
+                payload("test-user", "TX-REOPEN", payOrder.getPayOrderId(), "101", "D", null),
+                payOrder, context, CcatChannelNoticeService.NoticeTypeEnum.DO_NOTIFY));
+    }
+
     private CcatChannelNoticeService.CcatNoticePayload payload(String apiId, String transId, String orderNo,
                                                                String amount, String status, String payAmount) {
         return CcatChannelNoticeService.CcatNoticePayload.parse(
