@@ -22,11 +22,13 @@ import com.jeequan.jeepay.components.mq.model.PayOrderMchNotifyMQ;
 import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.entity.MchNotifyRecord;
+import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchNotifyRecordService;
+import com.jeequan.jeepay.service.impl.PayOrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -53,6 +55,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MchNotifyController extends CommonCtrl {
 
     @Autowired private MchNotifyRecordService mchNotifyService;
+    @Autowired private PayOrderService payOrderService;
     @Autowired private IMQSender mqSender;
 
     /**
@@ -164,6 +167,47 @@ public class MchNotifyController extends CommonCtrl {
 
         //调起MQ重发
         mqSender.send(PayOrderMchNotifyMQ.build(notifyId));
+
+        return ApiRes.ok(mchNotify);
+    }
+
+   /*
+    * 功能描述: 商户通知手动发送（仅终态订单）
+    * 与 resend 的区别：按 payOrderId 定位订单，允许对已支付/已失败订单的
+    * 通知记录（含已成功记录）再次发送，供外部系统接收端重测；
+    * 仍复用原生 MchNotifyRecord + PayOrderMchNotifyMQ，不改变订单状态、
+    * 不调用 Provider、不新增通知管线。
+    */
+    @Operation(summary = "商户通知手动发送")
+    @Parameters({
+           @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+           @Parameter(name = "payOrderId", description = "支付订单号", required = true)
+    })
+    @PreAuthorize("hasAuthority('ENT_MCH_NOTIFY_RESEND')")
+    @RequestMapping(value="send/{payOrderId}", method = RequestMethod.POST)
+    public ApiRes<MchNotifyRecord> send(@PathVariable("payOrderId") String payOrderId) {
+
+        PayOrder payOrder = payOrderService.getById(payOrderId);
+        if (payOrder == null) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
+        if (payOrder.getState() != PayOrder.STATE_SUCCESS && payOrder.getState() != PayOrder.STATE_FAIL) {
+            throw new BizException("仅支持已支付或已失败订单的通知发送");
+        }
+
+        MchNotifyRecord mchNotify = mchNotifyService.findByPayOrder(payOrderId);
+        if (mchNotify == null) {
+            throw new BizException("该订单无商户通知记录，无法手动发送");
+        }
+        if (mchNotify.getState() == MchNotifyRecord.STATE_ING) {
+            throw new BizException("商户通知进行中，请稍后再试");
+        }
+
+        //更新通知中并增加一次允许发送次数，沿用原生通知MQ
+        mchNotifyService.getBaseMapper().updateIngAndAddNotifyCountLimit(mchNotify.getNotifyId());
+
+        //调起MQ发送
+        mqSender.send(PayOrderMchNotifyMQ.build(mchNotify.getNotifyId()));
 
         return ApiRes.ok(mchNotify);
     }
