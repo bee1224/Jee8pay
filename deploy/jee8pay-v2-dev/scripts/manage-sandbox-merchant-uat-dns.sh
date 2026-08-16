@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [[ $# -ne 3 ]]; then
-  echo 'usage: manage-sandbox-merchant-uat-dns.sh <plan|apply|rollback> <cloudflare-token-ini> <backup-json>' >&2
+  echo 'usage: manage-sandbox-merchant-uat-dns.sh <plan|apply|rollback|proxy-plan|proxy-apply|proxy-rollback> <cloudflare-token-ini> <backup-json>' >&2
   exit 2
 fi
 
@@ -14,8 +14,9 @@ readonly record_name=api-v2-dev.nnviopp.com
 readonly record_ip=159.198.40.128
 readonly api_root=https://api.cloudflare.com/client/v4
 
-[[ $action == plan || $action == apply || $action == rollback ]] || {
-  echo 'action must be plan, apply, or rollback' >&2
+[[ $action == plan || $action == apply || $action == rollback || \
+   $action == proxy-plan || $action == proxy-apply || $action == proxy-rollback ]] || {
+  echo 'unsupported action' >&2
   exit 2
 }
 
@@ -63,6 +64,71 @@ api "$api_root/zones/$zone_id/dns_records?type=A&name=$record_name" >"$record_re
 jq -e '.success == true and (.result | length) <= 1' "$record_response" >/dev/null ||
   fail 'target hostname has an ambiguous record set'
 record_count=$(jq '.result | length' "$record_response")
+
+if [[ $action == proxy-plan ]]; then
+  [[ $record_count -eq 1 ]] || fail 'proxy plan expected exactly one current record'
+  jq -e --arg name "$record_name" --arg content "$record_ip" \
+    '.result[0].type == "A" and .result[0].name == $name and .result[0].content == $content and .result[0].proxied == false and .result[0].ttl == 300' \
+    "$record_response" >/dev/null || fail 'proxy plan current record differs from approved pre-state'
+  echo "dns_proxy_plan name=$record_name content=$record_ip proxied=false->true ttl=300->auto"
+  exit 0
+fi
+
+if [[ $action == proxy-apply ]]; then
+  [[ ${SANDBOX_API_V2_PROXY_CHANGE_APPROVED:-} == YES ]] ||
+    fail 'set SANDBOX_API_V2_PROXY_CHANGE_APPROVED=YES only after explicit approval'
+  [[ $record_count -eq 1 ]] || fail 'proxy apply expected exactly one current record'
+  jq -e --arg name "$record_name" --arg content "$record_ip" \
+    '.result[0].type == "A" and .result[0].name == $name and .result[0].content == $content and .result[0].proxied == false and .result[0].ttl == 300' \
+    "$record_response" >/dev/null || fail 'proxy apply current record differs from approved pre-state'
+  [[ ! -e $backup_file ]] || fail 'backup path already exists; refusing to overwrite it'
+  backup_dir=$(dirname -- "$backup_file")
+  [[ -d $backup_dir ]] || fail 'backup directory does not exist'
+  backup_temp=$(mktemp "$backup_dir/.api-v2-proxy-backup.XXXXXX")
+  jq --arg zone_id "$zone_id" --arg name "$record_name" \
+    '{zone_id:$zone_id,captured_at:(now|todateiso8601),name:$name,records:.result}' \
+    "$record_response" >"$backup_temp"
+  chmod 0600 "$backup_temp"
+  mv -- "$backup_temp" "$backup_file"
+  record_id=$(jq -r '.result[0].id' "$record_response")
+  payload=$temporary_dir/proxy-apply-payload.json
+  result=$temporary_dir/proxy-apply-result.json
+  jq -n '{proxied:true}' >"$payload"
+  api --request PATCH --data @"$payload" \
+    "$api_root/zones/$zone_id/dns_records/$record_id" >"$result"
+  jq -e --arg name "$record_name" --arg content "$record_ip" \
+    '.success == true and .result.type == "A" and .result.name == $name and .result.content == $content and .result.proxied == true and .result.ttl == 1' \
+    "$result" >/dev/null || fail 'record proxy state was not changed exactly'
+  echo "dns_proxy_applied name=$record_name content=$record_ip proxied=true ttl=auto"
+  echo "dns_backup=$backup_file"
+  exit 0
+fi
+
+if [[ $action == proxy-rollback ]]; then
+  [[ ${SANDBOX_API_V2_PROXY_ROLLBACK_APPROVED:-} == YES ]] ||
+    fail 'set SANDBOX_API_V2_PROXY_ROLLBACK_APPROVED=YES after selecting the exact backup'
+  [[ -f $backup_file ]] || fail 'backup file is missing'
+  [[ $(stat -c '%u:%g:%a' "$backup_file") == '0:0:600' ]] ||
+    fail 'backup file must be root:root mode 0600'
+  jq -e --arg zone_id "$zone_id" --arg name "$record_name" --arg content "$record_ip" \
+    '.zone_id == $zone_id and .name == $name and (.records | length) == 1 and .records[0].type == "A" and .records[0].name == $name and .records[0].content == $content and .records[0].proxied == false and .records[0].ttl == 300' \
+    "$backup_file" >/dev/null || fail 'backup is not the approved DNS-only target record'
+  [[ $record_count -eq 1 ]] || fail 'proxy rollback expected exactly one current record'
+  jq -e --arg name "$record_name" --arg content "$record_ip" \
+    '.result[0].type == "A" and .result[0].name == $name and .result[0].content == $content and .result[0].proxied == true' \
+    "$record_response" >/dev/null || fail 'current record is not the JEE-CF01 proxied target'
+  record_id=$(jq -r '.result[0].id' "$record_response")
+  payload=$temporary_dir/proxy-rollback-payload.json
+  result=$temporary_dir/proxy-rollback-result.json
+  jq -n '{proxied:false,ttl:300}' >"$payload"
+  api --request PATCH --data @"$payload" \
+    "$api_root/zones/$zone_id/dns_records/$record_id" >"$result"
+  jq -e --arg name "$record_name" --arg content "$record_ip" \
+    '.success == true and .result.type == "A" and .result.name == $name and .result.content == $content and .result.proxied == false and .result.ttl == 300' \
+    "$result" >/dev/null || fail 'record proxy rollback was not exact'
+  echo "dns_proxy_rolled_back name=$record_name content=$record_ip proxied=false ttl=300"
+  exit 0
+fi
 
 if [[ $action == plan ]]; then
   if [[ $record_count -eq 0 ]]; then

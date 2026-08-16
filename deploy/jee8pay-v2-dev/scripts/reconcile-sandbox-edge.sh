@@ -4,7 +4,7 @@ set -euo pipefail
 readonly edge=nnviopp-sandbox-edge
 readonly expected_host=server1.nnviopp.com
 readonly sandbox_ip=159.198.40.128
-readonly expected_config_sha=88f89d370c65b936ce0997e2088e2c6f71c11fdab338cd6ba21058c7274191dc
+readonly expected_config_sha=4de9702422d8090fef6d26e446ccdec55c55c1bc2d402178d6710e3149e84748
 readonly expected_overlay_sha=6ba37f3fb1221b804acb8a7d2d270d4b90b87570101cb1d8b70d76c20542f236
 readonly final_config=/opt/jee8pay-v2-dev/merchant-uat/nginx.proposed.conf
 readonly overlay=/opt/jee8pay-v2-dev/public-callback/compose.edge-overlay.yaml

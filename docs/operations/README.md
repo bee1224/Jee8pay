@@ -9,5 +9,6 @@
 - [`sandbox-edge-recovery.md`](sandbox-edge-recovery.md)：Sandbox public edge recovery、canonical network/config persistence、edge-only reconcile、health 與 External readiness gate。
 - [`merchant-uat-frontend-operator-map.md`](merchant-uat-frontend-operator-map.md)：JEE-D01 Manager／Merchant／Cashier actual page 與 CCAT_IBON relevance mapping。
 - [`ccat-v2-production-candidate.md`](ccat-v2-production-candidate.md)：CCAT-only Production Candidate 的 source provenance、隔離 topology、resource budget、secret Human Gate、callback plan 與 rollback。
+- [`platform-access.md`](platform-access.md)：營運平台公開網址（測試/正式）、登入帳號政策與前端繁中化狀態。
 
 Upstream deployment 文件保留在 `jeepay/docs/`，不納入 Taiwan Workspace governance；需要時從 Workspace 文件連結引用。
