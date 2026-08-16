@@ -21,6 +21,7 @@ import com.jeequan.jeepay.core.entity.SysUserAuth;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.core.model.security.JeeUserDetails;
 import com.jeequan.jeepay.service.mapper.SysUserAuthMapper;
+import com.jeequan.jeepay.service.utils.UpperCasePasswordEncoder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -49,7 +50,7 @@ public class SysUserAuthService extends ServiceImpl<SysUserAuthMapper, SysUserAu
     public void addUserAuthDefault(Long userId, String loginUserName, String telPhone, String pwdRaw, String sysType){
 
         String salt = StringKit.getUUID(6); //6位随机数
-        String userPwd = new BCryptPasswordEncoder().encode(pwdRaw);
+        String userPwd = new UpperCasePasswordEncoder().encode(pwdRaw);
 
         /** 用户名登录方式 */
         SysUserAuth record = new SysUserAuth(); record.setUserId(userId); record.setCredential(userPwd); record.setSalt(salt);record.setSysType(sysType);
@@ -93,7 +94,7 @@ public class SysUserAuthService extends ServiceImpl<SysUserAuthMapper, SysUserAu
                 }
                 SysUserAuth updateRecord = new SysUserAuth();
                 updateRecord.setAuthId(auth.getAuthId());
-                updateRecord.setCredential(new BCryptPasswordEncoder().encode(newPwd));
+                updateRecord.setCredential(new UpperCasePasswordEncoder().encode(newPwd));
                 updateById(updateRecord);
             }
         }
@@ -108,7 +109,7 @@ public class SysUserAuthService extends ServiceImpl<SysUserAuthMapper, SysUserAu
                 .eq(SysUserAuth::getUserId, JeeUserDetails.getCurrentUserDetails().getSysUser().getSysUserId())
                 .eq(SysUserAuth::getIdentityType, CS.AUTH_TYPE.LOGIN_USER_NAME)
         );
-        if(auth != null && new BCryptPasswordEncoder().matches(pwdRaw, auth.getCredential())){
+        if(auth != null && new UpperCasePasswordEncoder().matches(pwdRaw, auth.getCredential())){
             return true;
         }
 

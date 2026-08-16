@@ -16,6 +16,7 @@
 package com.jeequan.jeepay.mch.secruity;
 
 import com.jeequan.jeepay.mch.config.SystemYmlConfig;
+import com.jeequan.jeepay.service.utils.UpperCasePasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -111,11 +112,11 @@ public class WebSecurityConfig{
     }
 
     /**
-     * 使用BCrypt强哈希函数 实现PasswordEncoder
+     * 使用BCrypt强哈希函数 实现PasswordEncoder（密碼不分大小寫，一律以 toUpperCase 正規化）
      * **/
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new UpperCasePasswordEncoder();
     }
 
     /**
