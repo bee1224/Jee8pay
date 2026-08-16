@@ -9,15 +9,15 @@
     :drawer-style="{ backgroundColor: '#f0f2f5' }"
     width="80%"
   >
-    <a-descriptions title="绑定分账接收者账号">
-      <a-descriptions-item label="当前应用">
+    <a-descriptions title="綁定分帳接收者帳號">
+      <a-descriptions-item label="當前應用">
         <span style="color: red">{{ vdata.appInfo.appName }} [{{ vdata.appInfo.appId }}]</span>
       </a-descriptions-item>
 
-      <a-descriptions-item label="选择要加入到的账号分组">
+      <a-descriptions-item label="選擇要加入到的帳號分組">
         <a-select
           style="width: 210px"
-          placeholder="账号分组"
+          placeholder="帳號分組"
           v-model:value="vdata.selectedReceiverGroupId"
         >
           <a-select-option
@@ -32,10 +32,10 @@
     </a-descriptions>
     <a-divider></a-divider>
 
-    <a-card title="微信账号" v-show="vdata.appSupportIfCodes.indexOf('wxpay') >= 0">
+    <a-card title="微信帳號" v-show="vdata.appSupportIfCodes.indexOf('wxpay') >= 0">
       <template #extra>
         <a-button style="background: green; color: white" @click="addReceiverRow('wxpay')">
-          添加【微信官方】分账接收账号
+          添加【微信官方】分帳接收帳號
         </a-button>
       </template>
 
@@ -51,15 +51,15 @@
           <template v-if="column.key === 'reqBindState'">
             <div style="color: salmon" v-show="record.reqBindState == 0">
               <a-icon type="info-circle" />
-              待绑定
+              待綁定
             </div>
             <div style="color: green" v-show="record.reqBindState == 1">
               <a-icon type="check-circle" />
-              绑定成功
+              綁定成功
             </div>
             <div style="color: red" v-show="record.reqBindState == 2">
               <a-icon type="close-circle" />
-              绑定异常
+              綁定異常
             </div>
           </template>
 
@@ -68,7 +68,7 @@
             <a-input
               v-model:value="record.receiverAlias"
               style="width: 150px"
-              placeholder="(选填)默认为账号"
+              placeholder="(選填)預設為帳號"
             />
           </template>
 
@@ -77,11 +77,11 @@
             <a-select
               style="width: 110px"
               v-model:value="record.accType"
-              placeholder="账号类型"
+              placeholder="帳號類型"
               default-value="0"
             >
-              <a-select-option value="0">个人</a-select-option>
-              <a-select-option value="1">微信商户</a-select-option>
+              <a-select-option value="0">個人</a-select-option>
+              <a-select-option value="1">微信商戶</a-select-option>
             </a-select>
           </template>
 
@@ -90,20 +90,20 @@
             <a-input
               v-model:value="record.accNo"
               style="width: 150px"
-              placeholder="请输入接收方账号"
+              placeholder="請輸入接收方帳號"
             />
             <a-button
               type="link"
               v-if="record.accType == 0"
               @click="showChannelUserModal('wxpay', record)"
             >
-              扫码获取
+              掃碼獲取
             </a-button>
           </template>
 
           <!-- 接收方姓名 -->
           <template v-if="column.key === 'accName'">
-            <a-input v-model:value="record.accName" placeholder="请输入接收方姓名" />
+            <a-input v-model:value="record.accName" placeholder="請輸入接收方姓名" />
           </template>
 
           <!-- 分账关系 -->
@@ -111,21 +111,21 @@
             <a-select
               style="width: 110px"
               labelInValue
-              placeholder="分账关系类型"
+              placeholder="分帳關係類型"
               :defaultValue="{ key: 'PARTNER' }"
               @change="changeRelationType(record, $event)"
             >
-              <a-select-option key="PARTNER">合作伙伴</a-select-option>
-              <a-select-option key="SERVICE_PROVIDER">服务商</a-select-option>
-              <a-select-option key="STORE">门店</a-select-option>
-              <a-select-option key="STAFF">员工</a-select-option>
+              <a-select-option key="PARTNER">合作夥伴</a-select-option>
+              <a-select-option key="SERVICE_PROVIDER">服務商</a-select-option>
+              <a-select-option key="STORE">門店</a-select-option>
+              <a-select-option key="STAFF">員工</a-select-option>
               <a-select-option key="STORE_OWNER">店主</a-select-option>
-              <a-select-option key="HEADQUARTER">总部</a-select-option>
+              <a-select-option key="HEADQUARTER">總部</a-select-option>
               <a-select-option key="BRAND">品牌方</a-select-option>
-              <a-select-option key="DISTRIBUTOR">分销商</a-select-option>
-              <a-select-option key="USER">用户</a-select-option>
-              <a-select-option key="SUPPLIER">供应商</a-select-option>
-              <a-select-option key="CUSTOM">自定义</a-select-option>
+              <a-select-option key="DISTRIBUTOR">分銷商</a-select-option>
+              <a-select-option key="USER">使用者</a-select-option>
+              <a-select-option key="SUPPLIER">供應商</a-select-option>
+              <a-select-option key="CUSTOM">自訂</a-select-option>
             </a-select>
           </template>
 
@@ -144,17 +144,17 @@
           </template>
 
           <template v-if="column.key === 'op'">
-            <a-button type="link" @click="delRow(record)">删除</a-button>
+            <a-button type="link" @click="delRow(record)">刪除</a-button>
           </template>
         </template>
       </a-table>
     </a-card>
 
     <br />
-    <a-card title="支付宝账号" v-show="vdata.appSupportIfCodes.indexOf('alipay') >= 0">
+    <a-card title="支付寶帳號" v-show="vdata.appSupportIfCodes.indexOf('alipay') >= 0">
       <template #extra>
         <a-button style="background: dodgerblue; color: white" @click="addReceiverRow('alipay')">
-          添加【支付宝官方】分账接收账号
+          添加【支付寶官方】分帳接收帳號
         </a-button>
       </template>
       <a-table
@@ -169,15 +169,15 @@
           <template v-if="column.key === 'reqBindState'">
             <div style="color: salmon" v-show="record.reqBindState == 0">
               <a-icon type="info-circle" />
-              待绑定
+              待綁定
             </div>
             <div style="color: green" v-show="record.reqBindState == 1">
               <a-icon type="check-circle" />
-              绑定成功
+              綁定成功
             </div>
             <div style="color: red" v-show="record.reqBindState == 2">
               <a-icon type="close-circle" />
-              绑定异常
+              綁定異常
             </div>
           </template>
 
@@ -186,7 +186,7 @@
             <a-input
               v-model:value="record.receiverAlias"
               style="width: 150px"
-              placeholder="(选填)默认为账号"
+              placeholder="(選填)預設為帳號"
             />
           </template>
 
@@ -195,11 +195,11 @@
             <a-select
               style="width: 110px"
               v-model:value="record.accType"
-              placeholder="账号类型"
+              placeholder="帳號類型"
               default-value="0"
             >
-              <a-select-option value="0">个人</a-select-option>
-              <a-select-option value="1">商户</a-select-option>
+              <a-select-option value="0">個人</a-select-option>
+              <a-select-option value="1">商戶</a-select-option>
             </a-select>
           </template>
 
@@ -208,20 +208,20 @@
             <a-input
               v-model:value="record.accNo"
               style="width: 150px"
-              placeholder="请输入接收方账号"
+              placeholder="請輸入接收方帳號"
             />
             <a-button
               type="link"
               v-if="record.accType == 0"
               @click="showChannelUserModal('alipay', record)"
             >
-              扫码获取
+              掃碼獲取
             </a-button>
           </template>
 
           <!-- 接收方姓名 -->
           <template v-if="column.key === 'accName'">
-            <a-input v-model:value="record.accName" placeholder="请输入接收方姓名" />
+            <a-input v-model:value="record.accName" placeholder="請輸入接收方姓名" />
           </template>
 
           <!-- 分账关系 -->
@@ -229,21 +229,21 @@
             <a-select
               style="width: 110px"
               labelInValue
-              placeholder="分账关系类型"
+              placeholder="分帳關係類型"
               :defaultValue="{ key: 'PARTNER' }"
               @change="changeRelationType(record, $event)"
             >
-              <a-select-option key="PARTNER">合作伙伴</a-select-option>
-              <a-select-option key="SERVICE_PROVIDER">服务商</a-select-option>
-              <a-select-option key="STORE">门店</a-select-option>
-              <a-select-option key="STAFF">员工</a-select-option>
+              <a-select-option key="PARTNER">合作夥伴</a-select-option>
+              <a-select-option key="SERVICE_PROVIDER">服務商</a-select-option>
+              <a-select-option key="STORE">門店</a-select-option>
+              <a-select-option key="STAFF">員工</a-select-option>
               <a-select-option key="STORE_OWNER">店主</a-select-option>
-              <a-select-option key="HEADQUARTER">总部</a-select-option>
+              <a-select-option key="HEADQUARTER">總部</a-select-option>
               <a-select-option key="BRAND">品牌方</a-select-option>
-              <a-select-option key="DISTRIBUTOR">分销商</a-select-option>
-              <a-select-option key="USER">用户</a-select-option>
-              <a-select-option key="SUPPLIER">供应商</a-select-option>
-              <a-select-option key="CUSTOM">自定义</a-select-option>
+              <a-select-option key="DISTRIBUTOR">分銷商</a-select-option>
+              <a-select-option key="USER">使用者</a-select-option>
+              <a-select-option key="SUPPLIER">供應商</a-select-option>
+              <a-select-option key="CUSTOM">自訂</a-select-option>
             </a-select>
           </template>
 
@@ -262,7 +262,7 @@
           </template>
 
           <template v-if="column.key === 'op'">
-            <a-button type="link" @click="delRow(record)">删除</a-button>
+            <a-button type="link" @click="delRow(record)">刪除</a-button>
           </template>
         </template>
       </a-table>
@@ -270,9 +270,9 @@
 
     <div class="drawer-btn-center">
       <a-button type="primary" :style="{ marginRight: '8px' }" @click="reqBatchBindReceiver(0)">
-        发起绑定请求
+        發起綁定請求
       </a-button>
-      <a-button @click="onClose">关闭</a-button>
+      <a-button @click="onClose">關閉</a-button>
     </div>
 
     <ChannelUserModal
@@ -298,26 +298,26 @@ const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProp
 
 // eslint-disable-next-line no-unused-vars
 const accTableColumns = [
-  { key: 'reqBindState', title: '状态', scopedSlots: { customRender: 'reqBindStateSlot' } },
-  { key: 'receiverAlias', title: '账号别名', scopedSlots: { customRender: 'receiverAliasSlot' } },
-  { key: 'accType', title: '账号类型', scopedSlots: { customRender: 'accTypeSlot' } },
-  { key: 'accNo', width: '300px', title: '接收方账号', scopedSlots: { customRender: 'accNoSlot' } },
+  { key: 'reqBindState', title: '狀態', scopedSlots: { customRender: 'reqBindStateSlot' } },
+  { key: 'receiverAlias', title: '帳號別名', scopedSlots: { customRender: 'receiverAliasSlot' } },
+  { key: 'accType', title: '帳號類型', scopedSlots: { customRender: 'accTypeSlot' } },
+  { key: 'accNo', width: '300px', title: '接收方帳號', scopedSlots: { customRender: 'accNoSlot' } },
   {
     key: 'accName',
     width: '180px',
     title: '接收方姓名',
     scopedSlots: { customRender: 'accNameSlot' },
   },
-  { key: 'relationType', title: '分账关系', scopedSlots: { customRender: 'relationTypeSlot' } },
+  { key: 'relationType', title: '分帳關係', scopedSlots: { customRender: 'relationTypeSlot' } },
   {
     key: 'relationTypeName',
     width: '200px',
-    title: '关系名称',
+    title: '關係名稱',
     scopedSlots: { customRender: 'relationTypeNameSlot' },
   },
   {
     key: 'divisionProfit',
-    title: '默认分账比例',
+    title: '預設分帳比例',
     scopedSlots: { customRender: 'divisionProfitSlot' },
   },
   { key: 'op', title: '操作', scopedSlots: { customRender: 'opSlot' } },
@@ -333,7 +333,7 @@ const defaultReceiverTemplate = {
   accNo: null,
   accName: '',
   relationType: 'PARTNER', // 默认合作伙伴, 需要同时更改select的defaultValue
-  relationTypeName: '合作伙伴',
+  relationTypeName: '合作夥伴',
   divisionProfit: '',
 }
 
@@ -413,7 +413,7 @@ function changeChannelUserIdFunc({ channelUserId, extObject }) {
 // 添加一行账号信息
 function addReceiverRow(ifCode) {
   if (!vdata.selectedReceiverGroupId) {
-    return $infoBox.message.error('请选选择要加入的分组')
+    return $infoBox.message.error('請選選擇要加入的分組')
   }
   vdata.receiverTableData.push(
     Object.assign({}, defaultReceiverTemplate, {
@@ -427,12 +427,12 @@ function addReceiverRow(ifCode) {
 // 单条绑定 返回是否成功
 function reqBatchBindReceiver(i) {
   if (vdata.receiverTableData.length <= 0) {
-    return $infoBox.message.error('请先添加账号')
+    return $infoBox.message.error('請先添加帳號')
   }
 
   // 完成了所有的绑定操作
   if (i >= vdata.receiverTableData.length) {
-    return $infoBox.message.success('已完成所有账号的绑定操作')
+    return $infoBox.message.success('已完成所有帳號的綁定操作')
   }
 
   // 当前的账号
@@ -445,11 +445,11 @@ function reqBatchBindReceiver(i) {
   }
 
   if (!currentReceiver.accNo) {
-    return $infoBox.message.error(`第${i + 1}条： 接收方账号不能为空`)
+    return $infoBox.message.error(`第${i + 1}筆： 接收方帳號不能為空`)
   }
 
   if (currentReceiver.relationType === 'CUSTOM' && !currentReceiver.relationTypeName) {
-    return $infoBox.message.error(`第${i + 1}条： 自定义类型时接收方账号名称不能为空`)
+    return $infoBox.message.error(`第${i + 1}筆： 自訂類型時接收方帳號名稱不能為空`)
   }
 
   if (
@@ -457,7 +457,7 @@ function reqBatchBindReceiver(i) {
     currentReceiver.divisionProfit <= 0 ||
     currentReceiver.divisionProfit > 100
   ) {
-    return $infoBox.message.error(`第${i + 1}条： 默认分账比例请设置在[0.01% ~ 100% ] 之间`)
+    return $infoBox.message.error(`第${i + 1}筆： 預設分帳比例請設定在[0.01% ~ 100% ] 之間`)
   }
 
   req
@@ -470,10 +470,10 @@ function reqBatchBindReceiver(i) {
       } else {
         currentReceiver.reqBindState = 2 // 异常
         $infoBox.modalError(
-          `第${i + 1}条： 绑定异常`,
+          `第${i + 1}筆： 綁定異常`,
           <div>
-            <div>错误码：{apiRes.errCode}</div>
-            <div>错误信息：{apiRes.errMsg}</div>
+            <div>錯誤碼：{apiRes.errCode}</div>
+            <div>錯誤訊息：{apiRes.errMsg}</div>
           </div>
         )
       }

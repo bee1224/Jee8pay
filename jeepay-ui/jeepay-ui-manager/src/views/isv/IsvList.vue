@@ -4,21 +4,21 @@
       <div class="table-page-search-wrapper">
         <a-form layout="inline" class="table-head-ground">
           <div class="table-layer">
-            <jeepay-text-up :placeholder="'服务商号'" v-model:value="vdata.searchData.isvNo" />
-            <jeepay-text-up :placeholder="'服务商名称'" v-model:value="vdata.searchData.isvName" />
+            <jeepay-text-up :placeholder="'服務商號'" v-model:value="vdata.searchData.isvNo" />
+            <jeepay-text-up :placeholder="'服務商名稱'" v-model:value="vdata.searchData.isvName" />
 
             <a-select
               v-model:value="vdata.searchData.state"
-              placeholder="服务商状态"
+              placeholder="服務商狀態"
               class="table-head-layout"
             >
               <a-select-option value="">全部</a-select-option>
-              <a-select-option value="0">禁用</a-select-option>
-              <a-select-option value="1">启用</a-select-option>
+              <a-select-option value="0">停用</a-select-option>
+              <a-select-option value="1">啟用</a-select-option>
             </a-select>
             <span class="table-page-search-submitButtons">
               <a-button type="primary" @click="queryFunc" :loading="vdata.btnLoading">
-                搜索
+                搜尋
               </a-button>
               <a-button style="margin-left: 8px" @click="() => (vdata.searchData = {})">
                 重置
@@ -57,7 +57,7 @@
           <template v-if="column.key === 'state'">
             <a-badge
               :status="record.state === 0 ? 'error' : 'processing'"
-              :text="record.state === 0 ? '禁用' : '启用'"
+              :text="record.state === 0 ? '停用' : '啟用'"
             />
           </template>
           <template v-if="column.key === 'op'">
@@ -75,7 +75,7 @@
                 v-if="$access('ENT_ISV_PAY_CONFIG_LIST')"
                 @click="showPayIfConfigList(record.isvNo)"
               >
-                支付配置
+                支付設定
               </a-button>
               <a-button
                 type="link"
@@ -83,7 +83,7 @@
                 style="color: red"
                 @click="delFunc(record.isvNo)"
               >
-                删除
+                刪除
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -107,13 +107,13 @@ const tableColumns = [
   {
     key: 'isvName',
     width: '200px',
-    title: '服务商名称',
+    title: '服務商名稱',
     fixed: 'left',
     scopedSlots: { customRender: 'isvNameSlot' },
   },
-  { key: 'isvNo', title: '服务商号', dataIndex: 'isvNo' },
-  { key: 'state', title: '服务商状态', scopedSlots: { customRender: 'stateSlot' } },
-  { key: 'createdAt', dataIndex: 'createdAt', title: '创建日期' },
+  { key: 'isvNo', title: '服務商號', dataIndex: 'isvNo' },
+  { key: 'state', title: '服務商狀態', scopedSlots: { customRender: 'stateSlot' } },
+  { key: 'createdAt', dataIndex: 'createdAt', title: '建立日期' },
   {
     key: 'op',
     title: '操作',
@@ -144,10 +144,10 @@ function reqTableDataFunc(params) {
 }
 
 function delFunc(recordId) {
-  $infoBox.confirmDanger('确认删除？', '请确认该服务商下未分配商户', () => {
+  $infoBox.confirmDanger('確認刪除？', '請確認該服務商下未分配商戶', () => {
     req.delById(API_URL_ISV_LIST, recordId).then((res) => {
       infoTable.value.refTable(false)
-      $infoBox.message.success('删除成功')
+      $infoBox.message.success('刪除成功')
     })
   })
 }

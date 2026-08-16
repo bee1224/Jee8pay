@@ -1,7 +1,7 @@
 <template>
   <div style="background: #fff; padding: 0 20px">
     <a-tabs @change="selectTabs">
-      <a-tab-pane key="applicationConfig" tab="应用配置">
+      <a-tab-pane key="applicationConfig" tab="應用設定">
         <div class="account-settings-info-view">
           <a-form ref="configFormModel">
             <a-row>
@@ -18,7 +18,7 @@
             <div style="display: flex; justify-content: center">
               <a-form-item>
                 <a-button type="primary" @click="confirm" :loading="vdata.btnLoading">
-                  确认更新
+                  確認更新
                 </a-button>
               </a-form-item>
             </div>
@@ -61,7 +61,7 @@ function selectTabs(key) {
 }
 function confirm(e) {
   // 确认更新
-  $infoBox.confirmPrimary('确认修改应用配置吗？', '', () => {
+  $infoBox.confirmPrimary('確認修改應用設定嗎？', '', () => {
     vdata.btnLoading = true // 打开按钮上的 loading
     const formData = new FormData()
     for (var i in vdata.configData) {

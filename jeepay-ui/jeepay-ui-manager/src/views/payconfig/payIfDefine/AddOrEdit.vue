@@ -1,7 +1,7 @@
 <template>
   <a-drawer
     v-model:open="vdata.open"
-    :title="vdata.isAdd ? '新增支付接口' : '修改支付接口'"
+    :title="vdata.isAdd ? '新增支付介面' : '修改支付介面'"
     width="40%"
     :maskClosable="false"
     @close="onClose"
@@ -9,40 +9,40 @@
     <a-form ref="infoFormModel" :model="vdata.saveObject" layout="vertical" :rules="vdata.rules">
       <a-row :gutter="16" style="padding-bottom: 50px">
         <a-col :span="12">
-          <a-form-item label="接口代码" name="ifCode">
+          <a-form-item label="介面代碼" name="ifCode">
             <a-input
               v-model:value="vdata.saveObject.ifCode"
-              placeholder="请输入"
+              placeholder="請輸入"
               :disabled="!vdata.isAdd"
             />
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="接口名称" name="ifName">
-            <a-input v-model:value="vdata.saveObject.ifName" placeholder="请输入" />
+          <a-form-item label="介面名稱" name="ifName">
+            <a-input v-model:value="vdata.saveObject.ifName" placeholder="請輸入" />
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="是否支持普通商户模式" name="isMchMode">
+          <a-form-item label="是否支援普通商戶模式" name="isMchMode">
             <a-radio-group v-model:value="vdata.saveObject.isMchMode">
-              <a-radio :value="1">支持</a-radio>
-              <a-radio :value="0">不支持</a-radio>
+              <a-radio :value="1">支援</a-radio>
+              <a-radio :value="0">不支援</a-radio>
             </a-radio-group>
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="是否支持服务商子商户模式" name="isIsvMode">
+          <a-form-item label="是否支援服務商子商戶模式" name="isIsvMode">
             <a-radio-group v-model:value="vdata.saveObject.isIsvMode">
-              <a-radio :value="1">支持</a-radio>
-              <a-radio :value="0">不支持</a-radio>
+              <a-radio :value="1">支援</a-radio>
+              <a-radio :value="0">不支援</a-radio>
             </a-radio-group>
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item label="支付参数配置页面类型" name="configPageType">
+          <a-form-item label="支付參數設定頁面類型" name="configPageType">
             <a-radio-group v-model:value="vdata.saveObject.configPageType">
-              <a-radio :value="1">根据接口配置定义描述渲染页面</a-radio>
-              <a-radio :value="2">自定义页面</a-radio>
+              <a-radio :value="1">根據介面設定定義描述渲染頁面</a-radio>
+              <a-radio :value="2">自定義頁面</a-radio>
             </a-radio-group>
           </a-form-item>
         </a-col>
@@ -50,41 +50,41 @@
           :span="24"
           v-if="vdata.saveObject.isIsvMode == 1 && vdata.saveObject.configPageType === 1"
         >
-          <a-form-item label="服务商接口配置定义描述" name="isvParams">
-            <a-textarea v-model:value="vdata.saveObject.isvParams" placeholder="请输入" />
+          <a-form-item label="服務商介面設定定義描述" name="isvParams">
+            <a-textarea v-model:value="vdata.saveObject.isvParams" placeholder="請輸入" />
           </a-form-item>
         </a-col>
         <a-col
           :span="24"
           v-if="vdata.saveObject.isIsvMode == 1 && vdata.saveObject.configPageType === 1"
         >
-          <a-form-item label="特约商户接口配置定义描述" name="isvsubMchParams">
-            <a-textarea v-model:value="vdata.saveObject.isvsubMchParams" placeholder="请输入" />
+          <a-form-item label="特約商戶介面設定定義描述" name="isvsubMchParams">
+            <a-textarea v-model:value="vdata.saveObject.isvsubMchParams" placeholder="請輸入" />
           </a-form-item>
         </a-col>
         <a-col
           :span="24"
           v-if="vdata.saveObject.isMchMode == 1 && vdata.saveObject.configPageType === 1"
         >
-          <a-form-item label="普通商户接口配置定义描述" name="normalMchParams">
-            <a-textarea v-model:value="vdata.saveObject.normalMchParams" placeholder="请输入" />
+          <a-form-item label="普通商戶介面設定定義描述" name="normalMchParams">
+            <a-textarea v-model:value="vdata.saveObject.normalMchParams" placeholder="請輸入" />
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="状态" name="state">
+          <a-form-item label="狀態" name="state">
             <a-radio-group v-model:value="vdata.saveObject.state">
-              <a-radio :value="1">启用</a-radio>
+              <a-radio :value="1">啟用</a-radio>
               <a-radio :value="0">停用</a-radio>
             </a-radio-group>
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="备注" name="remark">
-            <a-input v-model:value="vdata.saveObject.remark" placeholder="请输入" />
+          <a-form-item label="備註" name="remark">
+            <a-input v-model:value="vdata.saveObject.remark" placeholder="請輸入" />
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item label="支持的支付方式" name="checkedList">
+          <a-form-item label="支援的支付方式" name="checkedList">
             <a-checkbox-group
               v-model:value="vdata.checkedList"
               :options="vdata.wayCodesOptions"
@@ -93,7 +93,7 @@
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="页面展示：卡片icon" name="icon">
+          <a-form-item label="頁面展示：卡片icon" name="icon">
             <JeepayUpload
               :action="vdata.action"
               accept=".jpg, .jpeg, .png"
@@ -103,15 +103,15 @@
                 <img :src="vdata.saveObject.icon" style="width: 80px" />
                 <a-button style="margin-left: 5px">
                   <a-icon :type="vdata.loading ? 'loading' : 'upload'" />
-                  {{ vdata.loading ? '正在上传' : '点击上传' }}
+                  {{ vdata.loading ? '正在上傳' : '點選上傳' }}
                 </a-button>
               </template>
             </JeepayUpload>
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="页面展示：卡片背景色" name="bgColor">
-            <a-input v-model:value="vdata.saveObject.bgColor" placeholder="请输入" type="color" />
+          <a-form-item label="頁面展示：卡片背景色" name="bgColor">
+            <a-input v-model:value="vdata.saveObject.bgColor" placeholder="請輸入" type="color" />
           </a-form-item>
         </a-col>
       </a-row>
@@ -119,7 +119,7 @@
 
     <div class="drawer-btn-center">
       <a-button @click="onClose" :style="{ marginRight: '8px' }">取消</a-button>
-      <a-button type="primary" @click="onSubmit">保存</a-button>
+      <a-button type="primary" @click="onSubmit">儲存</a-button>
     </div>
   </a-drawer>
 </template>
@@ -137,28 +137,28 @@ const props = defineProps({
 const validateNormalMchParams = (rule, value, callback) => {
   // 普通商户接口配置定义描述 验证器
   if (vdata.saveObject.isMchMode === 1 && vdata.saveObject.configPageType === 1 && !value) {
-    return Promise.reject('请输入普通商户接口配置定义描述')
+    return Promise.reject('請輸入普通商戶介面設定定義描述')
   }
   return Promise.resolve()
 }
 const validateIsvParams = (rule, value, callback) => {
   // 服务商接口配置定义描述 验证器
   if (vdata.saveObject.isIsvMode === 1 && vdata.saveObject.configPageType === 1 && !value) {
-    return Promise.reject('请输入服务商接口配置定义描述')
+    return Promise.reject('請輸入服務商介面設定定義描述')
   }
   return Promise.resolve()
 }
 const validateIsvsubMchParams = (rule, value, callback) => {
   // 特约商户接口配置定义描述 验证器
   if (vdata.saveObject.isIsvMode === 1 && vdata.saveObject.configPageType === 1 && !value) {
-    return Promise.reject('请输入特约商户接口配置定义描述')
+    return Promise.reject('請輸入特約商戶介面設定定義描述')
   }
   return Promise.resolve()
 }
 const validateWayCodes = (rule, value, callback) => {
   // 支付方式 验证器
   if (vdata.checkedList.length <= 0) {
-    return Promise.reject('请选择支付方式')
+    return Promise.reject('請選擇支付方式')
   }
   return Promise.resolve()
 }
@@ -170,8 +170,8 @@ const vdata: any = reactive({
   ifCode: '', // 支付接口定义id
   saveObject: {}, // 数据对象
   rules: {
-    ifCode: [{ required: true, message: '请输入接口代码', trigger: 'blur' }],
-    ifName: [{ required: true, message: '请输入接口名称', trigger: 'blur' }],
+    ifCode: [{ required: true, message: '請輸入介面代碼', trigger: 'blur' }],
+    ifName: [{ required: true, message: '請輸入介面名稱', trigger: 'blur' }],
     normalMchParams: [{ validator: validateNormalMchParams, trigger: 'blur' }],
     isvParams: [{ validator: validateIsvParams, trigger: 'blur' }],
     isvsubMchParams: [{ validator: validateIsvsubMchParams, trigger: 'blur' }],

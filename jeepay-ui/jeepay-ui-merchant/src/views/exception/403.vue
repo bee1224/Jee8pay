@@ -2,10 +2,10 @@
   <div class="result-err">
     <img src="~@/assets/svg/403.svg" alt="">
     <div>
-      抱歉，您无权访问此页。
+      抱歉，您無權訪問此頁。
     </div>
     <a-button type="primary" @click="toHome" style="margin-top:30px">
-      返回首页
+      返回首頁
     </a-button>
   </div>
 </template>

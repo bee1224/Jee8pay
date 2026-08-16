@@ -62,14 +62,14 @@ function handleChange(info) {
     emit('uploadSuccess', res.data)
   } else if (info.file.status === 'error') {
     console.log(info)
-    $infoBox.message.error(`上传失败`)
+    $infoBox.message.error(`上傳失敗`)
   }
 }
 // 上传图片前的校验
 function beforeUpload(file) {
   const validate = file.size / 1024 / 1024 < props.size
   if (!validate) {
-    $infoBox.message.error('文件应小于' + props.size + 'M!')
+    $infoBox.message.error('檔案應小於' + props.size + 'M!')
   }
   return validate
 }

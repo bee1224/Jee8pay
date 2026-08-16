@@ -30,7 +30,7 @@ const rootRouter = {
   component: BasicLayout,
   redirect: redirectFunc, // 根页面【/】默认跳转 地址
   children: [],
-  meta: { title: '主页' },
+  meta: { title: '主頁' },
 }
 
 // 动态跳转路径 func

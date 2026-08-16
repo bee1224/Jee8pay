@@ -9,7 +9,7 @@
   >
     <template #title>
       <a-steps :current="vdata.currentStep" type="navigation" style="width: 80%">
-        <a-step title="支付参数配置" @click="stepChange(0)" />
+        <a-step title="支付參數配置" @click="stepChange(0)" />
         <a-step title="支付通道配置" @click="stepChange(1)" />
       </a-steps>
     </template>
@@ -46,7 +46,7 @@
               </div>
               <a-badge
                 :status="record.ifConfigState === 1 ? 'processing' : 'error'"
-                :text="record.ifConfigState === 1 ? '启用' : '未开通'"
+                :text="record.ifConfigState === 1 ? '啟用' : '未開通'"
               />
             </div>
             <!-- 卡片底部操作栏 -->
@@ -59,15 +59,15 @@
                 "
                 @click="toAlipayAuthPageFunc(record)"
               >
-                扫码授权
+                掃碼授權
                 <a-icon key="right" type="right" style="font-size: 13px" />
               </a>
 
               <a v-if="$access('ENT_MCH_PAY_CONFIG_ADD')" @click="editPayIfConfigFunc(record)">
-                填写参数
+                填寫參數
                 <a-icon key="right" type="right" style="font-size: 13px" />
               </a>
-              <a v-else>暂无操作</a>
+              <a v-else>暫無操作</a>
             </div>
           </div>
         </template>
@@ -80,17 +80,17 @@
             <a-row :gutter="4">
               <a-col :md="9">
                 <a-form-item label="">
-                  <a-input v-model:value="vdata.searchData2.wayCode" placeholder="支付方式代码" />
+                  <a-input v-model:value="vdata.searchData2.wayCode" placeholder="支付方式代碼" />
                 </a-form-item>
               </a-col>
               <a-col :md="9">
                 <a-form-item label="">
-                  <a-input v-model:value="vdata.searchData2.wayName" placeholder="支付方式名称" />
+                  <a-input v-model:value="vdata.searchData2.wayName" placeholder="支付方式名稱" />
                 </a-form-item>
               </a-col>
               <a-col :sm="6">
                 <span class="table-page-search-submitButtons">
-                  <a-button type="primary" @click="searchFunc(true)">查询</a-button>
+                  <a-button type="primary" @click="searchFunc(true)">查詢</a-button>
                   <a-button style="margin-left: 8px" @click="() => (vdata.searchData2 = {})">
                     重置
                   </a-button>
@@ -113,7 +113,7 @@
             <template v-if="column.key === 'passageState'">
               <a-badge
                 :status="record.passageState === 0 ? 'error' : 'processing'"
-                :text="record.passageState === 0 ? '禁用' : '启用'"
+                :text="record.passageState === 0 ? '禁用' : '啟用'"
               />
             </template>
             <template v-if="column.key === 'op'">
@@ -133,7 +133,7 @@
       </a-card>
     </div>
     <div class="drawer-btn-center">
-      <a-button :style="{ marginRight: '8px' }" @click="onClose">关闭</a-button>
+      <a-button :style="{ marginRight: '8px' }" @click="onClose">關閉</a-button>
       <a-button
         v-if="$access('ENT_MCH_PAY_CONFIG_LIST') && vdata.currentStep === 1"
         type="primary"
@@ -180,9 +180,9 @@ const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProp
 
 // eslint-disable-next-line no-unused-vars
 const tableColumns = [
-  { key: 'wayCode', title: '支付方式代码', dataIndex: 'wayCode' },
-  { key: 'wayName', title: '支付方式名称', dataIndex: 'wayName' },
-  { key: 'passageState', title: '状态', scopedSlots: { customRender: 'stateSlot' } },
+  { key: 'wayCode', title: '支付方式代碼', dataIndex: 'wayCode' },
+  { key: 'wayName', title: '支付方式名稱', dataIndex: 'wayName' },
+  { key: 'passageState', title: '狀態', scopedSlots: { customRender: 'stateSlot' } },
   {
     key: 'op',
     title: '操作',
@@ -255,7 +255,7 @@ function editPayIfConfigFunc(record) {
   if (record.subMchIsvConfig === 0) {
     $infoBox.message.error({
       title: '提示',
-      content: '当前应用所属商户为特约商户，请先配置服务商支付参数！',
+      content: '當前應用所屬商戶為特約商戶，請先配置服務商支付參數！',
     })
   } else if (record.configPageType === 1) {
     mchPayConfigAddOrEdit.value.show(vdata.appId, record)
@@ -273,7 +273,7 @@ function editPayPassageFunc(record) {
     if (!resData || resData.length === 0) {
       $infoBox.message.error({
         title: '提示',
-        content: '暂无可用支付接口配置',
+        content: '暫無可用支付接口配置',
       })
     } else {
       mchPayPassageAddOrEdit.value.show(vdata.appId, record.wayCode)
@@ -291,7 +291,7 @@ function toAlipayAuthPageFunc(record) {
   if (record.subMchIsvConfig === 0) {
     return $infoBox.message.error({
       title: '提示',
-      content: '当前应用所属商户为特约商户，请先配置服务商支付参数！',
+      content: '當前應用所屬商戶為特約商戶，請先配置服務商支付參數！',
     })
   }
   alipayAuthPage.value.show(vdata.appId)

@@ -16,7 +16,7 @@
               class="analy-title"
               style="padding: 20px; box-sizing: border-box; padding-bottom: 10px"
             >
-              <span>今日交易金额</span>
+              <span>今日交易金額</span>
               <a-tooltip>
                 <template #title>
                   {{ vdata.mainTips.todayAmountTip }}
@@ -27,13 +27,13 @@
             <div v-show="vdata.ispayAmount">
               <div class="pay-amount-text">
                 <span class="pay-amount">NT${{ vdata.mainChart.todayAmount }}</span>
-                <span>共{{ vdata.mainChart.todayPayCount }}笔</span>
+                <span>共{{ vdata.mainChart.todayPayCount }}筆</span>
               </div>
               <div id="payAmount" style="height: 60px"></div>
             </div>
             <div class="payAmountSpan" v-show="vdata.ispayAmount">
-              <span>昨日交易金额：NT${{ vdata.mainChart.yesterdayAmount }}</span>
-              <span>近七天交易金额：NT${{ vdata.mainChart.payWeek }}</span>
+              <span>昨日交易金額：NT${{ vdata.mainChart.yesterdayAmount }}</span>
+              <span>近七天交易金額：NT${{ vdata.mainChart.payWeek }}</span>
             </div>
             <empty v-show="!vdata.ispayAmount" />
           </div>
@@ -46,7 +46,7 @@
             <div class="chart-data">
               <a-skeleton active :loading="vdata.skeletonIsShow" :paragraph="{ rows: 1 }">
                 <div class="analy-title">
-                  <span>交易总金额</span>
+                  <span>交易總金額</span>
                   <a-tooltip>
                     <template #title>
                       {{ vdata.mainTips.totalAmountTip }}
@@ -70,7 +70,7 @@
             <div class="chart-data">
               <a-skeleton active :loading="vdata.skeletonIsShow" :paragraph="{ rows: 1 }">
                 <div class="analy-title">
-                  <span>交易总笔数</span>
+                  <span>交易總筆數</span>
                   <a-tooltip>
                     <template #title>
                       {{ vdata.mainTips.totalPayCountTip }}
@@ -80,7 +80,7 @@
                 </div>
                 <a-statistic
                   style="margin-top: 10px"
-                  :value="vdata.mainChart.totalPayCount + ' 笔'"
+                  :value="vdata.mainChart.totalPayCount + ' 筆'"
                 />
               </a-skeleton>
             </div>
@@ -99,8 +99,8 @@
                 <div class="user-greet-all">
                   <span style="">{{ vdata.mainTips.helloTitle }}</span>
                   <div>
-                    <span style="font-size: 12px" v-if="vdata.isAdmin === 1">超级管理员</span>
-                    <span style="font-size: 12px" v-else>操作员</span>
+                    <span style="font-size: 12px" v-if="vdata.isAdmin === 1">超級管理員</span>
+                    <span style="font-size: 12px" v-else>操作員</span>
                   </div>
                 </div>
               </div>
@@ -114,7 +114,7 @@
               />
             </div>
             <div class="quick-start">
-              <p class="quick-start-title">快速开始</p>
+              <p class="quick-start-title">快速開始</p>
               <ul class="quick-start-ul">
                 <template v-for="menu in quickMenuList" :key="menu.entId">
                   <li>
@@ -135,12 +135,12 @@
           <div v-show="!vdata.skeletonIsShow">
             <div>
               <div class="pay-count-title">
-                <span class="chart-title">交易统计</span>
+                <span class="chart-title">交易統計</span>
                 <div class="chart-padding" style="border: 1px solid #ddd">
                   <a-range-picker
                     ref="jeeRange"
                     style="width: 100%"
-                    :presets="{ 最近一个月: [dayjs().subtract(1, 'months'), dayjs()] }"
+                    :presets="{ 最近一個月: [dayjs().subtract(1, 'months'), dayjs()] }"
                     :default-value="[dayjs().subtract(7, 'days'), dayjs()]"
                     show-time
                     format="YYYY-MM-DD"
@@ -185,7 +185,7 @@
                 <a-range-picker
                   style="width: 100%"
                   ref="jeeRangePie"
-                  :presets="{ 最近一个月: [dayjs().subtract(1, 'months'), dayjs()] }"
+                  :presets="{ 最近一個月: [dayjs().subtract(1, 'months'), dayjs()] }"
                   @change="payOnChange"
                   :default-value="[dayjs().subtract(7, 'days'), dayjs()]"
                   show-time
@@ -221,7 +221,7 @@
     <template>
       <div>
         <a-drawer
-          title="商户信息"
+          title="商戶資料"
           placement="right"
           :closable="true"
           v-model:open="vdata.open"
@@ -230,58 +230,58 @@
           <a-row>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="商户号">
+                <a-descriptions-item label="商戶號">
                   {{ vdata.userInfo.mchNo }}
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
             <a-col :span="24" v-if="vdata.userInfo.isvNo">
               <a-descriptions>
-                <a-descriptions-item label="服务商号">
+                <a-descriptions-item label="服務商號">
                   {{ vdata.userInfo.isvNo }}
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="商户名称">
+                <a-descriptions-item label="商戶名稱">
                   {{ vdata.userInfo.mchName }}
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="商户简称">
+                <a-descriptions-item label="商戶簡稱">
                   {{ vdata.userInfo.mchShortName }}
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="商户类型">
+                <a-descriptions-item label="商戶類型">
                   <a-tag :color="vdata.userInfo.type === 1 ? 'green' : 'orange'">
-                    {{ vdata.userInfo.type === 1 ? '普通商户' : '特约商户' }}
+                    {{ vdata.userInfo.type === 1 ? '普通商戶' : '特約商戶' }}
                   </a-tag>
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="联系人姓名">
+                <a-descriptions-item label="聯繫人姓名">
                   {{ vdata.userInfo.contactName }}
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="联系人手机号">
+                <a-descriptions-item label="聯繫人手機號">
                   {{ vdata.userInfo.contactTel }}
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="联系人邮箱">
+                <a-descriptions-item label="聯繫人郵箱">
                   {{ vdata.userInfo.contactEmail }}
                 </a-descriptions-item>
               </a-descriptions>
@@ -330,9 +330,9 @@ const vdata: any = reactive({
   jeeDatePie: undefined, // 自定义日期选择框所用状态-支付方式
   mainTips: {
     // 主页提示
-    todayAmountTip: '今日成功交易金额及笔数', // 今日交易提示文字
-    totalAmountTip: '成功交易总金额', // 交易总金额提示文字
-    totalPayCountTip: '成功交易总笔数', // 交易总笔数提示文字
+    todayAmountTip: '今日成功交易金額及筆數', // 今日交易提示文字
+    totalAmountTip: '成功交易總金額', // 交易总金额提示文字
+    totalPayCountTip: '成功交易總筆數', // 交易总笔数提示文字
     helloTitle: '',
   },
   mainChart: {
@@ -432,7 +432,7 @@ onMounted(() => {
         customHtml: (container, view, datum) => {
           const { width, height } = container.getBoundingClientRect()
           const d = Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2))
-          const text = datum ? datum.typeName : '总计'
+          const text = datum ? datum.typeName : '總計'
           return renderStatistic(d, text, { fontSize: 28 })
         },
       },
@@ -592,7 +592,7 @@ function showDrawer() {
   if (vdata.userInfo.mchNo) {
     vdata.open = true
   } else {
-    $infoBox.message.warning('当前功能已被限制')
+    $infoBox.message.warning('當前功能已被限制')
   }
 }
 function onClose() {

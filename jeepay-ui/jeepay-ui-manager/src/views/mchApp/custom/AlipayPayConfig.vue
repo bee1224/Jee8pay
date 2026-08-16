@@ -1,7 +1,7 @@
 <template>
   <a-drawer
     v-model:open="vdata.open"
-    title="填写参数"
+    title="填寫參數"
     width="40%"
     :closable="true"
     :maskClosable="false"
@@ -11,22 +11,22 @@
     <a-form ref="infoFormModel" :model="vdata.saveObject" layout="vertical">
       <a-row :gutter="16">
         <a-col :span="12">
-          <a-form-item label="状态" name="state">
+          <a-form-item label="狀態" name="state">
             <a-radio-group v-model:value="vdata.saveObject.state">
-              <a-radio :value="1">启用</a-radio>
+              <a-radio :value="1">啟用</a-radio>
               <a-radio :value="0">停用</a-radio>
             </a-radio-group>
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item label="备注" name="remark">
-            <a-textarea v-model:value="vdata.saveObject.remark" placeholder="请输入" />
+          <a-form-item label="備註" name="remark">
+            <a-textarea v-model:value="vdata.saveObject.remark" placeholder="請輸入" />
           </a-form-item>
         </a-col>
       </a-row>
     </a-form>
     <a-divider orientation="left">
-      <a-tag color="#FF4B33">{{ vdata.saveObject.ifCode }} 商户参数配置</a-tag>
+      <a-tag color="#FF4B33">{{ vdata.saveObject.ifCode }} 商戶參數設定</a-tag>
     </a-divider>
     <a-form
       ref="mchParamFormModel"
@@ -36,20 +36,20 @@
     >
       <a-row v-if="vdata.mchType === 1" :gutter="16">
         <a-col span="12">
-          <a-form-item label="环境配置" name="sandbox">
+          <a-form-item label="環境設定" name="sandbox">
             <a-radio-group v-model:value="vdata.ifParams.sandbox">
-              <a-radio :value="1">沙箱环境</a-radio>
-              <a-radio :value="0">生产环境</a-radio>
+              <a-radio :value="1">沙箱環境</a-radio>
+              <a-radio :value="0">生產環境</a-radio>
             </a-radio-group>
           </a-form-item>
         </a-col>
         <a-col span="12">
-          <a-form-item label="应用AppID" name="appId">
-            <a-input v-model:value="vdata.ifParams.appId" placeholder="请输入" />
+          <a-form-item label="應用AppID" name="appId">
+            <a-input v-model:value="vdata.ifParams.appId" placeholder="請輸入" />
           </a-form-item>
         </a-col>
         <a-col span="24">
-          <a-form-item label="应用私钥" name="privateKey">
+          <a-form-item label="應用私鑰" name="privateKey">
             <a-textarea
               v-model:value="vdata.ifParams.privateKey"
               :placeholder="vdata.ifParams.privateKey_ph"
@@ -57,7 +57,7 @@
           </a-form-item>
         </a-col>
         <a-col span="24">
-          <a-form-item label="支付宝公钥" name="alipayPublicKey">
+          <a-form-item label="支付寶公鑰" name="alipayPublicKey">
             <a-textarea
               v-model:value="vdata.ifParams.alipayPublicKey"
               :placeholder="vdata.ifParams.alipayPublicKey_ph"
@@ -65,7 +65,7 @@
           </a-form-item>
         </a-col>
         <a-col span="12">
-          <a-form-item label="接口签名方式(推荐使用RSA2)" name="signType">
+          <a-form-item label="介面簽名方式(推薦使用RSA2)" name="signType">
             <a-radio-group v-model:value="vdata.ifParams.signType" defaultValue="RSA">
               <a-radio value="RSA">RSA</a-radio>
               <a-radio value="RSA2">RSA2</a-radio>
@@ -73,16 +73,16 @@
           </a-form-item>
         </a-col>
         <a-col span="12">
-          <a-form-item label="公钥证书" name="useCert">
+          <a-form-item label="公鑰證書" name="useCert">
             <a-radio-group v-model:value="vdata.ifParams.useCert" defaultValue="1">
-              <a-radio :value="1">使用证书（请使用RSA2私钥）</a-radio>
-              <a-radio :value="0">不使用证书</a-radio>
+              <a-radio :value="1">使用證書（請使用RSA2私鑰）</a-radio>
+              <a-radio :value="0">不使用證書</a-radio>
             </a-radio-group>
           </a-form-item>
         </a-col>
         <a-col span="24">
           <a-form-item
-            label="应用公钥证书（.crt格式）"
+            label="應用公鑰證書（.crt格式）"
             name="appPublicCert"
             class="margin-botomt-5"
           >
@@ -97,14 +97,14 @@
             <template #uploadSlot="{ loading }">
               <a-button>
                 <a-icon :type="loading ? 'loading' : 'upload'" />
-                {{ loading ? '正在上传' : '点击上传' }}
+                {{ loading ? '正在上傳' : '點選上傳' }}
               </a-button>
             </template>
           </JeepayUpload>
         </a-col>
         <a-col span="24">
           <a-form-item
-            label="支付宝公钥证书（.crt格式）"
+            label="支付寶公鑰證書（.crt格式）"
             name="alipayPublicCert"
             class="margin-botomt-5"
           >
@@ -119,14 +119,14 @@
             <template #uploadSlot="{ loading }">
               <a-button>
                 <a-icon :type="loading ? 'loading' : 'upload'" />
-                {{ loading ? '正在上传' : '点击上传' }}
+                {{ loading ? '正在上傳' : '點選上傳' }}
               </a-button>
             </template>
           </JeepayUpload>
         </a-col>
         <a-col span="24">
           <a-form-item
-            label="支付宝根证书（.crt格式）"
+            label="支付寶根證書（.crt格式）"
             name="alipayRootCert"
             class="margin-botomt-5"
           >
@@ -141,7 +141,7 @@
             <template #uploadSlot="{ loading }">
               <a-button>
                 <a-icon :type="loading ? 'loading' : 'upload'" />
-                {{ loading ? '正在上传' : '点击上传' }}
+                {{ loading ? '正在上傳' : '點選上傳' }}
               </a-button>
             </template>
           </JeepayUpload>
@@ -149,10 +149,10 @@
       </a-row>
       <a-row v-else-if="vdata.mchType === 2" :gutter="16">
         <a-col span="12">
-          <a-form-item label="子商户app_auth_token" name="appAuthToken">
+          <a-form-item label="子商戶app_auth_token" name="appAuthToken">
             <a-input
               v-model:value="vdata.ifParams.appAuthToken"
-              placeholder="请输入子商户app_auth_token"
+              placeholder="請輸入子商戶app_auth_token"
             />
           </a-form-item>
         </a-col>
@@ -160,7 +160,7 @@
     </a-form>
     <div v-if="$access('ENT_MCH_PAY_CONFIG_ADD')" class="drawer-btn-center">
       <a-button :style="{ marginRight: '8px' }" @click="onClose">取消</a-button>
-      <a-button type="primary" :loading="vdata.btnLoading" @click="onSubmit">保存</a-button>
+      <a-button type="primary" :loading="vdata.btnLoading" @click="onSubmit">儲存</a-button>
     </div>
   </a-drawer>
 </template>
@@ -190,7 +190,7 @@ const ifParamsRules = reactive({
       trigger: 'blur',
       validator: (rule, value) => {
         if (vdata.mchType === 1 && !value) {
-          return Promise.reject('请输入应用AppID')
+          return Promise.reject('請輸入應用AppID')
         }
         return Promise.resolve()
       },
@@ -201,7 +201,7 @@ const ifParamsRules = reactive({
       trigger: 'blur',
       validator: (rule, value) => {
         if (vdata.mchType === 1 && vdata.isAdd && !value) {
-          return Promise.reject('请输入应用私钥')
+          return Promise.reject('請輸入應用私鑰')
         }
         return Promise.resolve()
       },
@@ -212,7 +212,7 @@ const ifParamsRules = reactive({
       trigger: 'blur',
       validator: (rule, value) => {
         if (vdata.mchType === 1 && vdata.isAdd && vdata.ifParams.useCert === 0 && !value) {
-          return Promise.reject('请输入支付宝公钥')
+          return Promise.reject('請輸入支付寶公鑰')
         }
         return Promise.resolve()
       },
@@ -223,7 +223,7 @@ const ifParamsRules = reactive({
       trigger: 'blur',
       validator: (rule, value) => {
         if (vdata.mchType === 1 && vdata.ifParams.useCert === 1 && !vdata.ifParams.appPublicCert) {
-          return Promise.reject('请上传应用公钥证书（.crt格式）')
+          return Promise.reject('請上傳應用公鑰證書（.crt格式）')
         }
         return Promise.resolve()
       },
@@ -238,7 +238,7 @@ const ifParamsRules = reactive({
           vdata.ifParams.useCert === 1 &&
           !vdata.ifParams.alipayPublicCert
         ) {
-          return Promise.reject('请上传支付宝公钥证书（.crt格式）')
+          return Promise.reject('請上傳支付寶公鑰證書（.crt格式）')
         }
         return Promise.resolve()
       },
@@ -249,7 +249,7 @@ const ifParamsRules = reactive({
       trigger: 'blur',
       validator: (rule, value) => {
         if (vdata.mchType === 1 && vdata.ifParams.useCert === 1 && !vdata.ifParams.alipayRootCert) {
-          return Promise.reject('请上传支付宝根证书（.crt格式）')
+          return Promise.reject('請上傳支付寶根證書（.crt格式）')
         }
         return Promise.resolve()
       },
@@ -260,7 +260,7 @@ const ifParamsRules = reactive({
       trigger: 'blur',
       validator: (rule, value) => {
         if (vdata.mchType === 2 && !value) {
-          return Promise.reject('请输入子商户app_auth_token')
+          return Promise.reject('請輸入子商戶app_auth_token')
         }
         return Promise.resolve()
       },
@@ -295,9 +295,9 @@ function show(appId, record) {
     signType: 'RSA2',
     useCert: 0,
     privateKey: '',
-    privateKey_ph: '请输入',
+    privateKey_ph: '請輸入',
     alipayPublicKey: '',
-    alipayPublicKey_ph: '请输入',
+    alipayPublicKey_ph: '請輸入',
     appPublicCert: '',
     alipayPublicCert: '',
     alipayRootCert: '',
@@ -340,7 +340,7 @@ function onSubmit() {
         reqParams.remark = vdata.saveObject.remark
         // 支付参数配置不能为空
         if (Object.keys(vdata.ifParams).length === 0) {
-          $infoBox.message.error('参数不能为空！')
+          $infoBox.message.error('參數不能為空！')
           return
         }
         // 脱敏数据为空时，删除该key
@@ -349,13 +349,13 @@ function onSubmit() {
         reqParams.ifParams = JSON.stringify(vdata.ifParams)
         // 请求接口
         if (Object.keys(reqParams).length === 0) {
-          $infoBox.message.error('参数不能为空！')
+          $infoBox.message.error('參數不能為空！')
           return
         }
         req
           .add(API_URL_MCH_PAYCONFIGS_LIST, reqParams)
           .then((res) => {
-            $infoBox.message.success('保存成功')
+            $infoBox.message.success('儲存成功')
             vdata.open = false
             props.callbackFunc()
           })

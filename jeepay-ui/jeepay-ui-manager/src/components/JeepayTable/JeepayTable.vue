@@ -9,7 +9,7 @@
       <div class="auto_refre">
         <div v-if="autoRefTableConfig">
           <span style="margin-right: 10px; color: #a9b3b1">
-            自动刷新：
+            自動重新整理：
             <span style="margin-right: 5px; color: #000">{{ autoRefTableSubTime }}s</span>
           </span>
           <div>
@@ -103,7 +103,7 @@ let pagination = reactive({
   total: 0,
   current: 1,
   pageSize: props.pageSize,
-  showTotal: (total) => `共${total}条`,
+  showTotal: (total) => `共${total}筆`,
 }) // ATable 分页配置项
 let showLoading = ref(false) // loading效果
 let apiResData = reactive({ total: 0, records: [] }) // 接口返回数据

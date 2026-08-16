@@ -11,10 +11,10 @@
       :wrapper-col="{ span: 15 }"
       :rules="vdata.rules"
     >
-      <a-form-item label="支付方式代码：" name="wayCode">
+      <a-form-item label="支付方式代碼：" name="wayCode">
         <a-input v-model:value="vdata.saveObject.wayCode" :disabled="!vdata.isAdd" />
       </a-form-item>
-      <a-form-item label="支付方式名称：" name="wayName">
+      <a-form-item label="支付方式名稱：" name="wayName">
         <a-input v-model:value="vdata.saveObject.wayName" />
       </a-form-item>
     </a-form>
@@ -35,8 +35,8 @@ const vdata: any = reactive({
   saveObject: {}, // 数据对象
   wayCode: null, // 更新对象ID
   rules: {
-    wayCode: [{ required: true, message: '请输入支付方式代码', trigger: 'blur' }],
-    wayName: [{ required: true, message: '请输入支付方式名称', trigger: 'blur' }],
+    wayCode: [{ required: true, message: '請輸入支付方式代碼', trigger: 'blur' }],
+    wayName: [{ required: true, message: '請輸入支付方式名稱', trigger: 'blur' }],
   },
 })
 

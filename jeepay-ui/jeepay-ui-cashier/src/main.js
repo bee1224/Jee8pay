@@ -22,12 +22,12 @@ router.beforeEach((to, from, next) => {
     }
 
     if (!config.cacheToken) {
-        next({ name: config.errorPageRouteName, params: { errInfo: '请通过二维码进入支付页面！' } })
+        next({ name: config.errorPageRouteName, params: { errInfo: '請透過 QR Code 進入支付頁面！' } })
         return
     }
 
     if (!wayCode.getPayWay()) {
-        next({ name: config.errorPageRouteName, params: { errInfo: '不支持的支付方式！ 请在微信/支付宝/银联应用内扫码进入！' } })
+        next({ name: config.errorPageRouteName, params: { errInfo: '不支援的支付方式！ 請在微信/支付寶/銀聯應用內掃碼進入！' } })
         return
     }
 

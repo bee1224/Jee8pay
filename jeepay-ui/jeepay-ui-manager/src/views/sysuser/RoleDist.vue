@@ -15,7 +15,7 @@
           :checked="vdata.checkedVal.length && vdata.allRoleList.length == vdata.checkedVal.length"
           @change="onCheckAllChange"
         >
-          全选
+          全選
         </a-checkbox>
       </div>
       <br />
@@ -24,7 +24,7 @@
 
     <div class="drawer-btn-center">
       <a-button :style="{ marginRight: '8px' }" @click="vdata.isShow = false">取消</a-button>
-      <a-button type="primary" @click="handleOkFunc" :loading="vdata.confirmLoading">保存</a-button>
+      <a-button type="primary" @click="handleOkFunc" :loading="vdata.confirmLoading">儲存</a-button>
     </div>
   </a-drawer>
 </template>
@@ -66,7 +66,7 @@ function show(recordId) {
   // 查询所有角色列表
   reqLoad.list(API_URL_ROLE_LIST, { pageSize: -1 }).then((res) => {
     if (res.total <= 0) {
-      return $infoBox.message.error(`当前暂无角色，请先行添加`)
+      return $infoBox.message.error(`當前暫無角色，請先行新增`)
     }
 
     vdata.allRoleList = []

@@ -5,16 +5,16 @@
         <a-form layout="inline" v-if="$access('ENT_PC_WAY_SEARCH')" class="table-head-ground">
           <div class="table-layer">
             <jeepay-text-up
-              :placeholder="'支付方式代码'"
+              :placeholder="'支付方式代碼'"
               v-model:value="vdata.searchData.wayCode"
             />
             <jeepay-text-up
-              :placeholder="'支付方式名称'"
+              :placeholder="'支付方式名稱'"
               v-model:value="vdata.searchData.wayName"
             />
             <span class="table-page-search-submitButtons">
               <a-button type="primary" @click="searchFunc(true)" :loading="vdata.btnLoading">
-                查询
+                查詢
               </a-button>
               <a-button style="margin-left: 8px" @click="() => (vdata.searchData = {})">
                 重置
@@ -66,7 +66,7 @@
                 v-if="$access('ENT_PC_WAY_DEL')"
                 @click="delFunc(record.wayCode)"
               >
-                删除
+                刪除
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -90,12 +90,12 @@ const tableColumns = [
   {
     key: 'wayCode', // key为必填项，用于标志该列的唯一
     fixed: 'left',
-    title: '支付方式代码',
+    title: '支付方式代碼',
     scopedSlots: { customRender: 'wayCodeSlot' },
   },
   {
     key: 'wayName',
-    title: '支付方式名称',
+    title: '支付方式名稱',
     dataIndex: 'wayName',
   },
   {
@@ -139,9 +139,9 @@ function editFunc(wayCode) {
 }
 
 function delFunc(wayCode) {
-  $infoBox.confirmDanger('确认删除？', '', () => {
+  $infoBox.confirmDanger('確認刪除？', '', () => {
     req.delById(API_URL_PAYWAYS_LIST, wayCode).then((res) => {
-      $infoBox.message.success('删除成功！')
+      $infoBox.message.success('刪除成功！')
       infoTable.value.refTable(false)
     })
   })

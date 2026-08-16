@@ -50,7 +50,7 @@ export const confirmResult = {
     return Modal.confirm(
       Object.assign(
         {
-          okText: '确定',
+          okText: '確定',
           cancelText: '取消',
           title: title || '提示',
           content: content,

@@ -2,7 +2,7 @@
   <a-drawer
     :maskClosable="false"
     v-model:open="vdata.open"
-    :title="vdata.isAdd ? '新增服务商' : '修改服务商'"
+    :title="vdata.isAdd ? '新增服務商' : '修改服務商'"
     @close="onClose"
     :body-style="{ paddingBottom: '80px' }"
     width="40%"
@@ -10,27 +10,27 @@
     <a-form ref="infoFormModel" :model="vdata.saveObject" layout="vertical" :rules="vdata.rules">
       <a-row justify="space-between" type="flex">
         <a-col :span="10">
-          <a-form-item label="服务商名称" name="isvName">
-            <a-input placeholder="请输入服务商名称" v-model:value="vdata.saveObject.isvName" />
+          <a-form-item label="服務商名稱" name="isvName">
+            <a-input placeholder="請輸入服務商名稱" v-model:value="vdata.saveObject.isvName" />
           </a-form-item>
         </a-col>
         <a-col :span="10">
-          <a-form-item label="服务商简称" name="isvShortName">
-            <a-input placeholder="请输入服务商简称" v-model:value="vdata.saveObject.isvShortName" />
+          <a-form-item label="服務商簡稱" name="isvShortName">
+            <a-input placeholder="請輸入服務商簡稱" v-model:value="vdata.saveObject.isvShortName" />
           </a-form-item>
         </a-col>
       </a-row>
 
       <a-row justify="space-between" type="flex">
         <a-col :span="10">
-          <a-form-item label="联系人姓名" name="contactName">
-            <a-input placeholder="请输入联系人姓名" v-model:value="vdata.saveObject.contactName" />
+          <a-form-item label="聯絡人姓名" name="contactName">
+            <a-input placeholder="請輸入聯絡人姓名" v-model:value="vdata.saveObject.contactName" />
           </a-form-item>
         </a-col>
         <a-col :span="10">
-          <a-form-item label="联系人手机号" name="contactTel">
+          <a-form-item label="聯絡人手機號" name="contactTel">
             <a-input
-              placeholder="请输入联系人手机号"
+              placeholder="請輸入聯絡人手機號"
               v-model:value="vdata.saveObject.contactTel"
             ></a-input>
           </a-form-item>
@@ -38,26 +38,26 @@
       </a-row>
       <a-row justify="space-between" type="flex">
         <a-col :span="10">
-          <a-form-item label="联系人邮箱" name="contactEmail">
+          <a-form-item label="聯絡人郵箱" name="contactEmail">
             <a-input
-              placeholder="请输入联系人邮箱"
+              placeholder="請輸入聯絡人郵箱"
               v-model:value="vdata.saveObject.contactEmail"
             ></a-input>
           </a-form-item>
         </a-col>
         <a-col :span="10">
-          <a-form-item label="状态" name="state">
+          <a-form-item label="狀態" name="state">
             <a-radio-group v-model:value="vdata.saveObject.state" :defaultValue="1">
-              <a-radio :value="1">启用</a-radio>
-              <a-radio :value="0">禁用</a-radio>
+              <a-radio :value="1">啟用</a-radio>
+              <a-radio :value="0">停用</a-radio>
             </a-radio-group>
           </a-form-item>
         </a-col>
       </a-row>
       <a-row justify="space-between" type="flex">
         <a-col :span="24">
-          <a-form-item label="备注" name="remark">
-            <a-textarea v-model:value="vdata.saveObject.remark" placeholder="请输入备注" />
+          <a-form-item label="備註" name="remark">
+            <a-textarea v-model:value="vdata.saveObject.remark" placeholder="請輸入備註" />
           </a-form-item>
         </a-col>
       </a-row>
@@ -70,7 +70,7 @@
         @click="handleOkFunc"
         :loading="vdata.btnLoading"
       >
-        保存
+        儲存
       </a-button>
     </div>
   </a-drawer>
@@ -95,18 +95,18 @@ const vdata: any = reactive({
   recordId: null, // 更新对象ID
   open: false, // 是否显示弹层/抽屉
   rules: {
-    isvName: [{ required: true, message: '请输入服务商名称', trigger: 'blur' }],
-    isvShortName: [{ required: true, message: '请输入服务商简称', trigger: 'blur' }],
+    isvName: [{ required: true, message: '請輸入服務商名稱', trigger: 'blur' }],
+    isvShortName: [{ required: true, message: '請輸入服務商簡稱', trigger: 'blur' }],
     contactEmail: [
       {
         required: false,
         pattern: /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/,
-        message: '请输入正确的邮箱地址',
+        message: '請輸入正確的郵箱地址',
         trigger: 'blur',
       },
     ],
     contactTel: [
-      { required: false, pattern: /^1\d{10}$/, message: '请输入正确的手机号', trigger: 'blur' },
+      { required: false, pattern: /^1\d{10}$/, message: '請輸入正確的手機號', trigger: 'blur' },
     ],
   },
 })

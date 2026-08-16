@@ -1,18 +1,18 @@
 <template>
   <a-modal
     v-model:open="vdata.isShow"
-    title="支付宝子商户扫码授权"
+    title="支付寶子商戶掃碼授權"
     @ok="handleOkFunc"
     @cancel="handleOkFunc"
   >
     <div style="text-align: center">
-      <p>方式1： <br>  请商家登录【支付宝】APP, 扫描如下二维码, 按提示授权： </p>
+      <p>方式1： <br>  請商家登入【支付寶】APP, 掃描如下QR Code, 按提示授權： </p>
       <img style="margin-bottom: 10px" :src="vdata.apiResData.authQrImgUrl">
       <hr>
 
       <p style="margin-top: 10px">
-        方式2： <br> <a-button v-clipboard:copy="vdata.apiResData.authUrl" v-clipboard:success="onCopySuccess" size="small" class="copy-btn">点击复制</a-button>
-        链接并发送给商户，商户进入链接，按照页面提示自主授权：
+        方式2： <br> <a-button v-clipboard:copy="vdata.apiResData.authUrl" v-clipboard:success="onCopySuccess" size="small" class="copy-btn">點選複製</a-button>
+        連結並發送給商戶，商戶進入連結，按照頁面提示自主授權：
       </p>
       <a target="_blank" :href="vdata.apiResData.authUrl">{{ vdata.apiResData.authUrl }}</a>
     </div>
@@ -45,7 +45,7 @@ const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProp
   }
 
   function onCopySuccess () {
-    $infoBox.message.success('复制成功')
+    $infoBox.message.success('複製成功')
   }
 
   function handleOkFunc() { // 点击【确认】按钮事件

@@ -1,7 +1,7 @@
 <template>
   <div>
     <header class="header">
-      <div class="header-text">付款给{{ payOrderInfo.mchName }}</div>
+      <div class="header-text">付款給{{ payOrderInfo.mchName }}</div>
       <div class="header-img">
         <img :src="avatar ? avatar : icon_member_default" alt="" />
       </div>
@@ -23,7 +23,7 @@
       <!-- 手写输入框 -->
       <div  class="input-c"  style="width: 100%">
         <div  v-if="payOrderInfo.amount" class="input-c-div-1">{{ payOrderInfo.amount/100 }}</div>
-        <input style="height: 120px;"  type="number" v-else v-model="amount" placeholder="请输入金额">
+        <input style="height: 120px;"  type="number" v-else v-model="amount" placeholder="請輸入金額">
         <!-- 数字金额后边的光标 -->
         <!-- <div class="input-c-div" style="background:#07c160"></div> -->
       </div>
@@ -131,7 +131,7 @@ export default {
     pay: function (){
 
       if(isNaN(this.amount) || this.amount <= 0){
-        return alert('请输入金额');
+        return alert('請輸入金額');
       }
 
       // 后端 /api/cashier/pay 返回双层 ApiRes：外层由 HttpRequest 拦截器拆除，
@@ -191,11 +191,11 @@ export default {
               window.WeixinJSBridge.call('closeWindow')
             }
             if (res.err_msg === "get_brand_wcpay_request:fail") {
-              alert('支付失败:' + JSON.stringify(res))
+              alert('支付失敗:' + JSON.stringify(res))
               window.WeixinJSBridge.call('closeWindow')
             }
             if (res.err_msg === "total_fee") {
-              alert('缺少参数')
+              alert('缺少參數')
               window.WeixinJSBridge.call('closeWindow')
             }
           }

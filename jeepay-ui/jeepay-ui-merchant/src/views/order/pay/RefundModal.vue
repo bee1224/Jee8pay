@@ -11,7 +11,7 @@
       <a-row>
         <a-col :sm="24">
           <a-descriptions>
-            <a-descriptions-item label="支付订单号">
+            <a-descriptions-item label="支付訂單號">
               <a-tag color="purple">
                 {{ vdata.detailData.payOrderId }}
               </a-tag>
@@ -20,7 +20,7 @@
         </a-col>
         <a-col :sm="24">
           <a-descriptions>
-            <a-descriptions-item label="支付金额">
+            <a-descriptions-item label="支付金額">
               <a-tag color="green">
                 {{ vdata.detailData.amount / 100 }}
               </a-tag>
@@ -29,7 +29,7 @@
         </a-col>
         <a-col :sm="24">
           <a-descriptions>
-            <a-descriptions-item label="可退金额">
+            <a-descriptions-item label="可退金額">
               <a-tag color="pink">
                 {{ nowRefundAmount }}
               </a-tag>
@@ -39,7 +39,7 @@
       </a-row>
 
       <a-form :rules="vdata.rules" :model="vdata.refund" ref="refundInfo">
-        <a-form-item label="退款金额" name="refundAmount">
+        <a-form-item label="退款金額" name="refundAmount">
           <a-input-number
             v-model:value="vdata.refund.refundAmount"
             :precision="2"
@@ -89,15 +89,15 @@ const vdata: any = reactive({
         max: 256,
         required: true,
         trigger: 'blur',
-        message: '请输入退款原因，最长不超过256个字符',
+        message: '請輸入退款原因，最長不超過256個字符',
       },
     ],
     refundAmount: [
-      { required: true, message: '请输入金额', trigger: 'blur' },
+      { required: true, message: '請輸入金額', trigger: 'blur' },
       {
         validator: (rule, value) => {
           if (value < 0.01 || value > vdata.nowRefundAmount) {
-            return Promise.reject('退款金额不能小于0.01，或者大于可退金额')
+            return Promise.reject('退款金額不能小於0.01，或者大於可退金額')
           }
           return Promise.resolve()
         },
@@ -133,7 +133,7 @@ function handleOk(e) {
 
           if (res.state === 0 || res.state === 3) {
             // 订单生成 || 失败
-            vdata.refundErrorModal = $infoBox.modalError('退款失败', buildModalText(res))
+            vdata.refundErrorModal = $infoBox.modalError('退款失敗', buildModalText(res))
           } else if (res.state === 1) {
             // 退款中
             vdata.refundErrorModal = $infoBox.modalWarning('退款中', buildModalText(res))
@@ -143,7 +143,7 @@ function handleOk(e) {
             $infoBox.message.success('退款成功')
             props.callbackFunc()
           } else {
-            vdata.refundErrorModal = $infoBox.modalWarning('退款状态未知', buildModalText(res))
+            vdata.refundErrorModal = $infoBox.modalWarning('退款狀態未知', buildModalText(res))
           }
         })
         .catch(() => {
@@ -159,10 +159,10 @@ function handleCancel(e) {
 function buildModalText(res) {
   return (
     <div>
-      {res.errCode ? <div>错误码：{res.errCode} </div> : ''}
-      {res.errMsg ? <div>错误信息：{res.errMsg} </div> : ''}
+      {res.errCode ? <div>錯誤碼：{res.errCode} </div> : ''}
+      {res.errMsg ? <div>錯誤訊息：{res.errMsg} </div> : ''}
       <div>
-        请到<a onClick={toRefundList}>退款列表</a>中查看详细信息
+        請到<a onClick={toRefundList}>退款列表</a>中查看詳細資訊
       </div>
     </div>
   )

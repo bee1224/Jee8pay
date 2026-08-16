@@ -11,7 +11,7 @@
           </div>
           <div class="desc">
             <img src="@/assets/svg/operate.svg" class="logo" alt="logo" />
-            <span>运营平台</span>
+            <span>營運平台</span>
           </div>
         </div>
 
@@ -37,7 +37,7 @@
                 v-model:value="formState.username"
                 size="large"
                 type="text"
-                placeholder="请输入账户"
+                placeholder="請輸入帳戶"
               />
             </a-form-item>
 
@@ -45,7 +45,7 @@
               <a-input-password
                 v-model:value="formState.password"
                 size="large"
-                placeholder="请输入密码"
+                placeholder="請輸入密碼"
               />
             </a-form-item>
 
@@ -56,23 +56,23 @@
                   class="code-input"
                   size="large"
                   type="text"
-                  placeholder="请输入人机验证码"
+                  placeholder="請輸入人機驗證碼"
                 />
               </a-form-item>
 
               <div class="code-img" style="position: relative; background: #ddd">
                 <img v-show="vercodeImgSrc" :src="vercodeImgSrc" @click="refVercode()" />
                 <div v-show="isOverdue" class="vercode-mask" @click="refVercode()">
-                  已过期 请刷新
+                  已過期 請重新整理
                 </div>
               </div>
             </div>
 
             <a-form-item>
               <!-- 自动登录 -->
-              <a-checkbox v-model:checked="isAutoLogin">自动登录</a-checkbox>
+              <a-checkbox v-model:checked="isAutoLogin">自動登入</a-checkbox>
               <!-- 忘记密码 -->
-              <a class="forge-password" style="float: right">忘记密码?</a>
+              <a class="forge-password" style="float: right">忘記密碼?</a>
             </a-form-item>
 
             <a-form-item class="submit">
@@ -83,7 +83,7 @@
                 class="login-button"
                 :loading="loginBtnLoadingFlag"
               >
-                登录
+                登入
               </a-button>
             </a-form-item>
           </a-form>
@@ -144,7 +144,7 @@ function handleSubmit(e) {
       router.push({ path: '/' })
       // 延迟 1 秒显示欢迎信息
       setTimeout(() => {
-        $infoBox.notification.success({ message: '欢迎', description: `${timeFix()}，欢迎回来` })
+        $infoBox.notification.success({ message: '歡迎', description: `${timeFix()}，歡迎回來` })
       }, 1000)
       showLoginErrorInfo.value = ''
     })

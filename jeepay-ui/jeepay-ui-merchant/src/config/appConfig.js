@@ -8,7 +8,7 @@
 
 /** 应用配置项 **/
 export default {
-  APP_TITLE: 'Jeepay商户系统', // 设置浏览器title
+  APP_TITLE: 'Jeepay商戶系統', // 设置浏览器title
   ACCESS_TOKEN_NAME: 'iToken', // 设置请求token的名字， 用于请求header 和 localstorage中存在名称
 }
 

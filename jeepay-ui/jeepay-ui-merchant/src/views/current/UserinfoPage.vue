@@ -1,7 +1,7 @@
 <template>
   <div style="background: #fff; padding: 20px">
     <a-tabs @change="selectTabs">
-      <a-tab-pane key="1" tab="基本信息">
+      <a-tab-pane key="1" tab="基本資料">
         <div class="account-settings-info-view">
           <a-row :gutter="16">
             <a-col :md="16" :lg="16">
@@ -12,16 +12,16 @@
                 :wrapper-col="{ span: 10 }"
                 :rules="vdata.rules"
               >
-                <a-form-item label="用户登录名:">
+                <a-form-item label="使用者登入名:">
                   <a-input v-model:value="vdata.saveObject.loginUsername" disabled />
                 </a-form-item>
-                <a-form-item label="用户姓名：" name="realname">
+                <a-form-item label="使用者姓名：" name="realname">
                   <a-input v-model:value="vdata.saveObject.realname" />
                 </a-form-item>
-                <a-form-item label="手机号：" name="telphone">
+                <a-form-item label="手機號：" name="telphone">
                   <a-input v-model:value="vdata.saveObject.telphone" disabled />
                 </a-form-item>
-                <a-form-item label="请选择性别：">
+                <a-form-item label="請選擇性別：">
                   <a-radio-group v-model:value="vdata.saveObject.sex">
                     <a-radio :value="1">男</a-radio>
                     <a-radio :value="2">女</a-radio>
@@ -30,7 +30,7 @@
               </a-form>
               <div style="display: flex; justify-content: center">
                 <a-button type="primary" @click="changeInfo" :loading="vdata.btnLoading">
-                  更新基本信息
+                  更新基本資料
                 </a-button>
               </div>
             </a-col>
@@ -57,7 +57,7 @@
                   <template #uploadSlot>
                     <a-button style="margin-left: 5px">
                       <a-icon :type="vdata.loading ? 'loading' : 'upload'" />
-                      {{ vdata.loading ? '正在上传' : '更换头像' }}
+                      {{ vdata.loading ? '正在上傳' : '更換頭像' }}
                     </a-button>
                   </template>
                 </JeepayUpload>
@@ -67,7 +67,7 @@
           <avatar-modal ref="modal" @ok="setavatar" />
         </div>
       </a-tab-pane>
-      <a-tab-pane key="2" tab="安全信息">
+      <a-tab-pane key="2" tab="安全資料">
         <div class="account-settings-info-view">
           <a-row :gutter="16">
             <a-col :md="16" :lg="16">
@@ -78,28 +78,28 @@
                 :wrapper-col="{ span: 10 }"
                 :rules="vdata.rulesPass"
               >
-                <a-form-item label="原密码：" name="originalPwd">
+                <a-form-item label="原密碼：" name="originalPwd">
                   <a-input-password
                     v-model:value="vdata.updateObject.originalPwd"
-                    placeholder="请输入原密码"
+                    placeholder="請輸入原密碼"
                   />
                 </a-form-item>
-                <a-form-item label="新密码：" name="newPwd">
+                <a-form-item label="新密碼：" name="newPwd">
                   <a-input-password
                     v-model:value="vdata.updateObject.newPwd"
-                    placeholder="请输入新密码"
+                    placeholder="請輸入新密碼"
                   />
                 </a-form-item>
-                <a-form-item label="确认新密码：" name="confirmPwd">
+                <a-form-item label="確認新密碼：" name="confirmPwd">
                   <a-input-password
                     v-model:value="vdata.updateObject.confirmPwd"
-                    placeholder="确认新密码"
+                    placeholder="確認新密碼"
                   />
                 </a-form-item>
               </a-form>
               <div style="display: flex; justify-content: center">
                 <a-button type="primary" @click="confirm" :loading="vdata.btnLoading">
-                  更新密码
+                  更新密碼
                 </a-button>
               </div>
             </a-col>
@@ -138,19 +138,19 @@ const vdata: any = reactive({
   },
   recordId: userStore.userInfo.sysUserId, // 拿到ID
   rules: {
-    realname: [{ required: true, message: '请输入真实姓名', trigger: 'blur' }],
+    realname: [{ required: true, message: '請輸入真實姓名', trigger: 'blur' }],
   },
   rulesPass: {
-    originalPwd: [{ required: true, message: '请输入原密码', trigger: 'blur' }],
-    newPwd: [{ min: 6, max: 12, required: true, message: '请输入6-12位新密码', trigger: 'blur' }],
+    originalPwd: [{ required: true, message: '請輸入原密碼', trigger: 'blur' }],
+    newPwd: [{ min: 6, max: 12, required: true, message: '請輸入6-12位新密碼', trigger: 'blur' }],
     confirmPwd: [
-      { required: true, message: '请输入确认新密码', trigger: 'blur' },
+      { required: true, message: '請輸入確認新密碼', trigger: 'blur' },
       {
         validator: (rule, value) => {
           if (vdata.updateObject.newPwd === value) {
             return Promise.resolve()
           } else {
-            return Promise.reject('新密码与确认密码不一致')
+            return Promise.reject('新密碼與確認密碼不一致')
           }
         },
       },
@@ -178,7 +178,7 @@ function changeInfo() {
   infoFormModel.value.validate().then((valid) => {
     if (valid) {
       // 验证通过
-      $infoBox.confirmPrimary('确认更新信息吗？', '', () => {
+      $infoBox.confirmPrimary('確認更新資料嗎？', '', () => {
         // 请求接口
         vdata.btnLoading = true // 打开按钮上的 loading
         updateUserInfo(vdata.saveObject)
@@ -208,7 +208,7 @@ function confirm(e) {
   pwdFormModel.value.validate().then((valid) => {
     if (valid) {
       // 验证通过
-      $infoBox.confirmPrimary('确认更新密码吗？', '', () => {
+      $infoBox.confirmPrimary('確認更新密碼嗎？', '', () => {
         // 请求接口
         vdata.btnLoading = true // 打开按钮上的 loading
         vdata.confirmLoading = true // 显示loading

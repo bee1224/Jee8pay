@@ -13,7 +13,7 @@
           </div>
           <div class="desc">
             <img src="~@/assets/svg/operate.svg" class="logo" alt="logo">
-            <span>商户系统</span>
+            <span>商戶系統</span>
           </div>
         </div>
 

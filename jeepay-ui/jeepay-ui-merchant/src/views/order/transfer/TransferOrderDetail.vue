@@ -5,18 +5,18 @@
     placement="right"
     :closable="true"
     v-model:open="vdata.isShow"
-    title="转账订单详情"
+    title="轉帳訂單詳情"
     @close="vdata.isShow = false"
   >
     <a-row justify="space-between" type="flex">
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="应用APPID">{{ vdata.detailData.appId }}</a-descriptions-item>
+          <a-descriptions-item label="應用APPID">{{ vdata.detailData.appId }}</a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="转账订单号">
+          <a-descriptions-item label="轉帳訂單號">
             <a-tag color="purple">{{ vdata.detailData.transferId }}</a-tag>
           </a-descriptions-item>
         </a-descriptions>
@@ -24,14 +24,14 @@
 
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="商户转账单号">
+          <a-descriptions-item label="商戶轉帳單號">
             {{ vdata.detailData.mchOrderNo }}
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="渠道订单号">
+          <a-descriptions-item label="渠道訂單號">
             {{ vdata.detailData.channelOrderNo }}
           </a-descriptions-item>
         </a-descriptions>
@@ -39,21 +39,21 @@
 
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="金额">
+          <a-descriptions-item label="金額">
             <a-tag color="green">{{ vdata.detailData.amount / 100 }}</a-tag>
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="货币代码">
+          <a-descriptions-item label="貨幣代碼">
             {{ vdata.detailData.currency }}
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="收款账号">
+          <a-descriptions-item label="收款帳號">
             <a-tag color="green">{{ vdata.detailData.accountNo }}</a-tag>
           </a-descriptions-item>
         </a-descriptions>
@@ -67,14 +67,14 @@
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="转账备注">
+          <a-descriptions-item label="轉帳備註">
             {{ vdata.detailData.transferDesc }}
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="订单状态">
+          <a-descriptions-item label="訂單狀態">
             <a-tag
               :color="
                 vdata.detailData.state === 0
@@ -88,15 +88,15 @@
             >
               {{
                 vdata.detailData.state === 0
-                  ? '订单生成'
+                  ? '訂單生成'
                   : vdata.detailData.state === 1
-                    ? '转账中'
+                    ? '轉帳中'
                     : vdata.detailData.state === 2
-                      ? '转账成功'
+                      ? '轉帳成功'
                       : vdata.detailData.state === 3
-                        ? '转账失败'
+                        ? '轉帳失敗'
                         : vdata.detailData.state === 4
-                          ? '任务关闭'
+                          ? '任務關閉'
                           : '未知'
               }}
             </a-tag>
@@ -105,21 +105,21 @@
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="转账成功时间">
+          <a-descriptions-item label="轉帳成功時間">
             {{ vdata.detailData.successTime }}
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="创建时间">
+          <a-descriptions-item label="建立時間">
             {{ vdata.detailData.createdAt }}
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="更新时间">
+          <a-descriptions-item label="更新時間">
             {{ vdata.detailData.updatedAt }}
           </a-descriptions-item>
         </a-descriptions>
@@ -127,27 +127,27 @@
       <a-divider />
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="接口代码">{{ vdata.detailData.ifCode }}</a-descriptions-item>
+          <a-descriptions-item label="接口代碼">{{ vdata.detailData.ifCode }}</a-descriptions-item>
         </a-descriptions>
       </a-col>
 
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="入账类型">
+          <a-descriptions-item label="入帳類型">
             {{ vdata.detailData.entryType }}
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="客户端IP">
+          <a-descriptions-item label="客戶端IP">
             {{ vdata.detailData.clientIp }}
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col :sm="24">
         <a-descriptions>
-          <a-descriptions-item label="异步通知地址">
+          <a-descriptions-item label="異步通知地址">
             {{ vdata.detailData.notifyUrl }}
           </a-descriptions-item>
         </a-descriptions>
@@ -157,17 +157,17 @@
       <a-divider />
       <a-col :sm="24" >
         <a-descriptions>
-          <a-descriptions-item label="领取链接">
+          <a-descriptions-item label="領取連結">
             {{ vdata.userH5ConfirmUrl }}
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col :sm="12" >
         <a-descriptions>
-          <a-descriptions-item label="领取二维码">
+          <a-descriptions-item label="領取QR Code">
             <div style="width: 100%; text-align: center">
               <img :src="vdata.userH5ConfirmQrImgUrl" alt="" />
-              <p>请使用微信扫码领取</p>
+              <p>請使用微信掃碼領取</p>
             </div>
           </a-descriptions-item>
         </a-descriptions>
@@ -177,26 +177,26 @@
     <a-divider />
     <a-col :sm="12">
       <a-descriptions>
-        <a-descriptions-item label="渠道订单号">
+        <a-descriptions-item label="渠道訂單號">
           {{ vdata.detailData.channelOrderNo }}
         </a-descriptions-item>
       </a-descriptions>
     </a-col>
     <a-col :sm="12">
       <a-descriptions>
-        <a-descriptions-item label="渠道错误码">{{ vdata.detailData.errCode }}</a-descriptions-item>
+        <a-descriptions-item label="渠道錯誤碼">{{ vdata.detailData.errCode }}</a-descriptions-item>
       </a-descriptions>
     </a-col>
     <a-col :sm="12">
       <a-descriptions>
-        <a-descriptions-item label="渠道错误描述">
+        <a-descriptions-item label="渠道錯誤描述">
           {{ vdata.detailData.errMsg }}
         </a-descriptions-item>
       </a-descriptions>
     </a-col>
     <a-form layout="vertical">
       <a-col :sm="24">
-        <a-form-item label="渠道额外参数:">
+        <a-form-item label="渠道額外參數:">
           <a-textarea
             disabled="disabled"
             style="height: 100px; color: black"
@@ -206,7 +206,7 @@
       </a-col>
       <a-divider />
       <a-col :sm="24">
-        <a-form-item label="扩展参数:">
+        <a-form-item label="擴展參數:">
           <a-textarea
             disabled="disabled"
             style="height: 100px; color: black"

@@ -55,7 +55,7 @@ class HttpRequest {
       this.destroy(url, showLoading)
       // 安全取值：网络断开时 error.response 为 undefined
       const responseData = error.response && error.response.data
-      const errorInfo = (responseData && responseData.data) || responseData || { msg: '网络异常，请稍后重试' }
+      const errorInfo = (responseData && responseData.data) || responseData || { msg: '網路異常，請稍後重試' }
 
       return Promise.reject(errorInfo)
     })

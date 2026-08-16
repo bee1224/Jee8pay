@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p style="font-size:16px;">正在跳转...</p>
+    <p style="font-size:16px;">正在跳轉...</p>
   </div>
 </template>
 
@@ -23,10 +23,10 @@ export default {
       if (payWay && payWay.routeName) {
         that.$router.push({ name: payWay.routeName })
       } else {
-        that.$router.push({ name: config.errorPageRouteName, params: { errInfo: '无法识别支付方式' } })
+        that.$router.push({ name: config.errorPageRouteName, params: { errInfo: '無法識別支付方式' } })
       }
     }).catch(res => {
-      that.$router.push({ name: config.errorPageRouteName, params: { errInfo: (res && res.msg) || '获取用户信息失败' } })
+      that.$router.push({ name: config.errorPageRouteName, params: { errInfo: (res && res.msg) || '獲取用戶資訊失敗' } })
     })
   }
 }

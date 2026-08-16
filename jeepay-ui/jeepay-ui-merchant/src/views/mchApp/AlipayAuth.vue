@@ -1,7 +1,7 @@
 <template>
   <a-modal
     v-model:open="vdata.isShow"
-    title="支付宝子商户扫码授权"
+    title="支付寶子商戶掃碼授權"
     @ok="handleOkFunc"
     @cancel="handleOkFunc"
   >
@@ -9,7 +9,7 @@
       <p>
         方式1：
         <br />
-        请商家登录【支付宝】APP, 扫描如下二维码, 按提示授权：
+        請商家登入【支付寶】APP, 掃描如下QR Code, 按提示授權：
       </p>
       <img style="margin-bottom: 10px" :src="vdata.apiResData.authQrImgUrl" />
       <hr />
@@ -23,9 +23,9 @@
           size="small"
           class="copy-btn"
         >
-          点击复制
+          點擊複製
         </a-button>
-        链接并发送给商户，商户进入链接，按照页面提示自主授权：
+        連結併傳送給商戶，商戶進入連結，按照頁面提示自主授權：
       </p>
       <a target="_blank" :href="vdata.apiResData.authUrl">{{ vdata.apiResData.authUrl }}</a>
     </div>
@@ -59,7 +59,7 @@ function show(appId) {
 }
 
 function onCopySuccess() {
-  $infoBox.message.success('复制成功')
+  $infoBox.message.success('複製成功')
 }
 
 function handleOkFunc() {

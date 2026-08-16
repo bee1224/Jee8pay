@@ -13,8 +13,8 @@
       :wrapper-col="{ span: 15 }"
       :rules="vdata.rules"
     >
-      <a-form-item label="角色名称：" name="roleName">
-        <a-input v-model:value="vdata.saveObject.roleName" placeholder="请输入角色名称" />
+      <a-form-item label="角色名稱：" name="roleName">
+        <a-input v-model:value="vdata.saveObject.roleName" placeholder="請輸入角色名稱" />
       </a-form-item>
     </a-form>
 
@@ -23,7 +23,7 @@
 
     <div class="drawer-btn-center">
       <a-button :style="{ marginRight: '8px' }" @click="vdata.isShow = false">取消</a-button>
-      <a-button type="primary" @click="handleOkFunc" :loading="vdata.confirmLoading">保存</a-button>
+      <a-button type="primary" @click="handleOkFunc" :loading="vdata.confirmLoading">儲存</a-button>
     </div>
   </a-drawer>
 </template>
@@ -46,7 +46,7 @@ const vdata: any = reactive({
   saveObject: {}, // 数据对象
   recordId: null, // 更新对象ID
   rules: {
-    roleName: [{ required: true, message: '请输入角色名称', trigger: 'blur' }],
+    roleName: [{ required: true, message: '請輸入角色名稱', trigger: 'blur' }],
   },
 })
 

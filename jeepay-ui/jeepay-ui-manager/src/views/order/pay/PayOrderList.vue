@@ -16,14 +16,14 @@
             </a-range-picker>
             <jeepay-text-up
               v-model:value="vdata.searchData.unionOrderId"
-              :placeholder="'支付/商户/渠道订单号'"
+              :placeholder="'支付/商戶/渠道訂單號'"
               :msg="vdata.searchData.unionOrderId"
             />
             <!--            <jeepay-text-up :placeholder="'支付订单号'" :msg="searchData.payOrderId" v-model:value="searchData.payOrderId" />-->
             <!--            <jeepay-text-up :placeholder="'商户订单号'" :msg="searchData.mchOrderNo" v-model:value="searchData.mchOrderNo" />-->
-            <jeepay-text-up v-model:value="vdata.searchData.mchNo" :placeholder="'商户号'" />
-            <jeepay-text-up v-model:value="vdata.searchData.isvNo" :placeholder="'服务商号'" />
-            <jeepay-text-up v-model:value="vdata.searchData.appId" :placeholder="'应用AppId'" />
+            <jeepay-text-up v-model:value="vdata.searchData.mchNo" :placeholder="'商戶號'" />
+            <jeepay-text-up v-model:value="vdata.searchData.isvNo" :placeholder="'服務商號'" />
+            <jeepay-text-up v-model:value="vdata.searchData.appId" :placeholder="'應用AppId'" />
 
             <a-select
               v-model:value="vdata.searchData.wayCode"
@@ -42,41 +42,41 @@
             </a-select>
             <a-select
               v-model:value="vdata.searchData.state"
-              placeholder="支付状态"
+              placeholder="支付狀態"
               class="table-head-layout"
             >
               <a-select-option value="">全部</a-select-option>
-              <a-select-option value="0">订单生成</a-select-option>
+              <a-select-option value="0">訂單生成</a-select-option>
               <a-select-option value="1">支付中</a-select-option>
               <a-select-option value="2">支付成功</a-select-option>
-              <a-select-option value="3">支付失败</a-select-option>
-              <a-select-option value="4">已撤销</a-select-option>
+              <a-select-option value="3">支付失敗</a-select-option>
+              <a-select-option value="4">已撤銷</a-select-option>
               <a-select-option value="5">已退款</a-select-option>
-              <a-select-option value="6">订单关闭</a-select-option>
+              <a-select-option value="6">訂單關閉</a-select-option>
             </a-select>
             <a-select
               v-model:value="vdata.searchData.notifyState"
-              placeholder="回调状态"
+              placeholder="回調狀態"
               class="table-head-layout"
             >
               <a-select-option value="">全部</a-select-option>
-              <a-select-option value="0">未发送</a-select-option>
-              <a-select-option value="1">已发送</a-select-option>
+              <a-select-option value="0">未發送</a-select-option>
+              <a-select-option value="1">已發送</a-select-option>
             </a-select>
             <a-select
               v-model:value="vdata.searchData.divisionState"
-              placeholder="分账状态"
+              placeholder="分帳狀態"
               class="table-head-layout"
             >
               <a-select-option value="">全部</a-select-option>
-              <a-select-option value="0">未发生分账</a-select-option>
-              <a-select-option value="1">等待分账任务处理</a-select-option>
-              <a-select-option value="2">分账处理中</a-select-option>
-              <a-select-option value="3">分账任务已结束（状态请看分账记录）</a-select-option>
+              <a-select-option value="0">未發生分帳</a-select-option>
+              <a-select-option value="1">等待分帳任務處理</a-select-option>
+              <a-select-option value="2">分帳處理中</a-select-option>
+              <a-select-option value="3">分帳任務已結束（狀態請看分帳記錄）</a-select-option>
             </a-select>
             <span class="table-page-search-submitButtons">
               <a-button type="primary" :loading="vdata.btnLoading" @click="queryFunc">
-                搜索
+                搜尋
               </a-button>
               <a-button
                 style="margin-left: 8px"
@@ -135,34 +135,34 @@
             >
               {{
                 record.state === 0
-                  ? '订单生成'
+                  ? '訂單生成'
                   : record.state === 1
                     ? '支付中'
                     : record.state === 2
                       ? '支付成功'
                       : record.state === 3
-                        ? '支付失败'
+                        ? '支付失敗'
                         : record.state === 4
-                          ? '已撤销'
+                          ? '已撤銷'
                           : record.state === 5
                             ? '已退款'
                             : record.state === 6
-                              ? '订单关闭'
+                              ? '訂單關閉'
                               : '未知'
               }}
             </a-tag>
           </template>
           <template v-if="column.key === 'divisionState'">
             <span v-if="record.divisionState == 0">-</span>
-            <a-tag v-else-if="record.divisionState == 1" color="orange">待分账</a-tag>
-            <a-tag v-else-if="record.divisionState == 2" color="red">分账处理中</a-tag>
-            <a-tag v-else-if="record.divisionState == 3" color="green">任务已结束</a-tag>
+            <a-tag v-else-if="record.divisionState == 1" color="orange">待分帳</a-tag>
+            <a-tag v-else-if="record.divisionState == 2" color="red">分帳處理中</a-tag>
+            <a-tag v-else-if="record.divisionState == 3" color="green">任務已結束</a-tag>
             <span v-else>未知</span>
           </template>
           <template v-if="column.key === 'notifyState'">
             <a-badge
               :status="record.notifyState === 1 ? 'processing' : 'error'"
-              :text="record.notifyState === 1 ? '已发送' : '未发送'"
+              :text="record.notifyState === 1 ? '已發送' : '未發送'"
             />
           </template>
           <template v-if="column.key === 'orderNo'">
@@ -171,7 +171,7 @@
                 <span style="color: #729ed5; background: #e7f5f7">支付</span>{{ record.payOrderId }}
               </p>
               <p>
-                <span style="color: #56cf56; background: #d8eadf">商户</span><a-tooltip
+                <span style="color: #56cf56; background: #d8eadf">商戶</span><a-tooltip
                   v-if="record.mchOrderNo.length > record.payOrderId.length"
                   placement="bottom"
                   style="font-weight: normal"
@@ -200,7 +200,7 @@
                 type="link"
                 @click="detailFunc(record.payOrderId)"
               >
-                详情
+                詳情
               </a-button>
               <a-button
                 v-if="$access('ENT_PAY_ORDER_REFUND')"
@@ -225,18 +225,18 @@
         placement="right"
         :closable="true"
         v-model:open="vdata.visible"
-        :title="vdata.visible === true ? '订单详情' : ''"
+        :title="vdata.visible === true ? '訂單詳情' : ''"
         @close="onClose"
       >
         <a-row justify="space-between" type="flex">
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="所属系统">
+              <a-descriptions-item label="所屬系統">
                 {{
                   vdata.detailData.mchType === 1
-                    ? '普通商户'
+                    ? '普通商戶'
                     : vdata.detailData.mchType === 2
-                      ? '特约商户'
+                      ? '特約商戶'
                       : '未知'
                 }}
               </a-descriptions-item>
@@ -244,14 +244,14 @@
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="服务商号">
+              <a-descriptions-item label="服務商號">
                 {{ vdata.detailData.isvNo }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="支付订单号">
+              <a-descriptions-item label="支付訂單號">
                 <a-tag color="purple">
                   {{ vdata.detailData.payOrderId }}
                 </a-tag>
@@ -260,28 +260,28 @@
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="商户号">
+              <a-descriptions-item label="商戶號">
                 {{ vdata.detailData.mchNo }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="商户订单号">
+              <a-descriptions-item label="商戶訂單號">
                 {{ vdata.detailData.mchOrderNo }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="商户名称">
+              <a-descriptions-item label="商戶名稱">
                 {{ vdata.detailData.mchName }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="支付金额">
+              <a-descriptions-item label="支付金額">
                 <a-tag color="green">
                   {{ vdata.detailData.amount / 100 }}
                 </a-tag>
@@ -290,7 +290,7 @@
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="手续费">
+              <a-descriptions-item label="手續費">
                 <a-tag color="pink">
                   {{ vdata.detailData.mchFeeAmount / 100 }}
                 </a-tag>
@@ -299,14 +299,14 @@
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="商家费率">
+              <a-descriptions-item label="商家費率">
                 {{ (vdata.detailData.mchFeeRate * 100).toFixed(2) }}%
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="订单状态">
+              <a-descriptions-item label="訂單狀態">
                 <a-tag
                   :color="
                     vdata.detailData.state === 0
@@ -322,19 +322,19 @@
                 >
                   {{
                     vdata.detailData.state === 0
-                      ? '订单生成'
+                      ? '訂單生成'
                       : vdata.detailData.state === 1
                         ? '支付中'
                         : vdata.detailData.state === 2
                           ? '支付成功'
                           : vdata.detailData.state === 3
-                            ? '支付失败'
+                            ? '支付失敗'
                             : vdata.detailData.state === 4
-                              ? '已撤销'
+                              ? '已撤銷'
                               : vdata.detailData.state === 5
                                 ? '已退款'
                                 : vdata.detailData.state === 6
-                                  ? '订单关闭'
+                                  ? '訂單關閉'
                                   : '未知'
                   }}
                 </a-tag>
@@ -343,13 +343,13 @@
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="回调状态">
+              <a-descriptions-item label="回調狀態">
                 <a-tag :color="vdata.detailData.notifyState === 1 ? 'green' : 'volcano'">
                   {{
                     vdata.detailData.notifyState === 0
-                      ? '未发送'
+                      ? '未發送'
                       : vdata.detailData.notifyState === 1
-                        ? '已发送'
+                        ? '已發送'
                         : '未知'
                   }}
                 </a-tag>
@@ -358,49 +358,49 @@
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="应用APPID">
+              <a-descriptions-item label="應用APPID">
                 {{ vdata.detailData.appId }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="支付错误码">
+              <a-descriptions-item label="支付錯誤碼">
                 {{ vdata.detailData.errCode }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="支付错误描述">
+              <a-descriptions-item label="支付錯誤描述">
                 {{ vdata.detailData.errMsg }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="订单失效时间">
+              <a-descriptions-item label="訂單失效時間">
                 {{ vdata.detailData.expiredTime }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="支付成功时间">
+              <a-descriptions-item label="支付成功時間">
                 {{ vdata.detailData.successTime }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="创建时间">
+              <a-descriptions-item label="建立時間">
                 {{ vdata.detailData.createdAt }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="更新时间">
+              <a-descriptions-item label="更新時間">
                 {{ vdata.detailData.updatedAt }}
               </a-descriptions-item>
             </a-descriptions>
@@ -408,7 +408,7 @@
           <a-divider />
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="商品标题">
+              <a-descriptions-item label="商品標題">
                 {{ vdata.detailData.subject }}
               </a-descriptions-item>
             </a-descriptions>
@@ -422,14 +422,14 @@
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="接口代码">
+              <a-descriptions-item label="介面代碼">
                 {{ vdata.detailData.ifCode }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="货币代码">
+              <a-descriptions-item label="貨幣代碼">
                 {{ vdata.detailData.currency }}
               </a-descriptions-item>
             </a-descriptions>
@@ -443,42 +443,42 @@
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="客户端IP">
+              <a-descriptions-item label="客戶端IP">
                 {{ vdata.detailData.clientIp }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="用户标识">
+              <a-descriptions-item label="用戶標識">
                 {{ vdata.detailData.channelUser }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="渠道订单号">
+              <a-descriptions-item label="渠道訂單號">
                 {{ vdata.detailData.channelOrderNo }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="异步通知地址">
+              <a-descriptions-item label="異步通知地址">
                 {{ vdata.detailData.notifyUrl }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="页面跳转地址">
+              <a-descriptions-item label="頁面跳轉地址">
                 {{ vdata.detailData.returnUrl }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="退款状态">
+              <a-descriptions-item label="退款狀態">
                 <a-tag
                   :color="
                     vdata.detailData.refundState === 0
@@ -492,11 +492,11 @@
                 >
                   {{
                     vdata.detailData.refundState === 0
-                      ? '未发起'
+                      ? '未發起'
                       : vdata.detailData.refundState === 1
                         ? '部分退款'
                         : vdata.detailData.refundState === 2
-                          ? '全额退款'
+                          ? '全額退款'
                           : '未知'
                   }}
                 </a-tag>
@@ -505,14 +505,14 @@
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="退款次数">
+              <a-descriptions-item label="退款次數">
                 {{ vdata.detailData.refundTimes }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="退款总额">
+              <a-descriptions-item label="退款總額">
                 <a-tag v-if="vdata.detailData.refundAmount" color="cyan">
                   {{ vdata.detailData.refundAmount / 100 }}
                 </a-tag>
@@ -522,13 +522,13 @@
           <a-divider />
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="订单分账模式">
-                <span v-if="vdata.detailData.divisionMode == 0">该笔订单不允许分账</span>
+              <a-descriptions-item label="訂單分帳模式">
+                <span v-if="vdata.detailData.divisionMode == 0">該筆訂單不允許分帳</span>
                 <span v-else-if="vdata.detailData.divisionMode == 1">
-                  支付成功按配置自动完成分账
+                  支付成功按設定自動完成分帳
                 </span>
                 <span v-else-if="vdata.detailData.divisionMode == 2">
-                  商户手动分账(解冻商户金额)
+                  商戶手動分帳(解凍商戶金額)
                 </span>
                 <span v-else>未知</span>
               </a-descriptions-item>
@@ -536,14 +536,14 @@
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="分账状态">
-                <a-tag v-if="vdata.detailData.divisionState == 0" color="blue">未发生分账</a-tag>
-                <a-tag v-else-if="vdata.detailData.divisionState == 1" color="orange">待分账</a-tag>
+              <a-descriptions-item label="分帳狀態">
+                <a-tag v-if="vdata.detailData.divisionState == 0" color="blue">未發生分帳</a-tag>
+                <a-tag v-else-if="vdata.detailData.divisionState == 1" color="orange">待分帳</a-tag>
                 <a-tag v-else-if="vdata.detailData.divisionState == 2" color="red">
-                  分账处理中
+                  分帳處理中
                 </a-tag>
                 <a-tag v-else-if="vdata.detailData.divisionState == 3" color="green">
-                  任务已结束
+                  任務已結束
                 </a-tag>
                 <a-tag v-else color="#f50">未知</a-tag>
               </a-descriptions-item>
@@ -551,7 +551,7 @@
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="最新分账发起时间">
+              <a-descriptions-item label="最新分帳發起時間">
                 {{ vdata.detailData.divisionLastTime }}
               </a-descriptions-item>
             </a-descriptions>
@@ -562,7 +562,7 @@
         <a-row justify="start" type="flex">
           <a-col :sm="24">
             <a-form layout="vertical">
-              <a-form-item label="扩展参数:">
+              <a-form-item label="擴充參數:">
                 <a-textarea
                   v-model:value="vdata.detailData.extParam"
                   disabled="disabled"
@@ -588,7 +588,7 @@ const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProp
 const tableColumns = [
   {
     key: 'amount',
-    title: '支付金额',
+    title: '支付金額',
     ellipsis: true,
     width: 108,
     fixed: 'left',
@@ -596,35 +596,35 @@ const tableColumns = [
   },
   {
     key: 'refundAmount',
-    title: '退款金额',
+    title: '退款金額',
     width: 108,
     scopedSlots: { customRender: 'refundAmountSlot' },
   },
   {
     key: 'mchFeeAmount',
     dataIndex: 'mchFeeAmount',
-    title: '手续费',
+    title: '手續費',
     width: 100,
   },
-  { key: 'mchName', title: '商户名称', dataIndex: 'mchName', ellipsis: true, width: 100 },
-  { key: 'orderNo', title: '订单号', scopedSlots: { customRender: 'orderSlot' }, width: 210 },
+  { key: 'mchName', title: '商戶名稱', dataIndex: 'mchName', ellipsis: true, width: 100 },
+  { key: 'orderNo', title: '訂單號', scopedSlots: { customRender: 'orderSlot' }, width: 210 },
   // { key: 'payOrderId', title: '支付订单号', dataIndex: 'payOrderId' },
   // { key: 'mchOrderNo', title: '商户订单号', dataIndex: 'mchOrderNo' },
   { key: 'wayName', title: '支付方式', dataIndex: 'wayName', width: 120 },
-  { key: 'state', title: '支付状态', scopedSlots: { customRender: 'stateSlot' }, width: 100 },
+  { key: 'state', title: '支付狀態', scopedSlots: { customRender: 'stateSlot' }, width: 100 },
   {
     key: 'notifyState',
-    title: '回调状态',
+    title: '回調狀態',
     scopedSlots: { customRender: 'notifySlot' },
     width: 100,
   },
   {
     key: 'divisionState',
-    title: '分账状态',
+    title: '分帳狀態',
     scopedSlots: { customRender: 'divisionStateSlot' },
     width: 100,
   },
-  { key: 'createdAt', dataIndex: 'createdAt', title: '创建日期', width: 120 },
+  { key: 'createdAt', dataIndex: 'createdAt', title: '建立日期', width: 120 },
   {
     key: 'op',
     title: '操作',
@@ -677,7 +677,7 @@ function searchFunc() {
 // 打开退款弹出框
 function openFunc(record, recordId) {
   if (record.refundState === 2) {
-    $infoBox.message.modalError('订单无可退款金额', '')
+    $infoBox.message.modalError('訂單無可退款金額', '')
   }
   refundModalInfo.value.show(recordId)
 }

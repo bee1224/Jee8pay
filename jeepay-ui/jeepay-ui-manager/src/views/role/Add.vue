@@ -7,7 +7,7 @@
       :wrapper-col="{ span: 15 }"
       :rules="vdata.rules"
     >
-      <a-form-item label="角色名称：" name="roleName">
+      <a-form-item label="角色名稱：" name="roleName">
         <a-input v-model:value="vdata.saveObject.roleName" />
       </a-form-item>
     </a-form>
@@ -29,7 +29,7 @@ const vdata: any = reactive({
   saveObject: {}, // 数据对象
 
   rules: {
-    roleName: [{ required: true, message: '请输入角色名称', trigger: 'blur' }],
+    roleName: [{ required: true, message: '請輸入角色名稱', trigger: 'blur' }],
   },
 })
 

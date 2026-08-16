@@ -1,7 +1,7 @@
 <template>
   <a-drawer
     v-model:open="vdata.open"
-    title="配置支付通道"
+    title="設定支付通道"
     :closable="true"
     :maskClosable="false"
     :body-style="{ paddingBottom: '80px' }"
@@ -51,7 +51,7 @@
                 {{ record.ifName }}
               </div>
               <a-form :labelCol="{ span: 8 }" :wrapperCol="{ span: 14 }">
-                <a-form-item label="费率：" :validate-status="record.error" :help="record.help">
+                <a-form-item label="費率：" :validate-status="record.error" :help="record.help">
                   <a-input
                     v-model:value="record.rate"
                     :disabled="!record.state && record.passageId != ''"
@@ -64,7 +64,7 @@
             <div class="jeepay-card-ops">
               <a-switch
                 v-model:checked="record.state"
-                checked-children="启用"
+                checked-children="啟用"
                 un-checked-children="停用"
               />
             </div>
@@ -87,7 +87,7 @@
       >
         <a-button :style="{ marginRight: '8px' }" @click="onClose">取消</a-button>
         <a-button v-if="$access('ENT_MCH_PAY_PASSAGE_ADD')" type="primary" @click="handleOkFunc">
-          保存
+          儲存
         </a-button>
       </div>
     </div>
@@ -158,12 +158,12 @@ function handleOkFunc() {
       if (item.state) {
         if (!item.rate) {
           item.error = 'error'
-          item.help = '请输入费率'
+          item.help = '請輸入費率'
           throw new Error('error')
         }
         if (!reg.test(item.rate) || item.rate > 100) {
           item.error = 'error'
-          item.help = '最多四位小数'
+          item.help = '最多四位小數'
           throw new Error('error')
         }
       }
@@ -185,7 +185,7 @@ function handleOkFunc() {
   }
   // 请求接口
   req.add(API_URL_MCH_PAYPASSAGE_LIST, { reqParams: JSON.stringify(reqParams) }).then((res) => {
-    $infoBox.message.success('保存成功')
+    $infoBox.message.success('儲存成功')
     vdata.open = false
     props.callbackFunc()
   })

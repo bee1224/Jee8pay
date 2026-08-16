@@ -16,7 +16,7 @@
               class="analy-title"
               style="padding: 20px; box-sizing: border-box; padding-bottom: 10px"
             >
-              <span>今日交易金额</span>
+              <span>今日交易金額</span>
               <a-tooltip>
                 <template slot="title">
                   {{ vdata.mainTips.todayAmountTip }}
@@ -27,13 +27,13 @@
             <div v-show="vdata.ispayAmount">
               <div class="pay-amount-text">
                 <span class="pay-amount">NT${{ vdata.mainChart.todayAmount }}</span>
-                <span>共{{ vdata.mainChart.todayPayCount }}笔</span>
+                <span>共{{ vdata.mainChart.todayPayCount }}筆</span>
               </div>
               <div id="payAmount" style="height: 60px"></div>
             </div>
             <div class="payAmountSpan" v-show="vdata.ispayAmount">
-              <span>昨日交易金额：NT${{ vdata.mainChart.yesterdayAmount }}</span>
-              <span>近七天交易金额：NT${{ vdata.mainChart.payWeek }}</span>
+              <span>昨日交易金額：NT${{ vdata.mainChart.yesterdayAmount }}</span>
+              <span>近七天交易金額：NT${{ vdata.mainChart.payWeek }}</span>
             </div>
             <empty v-show="!vdata.ispayAmount" />
           </div>
@@ -46,7 +46,7 @@
             <div class="chart-data">
               <a-skeleton active :loading="vdata.skeletonIsShow" :paragraph="{ rows: 1 }">
                 <div class="analy-title">
-                  <span>交易总金额</span>
+                  <span>交易總金額</span>
                   <a-tooltip>
                     <template #title>
                       {{ vdata.mainTips.totalAmountTip }}
@@ -67,7 +67,7 @@
             <div class="chart-data">
               <a-skeleton active :loading="vdata.skeletonIsShow" :paragraph="{ rows: 1 }">
                 <div class="analy-title">
-                  <span>服务商数量</span>
+                  <span>服務商數量</span>
                   <a-tooltip>
                     <template #title>
                       {{ vdata.mainTips.totalIsvTip }}
@@ -86,7 +86,7 @@
             <div class="chart-data">
               <a-skeleton active :loading="vdata.skeletonIsShow" :paragraph="{ rows: 1 }">
                 <div class="analy-title">
-                  <span>交易总笔数</span>
+                  <span>交易總筆數</span>
                   <a-tooltip>
                     <template #title>
                       {{ vdata.mainTips.totalPayCountTip }}
@@ -96,7 +96,7 @@
                 </div>
                 <a-statistic
                   style="margin-top: 10px"
-                  :value="vdata.mainChart.totalPayCount + ' 笔'"
+                  :value="vdata.mainChart.totalPayCount + ' 筆'"
                 />
               </a-skeleton>
             </div>
@@ -105,7 +105,7 @@
             <div class="chart-data">
               <a-skeleton active :loading="vdata.skeletonIsShow" :paragraph="{ rows: 1 }">
                 <div class="analy-title">
-                  <span>商户数量</span>
+                  <span>商戶數量</span>
                   <a-tooltip>
                     <template #title>
                       {{ vdata.mainTips.totalMchTip }}
@@ -131,8 +131,8 @@
                 <div class="user-greet-all">
                   <span style="">{{ vdata.mainTips.helloTitle }}</span>
                   <div>
-                    <span style="font-size: 12px" v-if="vdata.isAdmin === 1">超级管理员</span>
-                    <span style="font-size: 12px" v-else>操作员</span>
+                    <span style="font-size: 12px" v-if="vdata.isAdmin === 1">超級管理員</span>
+                    <span style="font-size: 12px" v-else>操作員</span>
                   </div>
                 </div>
               </div>
@@ -146,7 +146,7 @@
               />
             </div>
             <div class="quick-start">
-              <p class="quick-start-title">快速开始</p>
+              <p class="quick-start-title">快速開始</p>
               <ul class="quick-start-ul">
                 <template v-for="menu in quickMenuList" :key="menu.entId">
                   <li>
@@ -167,12 +167,12 @@
           <div v-show="!vdata.skeletonIsShow">
             <div>
               <div class="pay-count-title">
-                <span class="chart-title">交易统计</span>
+                <span class="chart-title">交易統計</span>
                 <div class="chart-padding">
                   <a-range-picker
                     ref="jeeRange"
                     style="width: 100%"
-                    :presets="{ 最近一个月: [vdata.dayjs().subtract(1, 'months'), vdata.dayjs()] }"
+                    :presets="{ 最近一個月: [vdata.dayjs().subtract(1, 'months'), vdata.dayjs()] }"
                     :default-value="[vdata.dayjs().subtract(7, 'days'), vdata.dayjs()]"
                     show-time
                     format="YYYY-MM-DD"
@@ -217,7 +217,7 @@
                 <a-range-picker
                   style="width: 100%"
                   ref="jeeRangePie"
-                  :presets="{ 最近一个月: [dayjs().subtract(1, 'months'), dayjs()] }"
+                  :presets="{ 最近一個月: [dayjs().subtract(1, 'months'), dayjs()] }"
                   :default-value="[dayjs().subtract(7, 'days'), dayjs()]"
                   @change="payOnChange"
                   show-time
@@ -253,7 +253,7 @@
     <template>
       <div>
         <a-drawer
-          title="用户信息"
+          title="用戶資訊"
           placement="right"
           :closable="true"
           v-model:open="vdata.visible"
@@ -262,12 +262,12 @@
           <a-row>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="所属系统">
+                <a-descriptions-item label="所屬系統">
                   {{
                     userStore.userInfo.sysType === 'MGR'
-                      ? '运营平台'
+                      ? '營運平台'
                       : userStore.userInfo.sysType === 'MCH'
-                        ? '商户系统'
+                        ? '商戶系統'
                         : '未知'
                   }}
                 </a-descriptions-item>
@@ -275,28 +275,28 @@
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="登录用户名">
+                <a-descriptions-item label="登入用戶名稱">
                   {{ userStore.userInfo.loginUsername }}
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="真实姓名">
+                <a-descriptions-item label="真實姓名">
                   {{ userStore.userInfo.realname }}
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="手机号">
+                <a-descriptions-item label="手機號">
                   {{ userStore.userInfo.telphone }}
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="性别">
+                <a-descriptions-item label="性別">
                   {{
                     userStore.userInfo.sex == '1'
                       ? '男'
@@ -309,16 +309,16 @@
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="权限">
+                <a-descriptions-item label="權限">
                   <a-tag color="#2db7f5" v-if="userStore.userInfo.isAdmin == '1'">超管</a-tag>
-                  <a-tag color="#87d068" v-if="userStore.userInfo.isAdmin == '0'">操作员</a-tag>
+                  <a-tag color="#87d068" v-if="userStore.userInfo.isAdmin == '0'">操作員</a-tag>
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="用户状态">
-                  <a-tag color="green" v-if="userStore.userInfo.state == '1'">启用</a-tag>
+                <a-descriptions-item label="用戶狀態">
+                  <a-tag color="green" v-if="userStore.userInfo.state == '1'">啟用</a-tag>
                   <a-tag color="red" v-if="userStore.userInfo.state == '0'">停用</a-tag>
                 </a-descriptions-item>
               </a-descriptions>
@@ -368,11 +368,11 @@ const vdata: any = reactive({
   isAdmin: userStore.userInfo.isAdmin, // 是否为超级管理员
   mainTips: {
     // 主页提示
-    todayAmountTip: '今日成功交易金额及笔数', // 今日交易提示文字
-    totalAmountTip: '成功交易总金额', // 交易总金额提示文字
-    totalPayCountTip: '成功交易总笔数', // 交易总笔数提示文字
-    totalIsvTip: '服务商数量', // 服务商数量提示文字
-    totalMchTip: '商户数量', // 商户数量提示文字
+    todayAmountTip: '今日成功交易金額及筆數', // 今日交易提示文字
+    totalAmountTip: '成功交易總金額', // 交易总金额提示文字
+    totalPayCountTip: '成功交易總筆數', // 交易总笔数提示文字
+    totalIsvTip: '服務商數量', // 服务商数量提示文字
+    totalMchTip: '商戶數量', // 商户数量提示文字
     helloTitle: '',
   },
   mainChart: {
@@ -659,7 +659,7 @@ onMounted(() => {
         customHtml: (container, view, datum) => {
           const { width, height } = container.getBoundingClientRect()
           const d = Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2))
-          const text = datum ? datum.typeName : '总计'
+          const text = datum ? datum.typeName : '總計'
           return renderStatistic(d, text, { fontSize: 28 })
         },
       },

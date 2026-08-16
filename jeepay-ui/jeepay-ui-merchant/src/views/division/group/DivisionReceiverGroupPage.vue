@@ -5,16 +5,16 @@
         <a-form layout="inline" class="table-head-ground">
           <div class="table-layer">
             <jeepay-text-up
-              :placeholder="'组ID'"
+              :placeholder="'組ID'"
               v-model:value="vdata.searchData.receiverGroupId"
             />
             <jeepay-text-up
-              :placeholder="'组名称'"
+              :placeholder="'組名稱'"
               v-model:value="vdata.searchData.receiverGroupName"
             />
             <span class="table-page-search-submitButtons">
               <a-button type="primary" @click="searchFunc" :loading="vdata.btnLoading">
-                查询
+                查詢
               </a-button>
               <a-button style="margin-left: 8px" @click="() => (vdata.searchData = {})">
                 重置
@@ -62,7 +62,7 @@
                 v-if="$access('ENT_DIVISION_RECEIVER_GROUP_DELETE')"
                 @click="delFunc(record.receiverGroupId)"
               >
-                删除
+                刪除
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -83,16 +83,16 @@ const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProp
 
 // eslint-disable-next-line no-unused-vars
 const tableColumns = [
-  { key: 'receiverGroupId', dataIndex: 'receiverGroupId', title: '组ID' },
-  { key: 'receiverGroupName', dataIndex: 'receiverGroupName', title: '组名称' },
+  { key: 'receiverGroupId', dataIndex: 'receiverGroupId', title: '組ID' },
+  { key: 'receiverGroupName', dataIndex: 'receiverGroupName', title: '組名稱' },
   {
     key: 'autoDivisionFlag',
     dataIndex: 'autoDivisionFlag',
-    title: '自动分账组',
+    title: '自動分帳組',
     customRender: ({ text }) => (text === 1 ? '是' : '否'),
   },
-  { key: 'createdBy', dataIndex: 'createdBy', title: '创建人' },
-  { key: 'createdAt', dataIndex: 'createdAt', title: '创建时间' },
+  { key: 'createdBy', dataIndex: 'createdBy', title: '建立人' },
+  { key: 'createdAt', dataIndex: 'createdAt', title: '建立時間' },
   {
     key: 'op',
     title: '操作',
@@ -134,10 +134,10 @@ function editFunc(recordId) {
 
 function delFunc(recordId) {
   // 业务通用【删除】 函数
-  $infoBox.confirmDanger('确认删除？', '', () => {
+  $infoBox.confirmDanger('確認刪除？', '', () => {
     // 需要【按钮】loading 请返回 promise对象， 不需要请直接返回null
     return req.delById(API_URL_DIVISION_RECEIVER_GROUP, recordId).then((res) => {
-      $infoBox.message.success('删除成功！')
+      $infoBox.message.success('刪除成功！')
       infoTable.value.refTable(false)
     })
   })

@@ -10,12 +10,12 @@
                   <a-form-item label="">
                     <a-select
                       v-model:value="vdata.querySysType"
-                      placeholder="选择系统菜单"
+                      placeholder="選擇系統選單"
                       @change="refTable"
                       class="table-head-layout"
                     >
-                      <a-select-option value="MGR">显示菜单：运营平台</a-select-option>
-                      <a-select-option value="MCH">显示菜单：商户系统</a-select-option>
+                      <a-select-option value="MGR">顯示選單：營運平台</a-select-option>
+                      <a-select-option value="MCH">顯示選單：商戶系統</a-select-option>
                     </a-select>
                   </a-form-item>
                 </a-col>
@@ -75,15 +75,15 @@ import { reactive, getCurrentInstance, ref, onMounted } from 'vue'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 const tableColumns = [
-  { title: '资源权限ID', dataIndex: 'entId' }, // key为必填项，用于标志该列的唯一
-  { title: '资源名称', dataIndex: 'entName' },
-  { title: '图标', dataIndex: 'menuIcon' },
-  { title: '路径', dataIndex: 'menuUri' },
-  { title: '组件名称', dataIndex: 'componentName' },
-  { title: '类型', dataIndex: 'entType' },
-  { title: '状态', key: 'state', align: 'center' },
+  { title: '資源權限ID', dataIndex: 'entId' }, // key为必填项，用于标志该列的唯一
+  { title: '資源名稱', dataIndex: 'entName' },
+  { title: '圖示', dataIndex: 'menuIcon' },
+  { title: '路徑', dataIndex: 'menuUri' },
+  { title: '元件名稱', dataIndex: 'componentName' },
+  { title: '類型', dataIndex: 'entType' },
+  { title: '狀態', key: 'state', align: 'center' },
   { title: '排序', dataIndex: 'entSort' },
-  { title: '修改时间', dataIndex: 'updatedAt' },
+  { title: '修改時間', dataIndex: 'updatedAt' },
   {
     title: '操作',
     width: '100px',

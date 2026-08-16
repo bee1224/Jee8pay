@@ -2,10 +2,10 @@
   <div class="result-err">
     <img src="~@/assets/svg/500.svg" alt="">
     <div>
-      对不起，服务器错误。
+      對不起，伺服器錯誤。
     </div>
     <a-button type="primary" @click="toHome" style="margin-top:30px">
-      返回首页
+      返回首頁
     </a-button>
   </div>
 </template>

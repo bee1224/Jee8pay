@@ -4,30 +4,30 @@
       <div class="table-page-search-wrapper">
         <a-form layout="inline" class="table-head-ground">
           <div class="table-layer">
-            <jeepay-text-up v-model:value="searchData.mchNo" :placeholder="'商户号'" />
-            <jeepay-text-up v-model:value="searchData.isvNo" :placeholder="'服务商号'" />
-            <jeepay-text-up v-model:value="searchData.mchName" :placeholder="'商户名称'" />
+            <jeepay-text-up v-model:value="searchData.mchNo" :placeholder="'商戶號'" />
+            <jeepay-text-up v-model:value="searchData.isvNo" :placeholder="'服務商號'" />
+            <jeepay-text-up v-model:value="searchData.mchName" :placeholder="'商戶名稱'" />
             <a-select
               v-model:value="searchData.state"
-              placeholder="商户状态"
+              placeholder="商戶狀態"
               class="table-head-layout"
             >
               <a-select-option value="">全部</a-select-option>
-              <a-select-option value="0">禁用</a-select-option>
-              <a-select-option value="1">启用</a-select-option>
+              <a-select-option value="0">停用</a-select-option>
+              <a-select-option value="1">啟用</a-select-option>
             </a-select>
             <a-select
               v-model:value="searchData.type"
-              placeholder="商户类型"
+              placeholder="商戶類型"
               class="table-head-layout"
             >
               <a-select-option value="">全部</a-select-option>
-              <a-select-option value="1">普通商户</a-select-option>
-              <a-select-option value="2">特约商户</a-select-option>
+              <a-select-option value="1">普通商戶</a-select-option>
+              <a-select-option value="2">特約商戶</a-select-option>
             </a-select>
             <span class="table-page-search-submitButtons" style="flex-grow: 0; flex-shrink: 0">
               <a-button type="primary" :loading="vdata.btnLoading" @click="queryFunc">
-                查询
+                查詢
               </a-button>
               <a-button style="margin-left: 8px" @click="searchData = {}">重置</a-button>
             </span>
@@ -64,13 +64,13 @@
           <template v-if="column.key === 'state'">
             <a-badge
               :status="record.state === 0 ? 'error' : 'processing'"
-              :text="record.state === 0 ? '禁用' : '启用'"
+              :text="record.state === 0 ? '停用' : '啟用'"
             />
           </template>
 
           <template v-if="column.key === 'type'">
             <a-tag :color="record.type === 1 ? 'green' : 'orange'">
-              {{ record.type === 1 ? '普通商户' : '特约商户' }}
+              {{ record.type === 1 ? '普通商戶' : '特約商戶' }}
             </a-tag>
           </template>
 
@@ -87,7 +87,7 @@
               @click="mchAppConfig(record.mchNo)"
               v-if="$access('ENT_MCH_APP_CONFIG')"
             >
-              应用配置
+              應用設定
             </a-button>
             <a-button
               type="link"
@@ -95,7 +95,7 @@
               @click="delFunc(record.mchNo)"
               v-if="$access('ENT_MCH_INFO_DEL')"
             >
-              删除
+              刪除
             </a-button>
           </template>
         </template>
@@ -124,12 +124,12 @@ const infoTable = ref()
 
 // eslint-disable-next-line no-unused-vars
 let tableColumns = reactive([
-  { key: 'mchName', fixed: 'left', width: '200px', title: '商户名称' },
-  { key: 'mchNo', title: '商户号', dataIndex: 'mchNo' },
-  { key: 'isvNo', title: '服务商号', dataIndex: 'isvNo' },
-  { key: 'state', title: '状态', width: '130px' },
-  { key: 'type', title: '商户类型', width: '130px' },
-  { key: 'createdAt', dataIndex: 'createdAt', title: '创建日期' },
+  { key: 'mchName', fixed: 'left', width: '200px', title: '商戶名稱' },
+  { key: 'mchNo', title: '商戶號', dataIndex: 'mchNo' },
+  { key: 'isvNo', title: '服務商號', dataIndex: 'isvNo' },
+  { key: 'state', title: '狀態', width: '130px' },
+  { key: 'type', title: '商戶類型', width: '130px' },
+  { key: 'createdAt', dataIndex: 'createdAt', title: '建立日期' },
   { key: 'operation', title: '操作', width: '260px', fixed: 'right', align: 'center' },
 ])
 
@@ -165,10 +165,10 @@ function detailFunc(recordId) {
 }
 // 删除商户
 function delFunc(recordId) {
-  $infoBox.confirmDanger('确认删除？', '该操作将删除商户下所有配置及用户信息', () => {
+  $infoBox.confirmDanger('確認刪除？', '該操作將刪除商戶下所有設定及用戶資訊', () => {
     reqLoad.delById(API_URL_MCH_LIST, recordId).then((res) => {
       infoTable.value.refTable(true)
-      $infoBox.message.success('删除成功')
+      $infoBox.message.success('刪除成功')
     })
   })
 }

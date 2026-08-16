@@ -2,10 +2,10 @@
   <div class="result-err">
     <img src="~@/assets/svg/404.svg" alt="">
     <div>
-      抱歉，您访问的页面不存在。
+      抱歉，您訪問的頁面不存在。
     </div>
     <a-button type="primary" @click="toHome" style="margin-top:30px">
-      返回首页
+      返回首頁
     </a-button>
   </div>
 </template>

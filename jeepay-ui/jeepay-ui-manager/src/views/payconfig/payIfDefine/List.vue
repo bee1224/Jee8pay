@@ -4,11 +4,11 @@
       <a-alert message="" type="info" style="width: calc(100% - 24px); margin-bottom: 20px">
         <template #description>
           <p style="display: flex; justify-content: space-between; margin: 0 0 4px">
-            计全科技已开放支付接口购买渠道，官方团队开发、源码提供、下载后直接使用。
+            計全科技已開放支付介面購買渠道，官方團隊開發、原始碼提供、下載後直接使用。
             <a href="https://docs.jeequan.com/docs/jeepay/jeepay-1ejdnsuhveb16" target="_blank">
-              接口下载、安装说明。
+              介面下載、安裝說明。
             </a>
-            <a href="https://www.jeequan.com/ifstore/list.html" target="_blank">前往接口市场 ></a>
+            <a href="https://www.jeequan.com/ifstore/list.html" target="_blank">前往介面市場 ></a>
           </p>
         </template>
       </a-alert>
@@ -47,10 +47,10 @@
             </div>
             <!-- 卡片底部操作栏 -->
             <div class="jeepay-card-ops">
-              <a-tooltip placement="top" title="编辑">
+              <a-tooltip placement="top" title="編輯">
                 <EditOutlined key="edit" type="edit" @click="addOrEdit(record.ifCode)" />
               </a-tooltip>
-              <a-tooltip placement="top" title="删除">
+              <a-tooltip placement="top" title="刪除">
                 <DeleteOutlined key="delete" type="delete" @click="del(record.ifCode)" />
               </a-tooltip>
             </div>
@@ -71,7 +71,7 @@ const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProp
 
 const vdata = reactive({
   jeepayCard: {
-    name: '支付接口',
+    name: '支付介面',
     height: 200,
     span: { xxl: 8, xl: 4, lg: 4, md: 3, sm: 2, xs: 1 },
     addAuthority: $access('ENT_PC_IF_DEFINE_ADD'),
@@ -93,9 +93,9 @@ function addOrEdit(ifCode) {
   payIfDefineAddOrEdit.value.show(ifCode)
 }
 function del(ifCode) {
-  $infoBox.confirmDanger('确认删除？', '', () => {
+  $infoBox.confirmDanger('確認刪除？', '', () => {
     req.delById(API_URL_IFDEFINES_LIST, ifCode).then((res) => {
-      $infoBox.message.success('删除成功！')
+      $infoBox.message.success('刪除成功！')
       refCardList()
     })
   })

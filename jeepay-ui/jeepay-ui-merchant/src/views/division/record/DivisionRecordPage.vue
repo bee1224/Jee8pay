@@ -14,32 +14,32 @@
               <a-icon slot="suffixIcon" type="sync" />
             </a-range-picker>
             <jeepay-text-up
-              placeholder="分账接受者ID"
+              placeholder="分帳接受者ID"
               v-model:value="vdata.searchData.receiverId"
             />
             <jeepay-text-up
-              placeholder="分账账号组ID"
+              placeholder="分帳帳號組ID"
               v-model:value="vdata.searchData.receiverGroupId"
             />
-            <jeepay-text-up placeholder="应用AppId" v-model:value="vdata.searchData.appId" />
-            <jeepay-text-up placeholder="支付订单号" v-model:value="vdata.searchData.payOrderId" />
-            <jeepay-text-up placeholder="分账接收账号" v-model:value="vdata.searchData.accNo" />
+            <jeepay-text-up placeholder="應用AppId" v-model:value="vdata.searchData.appId" />
+            <jeepay-text-up placeholder="支付訂單號" v-model:value="vdata.searchData.payOrderId" />
+            <jeepay-text-up placeholder="分帳接收帳號" v-model:value="vdata.searchData.accNo" />
 
             <a-select
               v-model:value="vdata.searchData.state"
-              placeholder="分账状态"
+              placeholder="分帳狀態"
               class="table-head-layout"
             >
               <a-select-option value="">全部</a-select-option>
-              <a-select-option value="0">待分账</a-select-option>
-              <a-select-option value="1">分账成功</a-select-option>
-              <a-select-option value="2">分账失败</a-select-option>
+              <a-select-option value="0">待分帳</a-select-option>
+              <a-select-option value="1">分帳成功</a-select-option>
+              <a-select-option value="2">分帳失敗</a-select-option>
               <a-select-option value="3">已受理</a-select-option>
             </a-select>
 
             <span class="table-page-search-submitButtons">
               <a-button type="primary" @click="queryFunc" :loading="vdata.btnLoading">
-                搜索
+                搜尋
               </a-button>
               <a-button style="margin-left: 8px" @click="() => (vdata.searchData = {})">
                 重置
@@ -65,9 +65,9 @@
           </template>
           <!-- 自定义插槽 -->
           <template v-if="column.key === 'state'">
-            <a-tag v-if="record.state === 0" :key="record.state" color="orange">分账中</a-tag>
-            <a-tag v-if="record.state === 1" :key="record.state" color="blue">分账成功</a-tag>
-            <a-tag v-if="record.state === 2" :key="record.state" color="volcano">分账失败</a-tag>
+            <a-tag v-if="record.state === 0" :key="record.state" color="orange">分帳中</a-tag>
+            <a-tag v-if="record.state === 1" :key="record.state" color="blue">分帳成功</a-tag>
+            <a-tag v-if="record.state === 2" :key="record.state" color="volcano">分帳失敗</a-tag>
             <a-tag v-if="record.state === 3" :key="record.state" color="purple">已受理</a-tag>
           </template>
           <template v-if="column.key === 'op'">
@@ -78,14 +78,14 @@
                 v-if="$access('ENT_DIVISION_RECORD_VIEW')"
                 @click="detailFunc(record.recordId)"
               >
-                详情
+                詳情
               </a-button>
               <a-button
                 type="link"
                 v-if="record.state == 2 && $access('ENT_DIVISION_RECORD_RESEND')"
                 @click="redivFunc(record.recordId)"
               >
-                重试
+                重試
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -106,34 +106,34 @@ const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProp
 
 // eslint-disable-next-line no-unused-vars
 const tableColumns = [
-  { key: 'calDivisionAmount', title: '分账金额', scopedSlots: { customRender: 'amountSlot' } },
-  { key: 'batchOrderId', title: '分账批次号', dataIndex: 'batchOrderId' },
-  { key: 'payOrderId', title: '支付订单号', dataIndex: 'payOrderId' },
-  { key: 'ifCode', title: '接口代码', dataIndex: 'ifCode' },
+  { key: 'calDivisionAmount', title: '分帳金額', scopedSlots: { customRender: 'amountSlot' } },
+  { key: 'batchOrderId', title: '分帳批次號', dataIndex: 'batchOrderId' },
+  { key: 'payOrderId', title: '支付訂單號', dataIndex: 'payOrderId' },
+  { key: 'ifCode', title: '接口代碼', dataIndex: 'ifCode' },
   {
     key: 'payOrderAmount',
     dataIndex: 'payOrderAmount',
-    title: '订单金额',
+    title: '訂單金額',
     customRender: ({ text }) => 'NT$' + (text / 100).toFixed(2),
   },
   {
     key: 'payOrderDivisionAmount',
     dataIndex: 'payOrderDivisionAmount',
-    title: '分账基数',
+    title: '分帳基數',
     customRender: ({ text }) => 'NT$' + (text / 100).toFixed(2),
   },
-  { key: 'receiverAlias', title: '账号别名', dataIndex: 'receiverAlias' },
-  { key: 'accNo', title: '接收账号', dataIndex: 'accNo' },
-  { key: 'accName', title: '账号姓名', dataIndex: 'accName' },
-  { key: 'relationTypeName', title: '分账关系类型', dataIndex: 'relationTypeName' },
+  { key: 'receiverAlias', title: '帳號別名', dataIndex: 'receiverAlias' },
+  { key: 'accNo', title: '接收帳號', dataIndex: 'accNo' },
+  { key: 'accName', title: '帳號姓名', dataIndex: 'accName' },
+  { key: 'relationTypeName', title: '分帳關係類型', dataIndex: 'relationTypeName' },
   {
     key: 'divisionProfit',
     dataIndex: 'divisionProfit',
-    title: '分账比例',
+    title: '分帳比例',
     customRender: ({ text }) => (text * 100).toFixed(2) + '%',
   },
-  { key: 'state', title: '分账状态', scopedSlots: { customRender: 'stateSlot' } },
-  { key: 'createdAt', dataIndex: 'createdAt', title: '创建日期' },
+  { key: 'state', title: '分帳狀態', scopedSlots: { customRender: 'stateSlot' } },
+  { key: 'createdAt', dataIndex: 'createdAt', title: '建立日期' },
   {
     key: 'op',
     title: '操作',
@@ -173,12 +173,12 @@ function detailFunc(recordId) {
 // 重新发起分账
 function redivFunc(recordId) {
   $infoBox.confirmPrimary(
-    '确认重新分账?',
-    '重新分账将按照订单维度重新发起（仅限分账失败订单）。',
+    '確認重新分帳?',
+    '重新分帳將按照訂單維度重新發起（僅限分帳失敗訂單）。',
     () => {
       resendDivision(recordId).then((res) => {
         infoTable.value.refTable(false)
-        $infoBox.message.warning('请等待接口最新状态')
+        $infoBox.message.warning('請等待接口最新狀態')
       })
     }
   )

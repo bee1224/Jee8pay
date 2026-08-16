@@ -12,7 +12,7 @@
         <a-badge status="error" text="停用" />
       </div>
       <div v-else-if="state == 1">
-        <a-badge status="processing" text="启用" />
+        <a-badge status="processing" text="啟用" />
       </div>
       <div v-else>
         <a-badge status="warning" text="未知" />
@@ -20,7 +20,7 @@
     </template>
 
     <template v-if="showSwitchType">
-      <a-switch class="els" checked-children="启用" un-checked-children="停用" :checked="switchChecked" @change="onChangeInner" />
+      <a-switch class="els" checked-children="啟用" un-checked-children="停用" :checked="switchChecked" @change="onChangeInner" />
     </template>
   </div>
 </template>

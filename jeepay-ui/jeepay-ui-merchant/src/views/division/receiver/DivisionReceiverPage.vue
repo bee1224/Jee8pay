@@ -6,42 +6,42 @@
           <div class="table-layer">
             <a-select
               v-model:value="vdata.searchData.appId"
-              placeholder="选择应用"
+              placeholder="選擇應用"
               class="table-head-layout"
             >
-              <a-select-option key="">全部应用</a-select-option>
+              <a-select-option key="">全部應用</a-select-option>
               <a-select-option v-for="item in vdata.mchAppList" :key="item.appId">
                 {{ item.appName }} [{{ item.appId }}]
               </a-select-option>
             </a-select>
 
             <jeepay-text-up
-              placeholder="分账接收者ID[精准]"
+              placeholder="分帳接收者ID[精準]"
               v-model:value="vdata.searchData.receiverId"
             />
             <jeepay-text-up
-              placeholder="接收者账号别名[模糊]"
+              placeholder="接收者帳號別名[模糊]"
               v-model:value="vdata.searchData.receiverAlias"
             />
             <jeepay-text-up
-              placeholder="组ID[精准]"
+              placeholder="組ID[精準]"
               v-model:value="vdata.searchData.receiverGroupId"
             />
 
             <a-select
               class="table-head-layout"
               v-model:value="vdata.searchData.state"
-              placeholder="账号状态（本系统）"
+              placeholder="帳號狀態（本系統）"
               default-value=""
             >
               <a-select-option value="">全部</a-select-option>
-              <a-select-option value="1">正常分账</a-select-option>
-              <a-select-option value="0">暂停分账</a-select-option>
+              <a-select-option value="1">正常分帳</a-select-option>
+              <a-select-option value="0">暫停分帳</a-select-option>
             </a-select>
 
             <span class="table-page-search-submitButtons table-head-layout">
               <a-button type="primary" @click="searchFunc" :loading="vdata.btnLoading">
-                查询
+                查詢
               </a-button>
               <a-button style="margin-left: 8px" @click="() => (vdata.searchData = {})">
                 重置
@@ -79,7 +79,7 @@
             <template v-else-if="record.ifCode == 'alipay'">
               <span style="color: dodgerblue">
                 <a-icon type="alipay-circle" />
-                支付宝
+                支付寶
               </span>
             </template>
             <template v-else>{{ record.ifCode }}</template>
@@ -87,8 +87,8 @@
 
           <!-- 状态（本系统） -->
           <template template v-if="column.key === 'state'">
-            <div v-if="record.state == 0"><a-badge status="error" text="暂停分账" /></div>
-            <div v-else-if="record.state == 1"><a-badge status="processing" text="正常分账" /></div>
+            <div v-if="record.state == 0"><a-badge status="error" text="暫停分帳" /></div>
+            <div v-else-if="record.state == 1"><a-badge status="processing" text="正常分帳" /></div>
             <div v-else><a-badge status="warning" text="未知" /></div>
           </template>
 
@@ -123,19 +123,19 @@ import { reactive, ref, onMounted, getCurrentInstance } from 'vue'
 
 // eslint-disable-next-line no-unused-vars
 const tableColumns = [
-  { key: 'receiverId', dataIndex: 'receiverId', title: '绑定ID' },
-  { key: 'ifCode', title: '渠道类型', scopedSlots: { customRender: 'ifCodeSlot' } },
-  { key: 'receiverAlias', dataIndex: 'receiverAlias', title: '账号别名' },
-  { key: 'receiverGroupName', dataIndex: 'receiverGroupName', title: '组名称' },
-  { key: 'accNo', dataIndex: 'accNo', title: '分账接收账号' },
-  { key: 'accName', dataIndex: 'accName', title: '分账接收账号名称' },
-  { key: 'relationTypeName', dataIndex: 'relationTypeName', title: '分账关系类型' },
-  { title: '状态', key: 'state', scopedSlots: { customRender: 'stateSlot' }, align: 'center' },
-  { key: 'bindSuccessTime', dataIndex: 'bindSuccessTime', title: '绑定成功时间' },
+  { key: 'receiverId', dataIndex: 'receiverId', title: '綁定ID' },
+  { key: 'ifCode', title: '渠道類型', scopedSlots: { customRender: 'ifCodeSlot' } },
+  { key: 'receiverAlias', dataIndex: 'receiverAlias', title: '帳號別名' },
+  { key: 'receiverGroupName', dataIndex: 'receiverGroupName', title: '組名稱' },
+  { key: 'accNo', dataIndex: 'accNo', title: '分帳接收帳號' },
+  { key: 'accName', dataIndex: 'accName', title: '分帳接收帳號名稱' },
+  { key: 'relationTypeName', dataIndex: 'relationTypeName', title: '分帳關係類型' },
+  { title: '狀態', key: 'state', scopedSlots: { customRender: 'stateSlot' }, align: 'center' },
+  { key: 'bindSuccessTime', dataIndex: 'bindSuccessTime', title: '綁定成功時間' },
   {
     key: 'divisionProfit',
     dataIndex: 'divisionProfit',
-    title: '默认分账比例',
+    title: '預設分帳比例',
     customRender: ({ text }) => {
       return (text * 100).toFixed(2) + '%'
     },
@@ -191,10 +191,10 @@ function searchFunc() {
 function addFunc() {
   // 业务通用【新增】 函数
   if (vdata.mchAppList.length <= 0) {
-    return $infoBox.message.error('当前商户无任何应用，请先创建应用后再试。')
+    return $infoBox.message.error('當前商戶無任何應用，請先建立應用後再試。')
   }
   if (!vdata.searchData.appId) {
-    return $infoBox.message.error('请先选择应用。')
+    return $infoBox.message.error('請先選擇應用。')
   }
 
   // 打开弹层

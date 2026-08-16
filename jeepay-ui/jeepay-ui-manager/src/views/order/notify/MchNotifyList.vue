@@ -14,38 +14,38 @@
             >
               <a-icon slot="suffixIcon" type="sync" />
             </a-range-picker>
-            <jeepay-text-up :placeholder="'订单ID'" v-model:value="vdata.searchData.orderId" />
+            <jeepay-text-up :placeholder="'訂單ID'" v-model:value="vdata.searchData.orderId" />
             <jeepay-text-up
-              :placeholder="'商户订单号'"
+              :placeholder="'商戶訂單號'"
               v-model:value="vdata.searchData.mchOrderNo"
             />
-            <jeepay-text-up :placeholder="'商户号'" v-model:value="vdata.searchData.mchNo" />
-            <jeepay-text-up :placeholder="'服务商号'" v-model:value="vdata.searchData.isvNo" />
-            <jeepay-text-up :placeholder="'应用AppId'" v-model:value="vdata.searchData.appId" />
+            <jeepay-text-up :placeholder="'商戶號'" v-model:value="vdata.searchData.mchNo" />
+            <jeepay-text-up :placeholder="'服務商號'" v-model:value="vdata.searchData.isvNo" />
+            <jeepay-text-up :placeholder="'應用AppId'" v-model:value="vdata.searchData.appId" />
             <a-select
               v-model:value="vdata.searchData.state"
-              placeholder="通知状态"
+              placeholder="通知狀態"
               class="table-head-layout"
             >
               <a-select-option value="">全部</a-select-option>
               <a-select-option value="1">通知中</a-select-option>
               <a-select-option value="2">通知成功</a-select-option>
-              <a-select-option value="3">通知失败</a-select-option>
+              <a-select-option value="3">通知失敗</a-select-option>
             </a-select>
             <a-select
               v-model:value="vdata.searchData.orderType"
-              placeholder="订单类型"
+              placeholder="訂單類型"
               class="table-head-layout"
             >
               <a-select-option value="">全部</a-select-option>
               <a-select-option value="1">支付</a-select-option>
               <a-select-option value="2">退款</a-select-option>
-              <a-select-option value="3">转账</a-select-option>
+              <a-select-option value="3">轉帳</a-select-option>
             </a-select>
 
             <span class="table-page-search-submitButtons">
               <a-button type="primary" @click="queryFunc" :loading="vdata.btnLoading">
-                搜索
+                搜尋
               </a-button>
               <a-button
                 style="margin-left: 8px"
@@ -83,14 +83,14 @@
             >
               <template v-if="record.state == 1">通知中</template>
               <template v-else-if="record.state == 2">通知成功</template>
-              <template v-else-if="record.state == 3">通知失败</template>
+              <template v-else-if="record.state == 3">通知失敗</template>
               <template v-else>未知</template>
             </a-tag>
           </template>
           <template v-if="column.key === 'orderType'">
             <a-tag v-if="record.orderType == 1" color="green">支付</a-tag>
             <a-tag v-else-if="record.orderType == 1" color="volcano">退款</a-tag>
-            <a-tag v-else-if="record.orderType == 1" color="blue">转账</a-tag>
+            <a-tag v-else-if="record.orderType == 1" color="blue">轉帳</a-tag>
             <a-tag v-else color="orange">未知</a-tag>
           </template>
           <template v-if="column.key === 'op'">
@@ -101,14 +101,14 @@
                 v-if="$access('ENT_MCH_NOTIFY_VIEW')"
                 @click="detailFunc(record.notifyId)"
               >
-                详情
+                詳情
               </a-button>
               <a-button
                 type="link"
                 v-if="$access('ENT_MCH_NOTIFY_RESEND') && record.state === 3"
                 @click="resendFunc(record.notifyId)"
               >
-                重发通知
+                重發通知
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -122,13 +122,13 @@
         placement="right"
         :closable="true"
         v-model:open="vdata.open"
-        :title="vdata.open === true ? '商户通知详情' : ''"
+        :title="vdata.open === true ? '商戶通知詳情' : ''"
         @close="onClose"
       >
         <a-row justify="space-between" type="flex">
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="订单ID">
+              <a-descriptions-item label="訂單ID">
                 <a-tag color="purple">
                   {{ vdata.detailData.orderId }}
                 </a-tag>
@@ -137,76 +137,76 @@
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="服务商号">
+              <a-descriptions-item label="服務商號">
                 {{ vdata.detailData.isvNo }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="商户订单号">
+              <a-descriptions-item label="商戶訂單號">
                 {{ vdata.detailData.mchOrderNo }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="商户号">
+              <a-descriptions-item label="商戶號">
                 {{ vdata.detailData.mchNo }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="订单类型">
+              <a-descriptions-item label="訂單類型">
                 <a-tag v-if="vdata.detailData.orderType == 1" color="green">支付</a-tag>
                 <a-tag v-else-if="vdata.detailData.orderType == 1" color="volcano">退款</a-tag>
-                <a-tag v-else-if="vdata.detailData.orderType == 1" color="blue">转账</a-tag>
+                <a-tag v-else-if="vdata.detailData.orderType == 1" color="blue">轉帳</a-tag>
                 <a-tag v-else color="orange">未知</a-tag>
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="应用APPID">
+              <a-descriptions-item label="應用APPID">
                 {{ vdata.detailData.appId }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="通知状态">
+              <a-descriptions-item label="通知狀態">
                 <a-tag v-if="vdata.detailData.state == 1" color="orange">通知中</a-tag>
                 <a-tag v-else-if="vdata.detailData.state == 2" color="green">通知成功</a-tag>
-                <a-tag v-else-if="vdata.detailData.state == 3" color="volcano">通知失败</a-tag>
+                <a-tag v-else-if="vdata.detailData.state == 3" color="volcano">通知失敗</a-tag>
                 <a-tag v-else color="volcano">未知</a-tag>
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="通知次数">
+              <a-descriptions-item label="通知次數">
                 {{ vdata.detailData.notifyCount }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="24">
             <a-descriptions>
-              <a-descriptions-item label="最后通知时间">
+              <a-descriptions-item label="最後通知時間">
                 {{ vdata.detailData.lastNotifyTime }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="创建时间">
+              <a-descriptions-item label="建立時間">
                 {{ vdata.detailData.createdAt }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="更新时间">
+              <a-descriptions-item label="更新時間">
                 {{ vdata.detailData.updatedAt }}
               </a-descriptions-item>
             </a-descriptions>
@@ -225,7 +225,7 @@
           </a-col>
           <a-col :sm="24">
             <a-form layout="vertical">
-              <a-form-item label="响应结果:">
+              <a-form-item label="回應結果:">
                 <a-textarea
                   disabled="disabled"
                   style="height: 100px; color: black"
@@ -247,16 +247,16 @@ const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProp
 
 // eslint-disable-next-line no-unused-vars
 const tableColumns = [
-  { key: 'orderId', title: '订单ID', fixed: 'left', dataIndex: 'orderId' },
-  { key: 'mchOrderNo', title: '商户订单号', dataIndex: 'mchOrderNo' },
-  { key: 'state', title: '通知状态', width: '130px', scopedSlots: { customRender: 'stateSlot' } },
+  { key: 'orderId', title: '訂單ID', fixed: 'left', dataIndex: 'orderId' },
+  { key: 'mchOrderNo', title: '商戶訂單號', dataIndex: 'mchOrderNo' },
+  { key: 'state', title: '通知狀態', width: '130px', scopedSlots: { customRender: 'stateSlot' } },
   {
     key: 'orderType',
-    title: '订单类型',
+    title: '訂單類型',
     width: '130px',
     scopedSlots: { customRender: 'orderTypeSlot' },
   },
-  { key: 'createdAt', dataIndex: 'createdAt', title: '创建日期' },
+  { key: 'createdAt', dataIndex: 'createdAt', title: '建立日期' },
   {
     key: 'op',
     title: '操作',
@@ -332,9 +332,9 @@ function onClose() {
 
 function resendFunc(notifyId) {
   // 重发通知
-  $infoBox.confirmPrimary('确认重发通知？', '', () => {
+  $infoBox.confirmPrimary('確認重發通知？', '', () => {
     mchNotifyResend(notifyId).then((res) => {
-      $infoBox.message.success('任务更新成功，请稍后查看最新状态！')
+      $infoBox.message.success('任務更新成功，請稍後檢視最新狀態！')
       searchFunc()
     })
   })

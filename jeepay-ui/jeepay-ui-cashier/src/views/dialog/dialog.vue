@@ -9,18 +9,18 @@
 <template>
   <div class="dialog">
     <div class="dialog-box">
-      <div class="dialog-remark">添加备注</div>
+      <div class="dialog-remark">添加備註</div>
       <div class="dialog-input">
         <input
           type="text"
-          placeholder="最多输入10个字"
+          placeholder="最多輸入10個字"
           maxlength="10"
           v-model="remarkC2"
         />
       </div>
       <div class="dialog-bnt">
         <div class="dialog-bnt-l" @click="myDialogStateFn(false)">取消</div>
-        <div class="dialog-bnt-r" @click="myDialogStateFn(true)">确认</div>
+        <div class="dialog-bnt-r" @click="myDialogStateFn(true)">確認</div>
       </div>
     </div>
   </div>

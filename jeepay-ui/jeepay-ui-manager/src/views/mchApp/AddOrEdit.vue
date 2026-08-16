@@ -1,7 +1,7 @@
 <template>
   <a-drawer
     v-model:open="vdata.open"
-    :title="vdata.isAdd ? '新增应用' : '修改应用'"
+    :title="vdata.isAdd ? '新增應用' : '修改應用'"
     width="40%"
     :mask-closable="false"
     @close="onClose"
@@ -9,38 +9,38 @@
     <a-form ref="infoFormModel" :model="vdata.saveObject" layout="vertical" :rules="rules">
       <a-row :gutter="16">
         <a-col v-if="!vdata.isAdd" :span="12">
-          <a-form-item label="应用 AppId" name="appId">
+          <a-form-item label="應用 AppId" name="appId">
             <a-input
               v-model:value="vdata.saveObject.appId"
-              placeholder="请输入"
+              placeholder="請輸入"
               :disabled="!vdata.isAdd"
             />
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="商户号" name="mchNo">
+          <a-form-item label="商戶號" name="mchNo">
             <a-input
               v-model:value="vdata.saveObject.mchNo"
-              placeholder="请输入"
+              placeholder="請輸入"
               :disabled="!vdata.isAdd"
             />
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="应用名称" name="appName">
-            <a-input v-model:value="vdata.saveObject.appName" placeholder="请输入" />
+          <a-form-item label="應用名稱" name="appName">
+            <a-input v-model:value="vdata.saveObject.appName" placeholder="請輸入" />
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="状态" name="state">
+          <a-form-item label="狀態" name="state">
             <a-radio-group v-model:value="vdata.saveObject.state">
-              <a-radio :value="1">启用</a-radio>
+              <a-radio :value="1">啟用</a-radio>
               <a-radio :value="0">停用</a-radio>
             </a-radio-group>
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item label="私钥 AppSecret" name="appSecret">
+          <a-form-item label="私鑰 AppSecret" name="appSecret">
             <a-textarea
               v-model:value="vdata.saveObject.appSecret"
               :placeholder="vdata.saveObject.appSecret_ph"
@@ -52,13 +52,13 @@
               @click="randomKey(false, 128, 0)"
             >
               <a-icon type="file-sync" />
-              随机生成私钥
+              隨機生成私鑰
             </a-button>
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item label="备注" name="remark">
-            <a-textarea v-model:value="vdata.saveObject.remark" placeholder="请输入" />
+          <a-form-item label="備註" name="remark">
+            <a-textarea v-model:value="vdata.saveObject.remark" placeholder="請輸入" />
           </a-form-item>
         </a-col>
       </a-row>
@@ -66,7 +66,7 @@
 
     <div class="drawer-btn-center">
       <a-button :style="{ marginRight: '8px' }" @click="onClose">取消</a-button>
-      <a-button type="primary" @click="onSubmit">保存</a-button>
+      <a-button type="primary" @click="onSubmit">儲存</a-button>
     </div>
   </a-drawer>
 </template>
@@ -91,8 +91,8 @@ const vdata: any = reactive({
 })
 
 const rules: any = reactive({
-  mchNo: [{ required: true, message: '请输入商户号', trigger: 'blur' }],
-  appName: [{ required: true, message: '请输入应用名称', trigger: 'blur' }],
+  mchNo: [{ required: true, message: '請輸入商戶號', trigger: 'blur' }],
+  appName: [{ required: true, message: '請輸入應用名稱', trigger: 'blur' }],
 })
 
 // 抽屉显示
@@ -103,7 +103,7 @@ function show(mchNo, appId) {
     state: 1,
     appSecret: '',
     mchNo: mchNo,
-    appSecret_ph: '请输入',
+    appSecret_ph: '請輸入',
   }
 
   if (infoFormModel.value) {
@@ -126,7 +126,7 @@ function show(mchNo, appId) {
     // 新增时，appSecret必填
     rules.appSecret.push({
       required: true,
-      message: '请输入私钥或点击随机生成私钥',
+      message: '請輸入私鑰或點選隨機生成私鑰',
       trigger: 'blur',
     })
 

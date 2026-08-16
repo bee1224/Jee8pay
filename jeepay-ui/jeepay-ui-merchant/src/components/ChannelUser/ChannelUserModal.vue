@@ -2,7 +2,7 @@
   <div>
     <a-modal
       v-model:open="vdata.open"
-      title="自动获取渠道用户ID"
+      title="自動獲取渠道用戶ID"
       @ok="handleClose"
       :footer="null"
       :width="300"
@@ -50,9 +50,9 @@ function showModal(appId, ifCode, extObject) {
   // 根据不同的支付方式，展示不同的信息
   vdata.payText = ''
   if (ifCode === 'wxpay') {
-    vdata.payText = '请使用微信客户端"扫一扫"'
+    vdata.payText = '請使用微信客戶端"掃一掃"'
   } else if (ifCode === 'alipay') {
-    vdata.payText = '请使用支付宝客户端"扫一扫"'
+    vdata.payText = '請使用支付寶客戶端"掃一掃"'
   }
 
   // 当前客户端CID

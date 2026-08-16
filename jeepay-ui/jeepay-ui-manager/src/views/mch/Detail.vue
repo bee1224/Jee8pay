@@ -2,7 +2,7 @@
 <template>
   <a-drawer
     v-model:open="vdata.open"
-    :title="true ? '商户详情' : ''"
+    :title="true ? '商戶詳情' : ''"
     :body-style="{ paddingBottom: '80px' }"
     width="40%"
     @close="onClose"
@@ -10,76 +10,76 @@
     <a-row justify="space-between" type="flex">
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="商户号">
+          <a-descriptions-item label="商戶號">
             {{ vdata.detailData.mchNo }}
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="商户名称">
+          <a-descriptions-item label="商戶名稱">
             {{ vdata.detailData.mchName }}
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="登录名">
+          <a-descriptions-item label="登入名">
             {{ vdata.detailData.loginUserName }}
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="商户简称">
+          <a-descriptions-item label="商戶簡稱">
             {{ vdata.detailData.mchShortName }}
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col v-if="vdata.detailData.type === 2" :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="服务商号">
+          <a-descriptions-item label="服務商號">
             {{ vdata.detailData.isvNo }}
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col v-if="vdata.detailData.type === 2" :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="服务商名称">
+          <a-descriptions-item label="服務商名稱">
             {{ vdata.isvName }}
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="联系人姓名">
+          <a-descriptions-item label="聯絡人姓名">
             {{ vdata.detailData.contactName }}
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="商户类型">
-            {{ vdata.detailData.type === 1 ? '普通商户' : '特约商户' }}
+          <a-descriptions-item label="商戶類型">
+            {{ vdata.detailData.type === 1 ? '普通商戶' : '特約商戶' }}
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="联系人手机号">
+          <a-descriptions-item label="聯絡人手機號">
             {{ vdata.detailData.contactTel }}
           </a-descriptions-item>
         </a-descriptions>
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="状态">
+          <a-descriptions-item label="狀態">
             <a-tag :color="vdata.detailData.state === 1 ? 'green' : 'volcano'">
               {{
                 vdata.detailData.state === 0
-                  ? '禁用'
+                  ? '停用'
                   : vdata.detailData.state === 1
-                    ? '启用'
+                    ? '啟用'
                     : '未知'
               }}
             </a-tag>
@@ -88,7 +88,7 @@
       </a-col>
       <a-col :sm="12">
         <a-descriptions>
-          <a-descriptions-item label="联系人邮箱">
+          <a-descriptions-item label="聯絡人郵箱">
             {{ vdata.detailData.contactEmail }}
           </a-descriptions-item>
         </a-descriptions>
@@ -96,7 +96,7 @@
     </a-row>
     <a-row justify="start" type="flex">
       <a-col :sm="24">
-        <a-form-item label="备注">
+        <a-form-item label="備註">
           <a-textarea
             v-model:value="vdata.detailData.remark"
             disabled="disabled"

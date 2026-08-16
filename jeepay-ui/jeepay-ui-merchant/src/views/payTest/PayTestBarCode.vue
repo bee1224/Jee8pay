@@ -2,13 +2,13 @@
   <div>
     <a-modal
       v-model:open="vdata.open"
-      title="条码支付"
+      title="條碼支付"
       @cancel="handleChose"
       :footer="null"
       :width="350"
     >
       <div>
-        <p>请输入用户条形码:</p>
+        <p>請輸入使用者條形碼:</p>
         <div style="display: flex; flex-direction: row; margin-bottom: 14px">
           <a-input
             v-model:value="vdata.barCodeValue"
@@ -21,10 +21,10 @@
             style="margin-left: 10px"
             :loading="vdata.loading"
           >
-            确认支付
+            確認支付
           </a-button>
         </div>
-        <p>或者使用(扫码枪/扫码盒)扫码:</p>
+        <p>或者使用(掃碼槍/掃碼盒)掃碼:</p>
         <div style="text-align: center">
           <img src="@/assets/payTestImg/scan.svg" alt="" />
         </div>

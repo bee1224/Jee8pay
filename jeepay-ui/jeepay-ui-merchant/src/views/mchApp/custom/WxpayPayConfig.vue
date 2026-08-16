@@ -1,7 +1,7 @@
 <template>
   <a-drawer
     v-model:open="vdata.open"
-    title="填写参数"
+    title="填寫參數"
     width="40%"
     :closable="true"
     :maskClosable="false"
@@ -11,22 +11,22 @@
     <a-form ref="infoFormModel" :model="vdata.saveObject" layout="vertical">
       <a-row :gutter="16">
         <a-col :span="12">
-          <a-form-item label="状态" name="state">
+          <a-form-item label="狀態" name="state">
             <a-radio-group v-model:value="vdata.saveObject.state">
-              <a-radio :value="1">启用</a-radio>
+              <a-radio :value="1">啟用</a-radio>
               <a-radio :value="0">停用</a-radio>
             </a-radio-group>
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item label="备注" name="remark">
-            <a-textarea v-model:value="vdata.saveObject.remark" placeholder="请输入" />
+          <a-form-item label="備註" name="remark">
+            <a-textarea v-model:value="vdata.saveObject.remark" placeholder="請輸入" />
           </a-form-item>
         </a-col>
       </a-row>
     </a-form>
     <a-divider orientation="left">
-      <a-tag color="#FF4B33">{{ vdata.saveObject.ifCode }} 商户参数配置</a-tag>
+      <a-tag color="#FF4B33">{{ vdata.saveObject.ifCode }} 商戶參數配置</a-tag>
     </a-divider>
     <a-form
       ref="mchParamFormModel"
@@ -36,17 +36,17 @@
     >
       <a-row v-if="vdata.mchType === 1" :gutter="16">
         <a-col span="12">
-          <a-form-item label="微信支付商户号" name="mchId">
-            <a-input v-model:value="vdata.ifParams.mchId" placeholder="请输入" />
+          <a-form-item label="微信支付商戶號" name="mchId">
+            <a-input v-model:value="vdata.ifParams.mchId" placeholder="請輸入" />
           </a-form-item>
         </a-col>
         <a-col span="12">
-          <a-form-item label="应用AppID" name="appId">
-            <a-input v-model:value="vdata.ifParams.appId" placeholder="请输入" />
+          <a-form-item label="應用AppID" name="appId">
+            <a-input v-model:value="vdata.ifParams.appId" placeholder="請輸入" />
           </a-form-item>
         </a-col>
         <a-col span="12">
-          <a-form-item label="应用AppSecret" name="appSecret">
+          <a-form-item label="應用AppSecret" name="appSecret">
             <a-input
               v-model:value="vdata.ifParams.appSecret"
               :placeholder="vdata.ifParams.appSecret_ph"
@@ -54,8 +54,8 @@
           </a-form-item>
         </a-col>
         <a-col span="12">
-          <a-form-item label="oauth2地址（置空将使用官方）" name="oauth2Url">
-            <a-input v-model:value="vdata.ifParams.oauth2Url" placeholder="请输入" />
+          <a-form-item label="oauth2地址（置空將使用官方）" name="oauth2Url">
+            <a-input v-model:value="vdata.ifParams.oauth2Url" placeholder="請輸入" />
           </a-form-item>
         </a-col>
         <a-col span="12">
@@ -67,12 +67,12 @@
           </a-form-item>
         </a-col>
         <a-col span="24">
-          <a-form-item label="APIv2密钥" name="key">
+          <a-form-item label="APIv2密鑰" name="key">
             <a-textarea v-model:value="vdata.ifParams.key" :placeholder="vdata.ifParams.key_ph" />
           </a-form-item>
         </a-col>
         <a-col span="24">
-          <a-form-item label="APIv3秘钥" name="apiV3Key">
+          <a-form-item label="APIv3秘鑰" name="apiV3Key">
             <a-textarea
               v-model:value="vdata.ifParams.apiV3Key"
               :placeholder="vdata.ifParams.apiV3Key_ph"
@@ -80,7 +80,7 @@
           </a-form-item>
         </a-col>
         <a-col span="24">
-          <a-form-item label="序列号" name="serialNo">
+          <a-form-item label="序列號" name="serialNo">
             <a-textarea
               v-model:value="vdata.ifParams.serialNo"
               :placeholder="vdata.ifParams.serialNo_ph"
@@ -88,7 +88,7 @@
           </a-form-item>
         </a-col>
         <a-col span="24">
-          <a-form-item label="API证书(apiclient_cert.p12)" name="cert">
+          <a-form-item label="API憑證(apiclient_cert.p12)" name="cert">
             <a-input v-model:value="vdata.ifParams.cert" disabled="disabled" />
             <JeepayUpload
               :action="vdata.action"
@@ -98,14 +98,14 @@
               <template #uploadSlot="{ loading }">
                 <a-button style="margin-top: 5px">
                   <a-icon :type="loading ? 'loading' : 'upload'" />
-                  {{ loading ? '正在上传' : '点击上传' }}
+                  {{ loading ? '正在上傳' : '點擊上傳' }}
                 </a-button>
               </template>
             </JeepayUpload>
           </a-form-item>
         </a-col>
         <a-col span="24">
-          <a-form-item label="证书文件(apiclient_cert.pem)" name="apiClientCert">
+          <a-form-item label="憑證檔案(apiclient_cert.pem)" name="apiClientCert">
             <a-input v-model:value="vdata.ifParams.apiClientCert" disabled="disabled" />
             <JeepayUpload
               :action="vdata.action"
@@ -115,14 +115,14 @@
               <template #uploadSlot="{ loading }">
                 <a-button style="margin-top: 5px">
                   <a-icon :type="loading ? 'loading' : 'upload'" />
-                  {{ loading ? '正在上传' : '点击上传' }}
+                  {{ loading ? '正在上傳' : '點擊上傳' }}
                 </a-button>
               </template>
             </JeepayUpload>
           </a-form-item>
         </a-col>
         <a-col span="24">
-          <a-form-item label="私钥文件(apiclient_key.pem)" name="apiClientKey">
+          <a-form-item label="私鑰檔案(apiclient_key.pem)" name="apiClientKey">
             <a-input v-model:value="vdata.ifParams.apiClientKey" disabled="disabled" />
             <JeepayUpload
               :action="vdata.action"
@@ -132,19 +132,19 @@
               <template #uploadSlot="{ loading }">
                 <a-button style="margin-top: 5px">
                   <a-icon :type="loading ? 'loading' : 'upload'" />
-                  {{ loading ? '正在上传' : '点击上传' }}
+                  {{ loading ? '正在上傳' : '點擊上傳' }}
                 </a-button>
               </template>
             </JeepayUpload>
           </a-form-item>
         </a-col>
         <a-col span="24">
-          <a-form-item label="微信侧公钥ID" name="wxpayPublicKeyId">
-            <a-input v-model:value="vdata.ifParams.wxpayPublicKeyId" placeholder="请输入" />
+          <a-form-item label="微信側公鑰ID" name="wxpayPublicKeyId">
+            <a-input v-model:value="vdata.ifParams.wxpayPublicKeyId" placeholder="請輸入" />
           </a-form-item>
         </a-col>
         <a-col span="24">
-          <a-form-item label="微信侧公钥证书（pub_key.pem）" name="wxpayPublicKey">
+          <a-form-item label="微信側公鑰憑證（pub_key.pem）" name="wxpayPublicKey">
             <a-input v-model:value="vdata.ifParams.wxpayPublicKey" disabled="disabled" />
             <JeepayUpload
               :action="vdata.action"
@@ -154,16 +154,16 @@
               <template #uploadSlot="{ loading }">
                 <a-button style="margin-top: 5px">
                   <a-icon :type="vdata.loading ? 'loading' : 'upload'" />
-                  {{ vdata.loading ? '正在上传' : '点击上传' }}
+                  {{ vdata.loading ? '正在上傳' : '點擊上傳' }}
                 </a-button>
               </template>
             </JeepayUpload>
           </a-form-item>
         </a-col>
         <a-col span="12">
-          <a-form-item label="微信转账版本" name="transferVersion">
+          <a-form-item label="微信轉帳版本" name="transferVersion">
             <a-radio-group v-model:value="vdata.ifParams.transferVersion" defaultValue="old">
-              <a-radio value="old">旧版</a-radio>
+              <a-radio value="old">舊版</a-radio>
               <a-radio value="new202501">新版202501</a-radio>
             </a-radio-group>
           </a-form-item>
@@ -171,20 +171,20 @@
       </a-row>
       <a-row v-else-if="vdata.mchType === 2" :gutter="16">
         <a-col span="12">
-          <a-form-item label="子商户ID" name="subMchId">
-            <a-input v-model:value="vdata.ifParams.subMchId" placeholder="请输入" />
+          <a-form-item label="子商戶ID" name="subMchId">
+            <a-input v-model:value="vdata.ifParams.subMchId" placeholder="請輸入" />
           </a-form-item>
         </a-col>
         <a-col span="12">
-          <a-form-item label="子账户appID(线上支付必填)" name="subMchAppId">
-            <a-input v-model:value="vdata.ifParams.subMchAppId" placeholder="请输入" />
+          <a-form-item label="子帳戶appID(線上支付必填)" name="subMchAppId">
+            <a-input v-model:value="vdata.ifParams.subMchAppId" placeholder="請輸入" />
           </a-form-item>
         </a-col>
       </a-row>
     </a-form>
     <div v-if="$access('ENT_MCH_PAY_CONFIG_ADD')" class="drawer-btn-center">
       <a-button :style="{ marginRight: '8px' }" @click="onClose">取消</a-button>
-      <a-button type="primary" :loading="vdata.btnLoading" @click="onSubmit">保存</a-button>
+      <a-button type="primary" :loading="vdata.btnLoading" @click="onSubmit">儲存</a-button>
     </div>
   </a-drawer>
 </template>
@@ -217,7 +217,7 @@ const ifParamsRules = reactive({
       trigger: 'blur',
       validator: (rule, value) => {
         if (vdata.mchType === 1 && !value) {
-          return Promise.reject('请输入微信支付商户号')
+          return Promise.reject('請輸入微信支付商戶號')
         }
         return Promise.resolve()
       },
@@ -228,7 +228,7 @@ const ifParamsRules = reactive({
       trigger: 'blur',
       validator: (rule, value) => {
         if (vdata.mchType === 1 && !value) {
-          return Promise.reject('请输入应用AppID')
+          return Promise.reject('請輸入應用AppID')
         }
         return Promise.resolve()
       },
@@ -239,7 +239,7 @@ const ifParamsRules = reactive({
       trigger: 'blur',
       validator: (rule, value) => {
         if (vdata.isAdd && vdata.mchType === 1 && !value) {
-          return Promise.reject('请输入应用AppSecret')
+          return Promise.reject('請輸入應用AppSecret')
         }
         return Promise.resolve()
       },
@@ -250,7 +250,7 @@ const ifParamsRules = reactive({
       trigger: 'blur',
       validator: (rule, value) => {
         if (vdata.ifParams.apiVersion === 'V2' && vdata.isAdd && vdata.mchType === 1 && !value) {
-          return Promise.reject('请输入API密钥')
+          return Promise.reject('請輸入API密鑰')
         }
         return Promise.resolve()
       },
@@ -261,7 +261,7 @@ const ifParamsRules = reactive({
       trigger: 'blur',
       validator: (rule, value) => {
         if (vdata.ifParams.apiVersion === 'V3' && vdata.isAdd && vdata.mchType === 1 && !value) {
-          return Promise.reject('请输入API V3秘钥')
+          return Promise.reject('請輸入API V3秘鑰')
         }
         return Promise.resolve()
       },
@@ -272,7 +272,7 @@ const ifParamsRules = reactive({
       trigger: 'blur',
       validator: (rule, value) => {
         if (vdata.ifParams.apiVersion === 'V3' && vdata.isAdd && vdata.mchType === 1 && !value) {
-          return Promise.reject('请输入序列号')
+          return Promise.reject('請輸入序列號')
         }
         return Promise.resolve()
       },
@@ -283,7 +283,7 @@ const ifParamsRules = reactive({
       trigger: 'blur',
       validator: (rule, value) => {
         if (vdata.ifParams.apiVersion === 'V3' && vdata.isAdd && !value) {
-          return Promise.reject('请上传API证书(apiclient_cert.p12)')
+          return Promise.reject('請上傳API憑證(apiclient_cert.p12)')
         }
         return Promise.resolve()
       },
@@ -294,7 +294,7 @@ const ifParamsRules = reactive({
       trigger: 'blur',
       validator: (rule, value) => {
         if (vdata.ifParams.apiVersion === 'V3' && vdata.isAdd && !value) {
-          return Promise.reject('请上传证书文件(apiclient_cert.pem)')
+          return Promise.reject('請上傳憑證檔案(apiclient_cert.pem)')
         }
         return Promise.resolve()
       },
@@ -309,7 +309,7 @@ const ifParamsRules = reactive({
           vdata.mchType === 1 &&
           !vdata.ifParams.apiClientKey
         ) {
-          return Promise.reject('请上传私钥文件(apiclient_key.pem)')
+          return Promise.reject('請上傳私鑰檔案(apiclient_key.pem)')
         }
         return Promise.resolve()
       },
@@ -320,7 +320,7 @@ const ifParamsRules = reactive({
       trigger: 'blur',
       validator: (rule, value) => {
         if (vdata.mchType === 2 && !value) {
-          return Promise.reject('请输入子商户ID')
+          return Promise.reject('請輸入子商戶ID')
         }
         return Promise.resolve()
       },
@@ -350,13 +350,13 @@ function show(appId, record) {
   vdata.ifParams = {
     apiVersion: 'V2',
     appSecret: '',
-    appSecret_ph: '请输入',
+    appSecret_ph: '請輸入',
     key: '',
-    key_ph: '请输入',
+    key_ph: '請輸入',
     apiV3Key: '',
-    apiV3Key_ph: '请输入',
+    apiV3Key_ph: '請輸入',
     serialNo: '',
-    serialNo_ph: '请输入',
+    serialNo_ph: '請輸入',
     wxpayPublicKeyId: '',
     wxpayPublicKey: '',
     transferVersion: '',
@@ -405,7 +405,7 @@ function onSubmit() {
         reqParams.remark = vdata.saveObject.remark
         // 支付参数配置不能为空
         if (Object.keys(vdata.ifParams).length === 0) {
-          $infoBox.message.error('参数不能为空！')
+          $infoBox.message.error('參數不能為空！')
           return
         }
         // 脱敏数据为空时，删除该key
@@ -416,18 +416,18 @@ function onSubmit() {
         reqParams.ifParams = JSON.stringify(vdata.ifParams)
         // 请求接口
         if (Object.keys(reqParams).length === 0) {
-          $infoBox.message.error('参数不能为空！')
+          $infoBox.message.error('參數不能為空！')
           return
         }
         req
           .add(API_URL_MCH_PAYCONFIGS_LIST, reqParams)
           .then((res) => {
-            $infoBox.message.success('保存成功')
+            $infoBox.message.success('儲存成功')
             vdata.open = false
             props.callbackFunc()
           })
           .catch(() => {
-            $infoBox.message.error('保存失败，请重试')
+            $infoBox.message.error('儲存失敗，請重試')
           })
           .finally(() => {
             vdata.btnLoading = false

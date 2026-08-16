@@ -1,7 +1,7 @@
 <template>
   <a-modal
     v-model:open="vdata.isShow"
-    :title="vdata.isAdd ? '新增菜单' : '修改菜单'"
+    :title="vdata.isAdd ? '新增選單' : '修改選單'"
     @ok="handleOkFunc"
     :confirmLoading="vdata.confirmLoading"
   >
@@ -12,21 +12,21 @@
       :wrapper-col="{ span: 15 }"
       :rules="vdata.rules"
     >
-      <a-form-item label="组名称：" name="receiverGroupName">
+      <a-form-item label="組名稱：" name="receiverGroupName">
         <a-input v-model:value="vdata.saveObject.receiverGroupName" />
       </a-form-item>
 
-      <a-form-item label="自动分账组" name="autoDivisionFlag">
+      <a-form-item label="自動分帳組" name="autoDivisionFlag">
         <a-radio-group v-model:value="vdata.saveObject.autoDivisionFlag">
           <a-radio :value="1">是</a-radio>
           <a-radio :value="0">否</a-radio>
         </a-radio-group>
         <hr />
         <p style="color: indianred">
-          1. 自动分账组: 当订单分账模式为自动分账，该组下的所有正常分账状态的账号将作为订单分账对象
+          1. 自動分帳組: 當訂單分帳模式為自動分帳，該組下的所有正常分帳狀態的帳號將作為訂單分帳對象
         </p>
         <p style="color: indianred">
-          2. 每个商户仅有一个默认分账组， 当该组更新为自动分账时，其他组将改为否
+          2. 每個商戶僅有一個預設分帳組， 當該組更新為自動分帳時，其他組將改為否
         </p>
       </a-form-item>
     </a-form>
@@ -49,7 +49,7 @@ const vdata: any = reactive({
   saveObject: { autoDivisionFlag: 0 }, // 数据对象
   recordId: null, // 更新对象ID
   rules: {
-    receiverGroupName: [{ required: true, message: '请输入组名称', trigger: 'blur' }],
+    receiverGroupName: [{ required: true, message: '請輸入組名稱', trigger: 'blur' }],
   },
 })
 

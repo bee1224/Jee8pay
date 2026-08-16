@@ -9,12 +9,12 @@
 export default {
   data () {
     return {
-      msg: '请重新扫码进入！',
+      msg: '請重新掃碼進入！',
     }
   },
   mounted() {
     // 优先从路由参数取错误信息，刷新后 params 丢失则显示默认提示
-    this.msg = this.$route.params.errInfo || this.$route.query.errInfo || '请重新扫码进入！'
+    this.msg = this.$route.params.errInfo || this.$route.query.errInfo || '請重新掃碼進入！'
   }
 }
 </script>

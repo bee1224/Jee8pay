@@ -15,28 +15,28 @@
               <a-icon slot="suffixIcon" type="sync" />
             </a-range-picker>
             <jeepay-text-up
-              :placeholder="'转账/商户/渠道订单号'"
+              :placeholder="'轉帳/商戶/渠道訂單號'"
               v-model:value="vdata.searchData.unionOrderId"
             />
             <!--            <jeepay-text-up :placeholder="'转账订单号'" :msg="searchData.transferId" v-model:value="searchData.transferId" />-->
             <!--            <jeepay-text-up :placeholder="'商户订单号'" :msg="searchData.mchOrderNo" v-model:value="searchData.mchOrderNo" />-->
             <!--            <jeepay-text-up :placeholder="'渠道支付订单号'" :msg="searchData.channelOrderNo" v-model:value="searchData.channelOrderNo" />-->
-            <jeepay-text-up :placeholder="'商户号'" v-model:value="vdata.searchData.mchNo" />
-            <jeepay-text-up :placeholder="'应用AppId'" v-model:value="vdata.searchData.appId" />
+            <jeepay-text-up :placeholder="'商戶號'" v-model:value="vdata.searchData.mchNo" />
+            <jeepay-text-up :placeholder="'應用AppId'" v-model:value="vdata.searchData.appId" />
             <a-select
               v-model:value="vdata.searchData.state"
               class="table-head-layout"
-              placeholder="转账状态"
+              placeholder="轉帳狀態"
             >
               <a-select-option value="">全部</a-select-option>
-              <a-select-option value="0">订单生成</a-select-option>
-              <a-select-option value="1">转账中</a-select-option>
-              <a-select-option value="2">转账成功</a-select-option>
-              <a-select-option value="3">转账失败</a-select-option>
+              <a-select-option value="0">訂單生成</a-select-option>
+              <a-select-option value="1">轉帳中</a-select-option>
+              <a-select-option value="2">轉帳成功</a-select-option>
+              <a-select-option value="3">轉帳失敗</a-select-option>
             </a-select>
             <span class="table-page-search-submitButtons">
               <a-button type="primary" @click="queryFunc" :loading="vdata.btnLoading">
-                搜索
+                搜尋
               </a-button>
               <a-button
                 style="margin-left: 8px"
@@ -85,15 +85,15 @@
             >
               {{
                 record.state === 0
-                  ? '订单生成'
+                  ? '訂單生成'
                   : record.state === 1
-                    ? '转账中'
+                    ? '轉帳中'
                     : record.state === 2
-                      ? '转账成功'
+                      ? '轉帳成功'
                       : record.state === 3
-                        ? '转账失败'
+                        ? '轉帳失敗'
                         : record.state === 4
-                          ? '任务关闭'
+                          ? '任務關閉'
                           : '未知'
               }}
             </a-tag>
@@ -101,11 +101,11 @@
           <template v-if="column.key === 'orderNo'">
             <div class="order-list">
               <p>
-                <span style="color: #729ed5; background: #e7f5f7">转账</span>
+                <span style="color: #729ed5; background: #e7f5f7">轉帳</span>
                 {{ record.transferId }}
               </p>
               <p>
-                <span style="color: #56cf56; background: #d8eadf">商户</span>
+                <span style="color: #56cf56; background: #d8eadf">商戶</span>
                 <a-tooltip
                   placement="bottom"
                   style="font-weight: normal"
@@ -142,7 +142,7 @@
                 v-if="$access('ENT_TRANSFER_ORDER_VIEW')"
                 @click="detailFunc(record.transferId)"
               >
-                详情
+                詳情
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -163,15 +163,15 @@ const { $infoBox, $access, $hasAgentEnt } = getCurrentInstance()!.appContext.con
 
 // eslint-disable-next-line no-unused-vars
 const tableColumns = [
-  { title: '转账金额', key: 'amount', width: 108 },
-  { title: '商户名称', dataIndex: 'mchName' },
-  { key: 'orderNo', title: '订单号', scopedSlots: { customRender: 'orderSlot' }, width: 260 },
+  { title: '轉帳金額', key: 'amount', width: 108 },
+  { title: '商戶名稱', dataIndex: 'mchName' },
+  { key: 'orderNo', title: '訂單號', scopedSlots: { customRender: 'orderSlot' }, width: 260 },
   // { title: '渠道订单号', dataIndex: 'channelOrderNo' },
-  { title: '收款账号', dataIndex: 'accountNo', width: 200 },
+  { title: '收款帳號', dataIndex: 'accountNo', width: 200 },
   { title: '收款人姓名', dataIndex: 'accountName' },
-  { title: '转账备注', dataIndex: 'transferDesc' },
-  { title: '状态', key: 'state', width: 100 },
-  { title: '创建日期', dataIndex: 'createdAt' },
+  { title: '轉帳備註', dataIndex: 'transferDesc' },
+  { title: '狀態', key: 'state', width: 100 },
+  { title: '建立日期', dataIndex: 'createdAt' },
   {
     title: '操作',
     width: '100px',

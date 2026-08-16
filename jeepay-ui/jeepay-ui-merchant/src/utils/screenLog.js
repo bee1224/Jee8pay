@@ -8,7 +8,7 @@ export const printANSI = () => {
 \\____/ \\___/\\___/ .___/\\__,_/\\__, /
                /_/          /____/
  :: Jeepay ::        (v3.1.0.RELEASE)
- 让支付接入更简单 : https://www.jeequan.com
+ 讓支付接入更簡單 : https://www.jeequan.com
 `
 
   console.log(`%c${text}`, 'color: #fc4d50')

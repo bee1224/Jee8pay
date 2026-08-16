@@ -1,7 +1,7 @@
 <template>
   <a-modal
     v-model:open="vdata.isShow"
-    :title="vdata.isAdd ? '新增菜单' : '修改菜单'"
+    :title="vdata.isAdd ? '新增選單' : '修改選單'"
     @ok="handleOkFunc"
     :confirmLoading="vdata.confirmLoading"
   >
@@ -12,19 +12,19 @@
       :wrapper-col="{ span: 15 }"
       :rules="vdata.rules"
     >
-      <a-form-item label="资源名称：" name="entName">
+      <a-form-item label="資源名稱：" name="entName">
         <a-input v-model:value="vdata.saveObject.entName" />
       </a-form-item>
 
-      <a-form-item label="路径地址：" name="menuUri">
+      <a-form-item label="路徑地址：" name="menuUri">
         <a-input v-model:value="vdata.saveObject.menuUri" />
       </a-form-item>
 
-      <a-form-item label="排序（正序显示）：" name="entSort">
+      <a-form-item label="排序（正序顯示）：" name="entSort">
         <a-input v-model:value="vdata.saveObject.entSort" />
       </a-form-item>
 
-      <a-form-item label="快速开始：" name="quickJump">
+      <a-form-item label="快速開始：" name="quickJump">
         <a-radio-group
           v-model:value="vdata.saveObject.quickJump"
           :disabled="vdata.saveObject.menuType == 'PB' || !vdata.saveObject.menuUri"
@@ -34,9 +34,9 @@
         </a-radio-group>
       </a-form-item>
 
-      <a-form-item label="状态：" name="state">
+      <a-form-item label="狀態：" name="state">
         <a-radio-group v-model:value="vdata.saveObject.state">
-          <a-radio :value="1">启用</a-radio>
+          <a-radio :value="1">啟用</a-radio>
           <a-radio :value="0">停用</a-radio>
         </a-radio-group>
       </a-form-item>
@@ -62,7 +62,7 @@ const vdata: any = reactive({
   recordId: null, // 更新对象ID
   sysType: 'MGR', // 菜单类型
   rules: {
-    entName: [{ required: true, message: '请输入资源名称', trigger: 'blur' }],
+    entName: [{ required: true, message: '請輸入資源名稱', trigger: 'blur' }],
   },
 })
 

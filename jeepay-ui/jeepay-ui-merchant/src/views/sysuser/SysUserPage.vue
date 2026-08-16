@@ -4,12 +4,12 @@
       <div v-if="$access('ENT_UR_USER_SEARCH')" class="table-page-search-wrapper">
         <a-form layout="inline" class="table-head-ground">
           <div class="table-layer">
-            <jeepay-text-up :placeholder="'用户ID'" v-model:value="vdata.searchData.sysUserId" />
-            <jeepay-text-up :placeholder="'用户姓名'" v-model:value="vdata.searchData.realname" />
+            <jeepay-text-up :placeholder="'使用者ID'" v-model:value="vdata.searchData.sysUserId" />
+            <jeepay-text-up :placeholder="'使用者姓名'" v-model:value="vdata.searchData.realname" />
 
             <span class="table-page-search-submitButtons">
               <a-button type="primary" @click="searchFunc" :loading="vdata.btnLoading">
-                查询
+                查詢
               </a-button>
               <a-button style="margin-left: 8px" @click="() => (vdata.searchData = {})">
                 重置
@@ -60,7 +60,7 @@
                 v-if="$access('ENT_UR_USER_UPD_ROLE')"
                 @click="roleDist(record.sysUserId)"
               >
-                变更角色
+                變更角色
               </a-button>
               <a-button
                 type="link"
@@ -75,7 +75,7 @@
                 danger
                 @click="delFunc(record.sysUserId)"
               >
-                删除
+                刪除
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -97,18 +97,18 @@ import RoleDist from './RoleDist.vue'
 import { reactive, getCurrentInstance, ref } from 'vue'
 
 const tableColumns = [
-  { title: '用户ID', dataIndex: 'sysUserId', fixed: 'left' },
+  { title: '使用者ID', dataIndex: 'sysUserId', fixed: 'left' },
   { title: '姓名', dataIndex: 'realname' },
   {
-    title: '性别',
+    title: '性別',
     dataIndex: 'sex',
     customRender: ({ record }) => {
       return record.sex === 1 ? '男' : record.sex === 2 ? '女' : '未知'
     },
   },
-  { title: '头像', key: 'avatar', scopedSlots: { customRender: 'avatarSlot' } },
-  { title: '编号', dataIndex: 'userNo' },
-  { title: '手机号', dataIndex: 'telphone' },
+  { title: '頭像', key: 'avatar', scopedSlots: { customRender: 'avatarSlot' } },
+  { title: '編號', dataIndex: 'userNo' },
+  { title: '手機號', dataIndex: 'telphone' },
   {
     title: '超管',
     dataIndex: 'isAdmin',
@@ -116,9 +116,9 @@ const tableColumns = [
       return record.isAdmin === 1 ? '是' : '否'
     },
   },
-  { title: '状态', key: 'state', scopedSlots: { customRender: 'stateSlot' }, align: 'center' },
-  { title: '创建时间', dataIndex: 'createdAt' },
-  { title: '修改时间', dataIndex: 'updatedAt' },
+  { title: '狀態', key: 'state', scopedSlots: { customRender: 'stateSlot' }, align: 'center' },
+  { title: '建立時間', dataIndex: 'createdAt' },
+  { title: '修改時間', dataIndex: 'updatedAt' },
   {
     key: 'op',
     title: '操作',
@@ -159,9 +159,9 @@ function addFunc() {
 
 function delFunc(recordId) {
   // 业务通用【删除】 函数
-  $infoBox.confirmDanger('确认删除？', '', () => {
+  $infoBox.confirmDanger('確認刪除？', '', () => {
     return req.delById(API_URL_SYS_USER_LIST, recordId).then((res) => {
-      $infoBox.message.success('删除成功！')
+      $infoBox.message.success('刪除成功！')
       infoTable.value.refTable(false)
     })
   })
@@ -178,9 +178,9 @@ function roleDist(recordId) {
 }
 function updateState(recordId, state) {
   // 【更新状态】
-  const title = state === 1 ? '确认[启用]该用户？' : '确认[停用]该用户？'
+  const title = state === 1 ? '確認[啟用]該使用者？' : '確認[停用]該使用者？'
   const content =
-    state === 1 ? '启用后用户可进行登陆等一系列操作' : '停用后该用户将立即退出系统并不可再次登陆'
+    state === 1 ? '啟用後使用者可進行登入等一系列操作' : '停用後該使用者將立即退出系統並不可再次登入'
 
   return new Promise((resolve, reject) => {
     $infoBox.confirmDanger(

@@ -85,9 +85,9 @@ class HttpRequest {
 
           useUserStore().logout()
 
-          $infoBox.confirmDanger('会话超时，请重新登录', '3s后将自动退出...', () => {}, {
-            okText: '重新登录',
-            cancelText: '关闭对话',
+          $infoBox.confirmDanger('會話逾時，請重新登入', '3s後將自動退出...', () => {}, {
+            okText: '重新登入',
+            cancelText: '關閉對話',
           })
         } else {
           if (showErrorMsg) {

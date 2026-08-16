@@ -9,14 +9,14 @@
 
         <a-menu-item v-if="$access('ENT_C_USERINFO')" key="settings" @click="handleToSettings">
           <a-icon type="setting" />
-          账户设置
+          帳戶設定
         </a-menu-item>
 
         <a-menu-divider />
 
         <a-menu-item key="logout" @click="handleLogout">
           <a-icon type="logout" />
-          退出登录
+          登出
         </a-menu-item>
 
       </a-menu>
@@ -49,7 +49,7 @@ export default {
       this.$router.push({ name: 'ENT_C_USERINFO' })
     },
     handleLogout: function (e) {
-      this.$infoBox.confirmPrimary('确认退出?', '', () => {
+      this.$infoBox.confirmPrimary('確認退出?', '', () => {
         this.$store.dispatch('Logout').then(() => {
           this.$router.push({ name: 'login' })
         })

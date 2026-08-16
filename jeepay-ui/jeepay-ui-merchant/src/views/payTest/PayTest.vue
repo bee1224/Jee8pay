@@ -7,7 +7,7 @@
           <!-- <p style="margin-top:9px;margin-right:10px;"></p> -->
           <a-form-item label="" class="table-head-layout">
             <a-select v-model:value="vdata.appId" @change="changeAppId" style="width: 300px">
-              <a-select-option key="">应用APPID</a-select-option>
+              <a-select-option key="">應用APPID</a-select-option>
               <a-select-option v-for="item in vdata.mchAppList" :key="item.appId">
                 {{ item.appName }} [{{ item.appId }}]
               </a-select-option>
@@ -17,7 +17,7 @@
       </a-form>
 
       <!-- 未配置支付方式提示框 -->
-      <a-divider v-if="!vdata.appId">请选择应用APPID</a-divider>
+      <a-divider v-if="!vdata.appId">請選擇應用APPID</a-divider>
       <a-divider v-else-if="vdata.noConfigText">您尚未配置任何支付方式</a-divider>
       <a-divider v-else></a-divider>
 
@@ -33,7 +33,7 @@
               :class="{ this: vdata.currentWayCode === 'WX_NATIVE' }"
             >
               <img src="@/assets/payTestImg/wx_native.svg" class="paydemo-type-img" />
-              <span class="color-change">微信二维码</span>
+              <span class="color-change">微信QR Code</span>
             </div>
 
             <div
@@ -43,7 +43,7 @@
               :class="{ this: vdata.currentWayCode === 'WX_BAR' }"
             >
               <img src="@/assets/payTestImg/wx_bar.svg" class="paydemo-type-img" />
-              <span class="color-change">微信条码</span>
+              <span class="color-change">微信條碼</span>
             </div>
 
             <div
@@ -53,7 +53,7 @@
               :class="{ this: vdata.currentWayCode === 'WX_JSAPI' }"
             >
               <img src="@/assets/payTestImg/wx_jsapi.svg" class="paydemo-type-img" />
-              <span class="color-change">公众号/小程序</span>
+              <span class="color-change">公眾號/小程序</span>
             </div>
 
             <div
@@ -67,7 +67,7 @@
             </div>
           </div>
 
-          <div class="paydemo-type-name article-title" v-show="showTitle('ALI')">支付宝支付</div>
+          <div class="paydemo-type-name article-title" v-show="showTitle('ALI')">支付寶支付</div>
           <div class="paydemo-type-body">
             <div
               class="paydemo-type color-change"
@@ -76,7 +76,7 @@
               :class="{ this: vdata.currentWayCode === 'ALI_QR' }"
             >
               <img src="@/assets/payTestImg/ali_qr.svg" class="paydemo-type-img" />
-              <span class="color-change">支付宝二维码</span>
+              <span class="color-change">支付寶QR Code</span>
             </div>
 
             <div
@@ -86,7 +86,7 @@
               :class="{ this: vdata.currentWayCode === 'ALI_BAR' }"
             >
               <img src="@/assets/payTestImg/ali_bar.svg" class="paydemo-type-img" />
-              <span class="color-change">支付宝条码</span>
+              <span class="color-change">支付寶條碼</span>
             </div>
 
             <div
@@ -96,7 +96,7 @@
               :class="{ this: vdata.currentWayCode === 'ALI_JSAPI' }"
             >
               <img src="@/assets/payTestImg/ali_jsapi.svg" class="paydemo-type-img" />
-              <span class="color-change">支付宝生活号</span>
+              <span class="color-change">支付寶生活號</span>
             </div>
 
             <div
@@ -106,7 +106,7 @@
               :class="{ this: vdata.currentWayCode === 'ALI_PC' }"
             >
               <img src="@/assets/payTestImg/ali_pc.svg" class="paydemo-type-img" />
-              <span class="color-change">支付宝PC网站</span>
+              <span class="color-change">支付寶PC網站</span>
             </div>
 
             <div>
@@ -117,7 +117,7 @@
                 :class="{ this: vdata.currentWayCode === 'ALI_WAP' }"
               >
                 <img src="@/assets/payTestImg/ali_wap.svg" class="paydemo-type-img" />
-                <span class="color-change">支付宝WAP</span>
+                <span class="color-change">支付寶WAP</span>
               </div>
             </div>
             <div>
@@ -128,7 +128,7 @@
                 :class="{ this: vdata.currentWayCode === 'ALI_OC' }"
               >
                 <img src="@/assets/payTestImg/ali_qr.svg" class="paydemo-type-img" />
-                <span class="color-change">支付宝订单码</span>
+                <span class="color-change">支付寶訂單碼</span>
               </div>
             </div>
           </div>
@@ -145,7 +145,7 @@
               :class="{ this: vdata.currentWayCode === 'QR_CASHIER' }"
             >
               <img src="@/assets/payTestImg/qr_cashier.svg" class="paydemo-type-img" />
-              <span class="color-change">聚合主扫</span>
+              <span class="color-change">聚合主掃</span>
             </div>
 
             <div
@@ -158,7 +158,7 @@
               :class="{ this: vdata.currentWayCode === 'AUTO_BAR' }"
             >
               <img src="@/assets/payTestImg/auto_bar.svg" class="paydemo-type-img" />
-              <span class="color-change">聚合被扫</span>
+              <span class="color-change">聚合被掃</span>
             </div>
 
             <div
@@ -176,25 +176,25 @@
         <a-divider></a-divider>
         <!-- 订单信息 -->
         <div class="paydemo-type-content">
-          <div class="paydemo-type-name article-title">支付信息</div>
+          <div class="paydemo-type-name article-title">支付資料</div>
           <form class="layui-form">
             <div class="paydemo-form-item">
-              <label>订单编号：</label>
+              <label>訂單編號：</label>
               <span id="payMchOrderNo">{{ vdata.mchOrderNo }}</span>
-              <a-button @click="randomOrderNo" type="link">刷新订单号</a-button>
+              <a-button @click="randomOrderNo" type="link">刷新訂單號</a-button>
             </div>
             <div class="paydemo-form-item">
-              <label>订单标题：</label>
+              <label>訂單標題：</label>
               <a-input v-model:value="vdata.orderTitle" style="width: 200px" />
             </div>
 
             <div class="paydemo-form-item">
-              <label>分账方式：</label>
+              <label>分帳方式：</label>
               <a-radio-group v-model:value="vdata.divisionMode" style="display: flex">
                 <div style="display: flex">
-                  <a-radio :value="0">订单不分账</a-radio>
-                  <a-radio :value="1">支付完成自动分账</a-radio>
-                  <a-radio :value="2">手动分账（冻结商户资金， 只能通过API发起分账后解冻）</a-radio>
+                  <a-radio :value="0">訂單不分帳</a-radio>
+                  <a-radio :value="1">支付完成自動分帳</a-radio>
+                  <a-radio :value="2">手動分帳（凍結商戶資金， 只能通過API發起分帳後解凍）</a-radio>
                 </div>
               </a-radio-group>
             </div>
@@ -237,7 +237,7 @@
                 </a-radio>
               </div>
               <a-radio @click="amountInputShow" :checked="vdata.amountInput">
-                <span style="margin-right: 3px">自定义金额</span>
+                <span style="margin-right: 3px">自訂金額</span>
                 <a-input-number
                   ref="amountInputFocus"
                   :max="100000"
@@ -295,7 +295,7 @@ const vdata: any = reactive({
   amountInput: false, // 自定金额输入框是否展示
   noConfigText: false, // 尚无任何配置分割线提示文字
   divisionMode: 0, // 订单分账模式
-  orderTitle: '接口调试', // 订单标题
+  orderTitle: '接口調試', // 订单标题
 })
 
 const payTestBarCodeRef = ref()
@@ -377,15 +377,15 @@ function appPaywayListHandle(value) {
 function immediatelyPay() {
   // 判断支付金额是否为0
   if (!vdata.paytestAmount || vdata.paytestAmount == 0.0) {
-    return $infoBox.message.error('请输入支付金额')
+    return $infoBox.message.error('請輸入支付金額')
   }
   // 判断是否选择支付方式
   if (vdata.currentWayCode === '') {
-    return $infoBox.message.error('请选择支付方式')
+    return $infoBox.message.error('請選擇支付方式')
   }
   // 请输入订单标题
   if (!vdata.orderTitle || vdata.orderTitle.length > 20) {
-    return $infoBox.message.error('请输入正确的订单标题[20字以内]')
+    return $infoBox.message.error('請輸入正確的訂單標題[20字以內]')
   }
 
   // 判断是否为条码支付

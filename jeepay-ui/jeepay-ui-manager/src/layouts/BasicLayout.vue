@@ -73,13 +73,13 @@
         <!-- 个人信息部分 -->
         <div style="display: flex; align-items: center">
           <a-button @click="openUrl('https://www.jeequan.com/ifstore/list.html')">
-            接口市场
+            介面市場
           </a-button>
           <a-button
             @click="openUrl('https://www.jeequan.com/product/jeepay4plus.html')"
             style="margin: 0 10px"
           >
-            Plus商业版
+            Plus商業版
           </a-button>
 
           <a-dropdown>
@@ -87,11 +87,11 @@
               <a-menu>
                 <a-menu-item @click="userInfo">
                   <setting-outlined style="margin-right: 10px" />
-                  <span style="cursor: hand">个人信息</span>
+                  <span style="cursor: hand">個人資訊</span>
                 </a-menu-item>
                 <a-menu-item @click="logout">
                   <LogoutOutlined style="margin-right: 10px" />
-                  <span style="cursor: hand">退出登录</span>
+                  <span style="cursor: hand">退出登入</span>
                 </a-menu-item>
               </a-menu>
             </template>
@@ -153,8 +153,8 @@ function userInfo() {
 // 登出函数
 function logout() {
   $infoBox.confirmDanger(
-    '是否退出登录？',
-    `你好${userStore.userInfo['realname']}确认退出登录吗？`,
+    '是否退出登入？',
+    `你好${userStore.userInfo['realname']}確認退出登入嗎？`,
     () => {
       userStore.logout()
     }

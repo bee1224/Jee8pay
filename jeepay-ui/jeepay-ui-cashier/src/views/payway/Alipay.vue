@@ -1,7 +1,7 @@
 <template>
   <div>
     <header class="header">
-      <div class="header-text">付款给 {{ payOrderInfo.mchName }}</div>
+      <div class="header-text">付款給 {{ payOrderInfo.mchName }}</div>
       <div class="header-img">
         <img :src="avatar ? avatar : icon_member_default" alt="" />
       </div>
@@ -15,7 +15,7 @@
       <!-- 手写输入框 -->
       <div  class="input-c" style="width: 100%">
         <div  v-if="payOrderInfo.amount" class="input-c-div-1">{{ payOrderInfo.amount/100 }}</div>
-        <input type="number" style="height: 120px;" v-else v-model="amount" placeholder="请输入金额">
+        <input type="number" style="height: 120px;" v-else v-model="amount" placeholder="請輸入金額">
       </div>
       <!-- 手写输入框的提示文字 -->
       <!-- <div v-show="!amount" class="placeholder">请输入金额</div> -->
@@ -27,7 +27,7 @@
         <div class="img-div">
           <img :src="wxImg" alt="" />
           <div class="div-text">
-            支付宝支付
+            支付寶支付
           </div>
         </div>
       </li>
@@ -85,7 +85,7 @@ export default {
     pay: function (){
 
       if(isNaN(this.amount) || this.amount <= 0){
-        return alert('请输入金额');
+        return alert('請輸入金額');
       }
 
       // 后端 /api/cashier/pay 返回双层 ApiRes：外层由 HttpRequest 拦截器拆除，
@@ -142,7 +142,7 @@ export default {
           window.AlipayJSBridge.call('closeWebview')
 
         }else{ ///其他异常信息， 需要取消订单
-          alert('用户已取消！');
+          alert('用戶已取消！');
           window.AlipayJSBridge.call('closeWebview')
         }
       });

@@ -1,6 +1,6 @@
 <template>
   <div style="padding-bottom: 50px">
-    <p v-if="vdata.hasEnt">请选择权限：</p>
+    <p v-if="vdata.hasEnt">請選擇權限：</p>
     <!-- 树状结构 -->
     <a-tree
       :tree-data="vdata.treeData"

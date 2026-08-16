@@ -16,10 +16,10 @@ export default {
       if (res && (res.startsWith('http') || res.startsWith('/'))) {
         location.href = res
       } else {
-        that.$router.push({ name: config.errorPageRouteName, params: { errInfo: '获取支付地址失败' } })
+        that.$router.push({ name: config.errorPageRouteName, params: { errInfo: '獲取支付地址失敗' } })
       }
     }).catch(res => {
-      that.$router.push({ name: config.errorPageRouteName, params: { errInfo: res.msg || '获取支付地址异常' } })
+      that.$router.push({ name: config.errorPageRouteName, params: { errInfo: res.msg || '獲取支付地址異常' } })
     })
   }
 }

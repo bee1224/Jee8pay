@@ -147,7 +147,7 @@
 
         <div class="foot">
           Copyright © 2021-2026
-          <a href="https://www.jeequan.com" target="_blank">计全科技</a>
+          <a href="https://www.jeequan.com" target="_blank">計全科技</a>
           All rights reserved.
         </div>
       </a-layout-content>

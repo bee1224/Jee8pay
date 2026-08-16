@@ -1,7 +1,7 @@
 <template>
   <div>
     <header class="header">
-      <div class="header-text">付款给{{ merchantName }}</div>
+      <div class="header-text">付款給{{ merchantName }}</div>
       <div class="header-img">
         <img :src="avatar ? avatar : icon_member_default" alt="" />
       </div>
@@ -17,7 +17,7 @@
         <div  class="input-c-div-1">{{ amount }}</div>
       </div>
       <!-- 手写输入框的提示文字 -->
-      <div v-show="!amount" class="placeholder">请输入金额</div>
+      <div v-show="!amount" class="placeholder">請輸入金額</div>
     </div>
     <ul class="plus-ul" >
       <!-- 支付板块 -->
@@ -26,7 +26,7 @@
         <div class="img-div">
           <img :src="wxImg" alt="" />
           <div class="div-text">
-            云闪付支付
+            雲閃付支付
           </div>
         </div>
       </li>
@@ -69,7 +69,7 @@ export default {
     pay: function (){
 
       if(isNaN(this.amount) || this.amount <= 0){
-        return alert('请输入金额');
+        return alert('請輸入金額');
       }
 
       let that = this;

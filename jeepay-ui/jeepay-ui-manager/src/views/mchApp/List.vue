@@ -4,22 +4,22 @@
       <div class="table-page-search-wrapper">
         <a-form layout="inline" class="table-head-ground">
           <div class="table-layer">
-            <jeepay-text-up v-model:value="vdata.searchData.mchNo" placeholder="商户号" />
-            <jeepay-text-up v-model:value="vdata.searchData.appId" placeholder="应用AppId" />
-            <jeepay-text-up v-model:value="vdata.searchData.appName" placeholder="应用名称" />
+            <jeepay-text-up v-model:value="vdata.searchData.mchNo" placeholder="商戶號" />
+            <jeepay-text-up v-model:value="vdata.searchData.appId" placeholder="應用AppId" />
+            <jeepay-text-up v-model:value="vdata.searchData.appName" placeholder="應用名稱" />
             <a-select
               v-model:value="vdata.searchData.state"
-              placeholder="状态"
+              placeholder="狀態"
               class="table-head-layout"
             >
               <a-select-option value="">全部</a-select-option>
 
-              <a-select-option value="0">禁用</a-select-option>
-              <a-select-option value="1">启用</a-select-option>
+              <a-select-option value="0">停用</a-select-option>
+              <a-select-option value="1">啟用</a-select-option>
             </a-select>
             <span class="table-page-search-submitButtons" style="flex-grow: 0; flex-shrink: 0">
               <a-button type="primary" :loading="vdata.btnLoading" @click="queryFunc">
-                查询
+                查詢
               </a-button>
               <a-button style="margin-left: 8px" @click="() => (vdata.searchData = {})">
                 重置
@@ -58,7 +58,7 @@
           <template v-if="column.key === 'state'">
             <a-badge
               :status="record.state === 0 ? 'error' : 'processing'"
-              :text="record.state === 0 ? '禁用' : '启用'"
+              :text="record.state === 0 ? '停用' : '啟用'"
             />
           </template>
           <template v-if="column.key === 'op'">
@@ -76,7 +76,7 @@
                 type="link"
                 @click="showPayIfConfigList(record.appId)"
               >
-                支付配置
+                支付設定
               </a-button>
               <a-button
                 v-if="$access('ENT_MCH_APP_DEL')"
@@ -84,7 +84,7 @@
                 style="color: red"
                 @click="delFunc(record.appId)"
               >
-                删除
+                刪除
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -118,13 +118,13 @@ const tableColumns = reactive([
     key: 'appId',
     fixed: 'left',
     width: '320px',
-    title: '应用AppId',
+    title: '應用AppId',
     scopedSlots: { customRender: 'appIdSlot' },
   },
-  { key: 'appName', title: '应用名称', dataIndex: 'appName' },
-  { key: 'mchNo', title: '商户号', dataIndex: 'mchNo' },
-  { key: 'state', title: '状态', scopedSlots: { customRender: 'stateSlot' } },
-  { key: 'createdAt', dataIndex: 'createdAt', title: '创建日期' },
+  { key: 'appName', title: '應用名稱', dataIndex: 'appName' },
+  { key: 'mchNo', title: '商戶號', dataIndex: 'mchNo' },
+  { key: 'state', title: '狀態', scopedSlots: { customRender: 'stateSlot' } },
+  { key: 'createdAt', dataIndex: 'createdAt', title: '建立日期' },
   {
     key: 'op',
     title: '操作',
@@ -171,9 +171,9 @@ function editFunc(recordId) {
 }
 
 function delFunc(appId) {
-  $infoBox.confirmDanger('确认删除？', '', () => {
+  $infoBox.confirmDanger('確認刪除？', '', () => {
     req.delById(API_URL_MCH_APP, appId).then((res) => {
-      $infoBox.message.success('删除成功！')
+      $infoBox.message.success('刪除成功！')
       searchFunc()
     })
   })

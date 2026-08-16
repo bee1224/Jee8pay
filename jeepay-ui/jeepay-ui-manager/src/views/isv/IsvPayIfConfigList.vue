@@ -1,7 +1,7 @@
 <template>
   <a-drawer
     v-model:open="vdata.visible"
-    title="支付参数列表"
+    title="支付參數列表"
     @close="onClose"
     :closable="true"
     :body-style="{ paddingBottom: '80px' }"
@@ -36,22 +36,22 @@
             </div>
             <a-badge
               :status="record.ifConfigState === 1 ? 'processing' : 'error'"
-              :text="record.ifConfigState === 1 ? '启用' : '未开通'"
+              :text="record.ifConfigState === 1 ? '啟用' : '未開通'"
             ></a-badge>
           </div>
           <!-- 卡片底部操作栏 -->
           <div class="jeepay-card-ops">
             <a v-if="$access('ENT_ISV_PAY_CONFIG_ADD')" @click="editPayIfConfigFunc(record)">
-              填写参数
+              填寫參數
               <a-icon key="right" type="right" style="font-size: 13px"></a-icon>
             </a>
-            <a v-else>暂无操作</a>
+            <a v-else>暫無操作</a>
           </div>
         </div>
       </template>
     </JeepayCard>
     <a-drawer
-      title="支付参数配置"
+      title="支付參數設定"
       width="40%"
       :closable="true"
       v-model:open="vdata.childrenVisible"
@@ -62,27 +62,27 @@
       <a-form ref="infoFormModel" :model="vdata.saveObject" layout="vertical" :rules="vdata.rules">
         <a-row :gutter="16">
           <a-col :span="12">
-            <a-form-item label="支付接口费率" name="ifRate">
-              <a-input v-model:value="vdata.saveObject.ifRate" placeholder="请输入" suffix="%" />
+            <a-form-item label="支付介面費率" name="ifRate">
+              <a-input v-model:value="vdata.saveObject.ifRate" placeholder="請輸入" suffix="%" />
             </a-form-item>
           </a-col>
           <a-col :span="12">
-            <a-form-item label="状态" name="state">
+            <a-form-item label="狀態" name="state">
               <a-radio-group v-model:value="vdata.saveObject.state">
-                <a-radio :value="1">启用</a-radio>
+                <a-radio :value="1">啟用</a-radio>
                 <a-radio :value="0">停用</a-radio>
               </a-radio-group>
             </a-form-item>
           </a-col>
           <a-col :span="24">
-            <a-form-item label="备注" name="remark">
-              <a-textarea v-model:value="vdata.saveObject.remark" placeholder="请输入" />
+            <a-form-item label="備註" name="remark">
+              <a-textarea v-model:value="vdata.saveObject.remark" placeholder="請輸入" />
             </a-form-item>
           </a-col>
         </a-row>
       </a-form>
       <a-divider orientation="left">
-        <a-tag color="#FF4B33">{{ vdata.saveObject.ifCode }} 服务商参数配置</a-tag>
+        <a-tag color="#FF4B33">{{ vdata.saveObject.ifCode }} 服務商參數設定</a-tag>
       </a-divider>
       <a-form
         ref="isvParamFormModel"
@@ -110,7 +110,7 @@
               <a-input
                 v-else
                 v-model:value="vdata.ifParams[item.name]"
-                placeholder="请输入"
+                placeholder="請輸入"
                 :type="item.type"
               />
             </a-form-item>
@@ -135,7 +135,7 @@
                 <template #uploadSlot="{ loading }">
                   <a-button style="margin-top: 5px">
                     <a-icon :type="vdata.loading ? 'loading' : 'upload'" />
-                    {{ vdata.loading ? '正在上传' : '点击上传' }}
+                    {{ vdata.loading ? '正在上傳' : '點選上傳' }}
                   </a-button>
                 </template>
               </JeepayUpload>
@@ -145,7 +145,7 @@
       </a-form>
       <div class="drawer-btn-center">
         <a-button @click="onChildrenDrawerClose" :style="{ marginRight: '8px' }">取消</a-button>
-        <a-button type="primary" @click="onSubmit" :loading="vdata.btnLoading">保存</a-button>
+        <a-button type="primary" @click="onSubmit" :loading="vdata.btnLoading">儲存</a-button>
       </div>
     </a-drawer>
     <!-- 支付参数配置页面组件  -->
@@ -189,7 +189,7 @@ const vdata: any = reactive({
       {
         required: false,
         pattern: /^(([1-9]{1}\d{0,1})|(0{1}))(\.\d{1,4})?$/,
-        message: '请输入0-100之间的数字，最多四位小数',
+        message: '請輸入0-100之間的數字，最多四位小數',
         trigger: 'blur',
       },
     ],
@@ -217,7 +217,7 @@ function generoterRules() {
     if (item.verify === 'required' && item.star !== '1') {
       newItems.push({
         required: true,
-        message: '请输入' + item.desc,
+        message: '請輸入' + item.desc,
         trigger: 'blur',
       })
       rules[item.name] = newItems
@@ -296,7 +296,7 @@ function editPayIfConfigFunc(record) {
           if (item.star === '1') {
             vdata.ifParams[item.name + '_ph'] = vdata.ifParams[item.name]
               ? vdata.ifParams[item.name]
-              : '请输入'
+              : '請輸入'
             if (vdata.ifParams[item.name]) {
               vdata.ifParams[item.name] = ''
             }
@@ -339,7 +339,7 @@ function onSubmit() {
 
         // 支付参数配置不能为空
         if (Object.keys(vdata.ifParams).length === 0) {
-          $infoBox.message.error('参数不能为空！')
+          $infoBox.message.error('參數不能為空！')
           return
         }
         // 脱敏数据为空时，删除该key
@@ -357,7 +357,7 @@ function onSubmit() {
         req
           .add(API_URL_ISV_PAYCONFIGS_LIST, reqParams)
           .then((res) => {
-            $infoBox.message.success('保存成功')
+            $infoBox.message.success('儲存成功')
             vdata.childrenVisible = false
             refCardList()
           })

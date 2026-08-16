@@ -14,21 +14,21 @@
             >
               <a-icon slot="suffixIcon" type="sync" />
             </a-range-picker>
-            <jeepay-text-up :placeholder="'用户ID'" v-model:value="vdata.searchData.userId" />
-            <jeepay-text-up :placeholder="'用户名'" v-model:value="vdata.searchData.userName" />
+            <jeepay-text-up :placeholder="'用戶ID'" v-model:value="vdata.searchData.userId" />
+            <jeepay-text-up :placeholder="'用戶名稱'" v-model:value="vdata.searchData.userName" />
             <a-select
               v-model:value="vdata.searchData.sysType"
-              placeholder="所属系统"
+              placeholder="所屬系統"
               class="table-head-layout"
             >
               <a-select-option value="">全部</a-select-option>
-              <a-select-option value="MGR">运营平台</a-select-option>
-              <a-select-option value="MCH">商户系统</a-select-option>
+              <a-select-option value="MGR">營運平台</a-select-option>
+              <a-select-option value="MCH">商戶系統</a-select-option>
             </a-select>
 
             <span class="table-page-search-submitButtons">
               <a-button type="primary" @click="queryhFunc" :loading="vdata.btnLoading">
-                搜索
+                搜尋
               </a-button>
               <a-button
                 style="margin-left: 8px"
@@ -52,7 +52,7 @@
             @click="delFunc"
             class="mg-b-30"
           >
-            删除
+            刪除
           </a-button>
         </div>
       </div>
@@ -82,9 +82,9 @@
             >
               {{
                 record.sysType === 'MGR'
-                  ? '运营平台'
+                  ? '營運平台'
                   : record.sysType === 'MCH'
-                    ? '商户系统'
+                    ? '商戶系統'
                     : '其他'
               }}
             </a-tag>
@@ -96,7 +96,7 @@
               v-if="$access('ENT_SYS_LOG_VIEW')"
               @click="detailFunc(record.sysLogId)"
             >
-              详情
+              詳情
             </a-button>
           </template>
         </template>
@@ -109,27 +109,27 @@
         placement="right"
         :closable="true"
         v-model:open="vdata.visible"
-        :title="vdata.visible === true ? '日志详情' : ''"
+        :title="vdata.visible === true ? '日誌詳情' : ''"
         @close="onClose"
       >
         <a-row justify="space-between" type="flex">
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="用户ID">
+              <a-descriptions-item label="用戶ID">
                 {{ vdata.detailData.userId }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="用户IP">
+              <a-descriptions-item label="用戶IP">
                 {{ vdata.detailData.userIp }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="用户名">
+              <a-descriptions-item label="用戶名稱">
                 <b>
                   {{ vdata.detailData.userName }}
                 </b>
@@ -138,7 +138,7 @@
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="所属系统">
+              <a-descriptions-item label="所屬系統">
                 <a-tag
                   :key="vdata.detailData.sysType"
                   :color="
@@ -151,9 +151,9 @@
                 >
                   {{
                     vdata.detailData.sysType === 'MGR'
-                      ? '运营平台'
+                      ? '營運平台'
                       : vdata.detailData.sysType === 'MCH'
-                        ? '商户系统'
+                        ? '商戶系統'
                         : '其他'
                   }}
                 </a-tag>
@@ -172,14 +172,14 @@
           </a-col>
           <a-col :sm="24">
             <a-descriptions>
-              <a-descriptions-item label="请求方法">
+              <a-descriptions-item label="請求方法">
                 {{ vdata.detailData.methodName }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="24">
             <a-descriptions>
-              <a-descriptions-item label="请求地址">
+              <a-descriptions-item label="請求地址">
                 {{ vdata.detailData.reqUrl }}
               </a-descriptions-item>
             </a-descriptions>
@@ -187,7 +187,7 @@
         </a-row>
         <a-row justify="start" type="flex">
           <a-col :sm="24">
-            <a-form-item label="请求参数">
+            <a-form-item label="請求參數">
               <a-textarea
                 disabled="disabled"
                 style="background-color: black; color: #ffffff; height: 100px"
@@ -198,7 +198,7 @@
         </a-row>
         <a-row justify="start" type="flex">
           <a-col :sm="24">
-            <a-form-item label="响应参数">
+            <a-form-item label="回應參數">
               <a-textarea
                 disabled="disabled"
                 style="background-color: black; color: #ffffff; height: 150px"
@@ -227,15 +227,15 @@ const infoTable = ref()
 const tableColumns = reactive([
   {
     key: 'userName',
-    title: '用户名',
+    title: '用戶名稱',
     fixed: 'left',
     scopedSlots: { customRender: 'userNameSlot' },
   },
-  { key: 'userId', title: '用户ID', dataIndex: 'userId' },
-  { key: 'userIp', title: '用户IP', dataIndex: 'userIp' },
-  { key: 'sysType', title: '所属系统', scopedSlots: { customRender: 'sysTypeSlot' } },
+  { key: 'userId', title: '用戶ID', dataIndex: 'userId' },
+  { key: 'userIp', title: '用戶IP', dataIndex: 'userIp' },
+  { key: 'sysType', title: '所屬系統', scopedSlots: { customRender: 'sysTypeSlot' } },
   { key: 'methodRemark', title: '操作描述', ellipsis: true, dataIndex: 'methodRemark' },
-  { key: 'createdAt', dataIndex: 'createdAt', title: '创建日期' },
+  { key: 'createdAt', dataIndex: 'createdAt', title: '建立日期' },
   {
     key: 'op',
     title: '操作',
@@ -265,17 +265,17 @@ function reqTableDataFunc(params) {
 
 function delFunc() {
   if (vdata.selectedIds.length === 0) {
-    message.error('请选择要删除的日志')
+    message.error('請選擇要刪除的日誌')
     return false
   }
   Modal.confirm({
-    title: '确认删除' + vdata.selectedIds.length + '条日志吗？',
+    title: '確認刪除' + vdata.selectedIds.length + '筆日誌嗎？',
     okType: 'danger',
     onOk() {
       req.delById(API_URL_SYS_LOG, vdata.selectedIds).then((res) => {
         vdata.selectedIds = [] // 清空选中数组
         infoTable.value.refTable(true)
-        message.success('删除成功')
+        message.success('刪除成功')
       })
     },
   })

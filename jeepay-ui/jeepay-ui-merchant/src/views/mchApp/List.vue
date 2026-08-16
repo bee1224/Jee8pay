@@ -4,21 +4,21 @@
       <div class="table-page-search-wrapper">
         <a-form layout="inline" class="table-head-ground">
           <div class="table-layer">
-            <jeepay-text-up placeholder="应用AppId" v-model:value="vdata.searchData.appId" />
-            <jeepay-text-up placeholder="应用名称" v-model:value="vdata.searchData.appName" />
+            <jeepay-text-up placeholder="應用AppId" v-model:value="vdata.searchData.appId" />
+            <jeepay-text-up placeholder="應用名稱" v-model:value="vdata.searchData.appName" />
             <a-select
               v-model:value="vdata.searchData.state"
-              placeholder="状态"
+              placeholder="狀態"
               class="table-head-layout"
             >
               <a-select-option value="">全部</a-select-option>
 
               <a-select-option value="0">禁用</a-select-option>
-              <a-select-option value="1">启用</a-select-option>
+              <a-select-option value="1">啟用</a-select-option>
             </a-select>
             <span class="table-page-search-submitButtons" style="flex-grow: 0; flex-shrink: 0">
               <a-button type="primary" @click="queryFunc" :loading="vdata.btnLoading">
-                查询
+                查詢
               </a-button>
               <a-button style="margin-left: 8px" @click="() => (vdata.searchData = {})">
                 重置
@@ -51,7 +51,7 @@
           <template v-if="column.key === 'state'">
             <a-badge
               :status="record.state === 0 ? 'error' : 'processing'"
-              :text="record.state === 0 ? '禁用' : '启用'"
+              :text="record.state === 0 ? '禁用' : '啟用'"
             />
           </template>
           <template v-if="column.key === 'op'">
@@ -73,12 +73,12 @@
               </a-button>
               <a-button type="link" v-if="$access('ENT_MCH_PAY_TEST') && record.state">
                 <router-link :to="{ name: 'ENT_MCH_PAY_TEST', params: { appId: record.appId } }">
-                  支付测试
+                  支付測試
                 </router-link>
               </a-button>
               <a-button type="link" v-if="$access('ENT_MCH_TRANSFER') && record.state">
                 <router-link :to="{ name: 'ENT_MCH_TRANSFER', params: { appId: record.appId } }">
-                  发起转账
+                  發起轉帳
                 </router-link>
               </a-button>
               <a-button
@@ -87,7 +87,7 @@
                 style="color: red"
                 @click="delFunc(record.appId)"
               >
-                删除
+                刪除
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -115,11 +115,11 @@ const tableColumns = [
     key: 'appId',
     fixed: 'left',
     width: '320px',
-    title: '应用AppId',
+    title: '應用AppId',
   },
-  { key: 'appName', title: '应用名称', dataIndex: 'appName' },
-  { key: 'state', title: '状态', scopedSlots: { customRender: 'stateSlot' } },
-  { key: 'createdAt', dataIndex: 'createdAt', title: '创建日期' },
+  { key: 'appName', title: '應用名稱', dataIndex: 'appName' },
+  { key: 'state', title: '狀態', scopedSlots: { customRender: 'stateSlot' } },
+  { key: 'createdAt', dataIndex: 'createdAt', title: '建立日期' },
   {
     key: 'op',
     title: '操作',
@@ -159,9 +159,9 @@ function editFunc(recordId) {
   mchAppAddOrEditRef.value.show(recordId)
 }
 function delFunc(appId) {
-  $infoBox.confirmDanger('确认删除？', '', () => {
+  $infoBox.confirmDanger('確認刪除？', '', () => {
     req.delById(API_URL_MCH_APP, appId).then((res) => {
-      $infoBox.message.success('删除成功！')
+      $infoBox.message.success('刪除成功！')
       searchFunc()
     })
   })

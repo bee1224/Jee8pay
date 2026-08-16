@@ -1,7 +1,7 @@
 <template>
   <div class="empty">
     <img src="@/assets/svg/empty.svg" alt="" style="width:100px;">
-    <p style="padding-right:5px;">暂无数据</p>
+    <p style="padding-right:5px;">暫無資料</p>
   </div>
 </template>
 
