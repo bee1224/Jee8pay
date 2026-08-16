@@ -14,7 +14,7 @@
 
 這是外部 Merchant UAT 平台，但 `CCAT_IBON` 連接真實 Production payment provider。成功 Create 可能產生真實 ibon 訂單；請只提交已獲測試授權的金額與筆數。外部系統只串接本文件的 JeePay V2 API，不串接 CCAT，也不需要任何 CCAT credential。
 
-UAT ingress 只允許 `34.92.245.74`、`34.92.52.162`。`35.220.239.87` 只記錄為未來 Production allowlist，本 UAT 未啟用。
+UAT ingress 只允許 `34.92.245.74`、`34.92.52.162`（Talend 測試機，系統保留）與授權的內部測試 IP（由營運平台「系統管理 → UAT Edge 白名單」自助管理，儲存後約 1 分鐘自動套用；見 `docs/operations/platform-access.md`）。`35.220.239.87` 只記錄為未來 Production allowlist，本 UAT 未啟用。
 
 ## B. Credential delivery
 
@@ -40,7 +40,7 @@ Merchant ID／App ID／App Secret 是「外部 Merchant → JeePay」的 downstr
 
 `channelExtra` 是 JSON **字串**，其字元、空白與欄位順序會直接影響簽名；建議先產生 compact JSON 字串，再組 request 與簽名。簽名值可用大小寫任一形式送出，但範例固定 uppercase。
 
-`reqTime` 是必填且參與簽名的字串，建議使用目前 Unix epoch milliseconds。現行 runtime **沒有 timestamp freshness／expiry 驗證**；不存在 nonce 欄位。MD5 shared-secret signature 是既有 native contract，不是新設計；所有呼叫必須使用 HTTPS，且不可記錄含 App Secret 的 canonical string。
+`reqTime` 是必填且參與簽名的字串，值為目前 Unix epoch milliseconds。Runtime 對 reqTime 有 **5 分鐘 freshness 窗口**：與系統時間偏差超過 5 分鐘會回「請求時間戳已過期」（`ApiController` 的 `REQTIME_FRESHNESS_MS`）；非數字 reqTime 不檢查 freshness，但仍參與簽名。不存在 nonce 欄位。MD5 shared-secret signature 是既有 native contract，不是新設計；所有呼叫必須使用 HTTPS，且不可記錄含 App Secret 的 canonical string。
 
 Synthetic Create vector：[`examples/create-vector.json`](examples/create-vector.json)。執行：
 
@@ -91,6 +91,18 @@ CONTENT-TYPE = application/json; charset=UTF-8
 | `payerEmail` | 必填 |
 
 完整 synthetic request 已在 Create vector；換入 secure handoff 的三個 downstream 值、目前 `reqTime`、唯一 `mchOrderNo`、真實 callback URL 後重新簽名即可送出。
+
+Talend 貼上產生器（每次自動產生新 `reqTime`、唯一 `mchOrderNo` 並簽名，直接輸出 Header + Body 兩段可複製內容）：
+
+```bash
+export UAT_MERCHANT_ID=M_D01_EXTERNAL_UAT
+export UAT_APP_ID=APP_D01_EXTERNAL_UAT
+export UAT_APP_SECRET=<secure handoff 取得的 App Secret>
+export UAT_NOTIFY_URL=https://<你的接收端>/callback   # full UAT 必填；產生器 fail closed
+python3 examples/talend-request-gen.py                 # 建單 + 查單
+```
+
+> `notifyUrl` 對 full UAT（含 Merchant Notify 驗收）是必填；產生器缺 `UAT_NOTIFY_URL` 會直接失敗，避免做出無法驗收 Notify 的訂單。純 Create/Query smoke 不需要本產生器。
 
 ### Create response
 
@@ -264,7 +276,7 @@ JEE-EC01 的 NC-01／NC-02／NC-03 closure 與 fresh execution evidence 見 [`JE
 | --- | --- |
 | [`UAT-START-NOTICE.md`](UAT-START-NOTICE.md) | **外部 UAT 啟動前必讀**：精確錯誤訊息表、notifyUrl 陷阱、真人付款安排、freeze 規則、到期行為（CLOSED(6)）與競態風險 |
 | [`JEE-EC01R1-external-consumer-closure.md`](JEE-EC01R1-external-consumer-closure.md) | External consumer NC-01/02/03 closure 與執行證據 |
-| [`examples/`](examples/) | synthetic 簽名向量（`create-vector.json`、`notify-vector.json`、`unified-order-success.json`、`verify_vectors.py`、`run-d01-blackbox.py`） |
+| [`examples/`](examples/) | synthetic 簽名向量（`create-vector.json`、`notify-vector.json`、`unified-order-success.json`、`verify_vectors.py`、`run-d01-blackbox.py`）；Talend 貼上產生器 `talend-request-gen.py`（見 §D 下方說明） |
 | [`../../operations/merchant-uat-frontend-operator-map.md`](../../operations/merchant-uat-frontend-operator-map.md) | Manager/Merchant/Cashier 頁面對應（operator 操作指引） |
 | [`../../providers/ccat/README.md`](../../providers/ccat/README.md) | CCAT Provider 狀態與契約文件入口 |
 | `deploy/jee8pay-v2-dev/scripts/monitor-uat.sh` | UAT 期間唯讀監控快照（在 nnviopp-sandbox 上以 sudo 執行） |
