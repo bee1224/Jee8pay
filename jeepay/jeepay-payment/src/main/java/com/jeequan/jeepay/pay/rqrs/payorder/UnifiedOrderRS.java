@@ -22,7 +22,7 @@ import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import lombok.Data;
 
 /*
-* 创建订单(统一订单) 响应参数
+* 创建訂單(统一訂單) 响应參數
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -31,37 +31,37 @@ import lombok.Data;
 @Data
 public class UnifiedOrderRS extends AbstractRS {
 
-    /** 支付订单号 **/
+    /** 支付訂單号 **/
     private String payOrderId;
 
-    /** 商户订单号 **/
+    /** 商戶訂單号 **/
     private String mchOrderNo;
 
-    /** 订单状态 **/
+    /** 訂單狀態 **/
     private Byte orderState;
 
-    /** 支付参数类型  ( 无参数，  调起支付插件参数， 重定向到指定地址，  用户扫码   )   **/
+    /** 支付參數类型  ( 无參數，  调起支付插件參數， 重定向到指定地址，  用戶扫码   )   **/
     private String payDataType;
 
-    /** 支付参数 **/
+    /** 支付參數 **/
     private String payData;
 
-    /** 渠道返回错误代码 **/
+    /** 渠道返回錯誤代码 **/
     private String errCode;
 
-    /** 渠道返回错误信息 **/
+    /** 渠道返回錯誤資訊 **/
     private String errMsg;
 
     /** 上游渠道返回数据包 (无需JSON序列化) **/
     @JSONField(serialize = false)
     private ChannelRetMsg channelRetMsg;
 
-    /** 生成聚合支付参数 (仅统一下单接口使用) **/
+    /** 生成聚合支付參數 (仅统一下单介面使用) **/
     public String buildPayDataType(){
         return CS.PAY_DATA_TYPE.NONE;
     }
 
-    /** 生成支付参数 **/
+    /** 生成支付參數 **/
     public String buildPayData(){
         return "";
     }

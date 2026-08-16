@@ -67,7 +67,7 @@ JEE-C03 已以契約會員取得的 `多元支付平台-WEBAPI介面規格(V1.28
 - B4 APN：官方確認即時一次、每 15 分鐘、每狀態最多三次，純文字 `OK` 停止；duplicate/replay 沿用 Query + JeePay native idempotency。
 - B5 Create：同 account 的 `cust_order_no` 唯一且 duplicate Append 明文拒絕；JEE-P05 起 response ambiguity 僅使用 Query-first reconciliation，不再由 Create path 自動重送 Append。
 
-31-item DoR：`28 READY`、`3 NONBLOCKING_PARTIAL`、`0 BLOCKED`、`0 runtime CONFLICT`。P04 已完成 offline runtime implementation 與 46 個 CCAT-specific tests；未執行 live Provider call、真實付款或 production validation。
+31-item DoR：`28 READY`、`3 NONBLOCKING_PARTIAL`、`0 BLOCKED`、`0 runtime CONFLICT`。P04 已完成 offline runtime implementation 與 46 個 CCAT-specific tests（後續 P05/P05R1 擴充至 86 個，ADR-0007 另增 5 個）；未執行 live Provider call、真實付款或 production validation。
 
 ## Security
 

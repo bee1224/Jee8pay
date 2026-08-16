@@ -48,12 +48,12 @@ public class CcatIbon extends CcatPaymentService {
     public String preCheck(UnifiedOrderRQ bizRQ, PayOrder payOrder) {
         try {
             if (!"TWD".equalsIgnoreCase(payOrder.getCurrency())) {
-                return "CCAT ibon 仅支持 TWD";
+                return "CCAT ibon 僅支援 TWD";
             }
             CcatKit.toCcatTwdAmount(payOrder.getAmount());
             parsePayer(bizRQ.getChannelExtra());
             if (payOrder.getExpiredTime() == null) {
-                return "CCAT ibon 缴费期限不能为空";
+                return "CCAT ibon 缴费期限不能為空";
             }
             return null;
         } catch (IllegalArgumentException e) {
@@ -89,13 +89,13 @@ public class CcatIbon extends CcatPaymentService {
                                   String notifyUrl) throws CcatException {
         if (params == null || StringUtils.isAnyBlank(
                 params.getEnvironment(), params.getCustId(), params.getApiPassword())) {
-            throw new CcatException(ErrorType.CONFIGURATION, "CCAT merchant configuration is incomplete");
+            throw new CcatException(ErrorType.CONFIGURATION, "CCAT 商戶設定不完整");
         }
         CcatClient.resolveBaseUrl(params.getEnvironment());
         JSONObject payer = parsePayer(bizRQ.getChannelExtra());
         long orderAmount = CcatKit.toCcatTwdAmount(payOrder.getAmount());
         if (payOrder.getExpiredTime() == null) {
-            throw new IllegalArgumentException("CCAT ibon 缴费期限不能为空");
+            throw new IllegalArgumentException("CCAT ibon 缴费期限不能為空");
         }
 
         JSONObject request = new JSONObject(true);
@@ -193,7 +193,7 @@ public class CcatIbon extends CcatPaymentService {
 
     private static ChannelRetMsg errorResult(CcatException error) {
         if (error.getType() == ErrorType.BUSINESS) {
-            return ChannelRetMsg.confirmFail("CCAT_BUSINESS", "CCAT Provider rejected request");
+            return ChannelRetMsg.confirmFail("CCAT_BUSINESS", "CCAT Provider 拒絕請求");
         }
         ChannelRetMsg result = new ChannelRetMsg();
         if (error.getType() == ErrorType.CONFIGURATION || error.getType() == ErrorType.AUTHENTICATION) {
@@ -212,13 +212,13 @@ public class CcatIbon extends CcatPaymentService {
         try {
             payer = JSON.parseObject(StringUtils.defaultIfBlank(channelExtra, "{}"));
         } catch (JSONException e) {
-            throw new IllegalArgumentException("CCAT channelExtra 格式错误");
+            throw new IllegalArgumentException("CCAT channelExtra 格式錯誤");
         }
         if (payer == null || StringUtils.isAnyBlank(
                 payer.getString("payerName"), payer.getString("payerPostcode"),
                 payer.getString("payerAddress"), payer.getString("payerMobile"),
                 payer.getString("payerEmail"))) {
-            throw new IllegalArgumentException("CCAT channelExtra 缺少缴款人资料");
+            throw new IllegalArgumentException("CCAT channelExtra 缺少繳款人資料");
         }
         return payer;
     }
@@ -229,7 +229,7 @@ public class CcatIbon extends CcatPaymentService {
             detail += " " + payOrder.getBody();
         }
         if (StringUtils.isBlank(detail)) {
-            throw new IllegalArgumentException("CCAT order_detail is required");
+            throw new IllegalArgumentException("CCAT order_detail 為必填");
         }
         return detail.length() <= ORDER_DETAIL_MAX_LENGTH ? detail : detail.substring(0, ORDER_DETAIL_MAX_LENGTH);
     }
@@ -252,7 +252,7 @@ public class CcatIbon extends CcatPaymentService {
     private static CcatException providerError(CollectResponse response) {
         String message = response.getBody() == null ? null : response.getBody().getString("msg");
         return new CcatException(ErrorType.BUSINESS,
-                StringUtils.defaultIfBlank(message, "CCAT Provider rejected request"), null,
+                StringUtils.defaultIfBlank(message, "CCAT Provider 拒絕請求"), null,
                 response.getHttpStatus(), response.getLatencyMillis(), allowlistedProviderFields(response.getBody()));
     }
 

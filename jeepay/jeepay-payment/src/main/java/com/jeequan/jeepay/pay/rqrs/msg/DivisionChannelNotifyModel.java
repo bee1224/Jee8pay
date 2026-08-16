@@ -31,10 +31,10 @@ import java.util.Map;
 @Data
 public class DivisionChannelNotifyModel {
 
-    /** 响应接口返回的数据 **/
+    /** 响应介面返回的数据 **/
     private ResponseEntity apiRes;
 
-    /** 每一条记录的更新状态 <ID, 结果> **/
+    /** 每一条记录的更新狀態 <ID, 结果> **/
     private Map<Long, ChannelRetMsg> recordResultMap;
 
 }

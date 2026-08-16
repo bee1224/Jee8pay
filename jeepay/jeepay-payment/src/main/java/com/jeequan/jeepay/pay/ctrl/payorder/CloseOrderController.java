@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /*
- * 关闭订单 controller
+ * 關閉訂單 controller
  *
  * @author xiaoyu
  * @site https://www.jeequan.com
@@ -50,30 +50,30 @@ public class CloseOrderController extends ApiController {
     /**
      * @author: xiaoyu
      * @date: 2022/1/25 9:19
-     * @describe: 关闭订单
+     * @describe: 關閉訂單
      */
     @RequestMapping("/api/pay/close")
     public ApiRes closeOrder(){
 
-        //获取参数 & 验签
+        //獲取參數 & 簽章驗證
         ClosePayOrderRQ rq = getRQByWithMchSign(ClosePayOrderRQ.class);
 
         if(StringUtils.isAllEmpty(rq.getMchOrderNo(), rq.getPayOrderId())){
-            throw new BizException("mchOrderNo 和 payOrderId 不能同时为空");
+            throw new BizException("mchOrderNo 和 payOrderId 不能同時為空");
         }
 
         PayOrder payOrder = payOrderService.queryMchOrder(rq.getMchNo(), rq.getPayOrderId(), rq.getMchOrderNo());
         if(payOrder == null){
-            throw new BizException("订单不存在");
+            throw new BizException("訂單不存在");
         }
 
         if (payOrder.getState() != PayOrder.STATE_INIT && payOrder.getState() != PayOrder.STATE_ING) {
-            throw new BizException("当前订单不可关闭");
+            throw new BizException("當前訂單不可關閉");
         }
 
         ClosePayOrderRS bizRes = new ClosePayOrderRS();
 
-        // 订单生成状态  直接修改订单状态
+        // 訂單生成狀態  直接修改訂單狀態
         if (payOrder.getState() == PayOrder.STATE_INIT) {
             payOrderService.updateInit2Close(payOrder.getPayOrderId());
             bizRes.setChannelRetMsg(ChannelRetMsg.confirmSuccess(null));
@@ -84,16 +84,16 @@ public class CloseOrderController extends ApiController {
 
             String payOrderId = payOrder.getPayOrderId();
 
-            //查询支付接口是否存在
+            //查询支付介面是否存在
             IPayOrderCloseService closeService = SpringBeansUtil.getBean(payOrder.getIfCode() + "PayOrderCloseService", IPayOrderCloseService.class);
 
-            // 支付通道接口实现不存在
+            // 支付通道介面实现不存在
             if(closeService == null){
                 log.error("{} interface not exists!", payOrder.getIfCode());
                 return null;
             }
 
-            //查询出商户应用的配置信息
+            //查询出商戶應用的設定資訊
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
 
             ChannelRetMsg channelRetMsg = closeService.close(payOrder, mchAppConfigContext);
@@ -102,9 +102,9 @@ public class CloseOrderController extends ApiController {
                 return null;
             }
 
-            log.info("关闭订单[{}]结果为：{}", payOrderId, channelRetMsg);
+            log.info("關閉訂單[{}]结果为：{}", payOrderId, channelRetMsg);
 
-            // 关闭订单 成功
+            // 關閉訂單 成功
             if(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
                 payOrderService.updateIng2Close(payOrderId);
             }else {
@@ -112,7 +112,7 @@ public class CloseOrderController extends ApiController {
             }
 
             bizRes.setChannelRetMsg(channelRetMsg);
-        } catch (Exception e) {  // 关闭订单异常
+        } catch (Exception e) {  // 關閉訂單異常
             log.error("error payOrderId = {}", payOrder.getPayOrderId(), e);
             return null;
         }

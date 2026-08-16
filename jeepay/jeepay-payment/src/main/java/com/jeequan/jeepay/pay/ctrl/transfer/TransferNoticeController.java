@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
-* 转账异步通知入口Controller
+* 轉帳異步通知入口Controller
 *
 * @author zx
 * @site https://www.jeequan.com
@@ -54,78 +54,78 @@ public class TransferNoticeController extends AbstractCtrl {
     @Autowired private PayMchNotifyService payMchNotifyService;
 
 
-    /** 异步回调入口 **/
+    /** 異步回調入口 **/
     @ResponseBody
     @RequestMapping(value= {"/api/transfer/notify/{ifCode}", "/api/transfer/notify/{ifCode}/{transferId}"})
     public ResponseEntity doNotify(HttpServletRequest request, @PathVariable("ifCode") String ifCode, @PathVariable(value = "transferId", required = false) String urlOrderId){
 
         String transferId = null;
-        String logPrefix = "进入[" +ifCode+ "]转账回调：urlOrderId：["+ StringUtils.defaultIfEmpty(urlOrderId, "") + "] ";
+        String logPrefix = "进入[" +ifCode+ "]轉帳回調：urlOrderId：["+ StringUtils.defaultIfEmpty(urlOrderId, "") + "] ";
         log.info("===== {} =====" , logPrefix);
 
         try {
 
-            // 参数有误
+            // 參數有误
             if(StringUtils.isEmpty(ifCode)){
                 return ResponseEntity.badRequest().body("ifCode is empty");
             }
 
-            //查询转账接口是否存在
+            //查询轉帳介面是否存在
             ITransferNoticeService transferNotifyService = SpringBeansUtil.getBean(ifCode + "TransferNoticeService", ITransferNoticeService.class);
 
-            // 支付通道转账接口实现不存在
+            // 支付通道轉帳介面实现不存在
             if(transferNotifyService == null){
                 log.error("{}, transfer interface not exists ", logPrefix);
                 return ResponseEntity.badRequest().body("[" + ifCode + "] transfer interface not exists");
             }
 
-            // 解析转账单号 和 请求参数
+            // 解析轉帳单号 和 請求參數
             MutablePair<String, Object> mutablePair = transferNotifyService.parseParams(request, urlOrderId);
-            if(mutablePair == null){ // 解析数据失败， 响应已处理
+            if(mutablePair == null){ // 解析数据失敗， 响应已處理
                 log.error("{}, mutablePair is null ", logPrefix);
-                throw new BizException("解析数据异常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此异常。
+                throw new BizException("解析数据異常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此異常。
             }
 
-            // 解析到转账单号
+            // 解析到轉帳单号
             transferId = mutablePair.left;
             log.info("{}, 解析数据为：transferId:{}, params:{}", logPrefix, transferId, mutablePair.getRight());
 
-            // 获取转账单号 和 转账单数据
+            // 獲取轉帳单号 和 轉帳单数据
             TransferOrder transferOrder = transferOrderService.getById(transferId);
 
-            // 转账单不存在
+            // 轉帳单不存在
             if(transferOrder == null){
-                log.error("{}, 转账单不存在. transferId={} ", logPrefix, transferId);
+                log.error("{}, 轉帳单不存在. transferId={} ", logPrefix, transferId);
                 return transferNotifyService.doNotifyOrderNotExists(request);
             }
 
-            //查询出商户应用的配置信息
+            //查询出商戶應用的設定資訊
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(transferOrder.getMchNo(), transferOrder.getAppId());
 
-            //调起接口的回调判断
+            //调起介面的回調判断
             ChannelRetMsg notifyResult = transferNotifyService.doNotice(request, mutablePair.getRight(), transferOrder, mchAppConfigContext);
 
-            // 返回null 表明出现异常， 无需处理通知下游等操作。
+            // 返回null 表明出现異常， 无需處理通知下游等操作。
             if(notifyResult == null || notifyResult.getChannelState() == null || notifyResult.getResponseEntity() == null){
-                log.error("{}, 处理回调事件异常  notifyResult data error, notifyResult ={} ",logPrefix, notifyResult);
-                throw new BizException("处理回调事件异常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此异常。
+                log.error("{}, 處理回調事件異常  notifyResult data error, notifyResult ={} ",logPrefix, notifyResult);
+                throw new BizException("處理回調事件異常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此異常。
             }
 
-            // 转账单是 【转账中状态】
+            // 轉帳单是 【轉帳中狀態】
             if(transferOrder.getState() == TransferOrder.STATE_ING) {
                 if(notifyResult.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
-                    // 转账成功
+                    // 轉帳成功
                     transferOrderService.updateIng2Success(transferId, notifyResult.getChannelOrderId());
                     payMchNotifyService.transferOrderNotify(transferOrderService.getById(transferId));
 
                 }else if(notifyResult.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_FAIL){
-                    // 转账失败
+                    // 轉帳失敗
                     transferOrderService.updateIng2Fail(transferId, notifyResult.getChannelOrderId(), notifyResult.getChannelErrCode(), notifyResult.getChannelErrMsg());
                     payMchNotifyService.transferOrderNotify(transferOrderService.getById(transferId));
                 }
             }
 
-            log.info("===== {}, 转账单通知完成。 transferId={}, parseState = {} =====", logPrefix, transferId, notifyResult.getChannelState());
+            log.info("===== {}, 轉帳单通知完成。 transferId={}, parseState = {} =====", logPrefix, transferId, notifyResult.getChannelState());
 
             return notifyResult.getResponseEntity();
 
@@ -138,7 +138,7 @@ public class TransferNoticeController extends AbstractCtrl {
             return e.getResponseEntity();
 
         } catch (Exception e) {
-            log.error("{}, transferId={}, 系统异常", logPrefix, transferId, e);
+            log.error("{}, transferId={}, 系統異常", logPrefix, transferId, e);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

@@ -58,30 +58,30 @@ public class QrCashierController extends AbstractPayOrderController {
     @Autowired private PayMchNotifyService payMchNotifyService;
 
     /**
-     * 返回 oauth2【获取uerId跳转地址】
+     * 返回 oauth2【獲取uerId跳转地址】
      * **/
     @PostMapping("/redirectUrl")
     public ApiRes redirectUrl(){
 
-        //获取商户配置信息
+        //獲取商戶設定資訊
         MchAppConfigContext mchAppConfigContext = this.commonQueryInfoMchAppConfigContext();
 
-        //回调地址
+        //回調地址
         String redirectUrlEncode = sysConfigService.getDBApplicationConfig().genOauth2RedirectUrlEncode(this.getToken());
 
-        //获取接口并返回数据
+        //獲取介面并返回数据
         IChannelUserService channelUserService = getServiceByWayCode(getWayCode(), "ChannelUserService", IChannelUserService.class);
         return ApiRes.ok(channelUserService.buildUserRedirectUrl(redirectUrlEncode, mchAppConfigContext));
 
     }
 
     /**
-     * 获取userId
+     * 獲取userId
      * **/
     @PostMapping("/channelUserId")
     public ApiRes channelUserId() throws Exception {
 
-        //获取商户配置信息
+        //獲取商戶設定資訊
         MchAppConfigContext mchAppConfigContext = this.commonQueryInfoMchAppConfigContext();
 
         String wayCode = getWayCode();
@@ -93,12 +93,12 @@ public class QrCashierController extends AbstractPayOrderController {
 
 
     /**
-     * 获取订单支付信息
+     * 獲取訂單支付資訊
      * **/
     @PostMapping("/payOrderInfo")
     public ApiRes payOrderInfo() throws Exception {
 
-        //查询订单
+        //查询訂單
         PayOrder payOrder = this.commonQueryPayOrder();
 
         PayOrder resOrder = new PayOrder();
@@ -116,11 +116,11 @@ public class QrCashierController extends AbstractPayOrderController {
     }
 
 
-    /** 调起下单接口, 返回支付数据包  **/
+    /** 调起下单介面, 返回支付数据包  **/
     @PostMapping("/pay")
     public ApiRes pay() throws Exception {
 
-        //查询订单
+        //查询訂單
         PayOrder payOrder = this.commonQueryPayOrder();
 
         String wayCode = getWayCode();
@@ -137,7 +137,7 @@ public class QrCashierController extends AbstractPayOrderController {
     }
 
 
-    /** 获取支付宝的 支付参数 **/
+    /** 獲取支付宝的 支付參數 **/
     private ApiRes packageAlipayPayPackage(PayOrder payOrder){
 
         String channelUserId = getValStringRequired("channelUserId");
@@ -148,7 +148,7 @@ public class QrCashierController extends AbstractPayOrderController {
     }
 
 
-    /** 获取微信的 支付参数 **/
+    /** 獲取微信的 支付參數 **/
     private ApiRes packageWxpayPayPackage(PayOrder payOrder){
 
         String openId = getValStringRequired("channelUserId");
@@ -161,7 +161,7 @@ public class QrCashierController extends AbstractPayOrderController {
     /** 赋值通用字段 **/
     private void commonSetRQ(UnifiedOrderRQ rq, PayOrder payOrder){
 
-        // 存在订单数据， 不需要处理
+        // 存在訂單数据， 不需要處理
         if(payOrder != null && StringUtils.isNotEmpty(payOrder.getPayOrderId())){
             return ;
         }
@@ -173,7 +173,7 @@ public class QrCashierController extends AbstractPayOrderController {
         rq.setCurrency("twd");
         rq.setSubject("静态码支付");
         rq.setBody("静态码支付");
-        rq.setSignType("MD5"); // 设置默认签名方式为MD5
+        rq.setSignType("MD5"); // 设置默认簽名方式为MD5
     }
 
 
@@ -206,17 +206,17 @@ public class QrCashierController extends AbstractPayOrderController {
     }
 
 
-    /** 通用查询订单信息 **/
+    /** 通用查询訂單資訊 **/
     private PayOrder commonQueryPayOrder(){
 
         QRCodeParams qrCodeParams = tokenConvert();
-        if(qrCodeParams.getType() == QRCodeParams.TYPE_PAY_ORDER){ // 订单
+        if(qrCodeParams.getType() == QRCodeParams.TYPE_PAY_ORDER){ // 訂單
 
             String payOrderId = this.tokenConvert().getId(); //解析token
 
             PayOrder payOrder = payOrderService.getById(payOrderId);
             if(payOrder == null || payOrder.getState() != PayOrder.STATE_INIT){
-                throw new BizException("订单不存在或状态不正确");
+                throw new BizException("訂單不存在或狀態不正確");
             }
 
             return payOrderService.getById(payOrderId);
@@ -230,7 +230,7 @@ public class QrCashierController extends AbstractPayOrderController {
         return null;
     }
 
-    /** 查询配置信息 **/
+    /** 查询設定資訊 **/
     private MchAppConfigContext commonQueryInfoMchAppConfigContext(){
 
         PayOrder payOrder = this.commonQueryPayOrder();

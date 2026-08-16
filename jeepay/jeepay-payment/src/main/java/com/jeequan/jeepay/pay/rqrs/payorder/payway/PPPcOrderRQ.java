@@ -17,7 +17,7 @@ import jakarta.validation.constraints.NotBlank;
 public class PPPcOrderRQ extends CommonPayDataRQ {
 
     /**
-     * 商品描述信息
+     * 商品描述資訊
      **/
     @NotBlank(message = "取消支付返回站点")
     private String cancelUrl;

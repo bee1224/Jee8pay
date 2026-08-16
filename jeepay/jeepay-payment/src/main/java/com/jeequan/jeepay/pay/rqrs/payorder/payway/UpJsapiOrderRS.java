@@ -30,7 +30,7 @@ import lombok.Data;
 @Data
 public class UpJsapiOrderRS extends UnifiedOrderRS {
 
-    /** 调起支付插件的云闪付订单号 **/
+    /** 调起支付插件的云闪付訂單号 **/
     private String redirectUrl;
 
     @Override

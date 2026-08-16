@@ -21,7 +21,7 @@ import lombok.Data;
 import jakarta.validation.constraints.NotNull;
 
 /*
-* 发起订单分账 请求参数
+* 发起訂單分帳 請求參數
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -30,33 +30,33 @@ import jakarta.validation.constraints.NotNull;
 @Data
 public class PayOrderDivisionExecRQ extends AbstractMchAppRQ {
 
-    /** 商户订单号 **/
+    /** 商戶訂單号 **/
     private String mchOrderNo;
 
-    /** 支付系统订单号 **/
+    /** 支付系統訂單号 **/
     private String payOrderId;
 
     /**
-     * 是否使用系统配置的自动分账组： 0-否 1-是
+     * 是否使用系統設定的自动分帳组： 0-否 1-是
      **/
-    @NotNull(message = "是否使用系统配置的自动分账组不能为空")
+    @NotNull(message = "是否使用系統設定的自动分帳组不能為空")
     private Byte useSysAutoDivisionReceivers;
 
-    /** 接收者账号列表（JSONArray 转换为字符串类型）
+    /** 接收者帳號列表（JSONArray 转换为字符串类型）
      * 仅当useSysAutoDivisionReceivers=0 时有效。
      *
      * 参考：
      *
-     * 方式1： 按账号纬度
+     * 方式1： 按帳號纬度
      * [{
      *     receiverId: 800001,
-     *     divisionProfit: 0.1 (若不填入则使用系统默认配置值)
+     *     divisionProfit: 0.1 (若不填入则使用系統默认設定值)
      * }]
      *
      * 方式2： 按组纬度
      * [{
-     *     receiverGroupId: 100001, (该组所有 当前订单的渠道账号并且可用状态的全部参与分账)
-     *     divisionProfit: 0.1 (每个账号的分账比例， 若不填入则使用系统默认配置值， 建议不填写)
+     *     receiverGroupId: 100001, (该组所有 當前訂單的渠道帳號并且可用狀態的全部参与分帳)
+     *     divisionProfit: 0.1 (每个帳號的分帳比例， 若不填入则使用系統默认設定值， 建议不填写)
      * }]
      *
      * **/

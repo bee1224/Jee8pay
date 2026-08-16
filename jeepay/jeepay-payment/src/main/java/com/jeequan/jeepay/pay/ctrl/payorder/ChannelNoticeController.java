@@ -43,7 +43,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /*
-* 渠道侧的通知入口Controller 【分为同步跳转（doReturn）和异步回调(doNotify) 】
+* 渠道侧的通知入口Controller 【分为同步跳转（doReturn）和異步回調(doNotify) 】
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -72,64 +72,64 @@ public class ChannelNoticeController extends AbstractCtrl {
 
         try {
 
-            // 参数有误
+            // 參數有误
             if(StringUtils.isEmpty(ifCode)){
                 return this.toReturnPage("ifCode is empty");
             }
 
-            //查询支付接口是否存在
+            //查询支付介面是否存在
             IChannelNoticeService payNotifyService = SpringBeansUtil.getBean(ifCode + "ChannelNoticeService", IChannelNoticeService.class);
 
-            // 支付通道接口实现不存在
+            // 支付通道介面实现不存在
             if(payNotifyService == null){
                 log.error("{}, interface not exists ", logPrefix);
                 return this.toReturnPage("[" + ifCode + "] interface not exists");
             }
 
-            // 仅做跳转，直接跳转订单的returnUrl
+            // 仅做跳转，直接跳转訂單的returnUrl
             if (StringUtils.isNotBlank(urlOrderId) && urlOrderId.startsWith(CS.PAY_RETURNURL_FIX_ONLY_JUMP_PREFIX)) {
                 onlyJump(urlOrderId, logPrefix);
                 return null;
             }
 
-            // 解析订单号 和 请求参数
+            // 解析訂單号 和 請求參數
             MutablePair<String, Object> mutablePair = payNotifyService.parseParams(request, urlOrderId, IChannelNoticeService.NoticeTypeEnum.DO_RETURN);
-            if(mutablePair == null){ // 解析数据失败， 响应已处理
+            if(mutablePair == null){ // 解析数据失敗， 响应已處理
                 log.error("{}, mutablePair is null ", logPrefix);
-                throw new BizException("解析数据异常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此异常。
+                throw new BizException("解析数据異常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此異常。
             }
 
-            //解析到订单号
+            //解析到訂單号
             payOrderId = mutablePair.left;
             log.info("{}, 解析数据为：payOrderId:{}, params:{}", logPrefix, payOrderId, mutablePair.getRight());
 
             if(StringUtils.isNotEmpty(urlOrderId) && !urlOrderId.equals(payOrderId)){
-                log.error("{}, 订单号不匹配. urlOrderId={}, payOrderId={} ", logPrefix, urlOrderId, payOrderId);
-                throw new BizException("订单号不匹配！");
+                log.error("{}, 訂單号不匹配. urlOrderId={}, payOrderId={} ", logPrefix, urlOrderId, payOrderId);
+                throw new BizException("訂單号不匹配！");
             }
 
-            //获取订单号 和 订单数据
+            //獲取訂單号 和 訂單数据
             PayOrder payOrder = payOrderService.getById(payOrderId);
 
-            // 订单不存在
+            // 訂單不存在
             if(payOrder == null){
-                log.error("{}, 订单不存在. payOrderId={} ", logPrefix, payOrderId);
-                return this.toReturnPage("支付订单不存在");
+                log.error("{}, 訂單不存在. payOrderId={} ", logPrefix, payOrderId);
+                return this.toReturnPage("支付訂單不存在");
             }
 
-            //查询出商户应用的配置信息
+            //查询出商戶應用的設定資訊
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
 
-            //调起接口的回调判断
+            //调起介面的回調判断
             ChannelRetMsg notifyResult = payNotifyService.doNotice(request, mutablePair.getRight(), payOrder, mchAppConfigContext, IChannelNoticeService.NoticeTypeEnum.DO_RETURN);
 
-            // 返回null 表明出现异常， 无需处理通知下游等操作。
+            // 返回null 表明出现異常， 无需處理通知下游等操作。
             if(notifyResult == null || notifyResult.getChannelState() == null || notifyResult.getResponseEntity() == null){
-                log.error("{}, 处理回调事件异常  notifyResult data error, notifyResult ={} ",logPrefix, notifyResult);
-                throw new BizException("处理回调事件异常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此异常。
+                log.error("{}, 處理回調事件異常  notifyResult data error, notifyResult ={} ",logPrefix, notifyResult);
+                throw new BizException("處理回調事件異常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此異常。
             }
 
-            //判断订单状态
+            //判断訂單狀態
             if(notifyResult.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
                 payOrder.setState(PayOrder.STATE_SUCCESS);
             }else if(notifyResult.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_FAIL) {
@@ -137,7 +137,7 @@ public class ChannelNoticeController extends AbstractCtrl {
             }
 
             boolean hasReturnUrl = StringUtils.isNotBlank(payOrder.getReturnUrl());
-            log.info("===== {}, 订单通知完成。 payOrderId={}, parseState = {}, hasReturnUrl={} =====", logPrefix, payOrderId, notifyResult.getChannelState(), hasReturnUrl);
+            log.info("===== {}, 訂單通知完成。 payOrderId={}, parseState = {}, hasReturnUrl={} =====", logPrefix, payOrderId, notifyResult.getChannelState(), hasReturnUrl);
 
             //包含通知地址时
             if(hasReturnUrl){
@@ -159,76 +159,76 @@ public class ChannelNoticeController extends AbstractCtrl {
             return this.toReturnPage(e.getMessage());
 
         } catch (Exception e) {
-            log.error("{}, payOrderId={}, 系统异常", logPrefix, payOrderId, e);
+            log.error("{}, payOrderId={}, 系統異常", logPrefix, payOrderId, e);
             return this.toReturnPage(e.getMessage());
         }
     }
 
-    /** 异步回调入口 **/
+    /** 異步回調入口 **/
     @ResponseBody
     @RequestMapping(value= {"/api/pay/notify/{ifCode}", "/api/pay/notify/{ifCode}/{payOrderId}"})
     public ResponseEntity doNotify(HttpServletRequest request, @PathVariable("ifCode") String ifCode, @PathVariable(value = "payOrderId", required = false) String urlOrderId){
 
         String payOrderId = null;
-        String logPrefix = "进入[" +ifCode+ "]支付回调：urlOrderId：["+ StringUtils.defaultIfEmpty(urlOrderId, "") + "] ";
+        String logPrefix = "进入[" +ifCode+ "]支付回調：urlOrderId：["+ StringUtils.defaultIfEmpty(urlOrderId, "") + "] ";
         log.info("===== {} =====" , logPrefix);
 
         try {
 
-            // 参数有误
+            // 參數有误
             if(StringUtils.isEmpty(ifCode)){
                 return ResponseEntity.badRequest().body("ifCode is empty");
             }
 
-            //查询支付接口是否存在
+            //查询支付介面是否存在
             IChannelNoticeService payNotifyService = SpringBeansUtil.getBean(ifCode + "ChannelNoticeService", IChannelNoticeService.class);
 
-            // 支付通道接口实现不存在
+            // 支付通道介面实现不存在
             if(payNotifyService == null){
                 log.error("{}, interface not exists ", logPrefix);
                 return ResponseEntity.badRequest().body("[" + ifCode + "] interface not exists");
             }
 
-            // 解析订单号 和 请求参数
+            // 解析訂單号 和 請求參數
             MutablePair<String, Object> mutablePair = payNotifyService.parseParams(request, urlOrderId, IChannelNoticeService.NoticeTypeEnum.DO_NOTIFY);
-            if(mutablePair == null){ // 解析数据失败， 响应已处理
+            if(mutablePair == null){ // 解析数据失敗， 响应已處理
                 log.error("{}, mutablePair is null ", logPrefix);
-                throw new BizException("解析数据异常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此异常。
+                throw new BizException("解析数据異常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此異常。
             }
 
-            //解析到订单号
+            //解析到訂單号
             payOrderId = mutablePair.left;
             log.info("{}, 解析数据为：payOrderId:{}, params:{}", logPrefix, payOrderId, mutablePair.getRight());
 
             if(StringUtils.isNotEmpty(urlOrderId) && !urlOrderId.equals(payOrderId)){
-                log.error("{}, 订单号不匹配. urlOrderId={}, payOrderId={} ", logPrefix, urlOrderId, payOrderId);
-                throw new BizException("订单号不匹配！");
+                log.error("{}, 訂單号不匹配. urlOrderId={}, payOrderId={} ", logPrefix, urlOrderId, payOrderId);
+                throw new BizException("訂單号不匹配！");
             }
 
-            //获取订单号 和 订单数据
+            //獲取訂單号 和 訂單数据
             PayOrder payOrder = payOrderService.getById(payOrderId);
 
-            // 订单不存在
+            // 訂單不存在
             if(payOrder == null){
-                log.error("{}, 订单不存在. payOrderId={} ", logPrefix, payOrderId);
+                log.error("{}, 訂單不存在. payOrderId={} ", logPrefix, payOrderId);
                 return payNotifyService.doNotifyOrderNotExists(request);
             }
 
-            //查询出商户应用的配置信息
+            //查询出商戶應用的設定資訊
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
 
 
-            //调起接口的回调判断
+            //调起介面的回調判断
             ChannelRetMsg notifyResult = payNotifyService.doNotice(request, mutablePair.getRight(), payOrder, mchAppConfigContext, IChannelNoticeService.NoticeTypeEnum.DO_NOTIFY);
 
-            // 返回null 表明出现异常， 无需处理通知下游等操作。
+            // 返回null 表明出现異常， 无需處理通知下游等操作。
             if(notifyResult == null || notifyResult.getChannelState() == null || notifyResult.getResponseEntity() == null){
-                log.error("{}, 处理回调事件异常  notifyResult data error, notifyResult ={} ",logPrefix, notifyResult);
-                throw new BizException("处理回调事件异常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此异常。
+                log.error("{}, 處理回調事件異常  notifyResult data error, notifyResult ={} ",logPrefix, notifyResult);
+                throw new BizException("處理回調事件異常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此異常。
             }
 
             boolean updateOrderSuccess = true; //默认更新成功
-            // 订单是 【支付中状态】
+            // 訂單是 【支付中狀態】
             if(payOrder.getState() == PayOrder.STATE_ING) {
 
                 //明确成功
@@ -236,31 +236,31 @@ public class ChannelNoticeController extends AbstractCtrl {
 
                     updateOrderSuccess = payOrderService.updateIng2Success(payOrderId, notifyResult.getChannelOrderId(), notifyResult.getChannelUserId());
 
-                    //明确失败
+                    //明确失敗
                 }else if(ChannelRetMsg.ChannelState.CONFIRM_FAIL == notifyResult.getChannelState()) {
 
                     updateOrderSuccess = payOrderService.updateIng2Fail(payOrderId, notifyResult.getChannelOrderId(), notifyResult.getChannelUserId(), notifyResult.getChannelErrCode(), notifyResult.getChannelErrMsg());
                 }
 
-            // ADR-0007：已关闭订单，仅接受经完整验证的 paid-APN 转回支付成功
+            // ADR-0007：已關閉訂單，仅接受经完整验证的 paid-APN 转回支付成功
             }else if(payOrder.getState() == PayOrder.STATE_CLOSED
                     && ChannelRetMsg.ChannelState.CONFIRM_SUCCESS == notifyResult.getChannelState()) {
 
                 updateOrderSuccess = payOrderService.updateClosed2Success(payOrderId, notifyResult.getChannelOrderId(), notifyResult.getChannelUserId());
             }
 
-            // 更新订单 异常
+            // 更新訂單 異常
             if(!updateOrderSuccess){
                 log.error("{}, updateOrderSuccess = {} ",logPrefix, updateOrderSuccess);
                 return payNotifyService.doNotifyOrderStateUpdateFail(request);
             }
 
-            //订单支付成功 其他业务逻辑
+            //訂單支付成功 其他业务逻辑
             if(notifyResult.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS){
                 payOrderProcessService.confirmSuccess(payOrder);
             }
 
-            log.info("===== {}, 订单通知完成。 payOrderId={}, parseState = {} =====", logPrefix, payOrderId, notifyResult.getChannelState());
+            log.info("===== {}, 訂單通知完成。 payOrderId={}, parseState = {} =====", logPrefix, payOrderId, notifyResult.getChannelState());
 
             return notifyResult.getResponseEntity();
 
@@ -273,7 +273,7 @@ public class ChannelNoticeController extends AbstractCtrl {
             return e.getResponseEntity();
 
         } catch (Exception e) {
-            log.error("{}, payOrderId={}, 系统异常", logPrefix, payOrderId, e);
+            log.error("{}, payOrderId={}, 系統異常", logPrefix, payOrderId, e);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -292,16 +292,16 @@ public class ChannelNoticeController extends AbstractCtrl {
 
             String payOrderId = urlOrderId.substring(CS.PAY_RETURNURL_FIX_ONLY_JUMP_PREFIX.length());
 
-            //获取订单号 和 订单数据
+            //獲取訂單号 和 訂單数据
             PayOrder payOrder = payOrderService.getById(payOrderId);
 
-            // 订单不存在
+            // 訂單不存在
             if(payOrder == null){
-                log.error("{}, 订单不存在. payOrderId={} ", logPrefix, payOrderId);
-                this.toReturnPage("支付订单不存在");
+                log.error("{}, 訂單不存在. payOrderId={} ", logPrefix, payOrderId);
+                this.toReturnPage("支付訂單不存在");
             }
 
-            //查询出商户应用的配置信息
+            //查询出商戶應用的設定資訊
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
 
             if (StringUtils.isBlank(payOrder.getReturnUrl())) {

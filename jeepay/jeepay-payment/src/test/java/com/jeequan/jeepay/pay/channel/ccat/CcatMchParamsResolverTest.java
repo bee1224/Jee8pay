@@ -93,7 +93,7 @@ class CcatMchParamsResolverTest {
         CcatException error = assertThrows(CcatException.class,
                 () -> resolver.resolve(binding("M-TEST", "APP-TEST")));
 
-        assertEquals("CCAT merchant configuration is malformed", error.getMessage());
+        assertEquals("CCAT 商戶設定格式錯誤", error.getMessage());
         assertFalse(output.getAll().contains(secret));
         assertFalse(error.getMessage().contains(secret));
     }
@@ -107,7 +107,7 @@ class CcatMchParamsResolverTest {
         CcatException error = assertThrows(CcatException.class,
                 () -> resolver.resolve(binding("M-TEST", "APP-TEST")));
 
-        assertEquals("CCAT merchant configuration is incomplete", error.getMessage());
+        assertEquals("CCAT 商戶設定不完整", error.getMessage());
     }
 
     @Test

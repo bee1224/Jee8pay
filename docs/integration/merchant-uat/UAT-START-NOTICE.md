@@ -14,25 +14,25 @@
 | App ID | `APP_D01_EXTERNAL_UAT` |
 | wayCode | `CCAT_IBON` |
 | 平台環境 / Provider 環境 | DEVELOPMENT / **PRODUCTION（真實 ibon 帳單）** |
-| Allowlist 來源 IP | `34.92.245.74`、`34.92.52.162`（**只能從這兩個 IP 發送**，其他 IP 回 403） |
+| Allowlist 來源 IP | `34.92.245.74`、`34.92.52.162`（**只能從這兩個 IP 發送**，其他 IP 回 403）；edge 為 Cloudflare proxied 模式（CF-Connecting-IP 信任） |
 | 金額單位 | minor units：`4000` = TWD 40；必須被 100 整除 |
 
 ## 2. 精確錯誤訊息表（黑箱實測，測試預期以此為準）
 
 | 場景 | code | 精確 msg |
 | --- | --- | --- |
-| 竄改簽名 | 9999 | `验签失败` |
-| Query 缺 payOrderId/mchOrderNo | 9999 | `mchOrderNo 和 payOrderId不能同时为空` |
-| 重複建單（同 mchNo+mchOrderNo） | 9999 | `商户订单[<mchOrderNo>]已存在` |
-| 金額不可被 100 整除 | 9999 | `amount must be an exact whole TWD value` |
-| 非 TWD 幣別 | 9999 | `CCAT ibon 仅支持 TWD` |
-| channelExtra 非 JSON | 9999 | `CCAT channelExtra 格式错误` |
-| channelExtra 缺 payer 欄位 | 9999 | `CCAT channelExtra 缺少缴款人资料` |
-| 不支援的 wayCode | 9999 | `商户应用不支持该支付方式` |
-| 缺 subject | 9999 | `商品标题不能为空` |
-| 代付（未開放） | 9999 | `无此转账通道接口` |
-| 退款-訂單不存在 | 9999 | `退款订单不存在` |
-| 退款-訂單未支付 | 9999 | `订单状态不正确， 无法完成退款` |
+| 竄改簽名 | 9999 | `簽章驗證失敗` |
+| Query 缺 payOrderId/mchOrderNo | 9999 | `mchOrderNo 和 payOrderId 不能同時為空` |
+| 重複建單（同 mchNo+mchOrderNo） | 9999 | `商戶訂單[<mchOrderNo>]已存在` |
+| 金額不可被 100 整除 | 9999 | `金額必須為整數 TWD 元` |
+| 非 TWD 幣別 | 9999 | `CCAT ibon 僅支援 TWD` |
+| channelExtra 非 JSON | 9999 | `CCAT channelExtra 格式錯誤` |
+| channelExtra 缺 payer 欄位 | 9999 | `CCAT channelExtra 缺少繳款人資料` |
+| 不支援的 wayCode | 9999 | `商戶應用不支援該支付方式` |
+| 缺 subject | 9999 | `商品標題不能為空` |
+| 代付（未開放） | 9999 | `無此轉帳通道介面` |
+| 退款-訂單不存在 | 9999 | `退款訂單不存在` |
+| 退款-訂單未支付 | 9999 | `訂單狀態不正確，無法完成退款` |
 
 ## 3. 必須遵守的行為（避免測試卡住）
 
@@ -43,7 +43,7 @@
 5. **Merchant Notify 驗簽**：與 Create/Query 相同演算法（App Secret MD5）；收到後回純文字 `SUCCESS`（大小寫不拘）；我方最多 6 次、間隔 0/30/60/90/120/150 秒。
 6. **不要對 `state=1`（WAITING）訂單上分**；只在 Notify 或 Query 確認 `state=2` 後入帳。
 7. **receiver 需能處理 `state=3`（FAIL）通知**：訂單到期會轉 FAIL（見第 4 節），屆時可能收到失敗通知。
-8. **reqTime**：必填且參與簽名；系統目前無 freshness 檢查（歷史證據，勿依賴為安全機制）。
+8. **reqTime**：必填且參與簽名；**系統有 freshness 檢查（5 分鐘視窗）**，超出窗口回 `9999 請求時間戳已過期`。請確保系統時鐘已 NTP 同步。
 
 ## 4. 已知行為（本輪實測新增的確定事實）
 
@@ -51,7 +51,7 @@
 - **reissue（補單）只查 `STATE_ING` 訂單**（`PayOrderReissueTask.java:55`）→ 訂單被關閉（CLOSED）後**不會再向 CCAT 補查**。
 - **競態風險（NEW FINDING）**：若付款人在本地關閉後才到 7-11 付款 → CCAT 顯示已付款（process_code=4）+ APN status=B → `CcatChannelNoticeService.doNotice` 因本地狀態為 CLOSED（不在 ING/SUCCESS/FAIL）而**拒絕** → 本地不轉 SUCCESS、不發通知、商戶不入帳，但付款人已付錢 → **滯留款項需人工對帳**。此為 fail-closed 安全行為，但存在真實營運風險；若要允許「經完整驗證的 paid-APN 將 CLOSED 轉回 SUCCESS」，屬 PayOrder state machine 變更（RED 邊界），需另立任務與 ADR 決策，**不在本文件範圍內自動修復**。
 - **到期/關閉不會通知商戶**（上述 18 筆 notify_state=0）：外部商戶需自行 Query 才能發現訂單到期。
-- **代付/退款端點在無台灣 adapter 時 fail-closed**：`code=9999` 乾淨 JSON，不會 500（transfer→`无此转账通道接口`、refund→`退款订单不存在`/`订单状态不正确， 无法完成退款`）。
+- **代付/退款端點在無台灣 adapter 時 fail-closed**：`code=9999` 乾淨 JSON，不會 500（transfer→`無此轉帳通道介面`、refund→`退款訂單不存在`/`訂單狀態不正確，無法完成退款`）。
 - **UAT 期間 freeze**：不要重啟 payment/merchant、不要套用 Cloudflare proxy-mode 變更（未 commit 的 `manage-sandbox-*-edge` / proxy 工作）。
 
 ## 5. 我方監控計畫（見 `deploy/jee8pay-v2-dev/scripts/monitor-uat.sh`）

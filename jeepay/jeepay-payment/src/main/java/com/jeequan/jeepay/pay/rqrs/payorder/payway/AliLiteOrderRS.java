@@ -30,7 +30,7 @@ import lombok.Data;
 @Data
 public class AliLiteOrderRS extends UnifiedOrderRS {
 
-    /** 调起支付插件的支付宝订单号 **/
+    /** 调起支付插件的支付宝訂單号 **/
     private String alipayTradeNo;
 
     @Override

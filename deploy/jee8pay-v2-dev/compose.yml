@@ -129,7 +129,7 @@ services:
       dockerfile: Dockerfile.backend
       args:
         SERVICE_JAR: jeepay-payment.jar
-    image: jee8pay-v2-dev-payment:1f313e776d03
+    image: jee8pay-v2-dev-payment:de94ab8fd19d-e1c6762472
     environment:
       SPRING_CONFIG_IMPORT: configtree:/run/secrets/
       SPRING_DATA_REDIS_DATABASE: 3
@@ -179,7 +179,7 @@ services:
       dockerfile: Dockerfile.backend
       args:
         SERVICE_JAR: jeepay-manager.jar
-    image: jee8pay-v2-dev-manager:1f313e776d03
+    image: jee8pay-v2-dev-manager:de94ab8fd19d-b20899e885
     environment:
       SPRING_CONFIG_IMPORT: configtree:/run/secrets/
       SPRING_DATA_REDIS_DATABASE: 1
@@ -211,7 +211,7 @@ services:
       dockerfile: Dockerfile.backend
       args:
         SERVICE_JAR: jeepay-merchant.jar
-    image: jee8pay-v2-dev-merchant:1f313e776d03
+    image: jee8pay-v2-dev-merchant:de94ab8fd19d-b20899e885
     environment:
       SPRING_CONFIG_IMPORT: configtree:/run/secrets/
       SPRING_DATA_REDIS_DATABASE: 2
@@ -242,7 +242,7 @@ services:
       dockerfile: Dockerfile.ui
       args:
         UI_DIR: ui-cashier
-    image: jee8pay-v2-dev-cashier:1f313e776d03
+    image: jee8pay-v2-dev-cashier:de94ab8fd19d-b20899e885
     restart: unless-stopped
     environment:
       BACKEND_HOST: payment:9216
@@ -266,7 +266,7 @@ services:
       dockerfile: Dockerfile.ui
       args:
         UI_DIR: ui-manager
-    image: jee8pay-v2-dev-manager-ui:1f313e776d03
+    image: jee8pay-v2-dev-manager-ui:de94ab8fd19d-b20899e885
     restart: unless-stopped
     environment:
       BACKEND_HOST: manager:9217
@@ -290,7 +290,7 @@ services:
       dockerfile: Dockerfile.ui
       args:
         UI_DIR: ui-merchant
-    image: jee8pay-v2-dev-merchant-ui:1f313e776d03
+    image: jee8pay-v2-dev-merchant-ui:de94ab8fd19d-b20899e885
     restart: unless-stopped
     environment:
       BACKEND_HOST: merchant:9218

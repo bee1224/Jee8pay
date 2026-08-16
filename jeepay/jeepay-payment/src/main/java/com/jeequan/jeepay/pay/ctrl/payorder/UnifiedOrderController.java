@@ -47,12 +47,12 @@ public class UnifiedOrderController extends AbstractPayOrderController {
     @Autowired private ConfigContextQueryService configContextQueryService;
 
     /**
-     * 统一下单接口
+     * 统一下单介面
      * **/
     @PostMapping("/api/pay/unifiedOrder")
     public ApiRes unifiedOrder(){
 
-        //获取参数 & 验签
+        //獲取參數 & 簽章驗證
         UnifiedOrderRQ rq = getRQByWithMchSign(UnifiedOrderRQ.class);
 
         UnifiedOrderRQ bizRQ = buildBizRQ(rq);
@@ -65,11 +65,11 @@ public class UnifiedOrderController extends AbstractPayOrderController {
 
         UnifiedOrderRS bizRes = (UnifiedOrderRS)apiRes.getData();
 
-        //聚合接口，返回的参数
+        //聚合介面，返回的參數
         UnifiedOrderRS res = new UnifiedOrderRS();
         BeanUtils.copyProperties(bizRes, res);
 
-        //只有 订单生成（QR_CASHIER） || 支付中 || 支付成功返回该数据
+        //只有 訂單生成（QR_CASHIER） || 支付中 || 支付成功返回该数据
         if(bizRes.getOrderState() != null && (bizRes.getOrderState() == PayOrder.STATE_INIT || bizRes.getOrderState() == PayOrder.STATE_ING || bizRes.getOrderState() == PayOrder.STATE_SUCCESS) ){
             res.setPayDataType(bizRes.buildPayDataType());
             res.setPayData(bizRes.buildPayData());
@@ -98,7 +98,7 @@ public class UnifiedOrderController extends AbstractPayOrderController {
         }
 
         if(payWayService.count(PayWay.gw().eq(PayWay::getWayCode, wayCode)) <= 0){
-            throw new BizException("不支持的支付方式");
+            throw new BizException("不支援的支付方式");
         }
 
         //转换为 bizRQ

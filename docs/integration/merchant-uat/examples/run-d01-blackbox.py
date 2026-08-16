@@ -133,7 +133,7 @@ def assert_order_absent(name, mch_order_no):
     time.sleep(0.01)
     http_status, response = query_by("mchOrderNo", mch_order_no)
     assert http_status == 200, f"{name}: follow-up Query HTTP {http_status}"
-    assert_api_failure(name, response, "订单不存在")
+    assert_api_failure(name, response, "訂單不存在")
     log_result(name + "_NO_ORDER", http_status, response)
 
 
@@ -155,11 +155,19 @@ def main():
             key: data.get(key) for key in stable_keys
         }
 
+    stale = auth_payload(mchOrderNo=EXISTING_MCH_ORDER_NO)
+    stale["reqTime"] = "1577808000000"  # 2020-01-01，超出 5 分鐘 freshness 窗口
+    stale["sign"] = sign(stale)
+    http_status, response = request("/api/pay/query", stale)
+    assert http_status == 200
+    assert_api_failure("P0_STALE_REQTIME", response, "請求時間戳已過期")
+    log_result("P0_STALE_REQTIME", http_status, response)
+
     tampered = auth_payload(mchOrderNo=EXISTING_MCH_ORDER_NO)
     tampered["mchOrderNo"] = EXISTING_MCH_ORDER_NO + "-TAMPERED"
     http_status, response = request("/api/pay/query", tampered)
     assert http_status == 200
-    assert_api_failure("P0_TAMPERED_SIGNATURE", response, "验签失败")
+    assert_api_failure("P0_TAMPERED_SIGNATURE", response, "簽章驗證失敗")
     assert not response.get("data")
     log_result("P0_TAMPERED_SIGNATURE", http_status, response, "data=EMPTY")
 
@@ -169,7 +177,7 @@ def main():
     assert_api_failure(
         "P0_MISSING_QUERY_IDENTIFIERS",
         response,
-        "mchOrderNo 和 payOrderId不能同时为空",
+        "mchOrderNo 和 payOrderId 不能同時為空",
     )
     log_result("P0_MISSING_QUERY_IDENTIFIERS", http_status, response)
 
@@ -179,7 +187,7 @@ def main():
     assert_api_failure(
         "P0_DUPLICATE_CREATE",
         response,
-        f"商户订单[{EXISTING_MCH_ORDER_NO}]已存在",
+        f"商戶訂單[{EXISTING_MCH_ORDER_NO}]已存在",
     )
     assert not response.get("data")
     log_result("P0_DUPLICATE_CREATE", http_status, response, "data=EMPTY")
@@ -190,19 +198,19 @@ def main():
             "P1_INVALID_AMOUNT",
             f"BB-{stamp}-AMOUNT",
             {"amount": 4050},
-            "amount must be an exact whole TWD value",
+            "金額必須為整數 TWD 元",
         ),
         (
             "P1_INVALID_CURRENCY",
             f"BB-{stamp}-CURRENCY",
             {"currency": "USD"},
-            "CCAT ibon 仅支持 TWD",
+            "CCAT ibon 僅支援 TWD",
         ),
         (
             "P1_MALFORMED_CHANNEL_EXTRA",
             f"BB-{stamp}-MALFORMED",
             {"channelExtra": "{not-json"},
-            "CCAT channelExtra 格式错误",
+            "CCAT channelExtra 格式錯誤",
         ),
         (
             "P1_MISSING_PAYER_FIELD",
@@ -219,19 +227,19 @@ def main():
                     separators=(",", ":"),
                 )
             },
-            "CCAT channelExtra 缺少缴款人资料",
+            "CCAT channelExtra 缺少繳款人資料",
         ),
         (
             "P1_UNSUPPORTED_WAYCODE",
             f"BB-{stamp}-WAYCODE",
             {"wayCode": "ALI_JSAPI"},
-            "商户应用不支持该支付方式",
+            "商戶應用不支援該支付方式",
         ),
         (
             "P1_MISSING_SUBJECT",
             f"BB-{stamp}-SUBJECT",
-            {"subject": None, "body": None},
-            "商品标题不能为空",
+            {"subject": None},
+            "商品標題不能為空",
         ),
     ]
     for name, mch_order_no, overrides, expected_message in negative_cases:

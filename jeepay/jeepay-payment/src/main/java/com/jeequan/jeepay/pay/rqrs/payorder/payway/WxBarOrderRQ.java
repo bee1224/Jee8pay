@@ -31,8 +31,8 @@ import jakarta.validation.constraints.NotBlank;
 @Data
 public class WxBarOrderRQ extends UnifiedOrderRQ {
 
-    /** 用户 支付条码 **/
-    @NotBlank(message = "支付条码不能为空")
+    /** 用戶 支付条码 **/
+    @NotBlank(message = "支付条码不能為空")
     private String authCode;
 
     /** 构造函数 **/

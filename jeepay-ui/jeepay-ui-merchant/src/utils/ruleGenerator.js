@@ -34,6 +34,6 @@ export default {
   emall: { pattern: /^.+@.+(\.).+$/, message: '請輸入正確的郵箱' },
 
   date: { pattern: /^\d{4}-\d{2}-\d{2}$/, message: '請輸入正確的日期[yyyy-MM-dd]' },
-  dateOrForever: { pattern: /^长期|(\d{4}-\d{2}-\d{2})$/, message: '請輸入正確的日期[yyyy-MM-dd]或選擇長期有效' }
+  dateOrForever: { pattern: /^(長期|长期)|(\d{4}-\d{2}-\d{2})$/, message: '請輸入正確的日期[yyyy-MM-dd]或選擇長期有效' }
 
 }

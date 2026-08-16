@@ -46,7 +46,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
-* 发起分账请求
+* 发起分帳請求
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -62,45 +62,45 @@ public class PayOrderDivisionExecController extends ApiController {
     @Autowired private MchDivisionReceiverGroupService mchDivisionReceiverGroupService;
     @Autowired private PayOrderDivisionProcessService payOrderDivisionProcessService;
 
-    /** 分账执行 **/
+    /** 分帳执行 **/
     @PostMapping("/api/division/exec")
     public ApiRes exec(){
 
-        //获取参数 & 验签
+        //獲取參數 & 簽章驗證
         PayOrderDivisionExecRQ bizRQ = getRQByWithMchSign(PayOrderDivisionExecRQ.class);
 
         try {
 
             if(StringUtils.isAllEmpty(bizRQ.getMchOrderNo(), bizRQ.getPayOrderId())){
-                throw new BizException("mchOrderNo 和 payOrderId不能同时为空");
+                throw new BizException("mchOrderNo 和 payOrderId 不能同時為空");
             }
 
             PayOrder payOrder = payOrderService.queryMchOrder(bizRQ.getMchNo(), bizRQ.getPayOrderId(), bizRQ.getMchOrderNo());
             if(payOrder == null){
-                throw new BizException("订单不存在");
+                throw new BizException("訂單不存在");
             }
 
             if(payOrder.getState() != PayOrder.STATE_SUCCESS || payOrder.getDivisionState() != PayOrder.DIVISION_STATE_UNHAPPEN || payOrder.getDivisionMode() != PayOrder.DIVISION_MODE_MANUAL){
-                throw new BizException("当前订单状态不支持分账");
+                throw new BizException("當前訂單狀態不支援分帳");
             }
 
             List<PayOrderDivisionMQ.CustomerDivisionReceiver> receiverList = null;
 
-            //不使用默认分组， 需要转换每个账号信息
+            //不使用默认分组， 需要转换每个帳號資訊
             if(bizRQ.getUseSysAutoDivisionReceivers() != CS.YES && !StringUtils.isEmpty(bizRQ.getReceivers())){
                 receiverList = JSON.parseArray(bizRQ.getReceivers(), PayOrderDivisionMQ.CustomerDivisionReceiver.class);
             }
 
-            // 验证账号是否合法
+            // 验证帳號是否合法
             this.checkReceiverList(receiverList, payOrder.getIfCode(), bizRQ.getMchNo(), bizRQ.getAppId());
 
-            // 商户配置信息
+            // 商戶設定資訊
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(bizRQ.getMchNo(), bizRQ.getAppId());
             if(mchAppConfigContext == null){
-                throw new BizException("获取商户应用信息失败");
+                throw new BizException("獲取商戶應用資訊失敗");
             }
 
-            //处理分账请求
+            //處理分帳請求
             ChannelRetMsg channelRetMsg = payOrderDivisionProcessService.processPayOrderDivision(payOrder.getPayOrderId(), bizRQ.getUseSysAutoDivisionReceivers(), receiverList, false);
 
             PayOrderDivisionExecRS bizRS = new PayOrderDivisionExecRS();
@@ -124,12 +124,12 @@ public class PayOrderDivisionExecController extends ApiController {
             return ApiRes.customFail(e.getMessage());
 
         } catch (Exception e) {
-            log.error("系统异常：payOrderId={}", bizRQ.getPayOrderId(), e);
-            return ApiRes.customFail("系统异常");
+            log.error("系統異常：payOrderId={}", bizRQ.getPayOrderId(), e);
+            return ApiRes.customFail("系統異常");
         }
     }
 
-    /** 检验账号是否合法 **/
+    /** 检验帳號是否合法 **/
     private void checkReceiverList(List<PayOrderDivisionMQ.CustomerDivisionReceiver> receiverList, String ifCode, String mchNo, String appId){
 
         if(receiverList == null || receiverList.isEmpty()){
@@ -150,19 +150,19 @@ public class PayOrderDivisionExecController extends ApiController {
             }
 
             if(receiver.getReceiverId() == null && receiver.getReceiverGroupId() == null){
-                throw new BizException("分账用户组： receiverId 和 与receiverGroupId 必填一项");
+                throw new BizException("分帳用戶組：receiverId 與 receiverGroupId 必填一項");
             }
 
             if(receiver.getDivisionProfit() != null){
 
                 if(receiver.getDivisionProfit().compareTo(BigDecimal.ZERO) < 0){
-                    throw new BizException("分账用户receiverId=["+ ( receiver.getReceiverId() == null ? "": receiver.getReceiverId() ) +"]," +
-                            "receiverGroupId=["+ (receiver.getReceiverGroupId() == null ? "": receiver.getReceiverGroupId() ) +"] 分账比例不得小于0%");
+                    throw new BizException("分帳用戶 receiverId=["+ ( receiver.getReceiverId() == null ? "": receiver.getReceiverId() ) +"]," +
+                            "receiverGroupId=["+ (receiver.getReceiverGroupId() == null ? "": receiver.getReceiverGroupId() ) +"] 分帳比例不得小于0%");
                 }
 
                 if(receiver.getDivisionProfit().compareTo(BigDecimal.ONE) > 0){
-                    throw new BizException("分账用户receiverId=["+ ( receiver.getReceiverId() == null ? "": receiver.getReceiverId() ) +"]," +
-                            "receiverGroupId=["+ (receiver.getReceiverGroupId() == null ? "": receiver.getReceiverGroupId() ) +"] 分账比例不得高于100%");
+                    throw new BizException("分帳用戶 receiverId=["+ ( receiver.getReceiverId() == null ? "": receiver.getReceiverId() ) +"]," +
+                            "receiverGroupId=["+ (receiver.getReceiverGroupId() == null ? "": receiver.getReceiverGroupId() ) +"] 分帳比例不得高于100%");
                 }
             }
         }
@@ -179,7 +179,7 @@ public class PayOrderDivisionExecController extends ApiController {
             );
 
             if(receiverCount != receiverIdSet.size()){
-                throw new BizException("分账[用户]中包含不存在或渠道不可用账号，请更改");
+                throw new BizException("分帳[用戶]中包含不存在或渠道不可用帳號，請更改");
             }
         }
 
@@ -191,7 +191,7 @@ public class PayOrderDivisionExecController extends ApiController {
             );
 
             if(receiverGroupCount != receiverGroupIdSet.size()){
-                throw new BizException("分账[账号组]中包含不存在或不可用组，请更改");
+                throw new BizException("分帳[帳號組]中包含不存在或不可用組，請更改");
             }
         }
 

@@ -20,7 +20,7 @@ import lombok.Data;
 
 
 /*
-* 查询订单请求参数对象
+* 查询訂單請求參數对象
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -29,10 +29,10 @@ import lombok.Data;
 @Data
 public class QueryPayOrderRQ extends AbstractMchAppRQ {
 
-    /** 商户订单号 **/
+    /** 商戶訂單号 **/
     private String mchOrderNo;
 
-    /** 支付系统订单号 **/
+    /** 支付系統訂單号 **/
     private String payOrderId;
 
 }

@@ -21,7 +21,7 @@ import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
 /*
-* 查询转账订单 响应参数
+* 查询轉帳訂單 响应參數
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -31,37 +31,37 @@ import org.springframework.beans.BeanUtils;
 public class QueryTransferOrderRS extends AbstractRS {
 
     /**
-     * 转账订单号
+     * 轉帳訂單号
      */
     private String transferId;
 
     /**
-     * 商户号
+     * 商戶號
      */
     private String mchNo;
 
     /**
-     * 应用ID
+     * 應用ID
      */
     private String appId;
 
     /**
-     * 商户订单号
+     * 商戶訂單号
      */
     private String mchOrderNo;
 
     /**
-     * 支付接口代码
+     * 支付介面代码
      */
     private String ifCode;
 
     /**
-     * 入账方式： WX_CASH-微信零钱; ALIPAY_CASH-支付宝转账; BANK_CARD-银行卡
+     * 入账方式： WX_CASH-微信零钱; ALIPAY_CASH-支付宝轉帳; BANK_CARD-银行卡
      */
     private String entryType;
 
     /**
-     * 转账金额,单位分
+     * 轉帳金額,单位分
      */
     private Long amount;
 
@@ -71,7 +71,7 @@ public class QueryTransferOrderRS extends AbstractRS {
     private String currency;
 
     /**
-     * 收款账号
+     * 收款帳號
      */
     private String accountNo;
 
@@ -86,22 +86,22 @@ public class QueryTransferOrderRS extends AbstractRS {
     private String bankName;
 
     /**
-     * 转账备注信息
+     * 轉帳备注資訊
      */
     private String transferDesc;
 
     /**
-     * 支付状态: 0-订单生成, 1-转账中, 2-转账成功, 3-转账失败, 4-订单关闭
+     * 支付狀態: 0-訂單生成, 1-轉帳中, 2-轉帳成功, 3-轉帳失敗, 4-訂單關閉
      */
     private Byte state;
 
     /**
-     * 特定渠道发起额外参数
+     * 特定渠道发起额外參數
      */
     private String channelExtra;
 
     /**
-     * 渠道订单号
+     * 渠道訂單号
      */
     private String channelOrderNo;
 
@@ -109,22 +109,22 @@ public class QueryTransferOrderRS extends AbstractRS {
     private String channelResData;
 
     /**
-     * 渠道支付错误码
+     * 渠道支付錯誤码
      */
     private String errCode;
 
     /**
-     * 渠道支付错误描述
+     * 渠道支付錯誤描述
      */
     private String errMsg;
 
     /**
-     * 商户扩展参数
+     * 商戶扩展參數
      */
     private String extParam;
 
     /**
-     * 转账成功时间
+     * 轉帳成功时间
      */
     private Long successTime;
 

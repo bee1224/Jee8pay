@@ -21,7 +21,7 @@ import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import lombok.Data;
 
 /*
- * 关闭订单 响应参数
+ * 關閉訂單 响应參數
  *
  * @author xiaoyu
  * @site https://www.jeequan.com

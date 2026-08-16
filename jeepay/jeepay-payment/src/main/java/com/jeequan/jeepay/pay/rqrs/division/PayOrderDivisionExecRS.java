@@ -19,7 +19,7 @@ import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import lombok.Data;
 
 /**
-* 发起订单分账 响应参数
+* 发起訂單分帳 响应參數
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -29,22 +29,22 @@ import lombok.Data;
 public class PayOrderDivisionExecRS extends AbstractRS {
 
     /**
-     * 分账状态 1-分账成功, 2-分账失败
+     * 分帳狀態 1-分帳成功, 2-分帳失敗
      */
     private Byte state;
 
     /**
-     * 上游分账批次号
+     * 上游分帳批次号
      */
     private String channelBatchOrderId;
 
     /**
-     * 支付渠道错误码
+     * 支付渠道錯誤码
      */
     private String errCode;
 
     /**
-     * 支付渠道错误信息
+     * 支付渠道錯誤資訊
      */
     private String errMsg;
 

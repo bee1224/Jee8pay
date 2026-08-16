@@ -31,8 +31,8 @@ import jakarta.validation.constraints.NotBlank;
 @Data
 public class AliAppOrderRQ extends UnifiedOrderRQ {
 
-    /** 支付宝用户ID **/
-    @NotBlank(message = "用户ID不能为空")
+    /** 支付宝用戶ID **/
+    @NotBlank(message = "用戶ID不能為空")
     private String buyerUserId;
 
     /** 构造函数 **/

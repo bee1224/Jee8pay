@@ -20,7 +20,7 @@ import com.jeequan.jeepay.pay.rqrs.payorder.CommonPayDataRQ;
 import lombok.Data;
 
 /**
- * 支付方式 订单码
+ * 支付方式 訂單码
  *
  * @author zhangheming
  * @site https://www.jeequan.com

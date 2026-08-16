@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /*
-* 商户查单controller
+* 商戶查单controller
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -45,21 +45,21 @@ public class QueryOrderController extends ApiController {
     @Autowired private ConfigContextQueryService configContextQueryService;
 
     /**
-     * 查单接口
+     * 查单介面
      * **/
     @RequestMapping("/api/pay/query")
     public ApiRes queryOrder(){
 
-        //获取参数 & 验签
+        //獲取參數 & 簽章驗證
         QueryPayOrderRQ rq = getRQByWithMchSign(QueryPayOrderRQ.class);
 
         if(StringUtils.isAllEmpty(rq.getMchOrderNo(), rq.getPayOrderId())){
-            throw new BizException("mchOrderNo 和 payOrderId不能同时为空");
+            throw new BizException("mchOrderNo 和 payOrderId 不能同時為空");
         }
 
         PayOrder payOrder = payOrderService.queryMchOrder(rq.getMchNo(), rq.getPayOrderId(), rq.getMchOrderNo());
         if(payOrder == null){
-            throw new BizException("订单不存在");
+            throw new BizException("訂單不存在");
         }
 
         QueryPayOrderRS bizRes = QueryPayOrderRS.buildByPayOrder(payOrder);

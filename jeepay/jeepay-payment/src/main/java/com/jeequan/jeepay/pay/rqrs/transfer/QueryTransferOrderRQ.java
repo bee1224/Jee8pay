@@ -19,7 +19,7 @@ import com.jeequan.jeepay.pay.rqrs.AbstractMchAppRQ;
 import lombok.Data;
 
 /*
-* 查询转账单请求参数对象
+* 查询轉帳单請求參數对象
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -28,10 +28,10 @@ import lombok.Data;
 @Data
 public class QueryTransferOrderRQ extends AbstractMchAppRQ {
 
-    /** 商户转账单号 **/
+    /** 商戶轉帳单号 **/
     private String mchOrderNo;
 
-    /** 支付系统转账单号 **/
+    /** 支付系統轉帳单号 **/
     private String transferId;
 
 }

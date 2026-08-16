@@ -78,8 +78,8 @@ public class JeepayKit {
             sb.append(arrayToSort[i]);
         }
         String result = sb.toString();
+        log.info("signParams:{}", result); // 只記錄參數，不包含 key=<secret>（TD-009）
         result += "key=" + key;
-        log.info("signStr:{}", result);
         result = md5(result, encodingCharset).toUpperCase();
         log.info("sign:{}", result);
         return result;

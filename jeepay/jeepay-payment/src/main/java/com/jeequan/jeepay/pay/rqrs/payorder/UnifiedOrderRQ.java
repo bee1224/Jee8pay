@@ -30,8 +30,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /*
-* 创建订单请求参数对象
-* 聚合支付接口（统一下单）
+* 创建訂單請求參數对象
+* 聚合支付介面（统一下单）
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -40,51 +40,51 @@ import jakarta.validation.constraints.NotNull;
 @Data
 public class UnifiedOrderRQ extends AbstractMchAppRQ {
 
-    /** 商户订单号 **/
-    @NotBlank(message="商户订单号不能为空")
+    /** 商戶訂單号 **/
+    @NotBlank(message="商戶訂單号不能為空")
     private String mchOrderNo;
 
     /** 支付方式  如： wxpay_jsapi,alipay_wap等   **/
-    @NotBlank(message="支付方式不能为空")
+    @NotBlank(message="支付方式不能為空")
     private String wayCode;
 
-    /** 支付金额， 单位：分 **/
-    @NotNull(message="支付金额不能为空")
-    @Min(value = 1, message = "支付金额不能为空")
+    /** 支付金額， 单位：分 **/
+    @NotNull(message="支付金額不能為空")
+    @Min(value = 1, message = "支付金額不能為空")
     private Long amount;
 
     /** 货币代码 **/
-    @NotBlank(message="货币代码不能为空")
+    @NotBlank(message="货币代码不能為空")
     private String currency;
 
     /** 客户端IP地址 **/
     private String clientIp;
 
-    /** 商品标题 **/
-    @NotBlank(message="商品标题不能为空")
+    /** 商品標題 **/
+    @NotBlank(message="商品標題不能為空")
     private String subject;
 
-    /** 商品描述信息 **/
-    @NotBlank(message="商品描述信息不能为空")
+    /** 商品描述資訊 **/
+    @NotBlank(message="商品描述資訊不能為空")
     private String body;
 
-    /** 异步通知地址 **/
+    /** 異步通知地址 **/
     private String notifyUrl;
 
     /** 跳转通知地址 **/
     private String returnUrl;
 
-    /** 订单失效时间, 单位：秒 **/
+    /** 訂單失效时间, 单位：秒 **/
     private Integer expiredTime;
 
-    /** 特定渠道发起额外参数 **/
+    /** 特定渠道发起额外參數 **/
     private String channelExtra;
 
-    /** 商户扩展参数 **/
+    /** 商戶扩展參數 **/
     private String extParam;
 
-    /** 分账模式： 0-该笔订单不允许分账, 1-支付成功按配置自动完成分账, 2-商户手动分账(解冻商户金额) **/
-    @Range(min = 0, max = 2, message = "分账模式设置值有误")
+    /** 分帳模式： 0-该笔訂單不允许分帳, 1-支付成功按設定自动完成分帳, 2-商戶手动分帳(解冻商戶金額) **/
+    @Range(min = 0, max = 2, message = "分帳模式设置值有误")
     private Byte divisionMode;
 
     /** 返回真实的bizRQ **/
@@ -167,7 +167,7 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
         return this;
     }
 
-    /** 获取渠道用户ID **/
+    /** 獲取渠道用戶ID **/
     @JSONField(serialize = false)
     public String getChannelUserId(){
         return null;

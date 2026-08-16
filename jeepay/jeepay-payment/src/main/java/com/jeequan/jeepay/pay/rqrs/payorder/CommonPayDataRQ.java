@@ -27,7 +27,7 @@ import lombok.Data;
 @Data
 public class CommonPayDataRQ extends UnifiedOrderRQ {
 
-    /** 请求参数： 支付数据包类型 **/
+    /** 請求參數： 支付数据包类型 **/
     private String payDataType;
 
 }

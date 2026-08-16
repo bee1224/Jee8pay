@@ -32,7 +32,7 @@ import jakarta.validation.constraints.NotBlank;
 public class WxJsapiOrderRQ extends UnifiedOrderRQ {
 
     /** 微信openid **/
-    @NotBlank(message = "openid不能为空")
+    @NotBlank(message = "openid不能為空")
     private String openid;
 
     /** 标志是否为 subMchAppId的对应 openId， 0-否， 1-是， 默认否  **/

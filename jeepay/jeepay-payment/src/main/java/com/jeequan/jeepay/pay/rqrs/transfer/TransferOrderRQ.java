@@ -23,7 +23,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /*
-* 申请转账 请求参数
+* 申請轉帳 請求參數
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -32,29 +32,29 @@ import jakarta.validation.constraints.NotNull;
 @Data
 public class TransferOrderRQ extends AbstractMchAppRQ {
 
-    /** 商户订单号 **/
-    @NotBlank(message="商户订单号不能为空")
+    /** 商戶訂單号 **/
+    @NotBlank(message="商戶訂單号不能為空")
     private String mchOrderNo;
 
-    /** 支付接口代码   **/
-    @NotBlank(message="支付接口代码不能为空")
+    /** 支付介面代码   **/
+    @NotBlank(message="支付介面代码不能為空")
     private String ifCode;
 
     /** 入账方式  **/
-    @NotBlank(message="入账方式不能为空")
+    @NotBlank(message="入账方式不能為空")
     private String entryType;
 
-    /** 支付金额， 单位：分 **/
-    @NotNull(message="转账金额不能为空")
-    @Min(value = 1, message = "转账金额不能小于1分")
+    /** 支付金額， 单位：分 **/
+    @NotNull(message="轉帳金額不能為空")
+    @Min(value = 1, message = "轉帳金額不能小于1分")
     private Long amount;
 
     /** 货币代码 **/
-    @NotBlank(message="货币代码不能为空")
+    @NotBlank(message="货币代码不能為空")
     private String currency;
 
-    /** 收款账号 **/
-    @NotBlank(message="收款账号不能为空")
+    /** 收款帳號 **/
+    @NotBlank(message="收款帳號不能為空")
     private String accountNo;
 
     /** 收款人姓名 **/
@@ -66,17 +66,17 @@ public class TransferOrderRQ extends AbstractMchAppRQ {
     /** 客户端IP地址 **/
     private String clientIp;
 
-    /** 转账备注信息 **/
-    @NotBlank(message="转账备注信息不能为空")
+    /** 轉帳备注資訊 **/
+    @NotBlank(message="轉帳备注資訊不能為空")
     private String transferDesc;
 
-    /** 异步通知地址 **/
+    /** 異步通知地址 **/
     private String notifyUrl;
 
-    /** 特定渠道发起额外参数 **/
+    /** 特定渠道发起额外參數 **/
     private String channelExtra;
 
-    /** 商户扩展参数 **/
+    /** 商戶扩展參數 **/
     private String extParam;
 
 }

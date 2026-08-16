@@ -41,7 +41,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /*
-* 分账渠道侧的通知入口Controller
+* 分帳渠道侧的通知入口Controller
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -56,39 +56,39 @@ public class DivisionRecordChannelNotifyController extends AbstractCtrl {
     @Autowired private PayOrderProcessService payOrderProcessService;
 
 
-    /** 异步回调入口 **/
+    /** 異步回調入口 **/
     @ResponseBody
     @RequestMapping(value= {"/api/divisionRecordChannelNotify/{ifCode}"})
     public ResponseEntity doNotify(HttpServletRequest request, @PathVariable("ifCode") String ifCode){
 
         String divisionBatchId = null;
-        String logPrefix = "进入[" +ifCode+ "]分账回调";
+        String logPrefix = "进入[" +ifCode+ "]分帳回調";
         log.info("===== {} =====" , logPrefix);
 
         try {
 
-            // 参数有误
+            // 參數有误
             if(StringUtils.isEmpty(ifCode)){
                 return ResponseEntity.badRequest().body("ifCode is empty");
             }
 
-            //查询支付接口是否存在
+            //查询支付介面是否存在
             AbstractDivisionRecordChannelNotifyService divisionNotifyService = SpringBeansUtil.getBean(ifCode + "DivisionRecordChannelNotifyService", AbstractDivisionRecordChannelNotifyService.class);
 
-            // 支付通道接口实现不存在
+            // 支付通道介面实现不存在
             if(divisionNotifyService == null){
                 log.error("{}, interface not exists ", logPrefix);
                 return ResponseEntity.badRequest().body("[" + ifCode + "] interface not exists");
             }
 
-            // 解析批次号 和 请求参数
+            // 解析批次号 和 請求參數
             MutablePair<String, Object> mutablePair = divisionNotifyService.parseParams(request);
-            if(mutablePair == null){ // 解析数据失败， 响应已处理
+            if(mutablePair == null){ // 解析数据失敗， 响应已處理
                 log.error("{}, mutablePair is null ", logPrefix);
-                throw new BizException("解析数据异常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此异常。
+                throw new BizException("解析数据異常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此異常。
             }
 
-            //解析到订单号
+            //解析到訂單号
             divisionBatchId = mutablePair.left;
             log.info("{}, 解析数据为：divisionBatchId:{}, params:{}", logPrefix, divisionBatchId, mutablePair.getRight());
 
@@ -100,22 +100,22 @@ public class DivisionRecordChannelNotifyController extends AbstractCtrl {
                     .orderByAsc(PayOrderDivisionRecord::getRecordId)
             );
 
-            // 订单不存在
+            // 訂單不存在
             if(recordList == null || recordList.isEmpty()){
-                log.error("{}, 待处理订单不存在. divisionBatchId={} ", logPrefix, divisionBatchId);
+                log.error("{}, 待處理訂單不存在. divisionBatchId={} ", logPrefix, divisionBatchId);
                 return divisionNotifyService.doNotifyOrderNotExists(request);
             }
 
-            //查询出商户应用的配置信息
+            //查询出商戶應用的設定資訊
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(recordList.get(0).getMchNo(), recordList.get(0).getAppId());
 
-            //调起接口的回调判断
+            //调起介面的回調判断
             DivisionChannelNotifyModel notifyResult = divisionNotifyService.doNotify(request, mutablePair.getRight(), recordList, mchAppConfigContext);
 
-            // 返回null 表明出现异常， 无需处理通知下游等操作。
+            // 返回null 表明出现異常， 无需處理通知下游等操作。
             if(notifyResult == null || notifyResult.getApiRes() == null){
-                log.error("{}, 处理回调事件异常  notifyResult data error, notifyResult ={} ",logPrefix, notifyResult);
-                throw new BizException("处理回调事件异常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此异常。
+                log.error("{}, 處理回調事件異常  notifyResult data error, notifyResult ={} ",logPrefix, notifyResult);
+                throw new BizException("處理回調事件異常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此異常。
             }
 
             if(notifyResult.getRecordResultMap() != null && !notifyResult.getRecordResultMap().isEmpty()){
@@ -130,7 +130,7 @@ public class DivisionRecordChannelNotifyController extends AbstractCtrl {
 
                         payOrderDivisionRecordService.updateRecordSuccessOrFailBySingleItem(divisionId, PayOrderDivisionRecord.STATE_SUCCESS, retMsgItem.getChannelOriginResponse());
 
-                    } else if(ChannelRetMsg.ChannelState.CONFIRM_FAIL == retMsgItem.getChannelState()){ // 明确失败
+                    } else if(ChannelRetMsg.ChannelState.CONFIRM_FAIL == retMsgItem.getChannelState()){ // 明确失敗
 
                         payOrderDivisionRecordService.updateRecordSuccessOrFailBySingleItem(divisionId, PayOrderDivisionRecord.STATE_FAIL, StringUtils.defaultIfEmpty(retMsgItem.getChannelErrMsg(), retMsgItem.getChannelOriginResponse()));
                     }
@@ -151,7 +151,7 @@ public class DivisionRecordChannelNotifyController extends AbstractCtrl {
             return e.getResponseEntity();
 
         } catch (Exception e) {
-            log.error("{}, divisionBatchId={}, 系统异常", logPrefix, divisionBatchId, e);
+            log.error("{}, divisionBatchId={}, 系統異常", logPrefix, divisionBatchId, e);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

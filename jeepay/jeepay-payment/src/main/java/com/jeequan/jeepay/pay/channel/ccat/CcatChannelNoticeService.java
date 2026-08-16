@@ -277,7 +277,7 @@ public class CcatChannelNoticeService extends AbstractChannelNoticeService {
         private static String required(JSONObject body, String name) {
             Object value = body.get(name);
             if (value == null || StringUtils.isBlank(String.valueOf(value))) {
-                throw new IllegalArgumentException(name + " is required");
+                throw new IllegalArgumentException(name + " 為必填");
             }
             return String.valueOf(value);
         }

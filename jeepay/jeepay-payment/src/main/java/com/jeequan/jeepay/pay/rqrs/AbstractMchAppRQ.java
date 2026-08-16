@@ -30,12 +30,12 @@ import jakarta.validation.constraints.NotBlank;
 @Data
 public class AbstractMchAppRQ extends AbstractRQ {
 
-    /** 商户号 **/
-    @NotBlank(message="商户号不能为空")
+    /** 商戶號 **/
+    @NotBlank(message="商戶號不能為空")
     private String mchNo;
 
-    /** 商户应用ID **/
-    @NotBlank(message="商户应用ID不能为空")
+    /** 商戶應用ID **/
+    @NotBlank(message="商戶應用ID不能為空")
     private String appId;
 
 

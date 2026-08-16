@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
 
 /*
-* 渠道侧的退款通知入口Controller 【异步回调(doNotify) 】
+* 渠道侧的退款通知入口Controller 【異步回調(doNotify) 】
 *
 * @author jmdhappy
 * @site https://www.jeequan.com
@@ -54,77 +54,77 @@ public class ChannelRefundNoticeController extends AbstractCtrl {
     @Autowired private ConfigContextQueryService configContextQueryService;
     @Autowired private RefundOrderProcessService refundOrderProcessService;
 
-    /** 异步回调入口 **/
+    /** 異步回調入口 **/
     @ResponseBody
     @RequestMapping(value= {"/api/refund/notify/{ifCode}", "/api/refund/notify/{ifCode}/{refundOrderId}"})
     public ResponseEntity doNotify(HttpServletRequest request, @PathVariable("ifCode") String ifCode, @PathVariable(value = "refundOrderId", required = false) String urlOrderId){
 
         String refundOrderId = null;
-        String logPrefix = "进入[" +ifCode+ "]退款回调：urlOrderId：["+ StringUtils.defaultIfEmpty(urlOrderId, "") + "] ";
+        String logPrefix = "进入[" +ifCode+ "]退款回調：urlOrderId：["+ StringUtils.defaultIfEmpty(urlOrderId, "") + "] ";
         log.info("===== {} =====" , logPrefix);
 
         try {
 
-            // 参数有误
+            // 參數有误
             if(StringUtils.isEmpty(ifCode)){
                 return ResponseEntity.badRequest().body("ifCode is empty");
             }
 
-            //查询退款接口是否存在
+            //查询退款介面是否存在
             IChannelRefundNoticeService refundNotifyService = SpringBeansUtil.getBean(ifCode + "ChannelRefundNoticeService", IChannelRefundNoticeService.class);
 
-            // 支付通道接口实现不存在
+            // 支付通道介面实现不存在
             if(refundNotifyService == null){
                 log.error("{}, interface not exists ", logPrefix);
                 return ResponseEntity.badRequest().body("[" + ifCode + "] interface not exists");
             }
 
-            // 解析订单号 和 请求参数
+            // 解析訂單号 和 請求參數
             MutablePair<String, Object> mutablePair = refundNotifyService.parseParams(request, urlOrderId, IChannelRefundNoticeService.NoticeTypeEnum.DO_NOTIFY);
-            if(mutablePair == null){ // 解析数据失败， 响应已处理
+            if(mutablePair == null){ // 解析数据失敗， 响应已處理
                 log.error("{}, mutablePair is null ", logPrefix);
-                throw new BizException("解析数据异常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此异常。
+                throw new BizException("解析数据異常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此異常。
             }
 
-            // 解析到订单号
+            // 解析到訂單号
             refundOrderId = mutablePair.left;
             log.info("{}, 解析数据为：refundOrderId:{}, params:{}", logPrefix, refundOrderId, mutablePair.getRight());
 
             if(StringUtils.isNotEmpty(urlOrderId) && !urlOrderId.equals(refundOrderId)){
-                log.error("{}, 订单号不匹配. urlOrderId={}, refundOrderId={} ", logPrefix, urlOrderId, refundOrderId);
-                throw new BizException("退款单号不匹配！");
+                log.error("{}, 訂單号不匹配. urlOrderId={}, refundOrderId={} ", logPrefix, urlOrderId, refundOrderId);
+                throw new BizException("退款單號不匹配！");
             }
 
-            //获取订单号 和 订单数据
+            //獲取訂單号 和 訂單数据
             RefundOrder refundOrder = refundOrderService.getById(refundOrderId);
 
-            // 订单不存在
+            // 訂單不存在
             if(refundOrder == null){
-                log.error("{}, 退款订单不存在. refundOrder={} ", logPrefix, refundOrder);
+                log.error("{}, 退款訂單不存在. refundOrder={} ", logPrefix, refundOrder);
                 return refundNotifyService.doNotifyOrderNotExists(request);
             }
 
-            //查询出商户应用的配置信息
+            //查询出商戶應用的設定資訊
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(refundOrder.getMchNo(), refundOrder.getAppId());
 
-            //调起接口的回调判断
+            //调起介面的回調判断
             ChannelRetMsg notifyResult = refundNotifyService.doNotice(request, mutablePair.getRight(), refundOrder, mchAppConfigContext, IChannelRefundNoticeService.NoticeTypeEnum.DO_NOTIFY);
 
-            // 返回null 表明出现异常， 无需处理通知下游等操作。
+            // 返回null 表明出现異常， 无需處理通知下游等操作。
             if(notifyResult == null || notifyResult.getChannelState() == null || notifyResult.getResponseEntity() == null){
-                log.error("{}, 处理回调事件异常  notifyResult data error, notifyResult ={} ",logPrefix, notifyResult);
-                throw new BizException("处理回调事件异常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此异常。
+                log.error("{}, 處理回調事件異常  notifyResult data error, notifyResult ={} ",logPrefix, notifyResult);
+                throw new BizException("處理回調事件異常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此異常。
             }
-            // 处理退款订单
+            // 處理退款訂單
             boolean updateOrderSuccess = refundOrderProcessService.handleRefundOrder4Channel(notifyResult, refundOrder);
 
-            // 更新退款订单 异常
+            // 更新退款訂單 異常
             if(!updateOrderSuccess){
                 log.error("{}, updateOrderSuccess = {} ",logPrefix, updateOrderSuccess);
                 return refundNotifyService.doNotifyOrderStateUpdateFail(request);
             }
 
-            log.info("===== {}, 订单通知完成。 refundOrderId={}, parseState = {} =====", logPrefix, refundOrderId, notifyResult.getChannelState());
+            log.info("===== {}, 訂單通知完成。 refundOrderId={}, parseState = {} =====", logPrefix, refundOrderId, notifyResult.getChannelState());
 
             return notifyResult.getResponseEntity();
 
@@ -137,7 +137,7 @@ public class ChannelRefundNoticeController extends AbstractCtrl {
             return e.getResponseEntity();
 
         } catch (Exception e) {
-            log.error("{}, refundOrderId={}, 系统异常", logPrefix, refundOrderId, e);
+            log.error("{}, refundOrderId={}, 系統異常", logPrefix, refundOrderId, e);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

@@ -19,7 +19,7 @@ import com.jeequan.jeepay.pay.rqrs.AbstractMchAppRQ;
 import lombok.Data;
 
 /*
- * 关闭订单 请求参数对象
+ * 關閉訂單 請求參數对象
  *
  * @author xiaoyu
  * @site https://www.jeequan.com
@@ -28,10 +28,10 @@ import lombok.Data;
 @Data
 public class ClosePayOrderRQ extends AbstractMchAppRQ {
 
-    /** 商户订单号 **/
+    /** 商戶訂單号 **/
     private String mchOrderNo;
 
-    /** 支付系统订单号 **/
+    /** 支付系統訂單号 **/
     private String payOrderId;
 
 }

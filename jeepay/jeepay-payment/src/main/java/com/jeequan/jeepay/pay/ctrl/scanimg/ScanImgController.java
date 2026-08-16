@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/scan")
 public class ScanImgController extends AbstractPayOrderController {
 
-    /** 返回 图片地址信息  **/
+    /** 返回 图片地址資訊  **/
     @RequestMapping("/imgs/{aesStr}.png")
     public void qrImgs(@PathVariable("aesStr") String aesStr) throws Exception {
         String str = JeepayKit.aesDecode(aesStr);

@@ -21,7 +21,7 @@ import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
 /*
-* 退款订单 响应参数
+* 退款訂單 响应參數
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -30,28 +30,28 @@ import org.springframework.beans.BeanUtils;
 @Data
 public class RefundOrderRS extends AbstractRS {
 
-    /** 支付系统退款订单号 **/
+    /** 支付系統退款訂單号 **/
     private String refundOrderId;
 
-    /** 商户发起的退款订单号 **/
+    /** 商戶发起的退款訂單号 **/
     private String mchRefundNo;
 
-    /** 订单支付金额 **/
+    /** 訂單支付金額 **/
     private Long payAmount;
 
-    /** 申请退款金额 **/
+    /** 申請退款金額 **/
     private Long refundAmount;
 
-    /** 退款状态 **/
+    /** 退款狀態 **/
     private Byte state;
 
-    /** 渠道退款单号   **/
+    /** 渠道退款單號   **/
     private String channelOrderNo;
 
-    /** 渠道返回错误代码 **/
+    /** 渠道返回錯誤代码 **/
     private String errCode;
 
-    /** 渠道返回错误信息 **/
+    /** 渠道返回錯誤資訊 **/
     private String errMsg;
 
 

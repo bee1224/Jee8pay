@@ -30,7 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /*
-* api 抽象接口， 公共函数
+* api 抽象介面， 公共函数
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -42,7 +42,7 @@ public abstract class ApiController extends AbstractCtrl {
     @Autowired private ConfigContextQueryService configContextQueryService;
 
 
-    /** 获取请求参数并转换为对象，通用验证  **/
+    /** 獲取請求參數并转换为对象，通用验证  **/
     protected <T extends AbstractRQ> T getRQ(Class<T> cls){
 
         T bizRQ = getObject(cls);
@@ -54,52 +54,65 @@ public abstract class ApiController extends AbstractCtrl {
     }
 
 
-    /** 获取请求参数并转换为对象，商户通用验证  **/
+    /** 獲取請求參數并转换为对象，商戶通用验证  **/
     protected <T extends AbstractRQ> T getRQByWithMchSign(Class<T> cls){
 
-        //获取请求RQ, and 通用验证
+        //獲取請求RQ, and 通用验证
         T bizRQ = getRQ(cls);
 
         AbstractMchAppRQ abstractMchAppRQ = (AbstractMchAppRQ)bizRQ;
 
-        //业务校验， 包括： 验签， 商户状态是否可用， 是否支持该支付方式下单等。
+        //业务校验， 包括： 簽章驗證， 商戶狀態是否可用， 是否支持该支付方式下单等。
         String mchNo = abstractMchAppRQ.getMchNo();
         String appId = abstractMchAppRQ.getAppId();
         String sign = bizRQ.getSign();
 
         if(StringUtils.isAnyBlank(mchNo, appId, sign)){
-            throw new BizException("参数有误！");
+            throw new BizException("參數有誤！");
         }
 
         MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(mchNo, appId);
 
         if(mchAppConfigContext == null){
-            throw new BizException("商户或商户应用不存在");
+            throw new BizException("商戶或商戶應用不存在");
         }
 
         if(mchAppConfigContext.getMchInfo() == null || mchAppConfigContext.getMchInfo().getState() != CS.YES){
-            throw new BizException("商户信息不存在或商户状态不可用");
+            throw new BizException("商戶資訊不存在或商戶狀態不可用");
         }
 
         MchApp mchApp = mchAppConfigContext.getMchApp();
         if(mchApp == null || mchApp.getState() != CS.YES){
-            throw new BizException("商户应用不存在或应用状态不可用");
+            throw new BizException("商戶應用不存在或應用狀態不可用");
         }
 
         if(!mchApp.getMchNo().equals(mchNo)){
-            throw new BizException("参数appId与商户号不匹配");
+            throw new BizException("參數 appId 與商戶號不匹配");
         }
 
-        // 验签
+        // 簽章驗證
         String appSecret = mchApp.getAppSecret();
 
         // 转换为 JSON
         JSONObject bizReqJSON = (JSONObject)JSONObject.toJSON(bizRQ);
         bizReqJSON.remove("sign");
         if(!sign.equalsIgnoreCase(JeepayKit.getSign(bizReqJSON, appSecret))){
-             throw new BizException("验签失败");
+             throw new BizException("簽章驗證失敗");
+        }
+
+        // reqTime freshness（防 replay；窗口為 5 分鐘，與系統時間偏差超過即拒絕）
+        String reqTimeStr = bizRQ.getReqTime();
+        if(StringUtils.isNotEmpty(reqTimeStr) && StringUtils.isNumeric(reqTimeStr)){
+            long reqTime = Long.parseLong(reqTimeStr);
+            long diff = Math.abs(System.currentTimeMillis() - reqTime);
+            if(diff > REQTIME_FRESHNESS_MS){
+                throw new BizException("請求時間戳已過期");
+            }
         }
 
         return bizRQ;
     }
+
+    /** reqTime 新鮮度窗口：5 分鐘（ms） **/
+    private static final long REQTIME_FRESHNESS_MS = 5 * 60 * 1000L;
 }

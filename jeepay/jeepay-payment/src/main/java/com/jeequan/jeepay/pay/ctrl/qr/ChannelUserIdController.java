@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /*
-* 商户获取渠道用户ID接口
+* 商戶獲取渠道用戶ID介面
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -53,16 +53,16 @@ public class ChannelUserIdController extends AbstractPayOrderController {
     @RequestMapping("/jump")
     public void jump() throws Exception {
 
-        //获取请求数据
+        //獲取請求数据
         ChannelUserIdRQ rq = getRQByWithMchSign(ChannelUserIdRQ.class);
 
         String ifCode = "AUTO".equalsIgnoreCase(rq.getIfCode()) ? getIfCodeByUA() : rq.getIfCode();
 
-        // 获取接口
+        // 獲取介面
         IChannelUserService channelUserService = SpringBeansUtil.getBean(ifCode + "ChannelUserService", IChannelUserService.class);
 
         if(channelUserService == null){
-            throw new BizException("不支持的客户端");
+            throw new BizException("不支援的用戶端");
         }
 
         if(!StringKit.isAvailableUrl(rq.getRedirectUrl())){
@@ -76,10 +76,10 @@ public class ChannelUserIdController extends AbstractPayOrderController {
         jsonObject.put("ifCode", ifCode);
         jsonObject.put("redirectUrl", rq.getRedirectUrl());
 
-        //回调地址
+        //回調地址
         String callbackUrl = sysConfigService.getDBApplicationConfig().genMchChannelUserIdApiOauth2RedirectUrlEncode(jsonObject);
 
-        //获取商户配置信息
+        //獲取商戶設定資訊
         MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(rq.getMchNo(), rq.getAppId());
         String redirectUrl = channelUserService.buildUserRedirectUrl(callbackUrl, mchAppConfigContext);
         response.sendRedirect(redirectUrl);
@@ -87,7 +87,7 @@ public class ChannelUserIdController extends AbstractPayOrderController {
     }
 
 
-    /**  回调地址  **/
+    /**  回調地址  **/
     @RequestMapping("/oauth2Callback/{aesData}")
     public void oauth2Callback(@PathVariable("aesData") String aesData) throws Exception {
 
@@ -99,17 +99,17 @@ public class ChannelUserIdController extends AbstractPayOrderController {
         String extParam = callbackData.getString("extParam");
         String redirectUrl = callbackData.getString("redirectUrl");
 
-        // 获取接口
+        // 獲取介面
         IChannelUserService channelUserService = SpringBeansUtil.getBean(ifCode + "ChannelUserService", IChannelUserService.class);
 
         if(channelUserService == null){
-            throw new BizException("不支持的客户端");
+            throw new BizException("不支援的用戶端");
         }
 
-        //获取商户配置信息
+        //獲取商戶設定資訊
         MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(mchNo, appId);
 
-        //获取渠道用户ID
+        //獲取渠道用戶ID
         String channelUserId = channelUserService.getChannelUserId(getReqParamJSON(), mchAppConfigContext);
 
         //同步跳转
@@ -121,12 +121,12 @@ public class ChannelUserIdController extends AbstractPayOrderController {
     }
 
 
-    /** 根据UA获取支付接口 */
+    /** 根据UA獲取支付介面 */
     private String getIfCodeByUA() {
 
         String ua = request.getHeader("User-Agent");
 
-        // 无法识别扫码客户端
+        // 無法识别扫码客户端
         if (StringUtils.isBlank(ua)) {
             return null;
         }

@@ -21,7 +21,7 @@ import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 /*
-* 基础请求参数
+* 基础請求參數
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -30,20 +30,20 @@ import java.io.Serializable;
 @Data
 public abstract class AbstractRQ implements Serializable {
 
-    /** 版本号 **/
-    @NotBlank(message="版本号不能为空")
+    /** 版本號 **/
+    @NotBlank(message="版本號不能為空")
     protected String version;
 
-    /** 签名类型 **/
-    @NotBlank(message="签名类型不能为空")
+    /** 簽名类型 **/
+    @NotBlank(message="簽名类型不能為空")
     protected String signType;
 
-    /** 签名值 **/
-    @NotBlank(message="签名值不能为空")
+    /** 簽名值 **/
+    @NotBlank(message="簽名值不能為空")
     protected String sign;
 
-    /** 接口请求时间 **/
-    @NotBlank(message="时间戳不能为空")
+    /** 介面請求时间 **/
+    @NotBlank(message="時間戳不能為空")
     protected String reqTime;
 
 }

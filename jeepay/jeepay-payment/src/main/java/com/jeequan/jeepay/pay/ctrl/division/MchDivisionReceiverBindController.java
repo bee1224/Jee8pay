@@ -44,7 +44,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
-* 分账账号绑定
+* 分帳帳號绑定
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -59,50 +59,50 @@ public class MchDivisionReceiverBindController extends ApiController {
     @Autowired private MchDivisionReceiverService mchDivisionReceiverService;
     @Autowired private MchDivisionReceiverGroupService mchDivisionReceiverGroupService;
 
-    /** 分账账号绑定 **/
+    /** 分帳帳號绑定 **/
     @PostMapping("/api/division/receiver/bind")
     public ApiRes bind(){
 
-        //获取参数 & 验签
+        //獲取參數 & 簽章驗證
         DivisionReceiverBindRQ bizRQ = getRQByWithMchSign(DivisionReceiverBindRQ.class);
 
         try {
 
-            //检查商户应用是否存在该接口
+            //检查商戶應用是否存在该介面
             String ifCode = bizRQ.getIfCode();
 
 
-            // 商户配置信息
+            // 商戶設定資訊
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(bizRQ.getMchNo(), bizRQ.getAppId());
             if(mchAppConfigContext == null){
-                throw new BizException("获取商户应用信息失败");
+                throw new BizException("獲取商戶應用資訊失敗");
             }
 
             MchInfo mchInfo = mchAppConfigContext.getMchInfo();
 
             if(!payInterfaceConfigService.mchAppHasAvailableIfCode(bizRQ.getAppId(), ifCode)){
-                throw new BizException("商户应用的支付配置不存在或已关闭");
+                throw new BizException("商戶應用的支付設定不存在或已關閉");
             }
 
             MchDivisionReceiverGroup group = mchDivisionReceiverGroupService.findByIdAndMchNo(bizRQ.getReceiverGroupId(), bizRQ.getMchNo());
             if(group == null){
-                throw new BizException("商户分账账号组不存在，请检查或进入商户平台进行创建操作");
+                throw new BizException("商戶分帳帳號组不存在，請檢查或进入商戶平台进行创建操作");
             }
 
             BigDecimal divisionProfit = new BigDecimal(bizRQ.getDivisionProfit());
             if(divisionProfit.compareTo(BigDecimal.ZERO) <= 0  || divisionProfit.compareTo(BigDecimal.ONE) > 1){
-                throw new BizException("账号分账比例有误, 配置值为[0.0001~1.0000]");
+                throw new BizException("帳號分帳比例有误, 設定值为[0.0001~1.0000]");
             }
 
 
-            //生成数据库对象信息 （数据不完成， 暂时不可入库操作）
+            //生成数据库对象資訊 （数据不完成， 暂时不可入库操作）
             MchDivisionReceiver receiver = genRecord(bizRQ, group, mchInfo, divisionProfit);
 
-            //调起上游接口
+            //调起上游介面
 
             IDivisionService divisionService = SpringBeansUtil.getBean(ifCode + "DivisionService", IDivisionService.class);
             if(divisionService == null){
-                throw new BizException("系统不支持该分账接口");
+                throw new BizException("系統不支援該分帳介面");
             }
 
 
@@ -137,8 +137,8 @@ public class MchDivisionReceiverBindController extends ApiController {
             return ApiRes.customFail(e.getMessage());
 
         } catch (Exception e) {
-            log.error("系统异常：{}", e);
-            return ApiRes.customFail("系统异常");
+            log.error("系統異常：{}", e);
+            return ApiRes.customFail("系統異常");
         }
     }
 
@@ -148,13 +148,13 @@ public class MchDivisionReceiverBindController extends ApiController {
         receiver.setReceiverAlias(StringUtils.defaultIfEmpty(bizRQ.getReceiverAlias(), bizRQ.getAccNo())); //别名
         receiver.setReceiverGroupId(bizRQ.getReceiverGroupId()); //分组ID
         receiver.setReceiverGroupName(group.getReceiverGroupName()); //组名称
-        receiver.setMchNo(bizRQ.getMchNo()); //商户号
+        receiver.setMchNo(bizRQ.getMchNo()); //商戶號
         receiver.setIsvNo(mchInfo.getIsvNo()); //isvNo
         receiver.setAppId(bizRQ.getAppId()); //appId
-        receiver.setIfCode(bizRQ.getIfCode()); //接口代码
-        receiver.setAccType(bizRQ.getAccType()); //账号类型
-        receiver.setAccNo(bizRQ.getAccNo()); //账号
-        receiver.setAccName(bizRQ.getAccName()); //账号名称
+        receiver.setIfCode(bizRQ.getIfCode()); //介面代码
+        receiver.setAccType(bizRQ.getAccType()); //帳號类型
+        receiver.setAccNo(bizRQ.getAccNo()); //帳號
+        receiver.setAccName(bizRQ.getAccName()); //帳號名称
         receiver.setRelationType(bizRQ.getRelationType()); //关系
 
         receiver.setRelationTypeName(getRelationTypeName(bizRQ.getRelationType())); //关系名称
@@ -163,8 +163,8 @@ public class MchDivisionReceiverBindController extends ApiController {
             receiver.setRelationTypeName(bizRQ.getRelationTypeName());
         }
 
-        receiver.setDivisionProfit(divisionProfit); //分账比例
-        receiver.setChannelExtInfo(bizRQ.getChannelExtInfo()); //渠道信息
+        receiver.setDivisionProfit(divisionProfit); //分帳比例
+        receiver.setChannelExtInfo(bizRQ.getChannelExtInfo()); //渠道資訊
 
         return receiver;
     }
@@ -174,7 +174,7 @@ public class MchDivisionReceiverBindController extends ApiController {
         if("PARTNER".equals(relationType)){
             return "合作伙伴";
         }else if("SERVICE_PROVIDER".equals(relationType)){
-            return "服务商";
+            return "服務商";
         }else if("STORE".equals(relationType)){
             return "门店";
         }else if("STAFF".equals(relationType)){
@@ -188,7 +188,7 @@ public class MchDivisionReceiverBindController extends ApiController {
         }else if("DISTRIBUTOR".equals(relationType)){
             return "分销商";
         }else if("USER".equals(relationType)){
-            return "用户";
+            return "用戶";
         }else if("SUPPLIER".equals(relationType)){
             return "供应商";
         }

@@ -74,7 +74,7 @@ public class CcatClient {
         if (CcatNormalMchParams.ENVIRONMENT_PRODUCTION.equals(environment)) {
             return PRODUCTION_BASE_URL;
         }
-        throw new CcatException(ErrorType.CONFIGURATION, "CCAT environment must be TEST or PRODUCTION");
+        throw new CcatException(ErrorType.CONFIGURATION, "CCAT 環境必須為 TEST 或 PRODUCTION");
     }
 
     private CollectResponse collect(CcatNormalMchParams params, JSONObject payload) throws CcatException {
@@ -179,7 +179,7 @@ public class CcatClient {
 
     private static CcatNormalMchParams requireConfig(CcatNormalMchParams params) throws CcatException {
         if (params == null || StringUtils.isAnyBlank(params.getEnvironment(), params.getCustId(), params.getApiPassword())) {
-            throw new CcatException(ErrorType.CONFIGURATION, "CCAT merchant configuration is incomplete");
+            throw new CcatException(ErrorType.CONFIGURATION, "CCAT 商戶設定不完整");
         }
         resolveBaseUrl(params.getEnvironment());
         return params;

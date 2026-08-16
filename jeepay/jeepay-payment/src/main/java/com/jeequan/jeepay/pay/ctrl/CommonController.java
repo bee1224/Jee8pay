@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.io.IOException;
 
 /*
-* 通用处理
+* 通用處理
 *
 * @author jmdhappy
 * @site https://www.jeequan.com

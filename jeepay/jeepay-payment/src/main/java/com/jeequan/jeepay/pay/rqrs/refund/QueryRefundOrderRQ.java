@@ -19,7 +19,7 @@ import com.jeequan.jeepay.pay.rqrs.AbstractMchAppRQ;
 import lombok.Data;
 
 /*
-* 查询退款单请求参数对象
+* 查询退款单請求參數对象
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -28,10 +28,10 @@ import lombok.Data;
 @Data
 public class QueryRefundOrderRQ extends AbstractMchAppRQ {
 
-    /** 商户退款单号 **/
+    /** 商戶退款單號 **/
     private String mchRefundNo;
 
-    /** 支付系统退款订单号 **/
+    /** 支付系統退款訂單号 **/
     private String refundOrderId;
 
 }

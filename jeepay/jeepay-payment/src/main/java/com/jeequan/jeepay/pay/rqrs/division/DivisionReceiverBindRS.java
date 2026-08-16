@@ -23,7 +23,7 @@ import org.springframework.beans.BeanUtils;
 import java.math.BigDecimal;
 
 /*
-* 绑定账户 响应参数
+* 绑定帳戶 响应參數
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -34,52 +34,52 @@ public class DivisionReceiverBindRS extends AbstractRS {
 
 
     /**
-     * 分账接收者ID
+     * 分帳接收者ID
      */
     private Long receiverId;
 
     /**
-     * 接收者账号别名
+     * 接收者帳號别名
      */
     private String receiverAlias;
 
     /**
-     * 组ID（便于商户接口使用）
+     * 组ID（便于商戶介面使用）
      */
     private Long receiverGroupId;
 
     /**
-     * 商户号
+     * 商戶號
      */
     private String mchNo;
 
     /**
-     * 应用ID
+     * 應用ID
      */
     private String appId;
 
     /**
-     * 支付接口代码
+     * 支付介面代码
      */
     private String ifCode;
 
     /**
-     * 分账接收账号类型: 0-个人(对私) 1-商户(对公)
+     * 分帳接收帳號类型: 0-个人(对私) 1-商戶(对公)
      */
     private Byte accType;
 
     /**
-     * 分账接收账号
+     * 分帳接收帳號
      */
     private String accNo;
 
     /**
-     * 分账接收账号名称
+     * 分帳接收帳號名称
      */
     private String accName;
 
     /**
-     * 分账关系类型（参考微信）， 如： SERVICE_PROVIDER 服务商等
+     * 分帳关系类型（参考微信）， 如： SERVICE_PROVIDER 服務商等
      */
     private String relationType;
 
@@ -90,7 +90,7 @@ public class DivisionReceiverBindRS extends AbstractRS {
 
 
     /**
-     * 渠道特殊信息
+     * 渠道特殊資訊
      */
     private String channelExtInfo;
 
@@ -100,22 +100,22 @@ public class DivisionReceiverBindRS extends AbstractRS {
     private Long bindSuccessTime;
 
     /**
-     * 分账比例
+     * 分帳比例
      */
     private BigDecimal divisionProfit;
 
     /**
-     * 分账状态 1-绑定成功, 0-绑定异常
+     * 分帳狀態 1-绑定成功, 0-绑定異常
      */
     private Byte bindState;
 
     /**
-     * 支付渠道错误码
+     * 支付渠道錯誤码
      */
     private String errCode;
 
     /**
-     * 支付渠道错误信息
+     * 支付渠道錯誤資訊
      */
     private String errMsg;
 

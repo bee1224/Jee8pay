@@ -44,7 +44,7 @@ public class CcatPayOrderQueryService implements IPayOrderQueryService {
         if (!"OK".equals(response.getString("status"))) {
             String message = response.getString("msg");
             throw new CcatException(ErrorType.BUSINESS,
-                    StringUtils.defaultIfBlank(message, "CCAT Query rejected request"));
+                    StringUtils.defaultIfBlank(message, "CCAT Query 請求被拒絕"));
         }
 
         try {
@@ -70,7 +70,7 @@ public class CcatPayOrderQueryService implements IPayOrderQueryService {
             long billAmount = CcatKit.parseWholeTwd(response.get("bill_amount"), "bill_amount", false);
             String processCode = response.getString("process_code");
             if (StringUtils.isBlank(processCode)) {
-                throw new IllegalArgumentException("process_code is required");
+                throw new IllegalArgumentException("process_code 為必填");
             }
             ChannelRetMsg.ChannelState state = CcatKit.mapProcessCode(processCode);
 
@@ -115,7 +115,7 @@ public class CcatPayOrderQueryService implements IPayOrderQueryService {
             } else if (state == ChannelRetMsg.ChannelState.WAITING) {
                 result = ChannelRetMsg.waiting();
             } else {
-                result = ChannelRetMsg.unknown("CCAT process_code has no safe transition");
+                result = ChannelRetMsg.unknown("CCAT process_code 無安全轉態");
             }
             result.setChannelOriginResponse(sanitizedResponse());
             return result;

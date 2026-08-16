@@ -27,7 +27,7 @@ public class CcatPaymentService extends AbstractPaymentService {
     @Override
     public String preCheck(UnifiedOrderRQ bizRQ, PayOrder payOrder) {
         IPaymentService payway = PaywayUtil.getRealPaywayService(this, payOrder.getWayCode());
-        return payway == null ? "CCAT 不支持该支付方式" : payway.preCheck(bizRQ, payOrder);
+        return payway == null ? "CCAT 不支援該支付方式" : payway.preCheck(bizRQ, payOrder);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class CcatPaymentService extends AbstractPaymentService {
             throws Exception {
         IPaymentService payway = PaywayUtil.getRealPaywayService(this, payOrder.getWayCode());
         if (payway == null) {
-            throw new IllegalArgumentException("CCAT payway is unavailable");
+            throw new IllegalArgumentException("CCAT 支付方式不可用");
         }
         return payway.pay(bizRQ, payOrder, mchAppConfigContext);
     }

@@ -22,7 +22,7 @@ public class CcatMchParamsResolver {
 
     public CcatNormalMchParams resolve(MchAppConfigContext context) throws CcatException {
         if (context == null || StringUtils.isAnyBlank(context.getMchNo(), context.getAppId())) {
-            throw configurationError("CCAT merchant binding is missing");
+            throw configurationError("CCAT 商戶綁定缺失");
         }
 
         final NormalMchParams nativeParams;
@@ -30,15 +30,15 @@ public class CcatMchParamsResolver {
             nativeParams = configContextQueryService.queryNormalMchParams(
                     context.getMchNo(), context.getAppId(), CS.IF_CODE.CCAT);
         } catch (RuntimeException e) {
-            throw new CcatException(ErrorType.CONFIGURATION, "CCAT merchant configuration is malformed", e);
+            throw new CcatException(ErrorType.CONFIGURATION, "CCAT 商戶設定格式錯誤", e);
         }
         if (!(nativeParams instanceof CcatNormalMchParams)) {
-            throw configurationError("CCAT merchant configuration is missing");
+            throw configurationError("CCAT 商戶設定缺失");
         }
 
         CcatNormalMchParams params = (CcatNormalMchParams) nativeParams;
         if (StringUtils.isAnyBlank(params.getEnvironment(), params.getCustId(), params.getApiPassword())) {
-            throw configurationError("CCAT merchant configuration is incomplete");
+            throw configurationError("CCAT 商戶設定不完整");
         }
         CcatClient.resolveBaseUrl(params.getEnvironment());
         return params;

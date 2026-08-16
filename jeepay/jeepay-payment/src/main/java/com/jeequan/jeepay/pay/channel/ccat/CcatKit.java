@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-/** CCAT boundary 的金额、状态与 checksum 纯函数。 */
+/** CCAT boundary 的金額、狀態与 checksum 纯函数。 */
 public final class CcatKit {
 
     private static final Pattern WHOLE_TWD = Pattern.compile("[0-9]+");
@@ -21,25 +21,25 @@ public final class CcatKit {
 
     public static long toCcatTwdAmount(long jeepayAmount) {
         if (jeepayAmount <= 0) {
-            throw new IllegalArgumentException("amount must be positive");
+            throw new IllegalArgumentException("金額必須大於 0");
         }
         if (jeepayAmount % 100 != 0) {
-            throw new IllegalArgumentException("amount must be an exact whole TWD value");
+            throw new IllegalArgumentException("金額必須為整數 TWD 元");
         }
         return jeepayAmount / 100;
     }
 
     public static long parseWholeTwd(Object value, String field, boolean allowZero) {
         if (value == null) {
-            throw new IllegalArgumentException(field + " is required");
+            throw new IllegalArgumentException(field + " 為必填");
         }
         String raw = String.valueOf(value);
         if (!WHOLE_TWD.matcher(raw).matches()) {
-            throw new IllegalArgumentException(field + " must be a scale-zero integer");
+            throw new IllegalArgumentException(field + " 必須為零位小數整數");
         }
         BigInteger parsed = new BigInteger(raw);
         if (parsed.compareTo(LONG_MAX) > 0 || (!allowZero && parsed.signum() == 0)) {
-            throw new IllegalArgumentException(field + " is out of range");
+            throw new IllegalArgumentException(field + " 超出範圍");
         }
         return parsed.longValueExact();
     }

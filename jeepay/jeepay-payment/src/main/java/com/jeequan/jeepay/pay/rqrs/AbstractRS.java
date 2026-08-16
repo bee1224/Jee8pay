@@ -21,7 +21,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /*
-* 接口抽象RS对象, 本身无需实例化
+* 介面抽象RS对象, 本身无需实例化
 *
 * @author terrfly
 * @site https://www.jeequan.com

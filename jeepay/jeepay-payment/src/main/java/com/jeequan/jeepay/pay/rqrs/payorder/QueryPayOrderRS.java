@@ -21,7 +21,7 @@ import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
 /*
-*  查询订单 响应参数
+*  查询訂單 响应參數
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -31,27 +31,27 @@ import org.springframework.beans.BeanUtils;
 public class QueryPayOrderRS extends AbstractRS {
 
     /**
-     * 支付订单号
+     * 支付訂單号
      */
     private String payOrderId;
 
     /**
-     * 商户号
+     * 商戶號
      */
     private String mchNo;
 
     /**
-     * 商户应用ID
+     * 商戶應用ID
      */
     private String appId;
 
     /**
-     * 商户订单号
+     * 商戶訂單号
      */
     private String mchOrderNo;
 
     /**
-     * 支付接口代码
+     * 支付介面代码
      */
     private String ifCode;
 
@@ -61,7 +61,7 @@ public class QueryPayOrderRS extends AbstractRS {
     private String wayCode;
 
     /**
-     * 支付金额,单位分
+     * 支付金額,单位分
      */
     private Long amount;
 
@@ -71,7 +71,7 @@ public class QueryPayOrderRS extends AbstractRS {
     private String currency;
 
     /**
-     * 支付状态: 0-订单生成, 1-支付中, 2-支付成功, 3-支付失败, 4-已撤销, 5-已退款, 6-订单关闭
+     * 支付狀態: 0-訂單生成, 1-支付中, 2-支付成功, 3-支付失敗, 4-已撤销, 5-已退款, 6-訂單關閉
      */
     private Byte state;
 
@@ -81,37 +81,37 @@ public class QueryPayOrderRS extends AbstractRS {
     private String clientIp;
 
     /**
-     * 商品标题
+     * 商品標題
      */
     private String subject;
 
     /**
-     * 商品描述信息
+     * 商品描述資訊
      */
     private String body;
 
     /**
-     * 渠道订单号
+     * 渠道訂單号
      */
     private String channelOrderNo;
 
     /**
-     * 渠道支付错误码
+     * 渠道支付錯誤码
      */
     private String errCode;
 
     /**
-     * 渠道支付错误描述
+     * 渠道支付錯誤描述
      */
     private String errMsg;
 
     /**
-     * 商户扩展参数
+     * 商戶扩展參數
      */
     private String extParam;
 
     /**
-     * 订单支付成功时间
+     * 訂單支付成功时间
      */
     private Long successTime;
 

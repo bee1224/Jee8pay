@@ -21,7 +21,7 @@ import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
 /*
-* 创建订单(统一订单) 响应参数
+* 创建訂單(统一訂單) 响应參數
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -31,17 +31,17 @@ import org.springframework.beans.BeanUtils;
 public class TransferOrderRS extends AbstractRS {
 
 
-    /** 转账单号 **/
+    /** 轉帳单号 **/
     private String transferId;
 
-    /** 商户单号 **/
+    /** 商戶单号 **/
     private String mchOrderNo;
 
-    /** 转账金额 **/
+    /** 轉帳金額 **/
     private Long amount;
 
     /**
-     * 收款账号
+     * 收款帳號
      */
     private String accountNo;
 
@@ -55,19 +55,19 @@ public class TransferOrderRS extends AbstractRS {
      */
     private String bankName;
 
-    /** 状态 **/
+    /** 狀態 **/
     private Byte state;
 
-    /** 渠道退款单号   **/
+    /** 渠道退款單號   **/
     private String channelOrderNo;
 
     /** 渠道响应数据（如微信确认数据包）   **/
     private String channelResData;
 
-    /** 渠道返回错误代码 **/
+    /** 渠道返回錯誤代码 **/
     private String errCode;
 
-    /** 渠道返回错误信息 **/
+    /** 渠道返回錯誤資訊 **/
     private String errMsg;
 
     public static TransferOrderRS buildByRecord(TransferOrder record){

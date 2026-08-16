@@ -23,7 +23,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /*
-* 创建退款订单请求参数对象
+* 创建退款訂單請求參數对象
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -32,39 +32,39 @@ import jakarta.validation.constraints.NotNull;
 @Data
 public class RefundOrderRQ extends AbstractMchAppRQ {
 
-    /** 商户订单号 **/
+    /** 商戶訂單号 **/
     private String mchOrderNo;
 
-    /** 支付系统订单号 **/
+    /** 支付系統訂單号 **/
     private String payOrderId;
 
-    /** 商户系统生成的退款单号   **/
-    @NotBlank(message="商户退款单号不能为空")
+    /** 商戶系統生成的退款單號   **/
+    @NotBlank(message="商戶退款單號不能為空")
     private String mchRefundNo;
 
-    /** 退款金额， 单位：分 **/
-    @NotNull(message="退款金额不能为空")
-    @Min(value = 1, message = "退款金额请大于1分")
+    /** 退款金額， 单位：分 **/
+    @NotNull(message="退款金額不能為空")
+    @Min(value = 1, message = "退款金額請大于1分")
     private Long refundAmount;
 
     /** 货币代码 **/
-    @NotBlank(message="货币代码不能为空")
+    @NotBlank(message="货币代码不能為空")
     private String currency;
 
     /** 退款原因 **/
-    @NotBlank(message="退款原因不能为空")
+    @NotBlank(message="退款原因不能為空")
     private String refundReason;
 
     /** 客户端IP地址 **/
     private String clientIp;
 
-    /** 异步通知地址 **/
+    /** 異步通知地址 **/
     private String notifyUrl;
 
-    /** 特定渠道发起额外参数 **/
+    /** 特定渠道发起额外參數 **/
     private String channelExtra;
 
-    /** 商户扩展参数 **/
+    /** 商戶扩展參數 **/
     private String extParam;
 
 }

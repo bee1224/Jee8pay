@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
-* 商户转账单查询controller
+* 商戶轉帳单查询controller
 *
 * @author terrfly
 * @site https://www.jeequan.com
@@ -44,21 +44,21 @@ public class QueryTransferOrderController extends ApiController {
     @Autowired private ConfigContextQueryService configContextQueryService;
 
     /**
-     * 查单接口
+     * 查单介面
      * **/
     @RequestMapping("/api/transfer/query")
     public ApiRes queryTransferOrder(){
 
-        //获取参数 & 验签
+        //獲取參數 & 簽章驗證
         QueryTransferOrderRQ rq = getRQByWithMchSign(QueryTransferOrderRQ.class);
 
         if(StringUtils.isAllEmpty(rq.getMchOrderNo(), rq.getTransferId())){
-            throw new BizException("mchOrderNo 和 transferId不能同时为空");
+            throw new BizException("mchOrderNo 和 transferId 不能同時為空");
         }
 
         TransferOrder refundOrder = transferOrderService.queryMchOrder(rq.getMchNo(), rq.getMchOrderNo(), rq.getTransferId());
         if(refundOrder == null){
-            throw new BizException("订单不存在");
+            throw new BizException("訂單不存在");
         }
 
         QueryTransferOrderRS bizRes = QueryTransferOrderRS.buildByRecord(refundOrder);
