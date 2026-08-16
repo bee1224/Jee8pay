@@ -6,7 +6,7 @@
           <div class="table-layer">
             <a-range-picker
               v-model:value="vdata.date"
-              class="table-head-layout"
+              class="table-head-layout range-picker-full"
               :show-time="{ format: 'HH:mm:ss' }"
               format="YYYY-MM-DD HH:mm:ss"
               :disabled-date="disabledDate"
@@ -114,10 +114,6 @@
             <b>{{ (record.currency || 'TWD').toUpperCase() }} {{ record.amount / 100 }}</b>
           </template>
           <!-- 自定义插槽 -->
-          <template v-if="column.key === 'refundAmount'">
-            {{ (record.currency || 'TWD').toUpperCase() }} {{ record.refundAmount / 100 }}
-          </template>
-          <!-- 自定义插槽 -->
           <template v-if="column.key === 'state'">
             <a-tag
               :key="record.state"
@@ -152,13 +148,6 @@
               }}
             </a-tag>
           </template>
-          <template v-if="column.key === 'divisionState'">
-            <span v-if="record.divisionState == 0">-</span>
-            <a-tag v-else-if="record.divisionState == 1" color="orange">待分帳</a-tag>
-            <a-tag v-else-if="record.divisionState == 2" color="red">分帳處理中</a-tag>
-            <a-tag v-else-if="record.divisionState == 3" color="green">任務已結束</a-tag>
-            <span v-else>未知</span>
-          </template>
           <template v-if="column.key === 'notifyState'">
             <a-badge
               :status="record.notifyState === 1 ? 'processing' : 'error'"
@@ -168,10 +157,10 @@
           <template v-if="column.key === 'orderNo'">
             <div class="order-list">
               <p>
-                <span style="color: #729ed5; background: #e7f5f7">支付</span>{{ record.payOrderId }}
+                <span class="order-label" style="color: #729ed5; background: #e7f5f7">支付</span>{{ record.payOrderId }}
               </p>
               <p>
-                <span style="color: #56cf56; background: #d8eadf">商戶</span><a-tooltip
+                <span class="order-label" style="color: #56cf56; background: #d8eadf">商戶</span><a-tooltip
                   v-if="record.mchOrderNo.length > record.payOrderId.length"
                   placement="bottom"
                   style="font-weight: normal"
@@ -181,7 +170,7 @@
                   </template>{{ changeStr2ellipsis(record.mchOrderNo, record.payOrderId.length) }}</a-tooltip><span v-else style="font-weight: normal">{{ record.mchOrderNo }}</span>
               </p>
               <p v-if="record.channelOrderNo">
-                <span style="color: #fff; background: #e09c4d">渠道</span><a-tooltip
+                <span class="order-label" style="color: #fff; background: #e09c4d">渠道</span><a-tooltip
                   v-if="record.channelOrderNo.length > record.payOrderId.length"
                   placement="bottom"
                   style="font-weight: normal"
@@ -206,7 +195,8 @@
                 v-if="$access('ENT_PAY_ORDER_REFUND')"
                 v-show="record.state === 2 && record.refundState !== 2"
                 type="link"
-                style="color: red"
+                :style="REFUND_CAPABLE ? 'color: red' : ''"
+                :disabled="!REFUND_CAPABLE"
                 @click="openFunc(record, record.payOrderId)"
               >
                 退款
@@ -584,6 +574,10 @@ import { reactive, ref, getCurrentInstance, onMounted, watch } from 'vue'
 
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
+// CCAT 目前尚無退款能力（Provider capability 未包含退款）：
+// 退款按鈕先「停用但保留顯示」，避免誤導可操作；待退款功能上線後改為 true 即可恢復。
+const REFUND_CAPABLE = false
+
 // eslint-disable-next-line no-unused-vars
 const tableColumns = [
   {
@@ -593,12 +587,6 @@ const tableColumns = [
     width: 108,
     fixed: 'left',
     scopedSlots: { customRender: 'amountSlot' },
-  },
-  {
-    key: 'refundAmount',
-    title: '退款金額',
-    width: 108,
-    scopedSlots: { customRender: 'refundAmountSlot' },
   },
   {
     key: 'mchFeeAmount',
@@ -618,13 +606,7 @@ const tableColumns = [
     scopedSlots: { customRender: 'notifySlot' },
     width: 100,
   },
-  {
-    key: 'divisionState',
-    title: '分帳狀態',
-    scopedSlots: { customRender: 'divisionStateSlot' },
-    width: 100,
-  },
-  { key: 'createdAt', dataIndex: 'createdAt', title: '建立日期', width: 120 },
+  { key: 'createdAt', dataIndex: 'createdAt', title: '建立日期', width: 170 },
   {
     key: 'op',
     title: '操作',
@@ -714,6 +696,10 @@ function changeStr2ellipsis(orderNo, baseLength) {
 }
 </script>
 <style lang="less" scoped>
+/* 建立時間區間選取器：放寬以完整顯示起訖時間 */
+.range-picker-full {
+  max-width: 480px;
+}
 .order-list {
   -webkit-text-size-adjust: none;
   font-size: 12px;
@@ -723,7 +709,7 @@ function changeStr2ellipsis(orderNo, baseLength) {
   p {
     white-space: nowrap;
     margin: 5px 0;
-    span {
+    .order-label {
       display: inline-block;
       font-weight: 800;
       height: 16px;

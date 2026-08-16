@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node ../scripts/add-entry-preload.mjs dist",
     "serve": "vite preview"
   },
   "dependencies": {
