@@ -132,8 +132,8 @@ def render(source: Path, origin_mode: str, query_exception: str) -> str:
     add_header Referrer-Policy no-referrer always;
 
     location = /api/pay/unifiedOrder {{
-      allow 34.92.245.74;
-      allow 34.92.52.162;
+      # 白名單由 host cron 依 allowlist.json 產生（/etc/nginx/allowlist/uat.conf），儲存後約 1 分鐘內自動套用
+      include /etc/nginx/allowlist/uat.conf;
       deny all;
       limit_except POST {{ deny all; }}
       proxy_http_version 1.1;
@@ -150,8 +150,8 @@ def render(source: Path, origin_mode: str, query_exception: str) -> str:
     }}
 
     location = /api/pay/query {{
-      allow 34.92.245.74;
-      allow 34.92.52.162;
+      # 白名單由 host cron 依 allowlist.json 產生（/etc/nginx/allowlist/uat.conf），儲存後約 1 分鐘內自動套用
+      include /etc/nginx/allowlist/uat.conf;
 {query_allow}      deny all;
       limit_except POST {{ deny all; }}
       proxy_http_version 1.1;

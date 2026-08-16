@@ -4,8 +4,8 @@ set -euo pipefail
 readonly edge=nnviopp-sandbox-edge
 readonly expected_host=server1.nnviopp.com
 readonly sandbox_ip=159.198.40.128
-readonly expected_config_sha=4de9702422d8090fef6d26e446ccdec55c55c1bc2d402178d6710e3149e84748
-readonly expected_overlay_sha=6ba37f3fb1221b804acb8a7d2d270d4b90b87570101cb1d8b70d76c20542f236
+readonly expected_config_sha=67bedd649546d54eb6337f205c5b5edb8e7dd9f1910105e726cddbdc1a2bc915
+readonly expected_overlay_sha=4e583abf4253e69daef8aa8c0dd7f612d669595528ff081330ef8b6c4eec5a9b
 readonly final_config=/opt/jee8pay-v2-dev/merchant-uat/nginx.proposed.conf
 readonly overlay=/opt/jee8pay-v2-dev/public-callback/compose.edge-overlay.yaml
 readonly v1_dir=/opt/payment/payment-service-sandbox
@@ -38,9 +38,13 @@ fail() {
 [[ $(grep -Fc 'location = /api/pay/unifiedOrder {' "$final_config") -eq 1 ]] || fail CREATE_ROUTE
 [[ $(grep -Fc 'location = /api/pay/query {' "$final_config") -eq 1 ]] || fail QUERY_ROUTE
 [[ $(grep -Fc 'location = /api/pay/notify/ccat {' "$final_config") -eq 1 ]] || fail CALLBACK_ROUTE
-[[ $(grep -Fc 'allow 34.92.245.74;' "$final_config") -eq 2 ]] || fail ALLOWLIST_PRIMARY
-[[ $(grep -Fc 'allow 34.92.52.162;' "$final_config") -eq 2 ]] || fail ALLOWLIST_SECONDARY
+# 白名單改為 include：主設定檔不再內嵌 allow，allow 檔由 host cron 依 allowlist.json 產生
+[[ $(grep -Fc 'include /etc/nginx/allowlist/uat.conf;' "$final_config") -eq 2 ]] || fail ALLOWLIST_INCLUDE
 ! grep -Fq '35.220.239.87' "$final_config" || fail PRODUCTION_IP_PRESENT
+# allow 檔內容：Talend 兩台測試機必須存在（系統保留）
+[[ -f /opt/jee8pay-v2-dev/edge-allowlist/uat.conf ]] || fail ALLOWLIST_FILE_MISSING
+[[ $(grep -Fc 'allow 34.92.245.74;' /opt/jee8pay-v2-dev/edge-allowlist/uat.conf) -eq 1 ]] || fail ALLOWLIST_PRIMARY
+[[ $(grep -Fc 'allow 34.92.52.162;' /opt/jee8pay-v2-dev/edge-allowlist/uat.conf) -eq 1 ]] || fail ALLOWLIST_SECONDARY
 
 [[ $(docker network inspect "$transit_network" --format '{{.Name}}|{{.Internal}}') == "$transit_network|true" ]] ||
   fail TRANSIT_NETWORK

@@ -86,6 +86,8 @@ export const API_URL_MCH_NOTIFY_LIST = '/api/mchNotify'
 export const API_URL_SYS_LOG = 'api/sysLog'
 /** 系统配置 **/
 export const API_URL_SYS_CONFIG = 'api/sysConfigs'
+/** UAT Edge 白名單（Jee8pay 自助設定） **/
+export const API_URL_UAT_EDGE_ALLOWLIST = '/api/uatEdge/allowlist'
 /** 首页统计 **/
 export const API_URL_MAIN_STATISTIC = 'api/mainChart'
 

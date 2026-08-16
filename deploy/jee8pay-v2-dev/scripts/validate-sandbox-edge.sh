@@ -4,8 +4,8 @@ set -euo pipefail
 readonly edge=nnviopp-sandbox-edge
 readonly expected_host=server1.nnviopp.com
 readonly sandbox_ip=159.198.40.128
-readonly expected_config_sha=88f89d370c65b936ce0997e2088e2c6f71c11fdab338cd6ba21058c7274191dc
-readonly expected_overlay_sha=6ba37f3fb1221b804acb8a7d2d270d4b90b87570101cb1d8b70d76c20542f236
+readonly expected_config_sha=67bedd649546d54eb6337f205c5b5edb8e7dd9f1910105e726cddbdc1a2bc915
+readonly expected_overlay_sha=4e583abf4253e69daef8aa8c0dd7f612d669595528ff081330ef8b6c4eec5a9b
 readonly final_config=/opt/jee8pay-v2-dev/merchant-uat/nginx.proposed.conf
 readonly overlay=/opt/jee8pay-v2-dev/public-callback/compose.edge-overlay.yaml
 readonly evidence_dir=/opt/jee8pay-v2-dev/state/n01
@@ -33,6 +33,13 @@ edge_state=$(docker inspect "$edge" --format '{{.State.Status}}|{{.State.Health.
 [[ $(stat -c '%u:%g:%a' "$overlay") == '0:0:600' ]] || fail OVERLAY_OWNER_MODE
 [[ $(docker inspect "$edge" --format '{{range .Mounts}}{{if eq .Destination "/etc/nginx/nginx.conf"}}{{.Source}}|{{.RW}}{{end}}{{end}}') == "$final_config|false" ]] ||
   fail CONFIG_MOUNT
+# allowlist 掛載 + 內容（Talend 兩台測試機必須存在）
+[[ $(docker inspect "$edge" --format '{{range .Mounts}}{{if eq .Destination "/etc/nginx/allowlist"}}{{.Source}}|{{.RW}}{{end}}{{end}}') == '/opt/jee8pay-v2-dev/edge-allowlist|false' ]] ||
+  fail ALLOWLIST_MOUNT
+[[ $(docker exec "$edge" grep -Fc 'allow 34.92.245.74;' /etc/nginx/allowlist/uat.conf) -eq 1 ]] ||
+  fail ALLOWLIST_PRIMARY
+[[ $(docker exec "$edge" grep -Fc 'allow 34.92.52.162;' /etc/nginx/allowlist/uat.conf) -eq 1 ]] ||
+  fail ALLOWLIST_SECONDARY
 
 compose_files=$(docker inspect "$edge" --format '{{index .Config.Labels "com.docker.compose.project.config_files"}}')
 [[ $compose_files == *"$overlay"* ]] || fail COMPOSE_PROVENANCE
