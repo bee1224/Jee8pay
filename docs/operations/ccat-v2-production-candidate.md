@@ -192,7 +192,7 @@ V1（Go `payment-service` 四方聚合支付）與 V2（JeePay Java）是兩套�
 | V1 containers（api/admin/mysql/egress proxies） | 已停止；`docker compose -p lp33ing-production down` 已全清；DB 封存於 `state/v1-payment-production-20260823-055935.sql` |
 | `jee8pay-v2-production-edge` | V2 compose 管理（nginx:alpine, 162.0.233.203:80/443）；admin-v2/api-v2/ccat-v2 路由正常 |
 | jay/chi credentials 綁定 | 已完成（populate secret + db rows） |
-| 正式付款 APN 全流程 | pilot 已到 Create 出單（`P2091285666526339074`）；真實付款 + APN + Merchant Notify 未驗證 |
+| 正式付款 APN 全流程 | pilot 已到 Create 出單（`P2091285666526339074`）；真實付款 + APN + Merchant Notify 未驗證。注意：pilot Create 只提供一個 `notifyUrl`（Provider APN URL `ccat-v2.lp33ing.com/api/pay/notify/ryo`），JeePay 會同時把它存為 `payOrder.notifyUrl`（Merchant 異步通知地址）並用 `paySiteUrl` 建構 Provider APN 目標 — 正式 Merchant 串接時**必須自行提供** merchant `notifyUrl`，否則付款後 Merchant Notify 會打到 Provider APN 路徑而被拒絕 |
 | NewebPay | V2 deferred（`docs/providers/README.md`）；V1 曾 Sandbox verified，若業務需要須在 V2 另建 adapter |
 | 代付（payout）/ 結算模型 | V2 fail-closed（`無此轉帳通道介面`）；需業務決策是否在 V2 實作 |
 | host reboot 後 V2 復原 | 未測（debt D1-D4） |
