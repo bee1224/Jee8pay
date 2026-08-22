@@ -4,9 +4,10 @@
 
 > **V1 RETIREMENT（2026-08-23）**：V2 Production 已完成公開 edge 切換並退役 V1（`payment-service` 四方聚合支付）。現況：
 > - 公開 edge（`lp33ing-production-edge`）已改為**純 V2 edge**：移除 V1 的 `api.lp33ing.com` / `admin.lp33ing.com` server blocks，保留 `admin-v2` / `api-v2`，新增 `ccat-v2.lp33ing.com` callback 三條路由（`/api/pay/notify/ryo|jay|chi` → `callback-ingress:8080` → payment）。
-> - DNS：新增 `ccat-v2.lp33ing.com` A record（162.0.233.203, proxied=false, TTL 300）；cert SAN 更新為 5 域名（admin-v2/admin/api-v2/api/ccat-v2）。
+> - DNS：新增 `ccat-v2.lp33ing.com` A record（162.0.233.203, proxied=false, TTL 300）；**已刪除 V1 的 `api` / `admin` / `pilot-callback` records**（backup: `state/dns-before-v1-remove-20260823-060846.json`）；cert SAN 已收斂為 3 個 V2 域名（admin-v2/api-v2/ccat-v2）。
 > - V1 容器已停止：`payment-api`、`payment-admin`、`mysql`、`callback-egress-proxy`、`ccat-egress-proxy`（edge 保留為 V2 入口）。V1 DB（`payment_production`）已封存於 `/opt/jee8pay-v2-production/state/v1-payment-production-20260823-055935.sql`。
 > - RYO pilot：正式環境 `P2091285666526339074`（TWD 40, RYO_IBON）Create 成功，回傳 ibon paymentCode `CCAT624203770661`（expire 2026-08-30）。
+> - **edge 收編**：`deploy/jee8pay-v2-production/compose.yml` 已加入 `edge` service 定義（nginx:alpine, 162.0.233.203:80/443, config/edge-nginx.conf）作為 canonical；現行 running 容器 `lp33ing-production-edge` 仍由 V1 compose 管理但內容純 V2，待正式接管（停 V1 edge → `docker compose -p jee8pay-v2-production up -d edge`）。
 > - **仍未完成**：`jay` / `chi` provider credentials 綁定（Human Gate，需 operator 互動 TTY 執行 `populate-v2-jay-secret` / `populate-v2-chi-secret`）；正式付款 APN 全流程（pilot 已到出單，未付款）。
 > - 完整 V1 retirement gap 分析見下文「V1 retirement gap」。
 
