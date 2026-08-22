@@ -317,24 +317,19 @@ services:
 
   # V2 公開 edge：取代 V1（lp33ing-production）compose 管理的 edge。
   # 2026-08-23 已將 V1 edge 改造成純 V2（config/edge-nginx.conf）並由本定義作為 canonical。
-  # 現行 running 容器 lp33ing-production-edge 仍由 V1 compose 管理；本 service 定義目標狀態，
-  # 待正式接管時：停 V1 edge → `docker compose -p jee8pay-v2-production up -d edge`。
-  # 注意：port 綁定 162.0.233.203:80/443 會與 V1 edge 衝突，接管需先停 V1 edge。
+  # nginx:alpine 以 root 啟動、worker 為 nginx(101)；tmpfs 需 uid=101 供 cache 寫入。
   edge:
     image: nginx:alpine
     restart: unless-stopped
     container_name: jee8pay-v2-production-edge
-    read_only: true
     security_opt:
       - no-new-privileges:true
-    cap_drop:
-      - ALL
     pids_limit: 64
     cpus: 0.25
     mem_limit: 128m
     tmpfs:
-      - /tmp:rw,noexec,nosuid,size=16m,uid=10002,gid=10002,mode=0770
-      - /var/cache/nginx:rw,noexec,nosuid,size=16m,uid=10002,gid=10002,mode=0770
+      - /tmp:rw,noexec,nosuid,size=16m,uid=101,gid=101,mode=0770
+      - /var/cache/nginx:rw,noexec,nosuid,size=16m,uid=101,gid=101,mode=0770
     volumes:
       - /etc/lp33ing-production/edge-tls:/etc/nginx/tls:ro
       - ./config/edge-nginx.conf:/etc/nginx/nginx.conf:ro
