@@ -178,3 +178,5 @@ Merchant 應回 `HTTP 200`、`Content-Type: text/plain`、body `SUCCESS`（大�
 - UAT 的 Talend 產生器可換成正式環境變數重複使用：
   `docs/integration/merchant-uat/examples/talend-request-gen.py`（`--way-code RYO_IBON|JAY_IBON|CHI_IBON`）。
 - 簽名向量與驗證：`docs/integration/merchant-uat/examples/verify_vectors.py`（演算法驗證用；正式值請以正式憑證重算）。
+- **正式啟用檢查清單**（operator 動作導向，含 notifyUrl 注意事項、白名單、pilot 付款、營運驗證與 deferred 決策）：
+  [`production-go-live-checklist.md`](production-go-live-checklist.md)
