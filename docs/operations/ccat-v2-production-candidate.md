@@ -2,6 +2,14 @@
 
 > **RENAME NOTE（2026-08-20）**：本文記錄 Production Candidate 的歷史部署狀態。JeePay Provider 已由 `ccat` 改名為 `ryo`（`CCAT_IBON` → `RYO_IBON`），並新增 `jay` / `chi`；重新部署後 callback 路徑為 `/api/pay/notify/ryo`、`/api/pay/notify/jay`、`/api/pay/notify/chi`，secret intake 腳本為 `populate-v2-ryo-secret`（及 `populate-v2-jay-secret` / `populate-v2-chi-secret`）。文中 `ccat-v2.lp33ing.com` 域名保留為歷史命名。
 
+> **V1 RETIREMENT（2026-08-23）**：V2 Production 已完成公開 edge 切換並退役 V1（`payment-service` 四方聚合支付）。現況：
+> - 公開 edge（`lp33ing-production-edge`）已改為**純 V2 edge**：移除 V1 的 `api.lp33ing.com` / `admin.lp33ing.com` server blocks，保留 `admin-v2` / `api-v2`，新增 `ccat-v2.lp33ing.com` callback 三條路由（`/api/pay/notify/ryo|jay|chi` → `callback-ingress:8080` → payment）。
+> - DNS：新增 `ccat-v2.lp33ing.com` A record（162.0.233.203, proxied=false, TTL 300）；cert SAN 更新為 5 域名（admin-v2/admin/api-v2/api/ccat-v2）。
+> - V1 容器已停止：`payment-api`、`payment-admin`、`mysql`、`callback-egress-proxy`、`ccat-egress-proxy`（edge 保留為 V2 入口）。V1 DB（`payment_production`）已封存於 `/opt/jee8pay-v2-production/state/v1-payment-production-20260823-055935.sql`。
+> - RYO pilot：正式環境 `P2091285666526339074`（TWD 40, RYO_IBON）Create 成功，回傳 ibon paymentCode `CCAT624203770661`（expire 2026-08-30）。
+> - **仍未完成**：`jay` / `chi` provider credentials 綁定（Human Gate，需 operator 互動 TTY 執行 `populate-v2-jay-secret` / `populate-v2-chi-secret`）；正式付款 APN 全流程（pilot 已到出單，未付款）。
+> - 完整 V1 retirement gap 分析見下文「V1 retirement gap」。
+
 ## Current binding
 
 JEE-E04 binds source `654df8b6b1ed01b03612e8dff204ae146730261c` to
@@ -172,3 +180,20 @@ sudo -E docker compose -p jee8pay-v2-production down
 Removing those volumes is a separate destructive V2-only action and is not
 part of routine rollback. V1 needs no restart, database restore or route
 restore because E04 never changed them.
+
+## V1 retirement gap（2026-08-23 盤點）
+
+V1（Go `payment-service` 四方聚合支付）與 V2（JeePay Java）是兩套獨立平台。2026-08-23 完成 edge 切換與 V1 容器退役後，剩餘事項：
+
+| 項目 | 狀態 |
+| --- | --- |
+| V1 公開入口（api/admin.lp33ing.com） | 已關閉（edge 移除 server blocks，回 000） |
+| V1 containers（api/admin/mysql/egress proxies） | 已停止；DB 封存於 `state/v1-payment-production-20260823-055935.sql` |
+| `lp33ing-production-edge` | 保留，已改造為純 V2 edge（admin-v2/api-v2/ccat-v2） |
+| jay/chi credentials 綁定 | Human Gate：需 operator 互動 TTY 執行 `populate-v2-jay-secret` / `populate-v2-chi-secret`，再建立 `t_pay_interface_config` row（`APP_D01_EXTERNAL_UAT`，info_type=3） |
+| 正式付款 APN 全流程 | pilot 已到 Create 出單（`P2091285666526339074`）；真實付款 + APN + Merchant Notify 未驗證 |
+| NewebPay | V2 deferred（`docs/providers/README.md`）；V1 曾 Sandbox verified，若業務需要須在 V2 另建 adapter |
+| 代付（payout）/ 結算模型 | V2 fail-closed（`無此轉帳通道介面`）；需業務決策是否在 V2 實作 |
+| host reboot 後 V2 復原 | 未測（debt D1-D4） |
+| V1 edge 後續 | 建議後續正式把 edge 收編為 V2-owned（目前由 V1 compose 管理但內容純 V2）；移除 V1 DNS records（api/admin/pilot-callback） |
+
