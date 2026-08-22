@@ -9,10 +9,10 @@
 | Base URL | `https://api-v2-dev.nnviopp.com` |
 | Merchant ID (`mchNo`) | `M_D01_EXTERNAL_UAT` |
 | App ID (`appId`) | `APP_D01_EXTERNAL_UAT` |
-| Channel code (`wayCode`) | `CCAT_IBON` |
+| Channel code (`wayCode`) | `RYO_IBON`（另可選 `JAY_IBON`、`CHI_IBON`，皆為黑貓 PAY ibon 上游） |
 | Currency | `TWD` |
 
-這是外部 Merchant UAT 平台，但 `CCAT_IBON` 連接真實 Production payment provider。成功 Create 可能產生真實 ibon 訂單；請只提交已獲測試授權的金額與筆數。外部系統只串接本文件的 JeePay V2 API，不串接 CCAT，也不需要任何 CCAT credential。
+這是外部 Merchant UAT 平台，但這三個 `*_IBON` 通道都連接真實 Production payment provider。成功 Create 可能產生真實 ibon 訂單；請只提交已獲測試授權的金額與筆數。外部系統只串接本文件的 JeePay V2 API，不串接黑貓 PAY，也不需要任何黑貓 PAY upstream credential。
 
 UAT ingress 只允許 `34.92.245.74`、`34.92.52.162`（Talend 測試機，系統保留）與授權的內部測試 IP（由營運平台「系統管理 → UAT Edge 白名單」自助管理，儲存後約 1 分鐘自動套用；見 `docs/operations/platform-access.md`）。`35.220.239.87` 只記錄為未來 Production allowlist，本 UAT 未啟用。
 
@@ -26,7 +26,7 @@ App ID      = APP_D01_EXTERNAL_UAT
 App Secret  = 【敏感：請從 secure handoff 取得】
 ```
 
-Merchant ID／App ID／App Secret 是「外部 Merchant → JeePay」的 downstream credential。CCAT custId、API password、Token 等 upstream credential 不會也不應提供給外部系統商。
+Merchant ID／App ID／App Secret 是「外部 Merchant → JeePay」的 downstream credential。黑貓 PAY 的 custId、API password、Token 等 upstream credential 不會也不應提供給外部系統商。
 
 ## C. Authentication and signing
 
@@ -42,7 +42,7 @@ Merchant ID／App ID／App Secret 是「外部 Merchant → JeePay」的 downstr
 
 `reqTime` 是必填且參與簽名的字串，值為目前 Unix epoch milliseconds。Runtime 對 reqTime 有 **5 分鐘 freshness 窗口**：與系統時間偏差超過 5 分鐘會回「請求時間戳已過期」（`ApiController` 的 `REQTIME_FRESHNESS_MS`）；非數字 reqTime 不檢查 freshness，但仍參與簽名。不存在 nonce 欄位。MD5 shared-secret signature 是既有 native contract，不是新設計；所有呼叫必須使用 HTTPS，且不可記錄含 App Secret 的 canonical string。
 
-Synthetic Create vector：[`examples/create-vector.json`](examples/create-vector.json)。執行：
+`RYO_IBON` Synthetic Create vector：[`examples/create-vector.json`](examples/create-vector.json)。執行：
 
 ```bash
 python3 docs/integration/merchant-uat/examples/verify_vectors.py
@@ -64,21 +64,21 @@ CONTENT-TYPE = application/json; charset=UTF-8
 | `mchNo` | string | 必填，secure handoff 的 Merchant ID |
 | `appId` | string | 必填，secure handoff 的 App ID |
 | `mchOrderNo` | string | 必填；同一 Merchant 必須唯一，重複會回「商戶訂單已存在」 |
-| `wayCode` | string | 必填，固定 `CCAT_IBON` |
-| `amount` | integer | 必填，JeePay amount units；`1 TWD = 100 JeePay amount units`；CCAT_IBON 另要求可整除 100 |
+| `wayCode` | string | 必填，黑貓 PAY ibon 上游擇一：`RYO_IBON` / `JAY_IBON` / `CHI_IBON`（三者契約相同，僅上游帳號不同） |
+| `amount` | integer | 必填，JeePay amount units；`1 TWD = 100 JeePay amount units`；三個 `*_IBON` 通道皆要求可整除 100 |
 | `currency` | string | 必填，固定 uppercase `TWD` |
 | `subject` | string | 必填，商品／訂單標題 |
 | `body` | string | 必填，商品／訂單描述 |
 | `notifyUrl` | string | UAT flow 必填；外部可接收的 HTTPS callback URL |
-| `returnUrl` | string | 選填；CCAT_IBON direct API flow 不依賴此欄位 |
+| `returnUrl` | string | 選填；direct API flow 不依賴此欄位 |
 | `clientIp` | string | 選填；省略時使用 ingress 傳入的 caller IP |
 | `expiredTime` | integer | 選填，從建立時間起算的秒數；省略時 native default 為 2 小時 |
-| `channelExtra` | JSON string | `CCAT_IBON` 必填，內容見下表 |
+| `channelExtra` | JSON string | 必填，內容見下表 |
 | `extParam` | string | 選填；原樣帶入 Query／Notify |
 | `divisionMode` | integer | 本產品不使用，請省略 |
 | `sign` | string | 必填，依上節計算 |
 
-`amount` 的 JSON type 必須是 integer，金額換算是 exact integer conversion：`1000 = TWD10`、`4000 = TWD40`。因此 `amount=4000` 不是 TWD4000，而是 TWD40。`CCAT_IBON` 另要求 `amount % 100 == 0`。`OFFICIAL_MINIMUM = NOT_SPECIFIED`；TWD40 只是已成功實測金額，不是官方 minimum。
+`amount` 的 JSON type 必須是 integer，金額換算是 exact integer conversion：`1000 = TWD10`、`4000 = TWD40`。因此 `amount=4000` 不是 TWD4000，而是 TWD40。三個 `*_IBON` 通道皆另要求 `amount % 100 == 0`。`OFFICIAL_MINIMUM = NOT_SPECIFIED`；TWD40 只是已成功實測金額，不是官方 minimum。
 
 `channelExtra` 必須是字串化 JSON，且包含：
 
@@ -99,14 +99,14 @@ export UAT_MERCHANT_ID=M_D01_EXTERNAL_UAT
 export UAT_APP_ID=APP_D01_EXTERNAL_UAT
 export UAT_APP_SECRET=<secure handoff 取得的 App Secret>
 export UAT_NOTIFY_URL=https://<你的接收端>/callback   # full UAT 必填；產生器 fail closed
-python3 examples/talend-request-gen.py                 # 建單 + 查單
+python3 examples/talend-request-gen.py --way-code RYO_IBON  # 可換 JAY_IBON／CHI_IBON；建單 + 查單
 ```
 
 > `notifyUrl` 對 full UAT（含 Merchant Notify 驗收）是必填；產生器缺 `UAT_NOTIFY_URL` 會直接失敗，避免做出無法驗收 Notify 的訂單。純 Create/Query smoke 不需要本產生器。
 
 ### Create response
 
-成功的 native envelope：
+成功的 native envelope（以下為 RYO_IBON 範例）：
 
 ```json
 {
@@ -116,14 +116,14 @@ python3 examples/talend-request-gen.py                 # 建單 + 查單
     "payOrderId": "P...",
     "mchOrderNo": "UAT-...",
     "orderState": 1,
-    "payDataType": "ccatIbon",
+    "payDataType": "ryoIbon",
     "payData": "{\"ibonShopId\":\"...\",\"ibonCode\":\"...\",\"paymentCode\":\"...\",\"expireDate\":\"YYYY-MM-DD\",\"billAmount\":40,\"shortUrl\":\"https://...\"}"
   },
   "sign": "..."
 }
 ```
 
-`payData` 是 JSON 字串，需再 parse 一次；不得把它當作 nested JSON object。第一次 parse 取得 UnifiedOrder response，第二次 parse `data.payData` 才取得付款指示。欄位均由 actual runtime response model 產生：`ibonShopId`、`ibonCode`、組合後的 `paymentCode`、`expireDate`、whole-TWD `billAmount`、可選 `shortUrl`。真實 TWD 40 acceptance response 同步回傳付款資訊與非空 `shortUrl`，所以問卷分類為 `3 = 兩者皆同步返回`；程式仍應容許 provider 未回 `shortUrl` 時只使用付款碼。
+`payData` 是 JSON 字串，需再 parse 一次；不得把它當作 nested JSON object。第一次 parse 取得 UnifiedOrder response，第二次 parse `data.payData` 才取得付款指示。欄位均由 actual runtime response model 產生：`ibonShopId`、`ibonCode`、組合後的 `paymentCode`、`expireDate`、whole-TWD `billAmount`、可選 `shortUrl`。`payDataType` 依通道為 `ryoIbon`／`jayIbon`／`chiIbon`。RYO 真實 TWD 40 acceptance response 同步回傳付款資訊與非空 `shortUrl`，所以問卷分類為 `3 = 兩者皆同步返回`；程式仍應容許 provider 未回 `shortUrl` 時只使用付款碼。
 
 可 machine-read 的 synthetic response 見 [`examples/unified-order-success.json`](examples/unified-order-success.json)。該 fixture 刻意省略可選的 `shortUrl`，但仍包含可實際使用的付款碼、到期日與金額，並由 `verify_vectors.py` 驗證 outer parse、`payData` string type、第二次 JSON parse 與付款指示欄位。
 
@@ -133,7 +133,7 @@ response envelope 的 `sign` 是只針對 `data` object、用同一 App Secret �
 
 `code=0` 與 `orderState=1` 代表 Create 成功、付款資訊已建立，**不代表付款成功**。Native state：`0=INIT`、`1=ING/WAITING`、`2=SUCCESS`、`3=FAIL`、`4=REVOKED`、`5=REFUND`、`6=CLOSED`。只能在 Merchant Notify 或 Query 確認 `state=2` 後上分。
 
-`CCAT_IBON` 正常成功的 WAITING response 有一項 invariant：`code=0`、`orderState=1` 時，`payData` 必須是 populated JSON string，且第二次 parse 後必須包含可解析、可實際使用的 payment instruction。Deterministic Provider Create failure 不得回傳 `code=0`、`orderState=1`、`payData={}`（wire value 可能表現為空 JSON string `"{}"`）。
+三個 `*_IBON` 通道正常成功的 WAITING response 都有一項 invariant：`code=0`、`orderState=1` 時，`payData` 必須是 populated JSON string，且第二次 parse 後必須包含可解析、可實際使用的 payment instruction。Deterministic Provider Create failure 不得回傳 `code=0`、`orderState=1`、`payData={}`（wire value 可能表現為空 JSON string `"{}"`）。
 
 若收到違反此 invariant 的 response，尤其 `payData={}` 或沒有可使用的 payment instruction，Merchant 不得將它視為正常可付款訂單或支付成功、不得上分，也不得 blind retry 同一業務交易。請保留原 `mchOrderNo`，依 Query／error contract 處理；必要時聯絡我方查核。
 
@@ -145,7 +145,7 @@ URL          = https://api-v2-dev.nnviopp.com/api/pay/query
 CONTENT-TYPE = application/json; charset=UTF-8
 ```
 
-Auth 欄位與 Create 相同。另傳 `payOrderId` 或 `mchOrderNo` 至少一個；建議只傳一個，若兩者同時存在，native implementation 優先使用 `payOrderId`。Query 只讀 JeePay local PayOrder，不會為每次 Merchant Query 同步呼叫 CCAT。
+Auth 欄位與 Create 相同。另傳 `payOrderId` 或 `mchOrderNo` 至少一個；建議只傳一個，若兩者同時存在，native implementation 優先使用 `payOrderId`。Query 只讀 JeePay local PayOrder，不會為每次 Merchant Query 同步呼叫黑貓 PAY。
 
 ```json
 {
@@ -161,7 +161,7 @@ Auth 欄位與 Create 相同。另傳 `payOrderId` 或 `mchOrderNo` 至少一個
 
 WAITING response 的 `data.state=1`；SUCCESS response 的 `data.state=2`。`data` 的 actual 欄位為 `payOrderId`、`mchNo`、`appId`、`mchOrderNo`、`ifCode`、`wayCode`、`amount`、`currency`、`state`、`clientIp`、`subject`、`body`、`channelOrderNo`、`errCode`、`errMsg`、`extParam`、`successTime`、`createdAt`；值為 null 的欄位可能不出現。Envelope `sign` 同樣只簽 `data`。
 
-WAITING synthetic example：
+WAITING synthetic example（RYO_IBON）：
 
 ```json
 {
@@ -172,8 +172,8 @@ WAITING synthetic example：
     "mchNo": "M_SYNTHETIC_UAT",
     "appId": "APP_SYNTHETIC_UAT",
     "mchOrderNo": "UAT-SYNTH-0001",
-    "ifCode": "ccat",
-    "wayCode": "CCAT_IBON",
+    "ifCode": "ryo",
+    "wayCode": "RYO_IBON",
     "amount": 4000,
     "currency": "TWD",
     "state": 1
@@ -182,7 +182,7 @@ WAITING synthetic example：
 }
 ```
 
-同一訂單付款完成後的 SUCCESS synthetic example：
+同一訂單付款完成後的 SUCCESS synthetic example（RYO_IBON）：
 
 ```json
 {
@@ -193,8 +193,8 @@ WAITING synthetic example：
     "mchNo": "M_SYNTHETIC_UAT",
     "appId": "APP_SYNTHETIC_UAT",
     "mchOrderNo": "UAT-SYNTH-0001",
-    "ifCode": "ccat",
-    "wayCode": "CCAT_IBON",
+    "ifCode": "ryo",
+    "wayCode": "RYO_IBON",
     "amount": 4000,
     "currency": "TWD",
     "state": 2,
@@ -207,7 +207,7 @@ WAITING synthetic example：
 
 ## F. Merchant Notify
 
-外部只需實作 `JeePay → Merchant` callback；`CCAT → JeePay` APN 是我方內部責任，請勿設定或處理。
+外部只需實作 `JeePay → Merchant` callback；`黑貓 PAY → JeePay` APN 是我方內部責任，請勿設定或處理。
 
 ```text
 METHOD       = POST
@@ -218,7 +218,7 @@ ACK BODY     = SUCCESS
 
 Create 的 `notifyUrl` 可使用 HTTP 或 HTTPS 語法；D01 對外 UAT 要求使用 HTTPS。JeePay 將 Query response 的非 null 訂單欄位，加上 `reqTime` 與 `sign`，以 form fields POST 到該 URL。驗簽時移除 `sign`，再套用與 request 完全相同的 App Secret canonicalization。Synthetic Notify vector 與 exact ACK 在 [`examples/notify-vector.json`](examples/notify-vector.json)。
 
-只有 terminal state 會建立通知。對 CCAT_IBON 上分只接受 `state=2`；入帳金額欄位是 `amount`，單位仍為 minor units。`billAmount` 是付款指示中的 whole-TWD payer amount，不是 Merchant 上分欄位。
+只有 terminal state 會建立通知。三個 `*_IBON` 通道上分都只接受 `state=2`；入帳金額欄位是 `amount`，單位仍為 minor units。`billAmount` 是付款指示中的 whole-TWD payer amount，不是 Merchant 上分欄位。
 
 Merchant 必須以 `payOrderId`（並可交叉比對 `mchOrderNo`）做 idempotency。JeePay 對同一 order 只建立一筆 logical Notify record；若 callback response body 不是 case-insensitive exact `SUCCESS` 或連線失敗，最多送 6 次，首次立即，後續以 30、60、90、120、150 秒 delay 重新排送。HTTP 2xx 但 body 不是 `SUCCESS` 仍視為失敗。
 
@@ -241,9 +241,9 @@ UAT Merchant Notify outbound IP 已從 actual `jee8pay-v2-dev-payment` container
 2. 提供 UAT HTTPS Merchant Notify callback URL。
 3. 依 canonicalization 簽 Create request。
 4. 呼叫 public UAT Base URL；JeePay 建立 native PayOrder。
-5. JeePay 以 `CCAT_IBON` 路由並同步回傳 ibon 付款資訊。
+5. JeePay 依 `RYO_IBON`／`JAY_IBON`／`CHI_IBON` 路由並同步回傳 ibon 付款資訊。
 6. 測試者依已授權金額完成真實付款。
-7. CCAT 通知 JeePay；JeePay 將 native PayOrder 轉為 SUCCESS。
+7. 黑貓 PAY 通知 JeePay；JeePay 將 native PayOrder 轉為 SUCCESS。
 8. JeePay 對 Merchant callback URL 發送 Merchant Notify。
 9. Merchant 驗簽、確認 `state=2`／`amount`／order identity、冪等上分，回純文字 `SUCCESS`。
 10. Merchant 呼叫 Query，確認同一 order 為 `state=2`。
@@ -254,13 +254,13 @@ UAT Merchant Notify outbound IP 已從 actual `jee8pay-v2-dev-payment` container
 
 | 問題 | 回答 |
 | --- | --- |
-| 代收 | 支援，`CCAT_IBON` |
+| 代收 | 支援，`RYO_IBON`／`JAY_IBON`／`CHI_IBON` |
 | 代付 | 不支援／deferred；餘額查詢與固定銀行編碼不適用 |
 | 代收實名 | 不要求實名/KYC；Create 仍必填 payer name/contact/address data |
 | 真實金額上分 | 是；只在 SUCCESS Notify／Query 後使用 `amount`（minor units） |
-| 同步返回 | `3`；actual acceptance response 同時有付款資訊與 `shortUrl` |
+| 同步返回 | `3`；RYO actual acceptance response 同時有付款資訊與 `shortUrl`，JAY／CHI 使用相同平台契約 |
 | Official minimum | `NOT_SPECIFIED`；provider/account validation 為準 |
-| Successfully tested | TWD 40（`amount=4000`） |
+| Successfully tested | RYO／JAY／CHI 均已實測 TWD 40（`amount=4000`） |
 
 ## J. Security boundary
 
@@ -274,11 +274,11 @@ JEE-EC01 的 NC-01／NC-02／NC-03 closure 與 fresh execution evidence 見 [`JE
 
 | 文件 | 用途 |
 | --- | --- |
-| [`UAT-START-NOTICE.md`](UAT-START-NOTICE.md) | **外部 UAT 啟動前必讀**：精確錯誤訊息表、notifyUrl 陷阱、真人付款安排、freeze 規則、到期行為（CLOSED(6)）與競態風險 |
+| [`UAT-START-NOTICE.md`](UAT-START-NOTICE.md) | **外部 UAT 啟動前必讀**：精確錯誤訊息表、notifyUrl 陷阱、真人付款安排、freeze 規則、到期行為（CLOSED(6)）與 paid-APN recovery |
 | [`JEE-EC01R1-external-consumer-closure.md`](JEE-EC01R1-external-consumer-closure.md) | External consumer NC-01/02/03 closure 與執行證據 |
 | [`examples/`](examples/) | synthetic 簽名向量（`create-vector.json`、`notify-vector.json`、`unified-order-success.json`、`verify_vectors.py`、`run-d01-blackbox.py`）；Talend 貼上產生器 `talend-request-gen.py`（見 §D 下方說明） |
 | [`../../operations/merchant-uat-frontend-operator-map.md`](../../operations/merchant-uat-frontend-operator-map.md) | Manager/Merchant/Cashier 頁面對應（operator 操作指引） |
-| [`../../providers/ccat/README.md`](../../providers/ccat/README.md) | CCAT Provider 狀態與契約文件入口 |
+| [`../../providers/ryo/README.md`](../../providers/ryo/README.md) | 黑貓 PAY 三個 Provider 共用平台契約與 RYO 文件入口 |
 | `deploy/jee8pay-v2-dev/scripts/monitor-uat.sh` | UAT 期間唯讀監控快照（在 nnviopp-sandbox 上以 sudo 執行） |
 
 > 本文件所有請求範例的 `notifyUrl` 均為 placeholder；外部系統商必須使用自己的接收端 URL（見 [`UAT-START-NOTICE.md`](UAT-START-NOTICE.md) §3）。

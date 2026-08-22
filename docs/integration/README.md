@@ -2,6 +2,10 @@
 
 本分類只放外部系統商可使用的 JeePay integration contract；不放 Provider credential、VPS／DB credential 或內部 APN 細節。
 
+## Merchant（正式環境，downstream）
+
+- [`merchant/README.md`](merchant/README.md)：**正式環境 Merchant 串接文件**（Create／Query／Notify 契約，`RYO_IBON`／`JAY_IBON`／`CHI_IBON`；Base URL 與憑證待正式啟用後公布）。
+
 ## Merchant UAT（downstream）
 
 - [`merchant-uat/README.md`](merchant-uat/README.md)：nnviopp JeePay V2 Development 的 downstream Merchant UAT package（Create／Query／Notify 契約與範例）。

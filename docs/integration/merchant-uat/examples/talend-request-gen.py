@@ -10,7 +10,8 @@
     export UAT_APP_SECRET=<secure handoff 取得的 App Secret>
     export UAT_NOTIFY_URL=https://<你的接收端>/callback   # full UAT 必填（fail closed）
 
-    python3 talend-request-gen.py                 # 同時輸出建單 + 查單（查單用剛建立的 mchOrderNo）
+    python3 talend-request-gen.py [--way-code RYO_IBON|JAY_IBON|CHI_IBON]
+        # 同時輸出建單 + 查單（預設 RYO_IBON；JAY/CHI 用 --way-code 指定）
     python3 talend-request-gen.py --query         # 只輸出查單（自動用剛才建單的 mchOrderNo 檔）
     python3 talend-request-gen.py --query --mch-order-no UAT-xxx   # 指定 mchOrderNo 查單
 
@@ -69,7 +70,7 @@ def print_block(title, method, url, payload):
     print()
 
 
-def build_create(secret, notify_url):
+def build_create(secret, notify_url, way_code):
     # 唯一性：毫秒 + 6 位隨機 hex，避免同秒/平行執行碰撞（重複 mchOrderNo 會回「商戶訂單已存在」）
     mch_order_no = "UAT-TALEND-" + datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + uuid.uuid4().hex[:6].upper()
     channel_extra = json.dumps(
@@ -83,6 +84,12 @@ def build_create(secret, notify_url):
         ensure_ascii=False,
         separators=(",", ":"),
     )
+    if way_code == "JAY_IBON":
+        subject = "JAY ibon UAT"
+    elif way_code == "CHI_IBON":
+        subject = "CHI ibon UAT"
+    else:
+        subject = "RYO ibon UAT"
     payload = {
         "version": "1.0",
         "signType": "MD5",
@@ -90,10 +97,10 @@ def build_create(secret, notify_url):
         "mchNo": os.environ["UAT_MERCHANT_ID"],
         "appId": os.environ["UAT_APP_ID"],
         "mchOrderNo": mch_order_no,
-        "wayCode": "CCAT_IBON",
+        "wayCode": way_code,
         "amount": 4000,  # = TWD 40（已實測；必須可整除 100）
         "currency": "TWD",
-        "subject": "CCAT ibon UAT",
+        "subject": subject,
         "body": "Talend UAT test order",
         "expiredTime": 3600,
         "channelExtra": channel_extra,
@@ -124,6 +131,8 @@ def main():
     parser = argparse.ArgumentParser(description="產生 Talend 可貼上的建單/查單 Header+Body")
     parser.add_argument("--query", action="store_true", help="只輸出查單")
     parser.add_argument("--mch-order-no", help="查單用的 mchOrderNo（預設用上次建單的值）")
+    parser.add_argument("--way-code", choices=("RYO_IBON", "JAY_IBON", "CHI_IBON"),
+                        default="RYO_IBON", help="上游通道（預設 RYO_IBON）")
     args = parser.parse_args()
 
     require_env("UAT_MERCHANT_ID")
@@ -143,7 +152,8 @@ def main():
         print_block("查單 Query（POST）", "POST", BASE_URL + QUERY_PATH, build_query(secret, mch_order_no))
         return
 
-    print_block("建單 Create（POST）", "POST", BASE_URL + CREATE_PATH, build_create(secret, notify_url))
+    print_block("建單 Create（POST）", "POST", BASE_URL + CREATE_PATH,
+                build_create(secret, notify_url, args.way_code))
     print_block("查單 Query（POST）", "POST", BASE_URL + QUERY_PATH, build_query(secret, read_last_mch_order_no()))
 
 

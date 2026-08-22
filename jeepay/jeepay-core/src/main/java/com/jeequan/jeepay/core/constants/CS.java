@@ -148,7 +148,9 @@ public class CS {
         String XXPAY = "xxpay";     // 小新支付
         String PPPAY = "pppay";     // Paypal 支付
         String PLSPAY = "plspay";     // 计全支付plus
-        String CCAT = "ccat";       // 黑猫 PAY
+        String RYO = "ryo";       // 黑猫 PAY ibon（統一客樂得上游一）
+        String JAY = "jay";       // 黑猫 PAY ibon（統一客樂得上游二）
+        String CHI = "chi";       // 黑猫 PAY ibon（統一客樂得上游三）
     }
 
 
@@ -187,7 +189,9 @@ public class CS {
 
         String PP_PC = "PP_PC"; // Paypal 支付
 
-        String CCAT_IBON = "CCAT_IBON"; // 黑猫 PAY ibon 缴款
+        String RYO_IBON = "RYO_IBON"; // 黑猫 PAY ibon 缴款（上游一）
+        String JAY_IBON = "JAY_IBON"; // 黑猫 PAY ibon 缴款（上游二）
+        String CHI_IBON = "CHI_IBON"; // 黑猫 PAY ibon 缴款（上游三）
     }
 
     //支付数据包 类型

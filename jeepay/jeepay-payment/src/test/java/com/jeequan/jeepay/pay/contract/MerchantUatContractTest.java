@@ -49,10 +49,10 @@ class MerchantUatContractTest {
         request.put("mchNo", "M_SYNTHETIC_UAT");
         request.put("appId", "APP_SYNTHETIC_UAT");
         request.put("mchOrderNo", "UAT-SYNTH-0001");
-        request.put("wayCode", "CCAT_IBON");
+        request.put("wayCode", "RYO_IBON");
         request.put("amount", 4000L);
         request.put("currency", "TWD");
-        request.put("subject", "CCAT ibon UAT");
+        request.put("subject", "RYO ibon UAT");
         request.put("body", "Synthetic test vector");
         request.put("notifyUrl", "https://merchant.example.test/callback/jeepay");
         request.put("expiredTime", 604800);
@@ -60,7 +60,7 @@ class MerchantUatContractTest {
                 + "\"payerAddress\":\"台北市測試路1號\",\"payerMobile\":\"0900000000\","
                 + "\"payerEmail\":\"uat@example.test\"}");
 
-        String expected = "C9E11BBEEF851CAAEE8320AB2A3CE321";
+        String expected = "A4E1A33781D36672F66999C99283DADD";
         assertEquals(expected, JeepayKit.getSign(request, SECRET));
 
         request.put("amount", 4100L);
@@ -73,7 +73,7 @@ class MerchantUatContractTest {
     @Test
     void notifyVectorMatchesNativeJeepaySignatureAndRejectsWrongSecret() {
         JSONObject payload = notifyPayload();
-        String expected = "72B1609DB4CCEF53AFC58BE796CE2116";
+        String expected = "8370535A47F225E2986FA91BAF9BCC4C";
 
         assertEquals(expected, JeepayKit.getSign(payload, SECRET));
         assertNotEquals(expected, JeepayKit.getSign(payload, "WRONG_SYNTHETIC_SECRET"));
@@ -150,13 +150,13 @@ class MerchantUatContractTest {
         payload.put("mchNo", "M_SYNTHETIC_UAT");
         payload.put("appId", "APP_SYNTHETIC_UAT");
         payload.put("mchOrderNo", "UAT-SYNTH-0001");
-        payload.put("ifCode", "ccat");
-        payload.put("wayCode", "CCAT_IBON");
+        payload.put("ifCode", "ryo");
+        payload.put("wayCode", "RYO_IBON");
         payload.put("amount", 4000L);
         payload.put("currency", "TWD");
         payload.put("state", 2);
         payload.put("clientIp", "203.0.113.10");
-        payload.put("subject", "CCAT ibon UAT");
+        payload.put("subject", "RYO ibon UAT");
         payload.put("body", "Synthetic test vector");
         payload.put("channelOrderNo", "SYNTHETIC_PROVIDER_REFERENCE");
         payload.put("extParam", "TRACE-SYNTHETIC");

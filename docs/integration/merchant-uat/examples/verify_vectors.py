@@ -36,7 +36,7 @@ def verify_unified_order_response(path):
     assert data["payOrderId"], f"{path.name}: payOrderId missing"
     assert data["mchOrderNo"], f"{path.name}: mchOrderNo missing"
     assert data["orderState"] == 1, f"{path.name}: orderState mismatch"
-    assert data["payDataType"] == "ccatIbon", f"{path.name}: payDataType mismatch"
+    assert data["payDataType"] == "ryoIbon", f"{path.name}: payDataType mismatch"
     assert isinstance(data["payData"], str), f"{path.name}: payData must be a JSON string"
 
     payment_instruction = json.loads(data["payData"])

@@ -5,7 +5,7 @@
     "payOrderId": "P_SYNTHETIC_RESPONSE_0001",
     "mchOrderNo": "UAT-SYNTH-RESPONSE-0001",
     "orderState": 1,
-    "payDataType": "ccatIbon",
+    "payDataType": "ryoIbon",
     "payData": "{\"ibonShopId\":\"990\",\"ibonCode\":\"123456\",\"paymentCode\":\"990123456\",\"expireDate\":\"2026-08-20\",\"billAmount\":40}"
   },
   "sign": "SYNTHETIC_RESPONSE_SIGNATURE_NOT_UNDER_TEST"

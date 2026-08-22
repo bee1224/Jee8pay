@@ -54,15 +54,17 @@ JeePay remains the authoritative platform core.
 
 ## 2. Product Scope
 
-### CCAT / 黑貓 PAY
+### RYO / JAY / CHI（黑貓 PAY ibon）
 
-Phase 1 active Provider:
+Phase 1 active Providers：黑貓 PAY 平台上的三個統一客樂得上游（原 `CCAT` 已改名 `RYO`）：
 
 ```text
-CCAT_IBON
+RYO_IBON  (ifCode=ryo)
+JAY_IBON  (ifCode=jay)
+CHI_IBON  (ifCode=chi)
 ```
 
-Current scope:
+Current scope（每個上游相同）：
 
 * ibon
 * Create Payment
@@ -76,13 +78,13 @@ Current non-goals:
 * Division
 * Channel User
 * Close Order
-* other CCAT products outside the approved Phase 1 scope
+* 其他黑貓 PAY products outside the approved Phase 1 scope
 
 ### NewebPay / 藍新
 
 Deferred.
 
-NewebPay does not block a CCAT-only Production Candidate.
+NewebPay does not block a 黑貓 PAY-only Production Candidate.
 
 Inherited, generic, experimental, or reference Provider implementations do not
 become part of the active Taiwan roadmap merely because code exists.

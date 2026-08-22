@@ -73,3 +73,12 @@ Manager 後端 API（UatEdgeAllowlistController）
 `deploy/jee8pay-v2-dev/merchant-uat/prepare-edge-nginx.py`（`include` 指令）。
 reconcile（`reconcile-sandbox-edge.sh`）會驗證 allowlist 掛載與 Talend 保留 IP 存在。
 此功能目前只在 Development 環境啟用；Production edge 若需白名單自助管理，走相同模式另立任務。
+
+> **OPS LESSON（2026-08-21）**：manager 容器的 allowlist 掛載**必須用絕對路徑**
+> `/opt/jee8pay-v2-dev/edge-allowlist:/edge-allowlist`（compose 已修正）。曾發生用相對路徑
+> `../../edge-allowlist` 時，因 `current/` 是 `releases/<hash>` 的 symlink，docker compose
+> 依 symlink 字面路徑解析成 `/opt/edge-allowlist`（空目錄）→ UI 白名單顯示空白、新增 IP 寫到錯誤位置。
+> edge 容器走 overlay 絕對路徑不受影響，只有 manager 中招。另外所有
+> `docker compose` 指令必須先 `export V2_SECRET_DIR=/opt/jee8pay-v2-dev/secrets`，
+> 否則 secrets 會預設找 `./.secrets/`（不存在）而報
+> `invalid mount config ... bind source path does not exist: .../current/.secrets/...`。

@@ -1,5 +1,7 @@
 # CCAT V2 Production Candidate
 
+> **RENAME NOTE（2026-08-20）**：本文記錄 Production Candidate 的歷史部署狀態。JeePay Provider 已由 `ccat` 改名為 `ryo`（`CCAT_IBON` → `RYO_IBON`），並新增 `jay` / `chi`；重新部署後 callback 路徑為 `/api/pay/notify/ryo`、`/api/pay/notify/jay`、`/api/pay/notify/chi`，secret intake 腳本為 `populate-v2-ryo-secret`（及 `populate-v2-jay-secret` / `populate-v2-chi-secret`）。文中 `ccat-v2.lp33ing.com` 域名保留為歷史命名。
+
 ## Current binding
 
 JEE-E04 binds source `654df8b6b1ed01b03612e8dff204ae146730261c` to

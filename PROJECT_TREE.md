@@ -1,6 +1,6 @@
 # Project file tree
 
-Generated from `/mnt/c/Users/tim.huang/Documents/Jee8pay` on 2026-08-16.
+Generated from `/mnt/c/Users/tim.huang/Documents/Jee8pay` on 2026-08-20.
 
 Excluded generated/metadata directories: `.git`, `node_modules`, `vendor`, `dist`, `build`, `target`, `.idea`, and `.vscode`.
 
@@ -10,7 +10,6 @@ Regenerate with:
 tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirst .
 ```
 
-```text
 .
 ├── .agents
 │   ├── skills
@@ -24,6 +23,13 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │       ├── n01r1-continuation
 │       │   └── final-medium-report.txt
 │       ├── d01-blackbox-results-20260815.txt
+│       ├── deepseek-change-review-2026-08-17.md
+│       ├── deepseek-docker-version.log
+│       ├── deepseek-manager-build.log
+│       ├── deepseek-merchant-build.log
+│       ├── deepseek-merchant-vectors.log
+│       ├── deepseek-talend-generator-check.log
+│       ├── generate-talend-create-query.py
 │       └── run-d01-blackbox.py
 ├── .codex
 │   └── config.toml
@@ -35,24 +41,24 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │   └── init.sql
 │   │   │   ├── ui-cashier
 │   │   │   │   ├── assets
-│   │   │   │   │   ├── Alipay-b499c351.css
-│   │   │   │   │   ├── Alipay-ddd74962.js
-│   │   │   │   │   ├── Cashier-d4d1a3b7.js
-│   │   │   │   │   ├── Error-616e46bd.css
-│   │   │   │   │   ├── Error-c5f54b97.js
-│   │   │   │   │   ├── Hub-12a29291.css
-│   │   │   │   │   ├── Hub-dd892559.js
-│   │   │   │   │   ├── Oauth2Callback-3efe3b41.js
+│   │   │   │   │   ├── Alipay-3c068398.css
+│   │   │   │   │   ├── Alipay-4ed61a2d.js
+│   │   │   │   │   ├── Cashier-76067fac.js
+│   │   │   │   │   ├── Error-c9050e44.css
+│   │   │   │   │   ├── Error-e032fc2b.js
+│   │   │   │   │   ├── Hub-26b7a8e3.js
+│   │   │   │   │   ├── Hub-ca73510e.css
+│   │   │   │   │   ├── Oauth2Callback-586f90a0.js
 │   │   │   │   │   ├── S-f63feb6b.svg
 │   │   │   │   │   ├── WeChatSansSS-Bold-41710157.ttf
-│   │   │   │   │   ├── Wxpay-46507991.js
-│   │   │   │   │   ├── Wxpay-ded61352.css
-│   │   │   │   │   ├── Ysfpay-60b34adf.css
-│   │   │   │   │   ├── Ysfpay-ee39b3ce.js
-│   │   │   │   │   ├── api-669d0d7b.js
+│   │   │   │   │   ├── Wxpay-50e5e19b.css
+│   │   │   │   │   ├── Wxpay-b2b2e7a9.js
+│   │   │   │   │   ├── Ysfpay-1f51dd2c.js
+│   │   │   │   │   ├── Ysfpay-2d2d1659.css
+│   │   │   │   │   ├── api-0b12ade8.js
 │   │   │   │   │   ├── error-a2400a96.svg
 │   │   │   │   │   ├── index-291e8efe.css
-│   │   │   │   │   ├── index-c6178d44.js
+│   │   │   │   │   ├── index-a4fe10a3.js
 │   │   │   │   │   ├── wx-d01ab358.svg
 │   │   │   │   │   ├── ysf-fe0ceebe.jpg
 │   │   │   │   │   └── zfb-2f9e1442.jpeg
@@ -60,106 +66,106 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │   └── index.html
 │   │   │   ├── ui-manager
 │   │   │   │   ├── assets
+│   │   │   │   │   ├── 404.bca3b177.js
 │   │   │   │   │   ├── 404.cd1a2daf.svg
-│   │   │   │   │   ├── 404.f677d1c6.js
-│   │   │   │   │   ├── Analysis.0969540b.css
-│   │   │   │   │   ├── Analysis.2d1c18d0.js
-│   │   │   │   │   ├── Badge.5ccac945.js
-│   │   │   │   │   ├── EntPage.b7a48ba8.js
-│   │   │   │   │   ├── Group.384b07b1.js
-│   │   │   │   │   ├── IsvList.022149ec.js
-│   │   │   │   │   ├── IsvList.0679ddfb.css
-│   │   │   │   │   ├── JeepayCard.38beb612.js
+│   │   │   │   │   ├── Analysis.022a95e1.css
+│   │   │   │   │   ├── Analysis.214b43bd.js
+│   │   │   │   │   ├── Badge.d5b2c032.js
+│   │   │   │   │   ├── EntPage.2b123b3c.js
+│   │   │   │   │   ├── Group.b15f8d0a.js
+│   │   │   │   │   ├── IsvList.8881df50.css
+│   │   │   │   │   ├── IsvList.b27285ea.js
+│   │   │   │   │   ├── JeepayCard.a1e3e905.js
 │   │   │   │   │   ├── JeepayCard.aadc8955.css
-│   │   │   │   │   ├── JeepayTable.33df05d8.js
-│   │   │   │   │   ├── JeepayTable.caf4a94b.css
-│   │   │   │   │   ├── JeepayTableColState.069d3bc3.js
+│   │   │   │   │   ├── JeepayTable.9223139e.js
+│   │   │   │   │   ├── JeepayTable.967ef110.css
+│   │   │   │   │   ├── JeepayTableColState.e19f261c.js
+│   │   │   │   │   ├── JeepayTableColumns.vue_vue_type_script_lang.29aa19c6.js
 │   │   │   │   │   ├── JeepayTableColumns.vue_vue_type_script_lang.7cab347f.css
-│   │   │   │   │   ├── JeepayTableColumns.vue_vue_type_script_lang.ec04ce14.js
-│   │   │   │   │   ├── JeepayTextUp.28a14f52.js
+│   │   │   │   │   ├── JeepayTextUp.580bd0d8.js
 │   │   │   │   │   ├── JeepayTextUp.ce597964.css
-│   │   │   │   │   ├── JeepayUpload.96420dc1.js
-│   │   │   │   │   ├── List.285f74e4.js
-│   │   │   │   │   ├── List.48c20357.js
-│   │   │   │   │   ├── List.d27341cc.css
-│   │   │   │   │   ├── List.dcacd29c.js
-│   │   │   │   │   ├── List.e6024f81.css
-│   │   │   │   │   ├── MchList.53747eb3.css
-│   │   │   │   │   ├── MchList.ff7d0e76.js
-│   │   │   │   │   ├── MchNotifyList.a5afdbee.js
-│   │   │   │   │   ├── PayOrderList.8e3e09a5.css
-│   │   │   │   │   ├── PayOrderList.c1a4d566.js
-│   │   │   │   │   ├── RefundOrderList.07c8945b.js
-│   │   │   │   │   ├── RefundOrderList.40082279.css
-│   │   │   │   │   ├── RolePage.64a3f0f3.js
-│   │   │   │   │   ├── SysConfig.012db407.js
-│   │   │   │   │   ├── SysLog.e0ce6b2f.js
-│   │   │   │   │   ├── SysUserPage.1c45b846.js
-│   │   │   │   │   ├── TabPane.43fa8453.js
-│   │   │   │   │   ├── TransferOrderList.33488a9f.css
-│   │   │   │   │   ├── TransferOrderList.7b8810bb.js
-│   │   │   │   │   ├── UserinfoPage.6ededfd9.css
-│   │   │   │   │   ├── UserinfoPage.b557a19d.js
+│   │   │   │   │   ├── JeepayUpload.3ec92a63.js
+│   │   │   │   │   ├── List.202e674e.css
+│   │   │   │   │   ├── List.7eabebda.css
+│   │   │   │   │   ├── List.8c4b5e95.js
+│   │   │   │   │   ├── List.a5aabdc0.js
+│   │   │   │   │   ├── List.e9a1c712.js
+│   │   │   │   │   ├── MchList.860d893d.css
+│   │   │   │   │   ├── MchList.8d88fb8c.js
+│   │   │   │   │   ├── MchNotifyList.352f172d.js
+│   │   │   │   │   ├── PayOrderList.1fae3ac4.js
+│   │   │   │   │   ├── PayOrderList.c2cbd430.css
+│   │   │   │   │   ├── RefundOrderList.751f23b9.js
+│   │   │   │   │   ├── RefundOrderList.fa105cfe.css
+│   │   │   │   │   ├── RolePage.730a261a.js
+│   │   │   │   │   ├── SysConfig.24bd10e1.js
+│   │   │   │   │   ├── SysLog.96b2dba4.js
+│   │   │   │   │   ├── SysUserPage.b9767b93.js
+│   │   │   │   │   ├── TabPane.ca66e5e5.js
+│   │   │   │   │   ├── TransferOrderList.bb9c6fd5.js
+│   │   │   │   │   ├── TransferOrderList.fc6838b7.css
+│   │   │   │   │   ├── UserinfoPage.415f9942.css
+│   │   │   │   │   ├── UserinfoPage.7ad3ef17.js
 │   │   │   │   │   ├── add-icon-hover.f92dc310.svg
 │   │   │   │   │   ├── add-icon.bdbbe2d3.svg
 │   │   │   │   │   ├── background.12aecf48.svg
 │   │   │   │   │   ├── bootstrap-icons.476adf42.woff2
 │   │   │   │   │   ├── bootstrap-icons.bb1de989.woff
-│   │   │   │   │   ├── dayjs.007de484.js
+│   │   │   │   │   ├── dayjs.46d84b49.js
 │   │   │   │   │   ├── empty.cc1bea71.svg
 │   │   │   │   │   ├── favicon.db8e62f3.ico
-│   │   │   │   │   ├── index.3556c4bc.js
-│   │   │   │   │   ├── index.370b9573.css
-│   │   │   │   │   ├── index.8ae799d6.js
-│   │   │   │   │   ├── index.b6fd963a.js
-│   │   │   │   │   ├── index.cfc27556.js
-│   │   │   │   │   ├── index.d63f213e.js
-│   │   │   │   │   ├── index.e447018d.js
-│   │   │   │   │   ├── index.eadfa88f.js
-│   │   │   │   │   ├── index.fd3319f9.js
+│   │   │   │   │   ├── index.097a1ec5.js
+│   │   │   │   │   ├── index.2210b293.js
+│   │   │   │   │   ├── index.24cf2d64.js
+│   │   │   │   │   ├── index.2e4d845e.js
+│   │   │   │   │   ├── index.6c648c79.js
+│   │   │   │   │   ├── index.71e8ac36.js
+│   │   │   │   │   ├── index.990a699b.css
+│   │   │   │   │   ├── index.bba1f563.js
+│   │   │   │   │   ├── index.c0679dee.js
 │   │   │   │   │   ├── jeepay.e180c5c7.svg
 │   │   │   │   │   ├── logo-j.612b880b.svg
 │   │   │   │   │   ├── logo.070cbf2b.svg
-│   │   │   │   │   ├── manage.4b139a94.js
+│   │   │   │   │   ├── manage.d92e4b6d.js
 │   │   │   │   │   ├── moment.40bc58bf.js
 │   │   │   │   │   ├── more.3d1a3462.svg
 │   │   │   │   │   ├── operate.ebec203e.svg
-│   │   │   │   │   └── useRefs.461c258b.js
+│   │   │   │   │   └── useRefs.8cb42a34.js
 │   │   │   │   └── index.html
 │   │   │   ├── ui-merchant
 │   │   │   │   ├── assets
-│   │   │   │   │   ├── 403.27c3e2bf.js
 │   │   │   │   │   ├── 403.b7b8bff3.svg
-│   │   │   │   │   ├── 404.34857be5.js
+│   │   │   │   │   ├── 403.f196948c.js
+│   │   │   │   │   ├── 404.6fd08dad.js
 │   │   │   │   │   ├── 404.cd1a2daf.svg
+│   │   │   │   │   ├── 500.da365f77.js
 │   │   │   │   │   ├── 500.f4af831f.svg
-│   │   │   │   │   ├── 500.f9037ef6.js
-│   │   │   │   │   ├── Analysis.4ef6d8e2.js
-│   │   │   │   │   ├── Analysis.97047235.css
-│   │   │   │   │   ├── ChannelUserModal.6f5e6627.js
-│   │   │   │   │   ├── ChannelUserModal.9f76165f.css
-│   │   │   │   │   ├── DivisionReceiverGroupPage.dff58829.js
-│   │   │   │   │   ├── DivisionReceiverPage.79497dd8.js
-│   │   │   │   │   ├── DivisionRecordPage.452384f7.js
-│   │   │   │   │   ├── JeepayTextUp.ba686124.js
-│   │   │   │   │   ├── JeepayTextUp.eba82935.css
-│   │   │   │   │   ├── JeepayUpload.aab5e02a.js
-│   │   │   │   │   ├── List.211d4bd4.js
-│   │   │   │   │   ├── List.c1ce5708.css
-│   │   │   │   │   ├── MchTransferPage.09fce2ee.css
-│   │   │   │   │   ├── MchTransferPage.48449dab.js
-│   │   │   │   │   ├── PayOrderList.044f091f.js
-│   │   │   │   │   ├── PayOrderList.f247aeca.css
-│   │   │   │   │   ├── PayTest.63f30da8.css
-│   │   │   │   │   ├── PayTest.ee8a5039.js
-│   │   │   │   │   ├── RefundOrderList.2cf92e7f.js
-│   │   │   │   │   ├── RefundOrderList.fbf76502.css
-│   │   │   │   │   ├── RolePage.bf116724.js
-│   │   │   │   │   ├── SysUserPage.447b132f.js
-│   │   │   │   │   ├── TransferOrderList.1ed48881.js
-│   │   │   │   │   ├── TransferOrderList.b0368e95.css
-│   │   │   │   │   ├── UserinfoPage.83b78319.css
-│   │   │   │   │   ├── UserinfoPage.9a47f12c.js
+│   │   │   │   │   ├── Analysis.716745d0.js
+│   │   │   │   │   ├── Analysis.c87d2e5d.css
+│   │   │   │   │   ├── ChannelUserModal.9aeff245.js
+│   │   │   │   │   ├── ChannelUserModal.c8fcc246.css
+│   │   │   │   │   ├── DivisionReceiverGroupPage.47c4ee33.js
+│   │   │   │   │   ├── DivisionReceiverPage.9f3e5d85.js
+│   │   │   │   │   ├── DivisionRecordPage.70cb570f.js
+│   │   │   │   │   ├── JeepayTextUp.79daabd4.css
+│   │   │   │   │   ├── JeepayTextUp.d6ecc246.js
+│   │   │   │   │   ├── JeepayUpload.71536d9c.js
+│   │   │   │   │   ├── List.70c3a85d.css
+│   │   │   │   │   ├── List.d510fb86.js
+│   │   │   │   │   ├── MchTransferPage.84c53eaa.js
+│   │   │   │   │   ├── MchTransferPage.91fb9104.css
+│   │   │   │   │   ├── PayOrderList.032285a1.js
+│   │   │   │   │   ├── PayOrderList.cb10d2d5.css
+│   │   │   │   │   ├── PayTest.862f1ea8.css
+│   │   │   │   │   ├── PayTest.c0cc22ec.js
+│   │   │   │   │   ├── RefundOrderList.baca8118.js
+│   │   │   │   │   ├── RefundOrderList.d250b7f2.css
+│   │   │   │   │   ├── RolePage.d6d6e5aa.js
+│   │   │   │   │   ├── SysUserPage.410132a5.js
+│   │   │   │   │   ├── TransferOrderList.ce6039da.css
+│   │   │   │   │   ├── TransferOrderList.e37bd459.js
+│   │   │   │   │   ├── UserinfoPage.59a198dc.js
+│   │   │   │   │   ├── UserinfoPage.89817dd9.css
 │   │   │   │   │   ├── add-icon.bdbbe2d3.svg
 │   │   │   │   │   ├── ali_app.d95204fd.svg
 │   │   │   │   │   ├── ali_bar.ae8ad12d.svg
@@ -173,17 +179,17 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │   │   ├── bootstrap-icons.bb1de989.woff
 │   │   │   │   │   ├── empty.cc1bea71.svg
 │   │   │   │   │   ├── favicon.db8e62f3.ico
-│   │   │   │   │   ├── index.0c7a5709.css
-│   │   │   │   │   ├── index.2cd5f568.js
+│   │   │   │   │   ├── index.8964129a.css
+│   │   │   │   │   ├── index.a2fa8880.js
 │   │   │   │   │   ├── jeepay.e180c5c7.svg
 │   │   │   │   │   ├── logo-j.612b880b.svg
 │   │   │   │   │   ├── logo.070cbf2b.svg
-│   │   │   │   │   ├── manage.4d31c1b2.js
+│   │   │   │   │   ├── manage.d203b38d.js
 │   │   │   │   │   ├── more.3d1a3462.svg
 │   │   │   │   │   ├── operate.ebec203e.svg
 │   │   │   │   │   ├── pp_pc.d45d0279.svg
 │   │   │   │   │   ├── qr_cashier.b2e47514.svg
-│   │   │   │   │   ├── reconnecting-websocket.97937d47.js
+│   │   │   │   │   ├── reconnecting-websocket.daaf1b24.js
 │   │   │   │   │   ├── scan.0364cbce.svg
 │   │   │   │   │   ├── wx_app.55df45ee.svg
 │   │   │   │   │   ├── wx_bar.2cc064e8.svg
@@ -220,6 +226,7 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   ├── prepare-edge-nginx.py
 │   │   │   └── rollback-edge-hot
 │   │   ├── scripts
+│   │   │   ├── apply-uat-allowlist.sh
 │   │   │   ├── capture-sandbox-edge-state.sh
 │   │   │   ├── manage-sandbox-api-v2-edge.sh
 │   │   │   ├── manage-sandbox-ccat-v2-dns.sh
@@ -411,13 +418,17 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │       │   └── rocketmq-broker.conf
 │       ├── scripts
 │       │   ├── install-v2-infrastructure-secrets
-│       │   └── populate-v2-ccat-secret
+│       │   ├── populate-v2-chi-secret
+│       │   ├── populate-v2-jay-secret
+│       │   ├── populate-v2-ryo-secret
+│       │   └── verify-prod-edge-admin-route.sh
 │       ├── .gitignore
 │       ├── DEPLOYMENT-MANIFEST.sha256
 │       ├── Dockerfile.backend
 │       ├── Dockerfile.ui
 │       ├── SOURCE
-│       └── compose.yml
+│       ├── compose.yml
+│       └── edge-nginx.conf
 ├── docs
 │   ├── architecture
 │   │   ├── README.md
@@ -435,6 +446,7 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   ├── ADR-0004-twd-platform-default.md
 │   │   ├── ADR-0005-environment-isolation.md
 │   │   ├── ADR-0006-taipei-platform-timezone.md
+│   │   ├── ADR-0007-closed-order-paid-apn-reopen.md
 │   │   └── README.md
 │   ├── integration
 │   │   ├── merchant-uat
@@ -442,6 +454,7 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │   ├── create-vector.json
 │   │   │   │   ├── notify-vector.json
 │   │   │   │   ├── run-d01-blackbox.py
+│   │   │   │   ├── talend-request-gen.py
 │   │   │   │   ├── unified-order-success.json
 │   │   │   │   └── verify_vectors.py
 │   │   │   ├── JEE-EC01R1-external-consumer-closure.md
@@ -454,9 +467,14 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   ├── ccat-v2-production-candidate.md
 │   │   ├── git-delivery-governance.md
 │   │   ├── merchant-uat-frontend-operator-map.md
+│   │   ├── platform-access.md
 │   │   └── sandbox-edge-recovery.md
 │   ├── providers
-│   │   ├── ccat
+│   │   ├── chi
+│   │   │   └── README.md
+│   │   ├── jay
+│   │   │   └── README.md
+│   │   ├── ryo
 │   │   │   ├── JEE-E05-external-create-investigation.md
 │   │   │   ├── JEE-P05-create-failure-semantics.md
 │   │   │   ├── JEE-P05R1-i07-blocker-closure.md
@@ -707,13 +725,17 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │                       │   │   │   ├── AlipayIsvParams.java
 │   │   │   │                       │   │   │   ├── AlipayIsvsubMchParams.java
 │   │   │   │                       │   │   │   └── AlipayNormalMchParams.java
-│   │   │   │                       │   │   ├── ccat
-│   │   │   │                       │   │   │   └── CcatNormalMchParams.java
+│   │   │   │                       │   │   ├── chi
+│   │   │   │                       │   │   │   └── ChiNormalMchParams.java
+│   │   │   │                       │   │   ├── jay
+│   │   │   │                       │   │   │   └── JayNormalMchParams.java
 │   │   │   │                       │   │   ├── plspay
 │   │   │   │                       │   │   │   ├── PlspayConfig.java
 │   │   │   │                       │   │   │   └── PlspayNormalMchParams.java
 │   │   │   │                       │   │   ├── pppay
 │   │   │   │                       │   │   │   └── PppayNormalMchParams.java
+│   │   │   │                       │   │   ├── ryo
+│   │   │   │                       │   │   │   └── RyoNormalMchParams.java
 │   │   │   │                       │   │   ├── wxpay
 │   │   │   │                       │   │   │   ├── WxpayIsvParams.java
 │   │   │   │                       │   │   │   ├── WxpayIsvsubMchParams.java
@@ -800,6 +822,7 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │   │   │                   │   ├── order
 │   │   │   │   │   │                   │   │   ├── MchNotifyController.class
 │   │   │   │   │   │                   │   │   ├── PayOrderController.class
+│   │   │   │   │   │                   │   │   ├── PayOrderManualNotifyController.class
 │   │   │   │   │   │                   │   │   ├── RefundOrderController.class
 │   │   │   │   │   │                   │   │   └── TransferOrderController.class
 │   │   │   │   │   │                   │   ├── payconfig
@@ -812,6 +835,8 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │   │   │                   │   │   ├── SysRoleEntRelaController.class
 │   │   │   │   │   │                   │   │   ├── SysUserController.class
 │   │   │   │   │   │                   │   │   └── SysUserRoleRelaController.class
+│   │   │   │   │   │                   │   ├── uatedge
+│   │   │   │   │   │                   │   │   └── UatEdgeAllowlistController.class
 │   │   │   │   │   │                   │   ├── CommonCtrl.class
 │   │   │   │   │   │                   │   └── CurrentUserController.class
 │   │   │   │   │   │                   ├── mq
@@ -837,6 +862,13 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │   │       └── logback-spring.xml
 │   │   │   │   └── test
 │   │   │   │       ├── java
+│   │   │   │       │   ├── com
+│   │   │   │       │   │   └── jeequan
+│   │   │   │       │   │       └── jeepay
+│   │   │   │       │   │           └── mgr
+│   │   │   │       │   │               └── ctrl
+│   │   │   │       │   │                   └── order
+│   │   │   │       │   │                       └── MchNotifyControllerSendTest.class
 │   │   │   │       │   └── .gitkeep
 │   │   │   │       └── resources
 │   │   │   │           └── .gitkeep
@@ -880,6 +912,7 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │   │                   │   ├── order
 │   │   │   │   │                   │   │   ├── MchNotifyController.java
 │   │   │   │   │                   │   │   ├── PayOrderController.java
+│   │   │   │   │                   │   │   ├── PayOrderManualNotifyController.java
 │   │   │   │   │                   │   │   ├── RefundOrderController.java
 │   │   │   │   │                   │   │   └── TransferOrderController.java
 │   │   │   │   │                   │   ├── payconfig
@@ -892,6 +925,8 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │   │                   │   │   ├── SysRoleEntRelaController.java
 │   │   │   │   │                   │   │   ├── SysUserController.java
 │   │   │   │   │                   │   │   └── SysUserRoleRelaController.java
+│   │   │   │   │                   │   ├── uatedge
+│   │   │   │   │                   │   │   └── UatEdgeAllowlistController.java
 │   │   │   │   │                   │   ├── CommonCtrl.java
 │   │   │   │   │                   │   └── CurrentUserController.java
 │   │   │   │   │                   ├── mq
@@ -1056,17 +1091,28 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │   │                   │   │   ├── AlipayRefundService.java
 │   │   │   │   │                   │   │   ├── AlipayTransferNoticeService.java
 │   │   │   │   │                   │   │   └── AlipayTransferService.java
-│   │   │   │   │                   │   ├── ccat
+│   │   │   │   │                   │   ├── chi
 │   │   │   │   │                   │   │   ├── payway
-│   │   │   │   │                   │   │   │   └── CcatIbon.java
-│   │   │   │   │                   │   │   ├── CcatChannelNoticeService.java
-│   │   │   │   │                   │   │   ├── CcatClient.java
-│   │   │   │   │                   │   │   ├── CcatIbonOrderRS.java
-│   │   │   │   │                   │   │   ├── CcatKit.java
-│   │   │   │   │                   │   │   ├── CcatLogSanitizer.java
-│   │   │   │   │                   │   │   ├── CcatMchParamsResolver.java
-│   │   │   │   │                   │   │   ├── CcatPayOrderQueryService.java
-│   │   │   │   │                   │   │   └── CcatPaymentService.java
+│   │   │   │   │                   │   │   │   └── ChiIbon.java
+│   │   │   │   │                   │   │   ├── ChiChannelNoticeService.java
+│   │   │   │   │                   │   │   ├── ChiClient.java
+│   │   │   │   │                   │   │   ├── ChiIbonOrderRS.java
+│   │   │   │   │                   │   │   ├── ChiKit.java
+│   │   │   │   │                   │   │   ├── ChiLogSanitizer.java
+│   │   │   │   │                   │   │   ├── ChiMchParamsResolver.java
+│   │   │   │   │                   │   │   ├── ChiPayOrderQueryService.java
+│   │   │   │   │                   │   │   └── ChiPaymentService.java
+│   │   │   │   │                   │   ├── jay
+│   │   │   │   │                   │   │   ├── payway
+│   │   │   │   │                   │   │   │   └── JayIbon.java
+│   │   │   │   │                   │   │   ├── JayChannelNoticeService.java
+│   │   │   │   │                   │   │   ├── JayClient.java
+│   │   │   │   │                   │   │   ├── JayIbonOrderRS.java
+│   │   │   │   │                   │   │   ├── JayKit.java
+│   │   │   │   │                   │   │   ├── JayLogSanitizer.java
+│   │   │   │   │                   │   │   ├── JayMchParamsResolver.java
+│   │   │   │   │                   │   │   ├── JayPayOrderQueryService.java
+│   │   │   │   │                   │   │   └── JayPaymentService.java
 │   │   │   │   │                   │   ├── plspay
 │   │   │   │   │                   │   │   ├── payway
 │   │   │   │   │                   │   │   │   ├── AliApp.java
@@ -1096,6 +1142,17 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │   │                   │   │   ├── PppayPayOrderQueryService.java
 │   │   │   │   │                   │   │   ├── PppayPaymentService.java
 │   │   │   │   │                   │   │   └── PppayRefundService.java
+│   │   │   │   │                   │   ├── ryo
+│   │   │   │   │                   │   │   ├── payway
+│   │   │   │   │                   │   │   │   └── RyoIbon.java
+│   │   │   │   │                   │   │   ├── RyoChannelNoticeService.java
+│   │   │   │   │                   │   │   ├── RyoClient.java
+│   │   │   │   │                   │   │   ├── RyoIbonOrderRS.java
+│   │   │   │   │                   │   │   ├── RyoKit.java
+│   │   │   │   │                   │   │   ├── RyoLogSanitizer.java
+│   │   │   │   │                   │   │   ├── RyoMchParamsResolver.java
+│   │   │   │   │                   │   │   ├── RyoPayOrderQueryService.java
+│   │   │   │   │                   │   │   └── RyoPaymentService.java
 │   │   │   │   │                   │   ├── wxpay
 │   │   │   │   │                   │   │   ├── ctrl
 │   │   │   │   │                   │   │   │   └── wxpayBizController.java
@@ -1399,17 +1456,39 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │       │   │       └── jeepay
 │   │   │       │   │           └── pay
 │   │   │       │   │               ├── channel
-│   │   │       │   │               │   └── ccat
+│   │   │       │   │               │   ├── chi
+│   │   │       │   │               │   │   ├── payway
+│   │   │       │   │               │   │   │   └── ChiIbonTest.java
+│   │   │       │   │               │   │   ├── ChiArchitectureTest.java
+│   │   │       │   │               │   │   ├── ChiChannelNoticeFlowTest.java
+│   │   │       │   │               │   │   ├── ChiChannelNoticeServiceTest.java
+│   │   │       │   │               │   │   ├── ChiClientTest.java
+│   │   │       │   │               │   │   ├── ChiKitTest.java
+│   │   │       │   │               │   │   ├── ChiLogSanitizerTest.java
+│   │   │       │   │               │   │   ├── ChiMchParamsResolverTest.java
+│   │   │       │   │               │   │   └── ChiPayOrderQueryServiceTest.java
+│   │   │       │   │               │   ├── jay
+│   │   │       │   │               │   │   ├── payway
+│   │   │       │   │               │   │   │   └── JayIbonTest.java
+│   │   │       │   │               │   │   ├── JayArchitectureTest.java
+│   │   │       │   │               │   │   ├── JayChannelNoticeFlowTest.java
+│   │   │       │   │               │   │   ├── JayChannelNoticeServiceTest.java
+│   │   │       │   │               │   │   ├── JayClientTest.java
+│   │   │       │   │               │   │   ├── JayKitTest.java
+│   │   │       │   │               │   │   ├── JayLogSanitizerTest.java
+│   │   │       │   │               │   │   ├── JayMchParamsResolverTest.java
+│   │   │       │   │               │   │   └── JayPayOrderQueryServiceTest.java
+│   │   │       │   │               │   └── ryo
 │   │   │       │   │               │       ├── payway
-│   │   │       │   │               │       │   └── CcatIbonTest.java
-│   │   │       │   │               │       ├── CcatArchitectureTest.java
-│   │   │       │   │               │       ├── CcatChannelNoticeFlowTest.java
-│   │   │       │   │               │       ├── CcatChannelNoticeServiceTest.java
-│   │   │       │   │               │       ├── CcatClientTest.java
-│   │   │       │   │               │       ├── CcatKitTest.java
-│   │   │       │   │               │       ├── CcatLogSanitizerTest.java
-│   │   │       │   │               │       ├── CcatMchParamsResolverTest.java
-│   │   │       │   │               │       └── CcatPayOrderQueryServiceTest.java
+│   │   │       │   │               │       │   └── RyoIbonTest.java
+│   │   │       │   │               │       ├── RyoArchitectureTest.java
+│   │   │       │   │               │       ├── RyoChannelNoticeFlowTest.java
+│   │   │       │   │               │       ├── RyoChannelNoticeServiceTest.java
+│   │   │       │   │               │       ├── RyoClientTest.java
+│   │   │       │   │               │       ├── RyoKitTest.java
+│   │   │       │   │               │       ├── RyoLogSanitizerTest.java
+│   │   │       │   │               │       ├── RyoMchParamsResolverTest.java
+│   │   │       │   │               │       └── RyoPayOrderQueryServiceTest.java
 │   │   │       │   │               └── contract
 │   │   │       │   │                   └── MerchantUatContractTest.java
 │   │   │       │   └── .gitkeep
@@ -1448,51 +1527,53 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │                       │   ├── SysUserRoleRelaService.java
 │   │   │   │                       │   ├── SysUserService.java
 │   │   │   │                       │   └── TransferOrderService.java
-│   │   │   │                       └── mapper
-│   │   │   │                           ├── IsvInfoMapper.java
-│   │   │   │                           ├── IsvInfoMapper.xml
-│   │   │   │                           ├── MchAppMapper.java
-│   │   │   │                           ├── MchAppMapper.xml
-│   │   │   │                           ├── MchDivisionReceiverGroupMapper.java
-│   │   │   │                           ├── MchDivisionReceiverGroupMapper.xml
-│   │   │   │                           ├── MchDivisionReceiverMapper.java
-│   │   │   │                           ├── MchDivisionReceiverMapper.xml
-│   │   │   │                           ├── MchInfoMapper.java
-│   │   │   │                           ├── MchInfoMapper.xml
-│   │   │   │                           ├── MchNotifyRecordMapper.java
-│   │   │   │                           ├── MchNotifyRecordMapper.xml
-│   │   │   │                           ├── MchPayPassageMapper.java
-│   │   │   │                           ├── MchPayPassageMapper.xml
-│   │   │   │                           ├── PayInterfaceConfigMapper.java
-│   │   │   │                           ├── PayInterfaceConfigMapper.xml
-│   │   │   │                           ├── PayInterfaceDefineMapper.java
-│   │   │   │                           ├── PayInterfaceDefineMapper.xml
-│   │   │   │                           ├── PayOrderDivisionRecordMapper.java
-│   │   │   │                           ├── PayOrderDivisionRecordMapper.xml
-│   │   │   │                           ├── PayOrderMapper.java
-│   │   │   │                           ├── PayOrderMapper.xml
-│   │   │   │                           ├── PayWayMapper.java
-│   │   │   │                           ├── PayWayMapper.xml
-│   │   │   │                           ├── RefundOrderMapper.java
-│   │   │   │                           ├── RefundOrderMapper.xml
-│   │   │   │                           ├── SysConfigMapper.java
-│   │   │   │                           ├── SysConfigMapper.xml
-│   │   │   │                           ├── SysEntitlementMapper.java
-│   │   │   │                           ├── SysEntitlementMapper.xml
-│   │   │   │                           ├── SysLogMapper.java
-│   │   │   │                           ├── SysLogMapper.xml
-│   │   │   │                           ├── SysRoleEntRelaMapper.java
-│   │   │   │                           ├── SysRoleEntRelaMapper.xml
-│   │   │   │                           ├── SysRoleMapper.java
-│   │   │   │                           ├── SysRoleMapper.xml
-│   │   │   │                           ├── SysUserAuthMapper.java
-│   │   │   │                           ├── SysUserAuthMapper.xml
-│   │   │   │                           ├── SysUserMapper.java
-│   │   │   │                           ├── SysUserMapper.xml
-│   │   │   │                           ├── SysUserRoleRelaMapper.java
-│   │   │   │                           ├── SysUserRoleRelaMapper.xml
-│   │   │   │                           ├── TransferOrderMapper.java
-│   │   │   │                           └── TransferOrderMapper.xml
+│   │   │   │                       ├── mapper
+│   │   │   │                       │   ├── IsvInfoMapper.java
+│   │   │   │                       │   ├── IsvInfoMapper.xml
+│   │   │   │                       │   ├── MchAppMapper.java
+│   │   │   │                       │   ├── MchAppMapper.xml
+│   │   │   │                       │   ├── MchDivisionReceiverGroupMapper.java
+│   │   │   │                       │   ├── MchDivisionReceiverGroupMapper.xml
+│   │   │   │                       │   ├── MchDivisionReceiverMapper.java
+│   │   │   │                       │   ├── MchDivisionReceiverMapper.xml
+│   │   │   │                       │   ├── MchInfoMapper.java
+│   │   │   │                       │   ├── MchInfoMapper.xml
+│   │   │   │                       │   ├── MchNotifyRecordMapper.java
+│   │   │   │                       │   ├── MchNotifyRecordMapper.xml
+│   │   │   │                       │   ├── MchPayPassageMapper.java
+│   │   │   │                       │   ├── MchPayPassageMapper.xml
+│   │   │   │                       │   ├── PayInterfaceConfigMapper.java
+│   │   │   │                       │   ├── PayInterfaceConfigMapper.xml
+│   │   │   │                       │   ├── PayInterfaceDefineMapper.java
+│   │   │   │                       │   ├── PayInterfaceDefineMapper.xml
+│   │   │   │                       │   ├── PayOrderDivisionRecordMapper.java
+│   │   │   │                       │   ├── PayOrderDivisionRecordMapper.xml
+│   │   │   │                       │   ├── PayOrderMapper.java
+│   │   │   │                       │   ├── PayOrderMapper.xml
+│   │   │   │                       │   ├── PayWayMapper.java
+│   │   │   │                       │   ├── PayWayMapper.xml
+│   │   │   │                       │   ├── RefundOrderMapper.java
+│   │   │   │                       │   ├── RefundOrderMapper.xml
+│   │   │   │                       │   ├── SysConfigMapper.java
+│   │   │   │                       │   ├── SysConfigMapper.xml
+│   │   │   │                       │   ├── SysEntitlementMapper.java
+│   │   │   │                       │   ├── SysEntitlementMapper.xml
+│   │   │   │                       │   ├── SysLogMapper.java
+│   │   │   │                       │   ├── SysLogMapper.xml
+│   │   │   │                       │   ├── SysRoleEntRelaMapper.java
+│   │   │   │                       │   ├── SysRoleEntRelaMapper.xml
+│   │   │   │                       │   ├── SysRoleMapper.java
+│   │   │   │                       │   ├── SysRoleMapper.xml
+│   │   │   │                       │   ├── SysUserAuthMapper.java
+│   │   │   │                       │   ├── SysUserAuthMapper.xml
+│   │   │   │                       │   ├── SysUserMapper.java
+│   │   │   │                       │   ├── SysUserMapper.xml
+│   │   │   │                       │   ├── SysUserRoleRelaMapper.java
+│   │   │   │                       │   ├── SysUserRoleRelaMapper.xml
+│   │   │   │                       │   ├── TransferOrderMapper.java
+│   │   │   │                       │   └── TransferOrderMapper.xml
+│   │   │   │                       └── utils
+│   │   │   │                           └── UpperCasePasswordEncoder.java
 │   │   │   └── test
 │   │   │       ├── java
 │   │   │       │   └── com
@@ -1774,6 +1855,8 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   │   │   │   ├── AddOrEdit.vue
 │   │   │   │   │   ├── RoleDist.vue
 │   │   │   │   │   └── SysUserPage.vue
+│   │   │   │   ├── uatedge
+│   │   │   │   │   └── UatEdgeAllowlist.vue
 │   │   │   │   └── user
 │   │   │   │       └── Login.vue
 │   │   │   ├── App.vue
@@ -2006,6 +2089,8 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   │   ├── package.json
 │   │   ├── tsconfig.json
 │   │   └── vite.config.ts
+│   ├── scripts
+│   │   └── add-entry-preload.mjs
 │   ├── .dockerignore
 │   ├── .gitignore
 │   ├── Dockerfile
@@ -2013,6 +2098,9 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   ├── README.md
 │   └── default.conf.template
 ├── runtime
+│   ├── __pycache__
+│   │   ├── create-authorized-new-ccat-order-oncecpython-312.pyc
+│   │   └── create-first-real-ccat-order-oncecpython-312.pyc
 │   ├── JEE-D01-downstream-merchant-uat-report.md
 │   ├── JEE-E02-ccat-development-report.md
 │   ├── JEE-E04-ccat-production-candidate-deployment-report.md
@@ -2029,10 +2117,17 @@ tree -a -I '.git|node_modules|vendor|dist|build|target|.idea|.vscode' --dirsfirs
 │   └── rollback-v2-callback-edge-hot
 ├── tmp
 │   └── talend-jeepay-v2-create-guide.png
+├── var
+│   ├── jdk-shim
+│   │   └── bin
+│   │       ├── java -> /mnt/c/Program Files/Java/jdk-21.0.11/bin/java.exe
+│   │       └── javac -> /mnt/c/Program Files/Java/jdk-21.0.11/bin/javac.exe
+│   ├── cf-geo.txt
+│   ├── cf-realip.txt
+│   └── mvn-test.log
 ├── .gitignore
 ├── AGENTS.md
 ├── PROJECT_TREE.md
 └── README.md
 
-483 directories, 1539 files
-```
+510 directories, 1609 files

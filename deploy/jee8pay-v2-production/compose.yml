@@ -134,7 +134,7 @@ services:
     image: jee8pay-v2-production-payment:654df8b6b1ed
     environment:
       PLATFORM_ENVIRONMENT: PRODUCTION
-      CCAT_PROVIDER_ENVIRONMENT: PRODUCTION
+      RYO_PROVIDER_ENVIRONMENT: PRODUCTION
       SPRING_CONFIG_IMPORT: configtree:/run/secrets/
       SPRING_DATA_REDIS_DATABASE: 3
       JAVA_TOOL_OPTIONS: -Xms192m -Xmx320m -XX:+ExitOnOutOfMemoryError
@@ -183,7 +183,7 @@ services:
       dockerfile: Dockerfile.backend
       args:
         SERVICE_JAR: jeepay-manager.jar
-    image: jee8pay-v2-production-manager:654df8b6b1ed
+    image: jee8pay-v2-production-manager:de94ab8fd19d-54355604
     environment:
       PLATFORM_ENVIRONMENT: PRODUCTION
       SPRING_CONFIG_IMPORT: configtree:/run/secrets/
@@ -199,6 +199,7 @@ services:
       - ./config/application.yml:/jeepayhomes/service/app/application.yml:ro
       - manager_logs:/jeepayhomes/service/logs
       - manager_uploads:/jeepayhomes/service/uploads
+      - /opt/jee8pay-v2-production/edge-allowlist:/edge-allowlist
     ports:
       - "127.0.0.1:29217:9217"
     healthcheck:

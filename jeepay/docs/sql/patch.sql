@@ -304,14 +304,47 @@ alter table t_transfer_order add column `channel_res_data` TEXT DEFAULT NULL COM
 
 ## -- ++++ [v3.1.0] ===> NEXT
 
--- CCAT / 黑猫 PAY ibon Phase 1
-DELETE FROM t_pay_way WHERE way_code = 'CCAT_IBON';
-INSERT INTO t_pay_way (way_code, way_name) VALUES ('CCAT_IBON', '黑猫 PAY ibon 缴款');
-DELETE FROM t_pay_interface_define WHERE if_code = 'ccat';
+-- 黑猫 PAY ibon：既有 CCAT / CCAT_IBON 改名 RYO / RYO_IBON，并新增同一平台的
+-- 統一客樂得上游 JAY / CHI（不同契约会员帐号，API/APN contract 相同）。
+-- 注意：以下 UPDATE 为一次性运行数据迁移；重复执行前请确认不存在 if_code 冲突。
+
+-- 1) 定义数据：CCAT / CCAT_IBON -> RYO / RYO_IBON（DELETE+INSERT 幂等）
+DELETE FROM t_pay_way WHERE way_code IN ('CCAT_IBON', 'RYO_IBON');
+INSERT INTO t_pay_way (way_code, way_name) VALUES ('RYO_IBON', 'RYO ibon 缴款');
+DELETE FROM t_pay_interface_define WHERE if_code IN ('ccat', 'ryo');
 INSERT INTO t_pay_interface_define (if_code, if_name, is_mch_mode, is_isv_mode, config_page_type, isv_params, isvsub_mch_params, normal_mch_params, way_codes, icon, bg_color, state, remark)
-VALUES ('ccat', '黑猫 PAY', 1, 0, 1,
+VALUES ('ryo', 'RYO（黑猫 PAY）', 1, 0, 1,
         NULL,
         NULL,
         '[{"name":"environment","desc":"Provider 环境","type":"radio","verify":"required","values":"TEST,PRODUCTION","titles":"测试环境,生产环境"},{"name":"custId","desc":"契客代号","type":"text","verify":"required"},{"name":"apiPassword","desc":"API 密码","type":"text","verify":"required","star":"1"}]',
-        '[{"wayCode":"CCAT_IBON"}]',
-        '', '#222222', 1, '黑猫 PAY ibon 通道');
+        '[{"wayCode":"RYO_IBON"}]',
+        '', '#222222', 1, '黑猫 PAY ibon 通道（上游一）');
+
+-- 2) 运行数据：既有 ccat 契约/通道/订单迁移为 ryo
+UPDATE t_pay_interface_config SET if_code = 'ryo' WHERE if_code = 'ccat';
+UPDATE t_mch_pay_passage SET if_code = 'ryo', way_code = 'RYO_IBON' WHERE if_code = 'ccat' AND way_code = 'CCAT_IBON';
+UPDATE t_pay_order SET if_code = 'ryo', way_code = 'RYO_IBON' WHERE if_code = 'ccat' AND way_code = 'CCAT_IBON';
+UPDATE t_pay_order_division_record SET if_code = 'ryo' WHERE if_code = 'ccat';
+UPDATE t_refund_order SET if_code = 'ryo', way_code = 'RYO_IBON' WHERE if_code = 'ccat' AND way_code = 'CCAT_IBON';
+UPDATE t_transfer_order SET if_code = 'ryo' WHERE if_code = 'ccat';
+UPDATE t_mch_division_receiver SET if_code = 'ryo' WHERE if_code = 'ccat';
+
+-- 3) 新增 JAY / CHI 定义
+DELETE FROM t_pay_way WHERE way_code IN ('JAY_IBON', 'CHI_IBON');
+INSERT INTO t_pay_way (way_code, way_name) VALUES ('JAY_IBON', 'JAY ibon 缴款');
+INSERT INTO t_pay_way (way_code, way_name) VALUES ('CHI_IBON', 'CHI ibon 缴款');
+DELETE FROM t_pay_interface_define WHERE if_code IN ('jay', 'chi');
+INSERT INTO t_pay_interface_define (if_code, if_name, is_mch_mode, is_isv_mode, config_page_type, isv_params, isvsub_mch_params, normal_mch_params, way_codes, icon, bg_color, state, remark)
+VALUES ('jay', 'JAY（黑猫 PAY）', 1, 0, 1,
+        NULL,
+        NULL,
+        '[{"name":"environment","desc":"Provider 环境","type":"radio","verify":"required","values":"TEST,PRODUCTION","titles":"测试环境,生产环境"},{"name":"custId","desc":"契客代号","type":"text","verify":"required"},{"name":"apiPassword","desc":"API 密码","type":"text","verify":"required","star":"1"}]',
+        '[{"wayCode":"JAY_IBON"}]',
+        '', '#222222', 1, '黑猫 PAY ibon 通道（上游二）');
+INSERT INTO t_pay_interface_define (if_code, if_name, is_mch_mode, is_isv_mode, config_page_type, isv_params, isvsub_mch_params, normal_mch_params, way_codes, icon, bg_color, state, remark)
+VALUES ('chi', 'CHI（黑猫 PAY）', 1, 0, 1,
+        NULL,
+        NULL,
+        '[{"name":"environment","desc":"Provider 环境","type":"radio","verify":"required","values":"TEST,PRODUCTION","titles":"测试环境,生产环境"},{"name":"custId","desc":"契客代号","type":"text","verify":"required"},{"name":"apiPassword","desc":"API 密码","type":"text","verify":"required","star":"1"}]',
+        '[{"wayCode":"CHI_IBON"}]',
+        '', '#222222', 1, '黑猫 PAY ibon 通道（上游三）');

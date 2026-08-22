@@ -1,7 +1,7 @@
 # Taiwan Platform Baseline
 
 > **STATUS: STALE（部分內容已被後續證據取代）**
-> 本文是 JEE-B01（2026-08-12）的 audit snapshot。其中「CCAT amount 轉換仍 blocked」與「`channelOrderNo` / `trans_id` UNKNOWN」兩項已由 JEE-C03 的認證規格與 CCAT 實作取代，以 [`../providers/ccat/contract-evidence.md`](../providers/ccat/contract-evidence.md) 與 [`../providers/ccat/provider-design.md`](../providers/ccat/provider-design.md) 為準。其餘 currency / locale / terminology / timezone 的分類結論仍有效。更新本文件時請先比對 CCAT 契約文件，避免覆寫已驗證結論。
+> 本文是 JEE-B01（2026-08-12）的 audit snapshot。其中「CCAT amount 轉換仍 blocked」與「`channelOrderNo` / `trans_id` UNKNOWN」兩項已由 JEE-C03 的認證規格與 CCAT 實作取代，以 [`../providers/ryo/contract-evidence.md`](../providers/ryo/contract-evidence.md) 與 [`../providers/ryo/provider-design.md`](../providers/ryo/provider-design.md) 為準。其餘 currency / locale / terminology / timezone 的分類結論仍有效。更新本文件時請先比對 CCAT 契約文件，避免覆寫已驗證結論。
 
 ## Scope and classification
 

@@ -11,8 +11,17 @@ BASE_URL = os.environ.get("UAT_INTERNAL_BASE_URL", "http://127.0.0.1:19216")
 MCH_NO = os.environ["UAT_MERCHANT_ID"]
 APP_ID = os.environ["UAT_APP_ID"]
 SECRET = os.environ["UAT_APP_SECRET"]
-EXISTING_MCH_ORDER_NO = "T0814160202322276"
-EXISTING_PAY_ORDER_ID = "P2088297924112322562"
+WAY_CODE = os.environ.get("UAT_WAY_CODE", "RYO_IBON")
+PROVIDER_PREFIXES = {
+    "RYO_IBON": "RYO",
+    "JAY_IBON": "JAY",
+    "CHI_IBON": "CHI",
+}
+if WAY_CODE not in PROVIDER_PREFIXES:
+    raise SystemExit("UAT_WAY_CODE must be RYO_IBON, JAY_IBON, or CHI_IBON")
+PROVIDER_PREFIX = PROVIDER_PREFIXES[WAY_CODE]
+EXISTING_MCH_ORDER_NO = "UAT-TALEND-RYO-20260821-092912-F8DAD9"
+EXISTING_PAY_ORDER_ID = "P2090733029679960065"
 
 
 def wire_value(value):
@@ -91,17 +100,17 @@ def query_by(field, value):
     return request("/api/pay/query", payload)
 
 
-def assert_waiting_query(name, http_status, response):
+def assert_baseline_query(name, http_status, response):
     assert http_status == 200, f"{name}: HTTP {http_status}"
     assert response.get("code") == 0, f"{name}: {response}"
     data = response["data"]
     assert data["payOrderId"] == EXISTING_PAY_ORDER_ID
     assert data["mchOrderNo"] == EXISTING_MCH_ORDER_NO
-    assert data["state"] == 1
+    assert data["state"] == 2
     assert data["amount"] == 4000
     assert data["currency"] == "TWD"
     assert response.get("sign") == sign(data), f"{name}: response signature mismatch"
-    log_result(name, http_status, response, "state=1 amount=4000 responseSign=VALID")
+    log_result(name, http_status, response, "state=2 amount=4000 responseSign=VALID")
     return data
 
 
@@ -115,10 +124,10 @@ def create_payload(mch_order_no, **overrides):
     }
     fields = {
         "mchOrderNo": mch_order_no,
-        "wayCode": "CCAT_IBON",
+        "wayCode": WAY_CODE,
         "amount": 4000,
         "currency": "TWD",
-        "subject": "CCAT ibon black-box negative test",
+        "subject": f"{PROVIDER_PREFIX} ibon black-box negative test",
         "body": "Must be rejected before Provider Create",
         "notifyUrl": "https://merchant.example.test/callback/jeepay",
         "clientIp": "127.0.0.1",
@@ -139,10 +148,10 @@ def assert_order_absent(name, mch_order_no):
 
 def main():
     baseline_http, baseline_response = query_by("mchOrderNo", EXISTING_MCH_ORDER_NO)
-    baseline = assert_waiting_query("P0_QUERY_BY_MCH_ORDER_NO", baseline_http, baseline_response)
+    baseline = assert_baseline_query("P0_QUERY_BY_MCH_ORDER_NO", baseline_http, baseline_response)
 
     pay_id_http, pay_id_response = query_by("payOrderId", EXISTING_PAY_ORDER_ID)
-    pay_id_data = assert_waiting_query("P0_QUERY_BY_PAY_ORDER_ID", pay_id_http, pay_id_response)
+    pay_id_data = assert_baseline_query("P0_QUERY_BY_PAY_ORDER_ID", pay_id_http, pay_id_response)
     stable_keys = ("payOrderId", "mchOrderNo", "amount", "currency", "state", "createdAt")
     assert {key: baseline.get(key) for key in stable_keys} == {
         key: pay_id_data.get(key) for key in stable_keys
@@ -150,7 +159,7 @@ def main():
 
     for index in range(1, 4):
         http_status, response = query_by("mchOrderNo", EXISTING_MCH_ORDER_NO)
-        data = assert_waiting_query(f"P0_REPEAT_QUERY_{index}", http_status, response)
+        data = assert_baseline_query(f"P0_REPEAT_QUERY_{index}", http_status, response)
         assert {key: baseline.get(key) for key in stable_keys} == {
             key: data.get(key) for key in stable_keys
         }
@@ -204,13 +213,13 @@ def main():
             "P1_INVALID_CURRENCY",
             f"BB-{stamp}-CURRENCY",
             {"currency": "USD"},
-            "CCAT ibon 僅支援 TWD",
+            f"{PROVIDER_PREFIX} ibon 僅支援 TWD",
         ),
         (
             "P1_MALFORMED_CHANNEL_EXTRA",
             f"BB-{stamp}-MALFORMED",
             {"channelExtra": "{not-json"},
-            "CCAT channelExtra 格式錯誤",
+            f"{PROVIDER_PREFIX} channelExtra 格式錯誤",
         ),
         (
             "P1_MISSING_PAYER_FIELD",
@@ -227,7 +236,7 @@ def main():
                     separators=(",", ":"),
                 )
             },
-            "CCAT channelExtra 缺少繳款人資料",
+            f"{PROVIDER_PREFIX} channelExtra 缺少繳款人資料",
         ),
         (
             "P1_UNSUPPORTED_WAYCODE",
@@ -252,8 +261,11 @@ def main():
         assert_order_absent(name, mch_order_no)
 
     final_http, final_response = query_by("mchOrderNo", EXISTING_MCH_ORDER_NO)
-    assert_waiting_query("FINAL_EXISTING_ORDER_UNCHANGED", final_http, final_response)
-    print("D01_BLACKBOX_SUITE=PASS providerCreateCallsExpected=0 realPaymentTriggered=NO")
+    assert_baseline_query("FINAL_EXISTING_ORDER_UNCHANGED", final_http, final_response)
+    print(
+        f"D01_BLACKBOX_SUITE=PASS wayCode={WAY_CODE} "
+        "providerCreateCallsExpected=0 realPaymentTriggered=NO"
+    )
 
 
 if __name__ == "__main__":

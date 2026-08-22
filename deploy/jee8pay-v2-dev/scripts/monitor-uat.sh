@@ -29,8 +29,8 @@ db "SELECT notify_id, order_id, state, notify_count, notify_count_limit, LEFT(no
     FROM t_mch_notify_record ORDER BY notify_id DESC LIMIT 10;"
 echo "(state: 1=通知中 2=成功 3=失敗)"
 
-echo "--- 4. 最近 15 分鐘 payment log CCAT 事件數 ---"
-sudo -n docker logs --since 15m "$PAYMENT" 2>&1 | grep -c "CCAT_CREATE\|CCAT_APN\|CCAT.*reject" || echo 0
+echo "--- 4. 最近 15 分鐘 payment log 黑猫 PAY（RYO/JAY/CHI）事件數 ---"
+sudo -n docker logs --since 15m "$PAYMENT" 2>&1 | grep -cE "RYO_CREATE|JAY_CREATE|CHI_CREATE|RYO_APN|JAY_APN|CHI_APN|RYO.*reject|JAY.*reject|CHI.*reject" || echo 0
 
 echo "--- 5. container 健康 ---"
 sudo -n docker ps --filter "name=jee8pay-v2-dev" --format "{{.Names}} | {{.Status}}" | head -12

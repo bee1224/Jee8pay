@@ -6,13 +6,14 @@
 #       `include /etc/nginx/allowlist/uat.conf;` 引用 allow 規則。
 # 本腳本由 root crontab 每分鐘執行：比對 json 與 uat.conf 的 sha，變更時重新產生並 nginx -t + reload，
 # 失敗自動回滾，並把結果寫入 status.txt 供頁面顯示。
+# dev/prod 共用：可用環境變數覆寫（cron 上設定），預設為 Development。
 set -uo pipefail
 
-dir=/opt/jee8pay-v2-dev/edge-allowlist
+dir=${UAT_ALLOWLIST_DIR:-/opt/jee8pay-v2-dev/edge-allowlist}
 json="$dir/allowlist.json"
 conf="$dir/uat.conf"
 status="$dir/status.txt"
-edge=nnviopp-sandbox-edge
+edge=${UAT_EDGE_NAME:-nnviopp-sandbox-edge}
 
 [ -f "$json" ] || exit 0
 

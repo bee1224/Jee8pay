@@ -5,22 +5,22 @@
     "mchNo": "M_SYNTHETIC_UAT",
     "appId": "APP_SYNTHETIC_UAT",
     "mchOrderNo": "UAT-SYNTH-0001",
-    "ifCode": "ccat",
-    "wayCode": "CCAT_IBON",
+    "ifCode": "ryo",
+    "wayCode": "RYO_IBON",
     "amount": 4000,
     "currency": "TWD",
     "state": 2,
     "clientIp": "203.0.113.10",
-    "subject": "CCAT ibon UAT",
+    "subject": "RYO ibon UAT",
     "body": "Synthetic test vector",
     "channelOrderNo": "SYNTHETIC_PROVIDER_REFERENCE",
     "extParam": "TRACE-SYNTHETIC",
     "successTime": 1786581600000,
     "createdAt": 1786581000000,
     "reqTime": 1786581601000,
-    "sign": "72B1609DB4CCEF53AFC58BE796CE2116"
+    "sign": "8370535A47F225E2986FA91BAF9BCC4C"
   },
-  "canonical": "amount=4000&appId=APP_SYNTHETIC_UAT&body=Synthetic test vector&channelOrderNo=SYNTHETIC_PROVIDER_REFERENCE&clientIp=203.0.113.10&createdAt=1786581000000&currency=TWD&extParam=TRACE-SYNTHETIC&ifCode=ccat&mchNo=M_SYNTHETIC_UAT&mchOrderNo=UAT-SYNTH-0001&payOrderId=P_SYNTHETIC_0001&reqTime=1786581601000&state=2&subject=CCAT ibon UAT&successTime=1786581600000&wayCode=CCAT_IBON&key=SYNTHETIC_SECRET_ONLY_FOR_D01_VECTOR_20260813",
-  "expectedSign": "72B1609DB4CCEF53AFC58BE796CE2116",
+  "canonical": "amount=4000&appId=APP_SYNTHETIC_UAT&body=Synthetic test vector&channelOrderNo=SYNTHETIC_PROVIDER_REFERENCE&clientIp=203.0.113.10&createdAt=1786581000000&currency=TWD&extParam=TRACE-SYNTHETIC&ifCode=ryo&mchNo=M_SYNTHETIC_UAT&mchOrderNo=UAT-SYNTH-0001&payOrderId=P_SYNTHETIC_0001&reqTime=1786581601000&state=2&subject=RYO ibon UAT&successTime=1786581600000&wayCode=RYO_IBON&key=SYNTHETIC_SECRET_ONLY_FOR_D01_VECTOR_20260813",
+  "expectedSign": "8370535A47F225E2986FA91BAF9BCC4C",
   "ack": "SUCCESS"
 }

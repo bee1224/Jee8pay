@@ -10,7 +10,7 @@ Current canonical inputs:
 V1 Compose directory = /opt/payment/payment-service-sandbox
 Edge overlay = /opt/jee8pay-v2-dev/public-callback/compose.edge-overlay.yaml
 Ingress config = /opt/jee8pay-v2-dev/merchant-uat/nginx.proposed.conf
-Ingress config SHA256 = 88f89d370c65b936ce0997e2088e2c6f71c11fdab338cd6ba21058c7274191dc
+Ingress config SHA256 = cb1500d31110f06e5211089976ac8436329567ba007ef854f4baceaaf24e56b6
 Ingress config owner/mode = 0:10002 0640
 Overlay SHA256 = 6ba37f3fb1221b804acb8a7d2d270d4b90b87570101cb1d8b70d76c20542f236
 Overlay owner/mode = root:root 0600
@@ -19,6 +19,8 @@ Restart policy = unless-stopped
 ```
 
 The config checksum differs from reviewed final checksum `0786d6bcba356279f3065f2b33ef97fac84f998e1ff035c901a3a45108acf7f6` by one logging-only change: `$remote_addr` was prepended to the edge access log. The root-only semantic diff is `/opt/jee8pay-v2-dev/state/n01/final-config-semantic.diff`. Routes、upstreams、methods and the two-IP UAT allowlist did not change.
+
+**2026-08-21 update**：Provider 改名與新增上游後，edge callback 已由 `/api/pay/notify/ccat` 改為 `/api/pay/notify/{ryo,jay,chi}` 三條 route，ingress config SHA256 更新為 `cb1500d31110f06e5211089976ac8436329567ba007ef854f4baceaaf24e56b6`（allowlist include ×2 保留，renderer 已更新為 include 版本；`bin/reconcile-sandbox-edge` / `bin/validate-sandbox-edge` 的 `expected_config_sha` 已同步）。
 
 ## Root cause closed by N01
 
@@ -65,7 +67,7 @@ The validator checks:
 - local 80/443 listening sockets;
 - V1 edge health and both V2 ingress health endpoints;
 - V2 core `11/11` and V1 backend health;
-- exact Create、Query and CCAT callback routes;
+- exact Create、Query and 黑貓 PAY（RYO/JAY/CHI）callback routes;
 - UAT allowlist unchanged and Production IP absent.
 
 Latest root-only evidence is `/opt/jee8pay-v2-dev/state/n01/validation-latest.txt`. Recovery-time evidence is `/opt/jee8pay-v2-dev/state/n01/forensic-before.txt`.
@@ -79,7 +81,9 @@ Public route contract remains:
 ```text
 api-v2-dev.nnviopp.com POST /api/pay/unifiedOrder
 api-v2-dev.nnviopp.com POST /api/pay/query
-ccat-v2-dev.nnviopp.com /api/pay/notify/ccat
+ccat-v2-dev.nnviopp.com /api/pay/notify/ryo
+ccat-v2-dev.nnviopp.com /api/pay/notify/jay
+ccat-v2-dev.nnviopp.com /api/pay/notify/chi
 ```
 
 The API host exposes no Manager、Merchant UI or Cashier path. UAT allowlist remains only `34.92.245.74` and `34.92.52.162`; `35.220.239.87` is not present.

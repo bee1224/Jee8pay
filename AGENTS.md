@@ -10,7 +10,8 @@ Taiwan payment companies are Providers.
 ## CURRENT PHASE
 
 ```text
-Current provider: CCAT
+Platform: 黑貓 PAY（www.ccat.com.tw）
+Active providers（統一客樂得上游，同一平台）：RYO（原 CCAT 改名）、JAY、CHI
 Current product: ibon CVS payment
 Current capabilities:
 - Create Payment
@@ -18,7 +19,7 @@ Current capabilities:
 - Payment Notify / APN
 ```
 
-其他 CCAT capability 不得自行擴張。
+其他黑貓 PAY capability 不得自行擴張。
 
 ## UPSTREAM PRESERVATION RULE
 
@@ -45,7 +46,7 @@ NormalMchParams
 → model/params/<ifCode>/<IfCode>NormalMchParams
 ```
 
-CCAT 預期為 `model/params/ccat/CcatNormalMchParams`。credentials 使用既有 `PayInterfaceConfig` / `if_params` JSON，Provider class 不得 hard-code credential。
+黑貓 PAY 上游預期為 `model/params/ryo/RyoNormalMchParams`、`model/params/jay/JayNormalMchParams`、`model/params/chi/ChiNormalMchParams`（三者的 params schema 相同，僅類別/ifCode 不同）。credentials 使用既有 `PayInterfaceConfig` / `if_params` JSON，Provider class 不得 hard-code credential。
 
 ## PAYMENT QUERY RULE
 

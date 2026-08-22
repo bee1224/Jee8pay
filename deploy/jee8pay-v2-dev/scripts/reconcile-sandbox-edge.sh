@@ -4,7 +4,7 @@ set -euo pipefail
 readonly edge=nnviopp-sandbox-edge
 readonly expected_host=server1.nnviopp.com
 readonly sandbox_ip=159.198.40.128
-readonly expected_config_sha=67bedd649546d54eb6337f205c5b5edb8e7dd9f1910105e726cddbdc1a2bc915
+readonly expected_config_sha=cb1500d31110f06e5211089976ac8436329567ba007ef854f4baceaaf24e56b6
 readonly expected_overlay_sha=4e583abf4253e69daef8aa8c0dd7f612d669595528ff081330ef8b6c4eec5a9b
 readonly final_config=/opt/jee8pay-v2-dev/merchant-uat/nginx.proposed.conf
 readonly overlay=/opt/jee8pay-v2-dev/public-callback/compose.edge-overlay.yaml
@@ -37,7 +37,9 @@ fail() {
 
 [[ $(grep -Fc 'location = /api/pay/unifiedOrder {' "$final_config") -eq 1 ]] || fail CREATE_ROUTE
 [[ $(grep -Fc 'location = /api/pay/query {' "$final_config") -eq 1 ]] || fail QUERY_ROUTE
-[[ $(grep -Fc 'location = /api/pay/notify/ccat {' "$final_config") -eq 1 ]] || fail CALLBACK_ROUTE
+[[ $(grep -Fc 'location = /api/pay/notify/ryo {' "$final_config") -eq 1 ]] || fail CALLBACK_ROUTE_RYO
+[[ $(grep -Fc 'location = /api/pay/notify/jay {' "$final_config") -eq 1 ]] || fail CALLBACK_ROUTE_JAY
+[[ $(grep -Fc 'location = /api/pay/notify/chi {' "$final_config") -eq 1 ]] || fail CALLBACK_ROUTE_CHI
 # 白名單改為 include：主設定檔不再內嵌 allow，allow 檔由 host cron 依 allowlist.json 產生
 [[ $(grep -Fc 'include /etc/nginx/allowlist/uat.conf;' "$final_config") -eq 2 ]] || fail ALLOWLIST_INCLUDE
 ! grep -Fq '35.220.239.87' "$final_config" || fail PRODUCTION_IP_PRESENT

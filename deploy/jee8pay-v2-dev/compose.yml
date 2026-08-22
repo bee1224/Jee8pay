@@ -179,7 +179,7 @@ services:
       dockerfile: Dockerfile.backend
       args:
         SERVICE_JAR: jeepay-manager.jar
-    image: jee8pay-v2-dev-manager:de94ab8fd19d-7c7d0be8
+    image: jee8pay-v2-dev-manager:de94ab8fd19d-ffc25e28
     environment:
       SPRING_CONFIG_IMPORT: configtree:/run/secrets/
       SPRING_DATA_REDIS_DATABASE: 1
@@ -194,7 +194,7 @@ services:
       - ./config/application.yml:/jeepayhomes/service/app/application.yml:ro
       - manager_logs:/jeepayhomes/service/logs
       - manager_uploads:/jeepayhomes/service/uploads
-      - ../../edge-allowlist:/edge-allowlist
+      - /opt/jee8pay-v2-dev/edge-allowlist:/edge-allowlist
     ports:
       - "127.0.0.1:19217:9217"
     healthcheck:

@@ -7,16 +7,16 @@
     "mchNo": "M_SYNTHETIC_UAT",
     "appId": "APP_SYNTHETIC_UAT",
     "mchOrderNo": "UAT-SYNTH-0001",
-    "wayCode": "CCAT_IBON",
+    "wayCode": "RYO_IBON",
     "amount": 4000,
     "currency": "TWD",
-    "subject": "CCAT ibon UAT",
+    "subject": "RYO ibon UAT",
     "body": "Synthetic test vector",
     "notifyUrl": "https://merchant.example.test/callback/jeepay",
     "expiredTime": 604800,
     "channelExtra": "{\"payerName\":\"王小明\",\"payerPostcode\":\"100\",\"payerAddress\":\"台北市測試路1號\",\"payerMobile\":\"0900000000\",\"payerEmail\":\"uat@example.test\"}",
-    "sign": "C9E11BBEEF851CAAEE8320AB2A3CE321"
+    "sign": "A4E1A33781D36672F66999C99283DADD"
   },
-  "canonical": "amount=4000&appId=APP_SYNTHETIC_UAT&body=Synthetic test vector&channelExtra={\"payerName\":\"王小明\",\"payerPostcode\":\"100\",\"payerAddress\":\"台北市測試路1號\",\"payerMobile\":\"0900000000\",\"payerEmail\":\"uat@example.test\"}&currency=TWD&expiredTime=604800&mchNo=M_SYNTHETIC_UAT&mchOrderNo=UAT-SYNTH-0001&notifyUrl=https://merchant.example.test/callback/jeepay&reqTime=1786581000000&signType=MD5&subject=CCAT ibon UAT&version=1.0&wayCode=CCAT_IBON&key=SYNTHETIC_SECRET_ONLY_FOR_D01_VECTOR_20260813",
-  "expectedSign": "C9E11BBEEF851CAAEE8320AB2A3CE321"
+  "canonical": "amount=4000&appId=APP_SYNTHETIC_UAT&body=Synthetic test vector&channelExtra={\"payerName\":\"王小明\",\"payerPostcode\":\"100\",\"payerAddress\":\"台北市測試路1號\",\"payerMobile\":\"0900000000\",\"payerEmail\":\"uat@example.test\"}&currency=TWD&expiredTime=604800&mchNo=M_SYNTHETIC_UAT&mchOrderNo=UAT-SYNTH-0001&notifyUrl=https://merchant.example.test/callback/jeepay&reqTime=1786581000000&signType=MD5&subject=RYO ibon UAT&version=1.0&wayCode=RYO_IBON&key=SYNTHETIC_SECRET_ONLY_FOR_D01_VECTOR_20260813",
+  "expectedSign": "A4E1A33781D36672F66999C99283DADD"
 }

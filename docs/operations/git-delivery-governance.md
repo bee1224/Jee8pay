@@ -92,9 +92,9 @@ ADR-0003 與 `docs/decisions/README.md` 已存在於 worktree 且內容一致，
 C01 scope candidates（不認領、不修改）：
 
 - `docs/providers/README.md`
-- `docs/providers/ccat/README.md`
-- `docs/providers/ccat/provider-design.md`
-- `docs/providers/ccat/contract-evidence.md`
+- `docs/providers/ryo/README.md`
+- `docs/providers/ryo/provider-design.md`
+- `docs/providers/ryo/contract-evidence.md`
 
 V01 是 read-only acceptance；沒有可可靠歸屬於 V01 的檔案變更，因此不認領任何 path。
 

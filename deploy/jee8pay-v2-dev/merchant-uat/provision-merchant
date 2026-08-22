@@ -34,9 +34,9 @@ SQL
 
 [[ $(db <<SQL
 SELECT COUNT(*) FROM t_pay_interface_config
-WHERE info_type=3 AND info_id='$source_app_id' AND if_code='ccat' AND state=1;
+WHERE info_type=3 AND info_id='$source_app_id' AND if_code='ryo' AND state=1;
 SQL
-) == 1 ]] || { echo 'PROVISION=FAIL_SOURCE_CCAT_CONFIG' >&2; exit 2; }
+) == 1 ]] || { echo 'PROVISION=FAIL_SOURCE_RYO_CONFIG' >&2; exit 2; }
 
 app_secret=$(openssl rand -hex 32)
 temporary=$(mktemp /opt/jee8pay-v2-dev/secrets/.d01-external-merchant-uat.XXXXXX)
@@ -71,13 +71,13 @@ INSERT INTO t_pay_interface_config
   (info_type, info_id, if_code, if_params, if_rate, state, remark, created_by, updated_by)
 SELECT
   3, '$app_id', if_code, if_params, if_rate, 1,
-  'JEE-D01 native CCAT config binding', 'JEE-D01', 'JEE-D01'
+  'JEE-D01 native RYO config binding', 'JEE-D01', 'JEE-D01'
 FROM t_pay_interface_config
-WHERE info_type=3 AND info_id='$source_app_id' AND if_code='ccat' AND state=1;
+WHERE info_type=3 AND info_id='$source_app_id' AND if_code='ryo' AND state=1;
 INSERT INTO t_mch_pay_passage
   (mch_no, app_id, if_code, way_code, rate, risk_config, state)
 VALUES
-  ('$mch_no', '$app_id', 'ccat', 'CCAT_IBON', 0.000000, NULL, 1);
+  ('$mch_no', '$app_id', 'ryo', 'RYO_IBON', 0.000000, NULL, 1);
 COMMIT;
 SQL
 

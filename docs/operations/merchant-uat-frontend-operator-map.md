@@ -8,14 +8,14 @@
 | --- | --- | --- |
 | Merchant | 商戶管理 → 商戶列表；route `/mch`，`MchListPage` | 檢查 `M_D01_EXTERNAL_UAT`、普通商戶、啟用狀態 |
 | App | 商戶管理 → 應用列表；route `/apps`，`MchAppPage` | 檢查 `APP_D01_EXTERNAL_UAT`、啟用狀態；編輯畫面以 masked placeholder 顯示 App Secret |
-| Provider config | 應用列表 → 支付配置 → 支付參數 | 檢查 App 的 `ccat` config 已啟用；敏感欄位由 params model 脫敏，不抄到文件 |
-| Passage | 應用列表 → 支付配置 → 支付通道 | 檢查 `CCAT_IBON → ccat` passage、rate、state |
-| PayInterface | 支付配置 → 支付接口；route `/ifdefines` | 檢查 `ifCode=ccat` 定義與支援 wayCode |
-| PayWay | 支付配置 → 支付方式；route `/payways` | 檢查 exact `CCAT_IBON` casing/name |
+| Provider config | 應用列表 → 支付配置 → 支付參數 | 檢查 App 的 `ryo` config 已啟用；敏感欄位由 params model 脫敏，不抄到文件 |
+| Passage | 應用列表 → 支付配置 → 支付通道 | 檢查 `RYO_IBON → ryo` passage（JAY／CHI 同理）、rate、state |
+| PayInterface | 支付配置 → 支付接口；route `/ifdefines` | 檢查 `ifCode=ryo` 定義與支援 wayCode |
+| PayWay | 支付配置 → 支付方式；route `/payways` | 檢查 exact `RYO_IBON` casing/name |
 | PayOrder | 訂單管理 → 支付訂單；component default `/payOrder` | 依 Merchant/App、`mchOrderNo` 或 `payOrderId` 查 WAITING／SUCCESS |
 | Merchant Notify | 訂單管理 → 商戶通知；route `/notify` | 查 notify state/count/response；failed record 有 native 重發操作 |
 
-`CCAT_IBON` 沒有 custom Provider frontend；generic PayInterface config form 就是 canonical operator surface。
+`RYO_IBON` 沒有 custom Provider frontend；generic PayInterface config form 就是 canonical operator surface。
 
 ## Merchant
 
@@ -30,9 +30,9 @@ D01 沒有建立 Merchant portal login credential；外部系統串接只需要 
 
 ## Cashier
 
-Cashier UI 的 actual routes 只有 WeChat、Alipay、YSF JSAPI；沒有 `CCAT_IBON` page／route。`CCAT_IBON` native UnifiedOrder 直接回 `payDataType=ccatIbon` 與 `payData`，不使用 JeePay Cashier URL。
+Cashier UI 的 actual routes 只有 WeChat、Alipay、YSF JSAPI；沒有 `RYO_IBON` page／route。`RYO_IBON` native UnifiedOrder 直接回 `payDataType=ryoIbon` 與 `payData`，不使用 JeePay Cashier URL。
 
-Merchant UI 的 generic Pay Test modal 也只特別處理既有 QR／payurl types，沒有 `ccatIbon` renderer。因此本次外部 Merchant API flow 應自行 parse `payData` 顯示 payment code／expiry／可選 `shortUrl`，不依賴 JeePay frontend redesign。
+Merchant UI 的 generic Pay Test modal 也只特別處理既有 QR／payurl types，沒有 `ryoIbon` renderer。因此本次外部 Merchant API flow 應自行 parse `payData` 顯示 payment code／expiry／可選 `shortUrl`，不依賴 JeePay frontend redesign。
 
 ## Source evidence
 
@@ -40,4 +40,4 @@ Merchant UI 的 generic Pay Test modal 也只特別處理既有 QR／payurl type
 - Manager component map：`jeepay-ui/jeepay-ui-manager/src/config/appConfig.js`。
 - Merchant component map：`jeepay-ui/jeepay-ui-merchant/src/config/appConfig.js`。
 - Cashier routes：`jeepay-ui/jeepay-ui-cashier/src/router/index.js` 與 `src/config/index.js`。
-- CCAT response：`CcatIbonOrderRS`。
+- RYO response：`RyoIbonOrderRS`。

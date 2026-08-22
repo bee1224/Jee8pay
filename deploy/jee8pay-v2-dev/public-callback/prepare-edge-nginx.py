@@ -44,7 +44,33 @@ callback_server = """
     add_header X-Frame-Options DENY always;
     add_header Referrer-Policy no-referrer always;
 
-    location = /api/pay/notify/ccat {
+    location = /api/pay/notify/ryo {
+      proxy_http_version 1.1;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto https;
+      proxy_set_header Connection '';
+      proxy_connect_timeout 5s;
+      proxy_read_timeout 60s;
+      proxy_send_timeout 60s;
+      proxy_pass http://jee8pay_v2_callback;
+    }
+
+    location = /api/pay/notify/jay {
+      proxy_http_version 1.1;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto https;
+      proxy_set_header Connection '';
+      proxy_connect_timeout 5s;
+      proxy_read_timeout 60s;
+      proxy_send_timeout 60s;
+      proxy_pass http://jee8pay_v2_callback;
+    }
+
+    location = /api/pay/notify/chi {
       proxy_http_version 1.1;
       proxy_set_header Host $host;
       proxy_set_header X-Real-IP $remote_addr;

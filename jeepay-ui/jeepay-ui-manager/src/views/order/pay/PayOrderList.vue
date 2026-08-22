@@ -182,7 +182,7 @@
             </div>
           </template>
           <template v-if="column.key === 'op'">
-            <!-- 操作列插槽 -->
+            <!-- 操作列插槽：僅詳情；人工回調/退款在訂單詳情最下方，避免誤觸 -->
             <JeepayTableColumns>
               <a-button
                 v-if="$access('ENT_PAY_ORDER_VIEW')"
@@ -190,16 +190,6 @@
                 @click="detailFunc(record.payOrderId)"
               >
                 詳情
-              </a-button>
-              <a-button
-                v-if="$access('ENT_PAY_ORDER_REFUND')"
-                v-show="record.state === 2 && record.refundState !== 2"
-                type="link"
-                :style="REFUND_CAPABLE ? 'color: red' : ''"
-                :disabled="!REFUND_CAPABLE"
-                @click="openFunc(record, record.payOrderId)"
-              >
-                退款
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -562,13 +552,39 @@
             </a-form>
           </a-col>
         </a-row>
+
+        <!-- 底部操作：人工回調 / 退款（放在最下面，避免誤觸） -->
+        <a-divider />
+        <a-row justify="start" type="flex">
+          <a-col :sm="24">
+            <a-button
+              v-if="$access('ENT_PAY_ORDER_MANUAL_NOTIFY')"
+              type="primary"
+              danger
+              @click="manualNotifyFunc(vdata.detailData)"
+            >
+              人工回調
+            </a-button>
+            <a-button
+              v-if="$access('ENT_PAY_ORDER_REFUND')"
+              v-show="vdata.detailData.state === 2 && vdata.detailData.refundState !== 2"
+              type="primary"
+              danger
+              style="margin-left: 8px"
+              :disabled="!REFUND_CAPABLE"
+              @click="openFunc(vdata.detailData, vdata.detailData.payOrderId)"
+            >
+              退款
+            </a-button>
+          </a-col>
+        </a-row>
       </a-drawer>
     </template>
   </page-header-wrapper>
 </template>
 <script setup lang="ts">
 import RefundModal from './RefundModal.vue' // 退款弹出框
-import { API_URL_PAY_ORDER_LIST, API_URL_PAYWAYS_LIST, req } from '@/api/manage'
+import { API_URL_PAY_ORDER_LIST, API_URL_PAY_ORDER_MANUAL_NOTIFY, API_URL_PAYWAYS_LIST, req } from '@/api/manage'
 import moment from 'moment'
 import { reactive, ref, getCurrentInstance, onMounted, watch } from 'vue'
 
@@ -668,6 +684,22 @@ function detailFunc(recordId) {
     vdata.detailData = res
   })
   vdata.visible = true
+}
+
+// 人工手動回調：繞過支付，把訂單目前狀態直接通知到異步通知地址（外部商戶回調測試用）
+function manualNotifyFunc(record) {
+  const stateText = record.state === 6 ? '訂單關閉' : 'state=' + record.state
+  $infoBox.confirmDanger(
+    '確認人工回調？',
+    `將訂單 ${record.payOrderId}（${stateText}）以標準 Merchant Notify 格式直接通知到異步通知地址。通知內容為訂單目前狀態，外部商戶不會以非 SUCCESS 上分。`,
+    () => {
+      req
+        .add(API_URL_PAY_ORDER_MANUAL_NOTIFY, { payOrderId: record.payOrderId })
+        .then((res) => {
+          $infoBox.message.success(`已推送通知，notifyId=${res && res.notifyId}`)
+        })
+    }
+  )
 }
 function onChange(date, dateString) {
   vdata.searchData.createdStart = dateString[0] // 开始时间

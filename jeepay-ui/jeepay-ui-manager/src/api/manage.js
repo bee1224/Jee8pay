@@ -78,6 +78,8 @@ export const API_URL_MCH_LIST = '/api/mchInfo'
 export const API_URL_MCH_APP = '/api/mchApps'
 /** 支付订单管理 **/
 export const API_URL_PAY_ORDER_LIST = '/api/payOrder'
+/** 人工手動回調 **/
+export const API_URL_PAY_ORDER_MANUAL_NOTIFY = '/api/payOrder/manualNotify'
 /** 退款订单管理 **/
 export const API_URL_REFUND_ORDER_LIST = '/api/refundOrder'
 /** 商户通知管理 **/

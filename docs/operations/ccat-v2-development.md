@@ -1,5 +1,7 @@
 # CCAT V2 Development Runtime
 
+> **RENAME NOTE（2026-08-20）**：本文記錄 Development runtime 的歷史部署狀態。JeePay Provider 已由 `ccat` 改名為 `ryo`（`CCAT_IBON` → `RYO_IBON`），並新增 `jay` / `chi`；重新部署後 APN 路徑為 `/api/pay/notify/ryo`、`/api/pay/notify/jay`、`/api/pay/notify/chi`，secret 目錄改為 `secrets/ryo-provider`（及 jay/chi）。文中 `ccat-v2-dev.nnviopp.com` 域名與 `ccat-v2` 名稱保留為歷史命名。
+
 ## Current binding
 
 JEE-E02 binds source `1f313e776d03c2383adff5aa96b9aac9b78efedc` to Development VPS `server1.nnviopp.com` as Compose project `jee8pay-v2-dev`. The runtime is under `/opt/jee8pay-v2-dev/`; it does not use `/opt/payment/`, V1 databases, V1 volumes, V1 application networks, or public ports 80/443.

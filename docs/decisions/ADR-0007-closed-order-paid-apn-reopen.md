@@ -15,7 +15,7 @@ INIT/ING 的訂單**純本地**轉為 `STATE_CLOSED(6)`：不打 CCAT、不發�
 `expiredTime`（datetime）可能相差數小時：付款人可能在「本地已關閉、CCAT 仍接受付款」的窗口內
 完成付款（CCAT `process_code=4` + APN status=B）。
 
-此時 `CcatChannelNoticeService.doNotice` 的狀態守衛（`CcatChannelNoticeService.java:85-89`，
+此時 `RyoChannelNoticeService.doNotice` 的狀態守衛（`RyoChannelNoticeService.java:85-89`，
 僅接受 ING/SUCCESS/FAIL）會**拒絕**該 APN：本地不轉 SUCCESS、不發 Merchant Notify、商戶不入帳，
 但付款人已真實付款 → **滯留款項**，只能人工對帳（目前無任何自動化 recovery）。
 
@@ -23,7 +23,7 @@ INIT/ING 的訂單**純本地**轉為 `STATE_CLOSED(6)`：不打 CCAT、不發�
 
 允許「經完整驗證的 paid-APN」把本地 `STATE_CLOSED` 訂單轉回 `STATE_SUCCESS`：
 
-1. **Adapter（GREEN）**：`CcatChannelNoticeService.doNotice` 的狀態守衛加入 CLOSED；且
+1. **Adapter（GREEN）**：`RyoChannelNoticeService.doNotice` 的狀態守衛加入 CLOSED；且
    `ensureTerminalStateConsistency` 對 CLOSED 只接受 `CONFIRM_SUCCESS`（paid Query）→ 允許 reopen；
    CLOSED + WAITING/FAIL Query 一律維持 CLOSED（不轉態）。
 2. **Controller（RED，經本 ADR 授權）**：`ChannelNoticeController.doNotify` 增加分支
@@ -91,7 +91,7 @@ None
 
 ## Related Documents
 
-- [`provider-design.md`](../providers/ccat/provider-design.md)（APN 驗證與狀態映射）
+- [`provider-design.md`](../providers/ryo/provider-design.md)（APN 驗證與狀態映射）
 - [`UAT-START-NOTICE.md`](../integration/merchant-uat/UAT-START-NOTICE.md) §4（競態風險描述）
 - `PayOrderExpiredTask`、`PayOrderReissueTask`、`ChannelNoticeController.doNotify`、
   `PayOrderProcessService.confirmSuccess`（code evidence）
