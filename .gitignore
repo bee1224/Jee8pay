@@ -14,6 +14,12 @@ runtime-data/
 *.pid
 *.sqlite
 *.sqlite3
+# Operator scratch（pilot / migration / 臨時腳本，僅供運維參考，不 commit）
+var/
+
+# Python bytecode caches
+__pycache__/
+*.pyc
 
 # IDE and operating-system files
 .idea/
