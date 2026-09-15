@@ -348,3 +348,8 @@ VALUES ('chi', 'CHI（黑猫 PAY）', 1, 0, 1,
         '[{"name":"environment","desc":"Provider 环境","type":"radio","verify":"required","values":"TEST,PRODUCTION","titles":"测试环境,生产环境"},{"name":"custId","desc":"契客代号","type":"text","verify":"required"},{"name":"apiPassword","desc":"API 密码","type":"text","verify":"required","star":"1"}]',
         '[{"wayCode":"CHI_IBON"}]',
         '', '#222222', 1, '黑猫 PAY ibon 通道（上游三）');
+
+-- IPv6 client address support for payment, refund and transfer orders.
+ALTER TABLE t_pay_order MODIFY COLUMN client_ip VARCHAR(45) DEFAULT NULL COMMENT '客户端IP';
+ALTER TABLE t_refund_order MODIFY COLUMN client_ip VARCHAR(45) DEFAULT NULL COMMENT '客户端IP';
+ALTER TABLE t_transfer_order MODIFY COLUMN client_ip VARCHAR(45) DEFAULT NULL COMMENT '客户端IP';
