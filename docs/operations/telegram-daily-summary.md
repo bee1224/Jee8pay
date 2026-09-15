@@ -28,7 +28,7 @@ SUM：NT$ 201,300
 Bot Token 不得寫入 repo、command line、chat 或 log。部署前由 operator 的 TTY 執行：
 
 ```bash
-sudo /opt/jee8pay-v2-production/scripts/populate-v2-telegram-bot-token
+sudo /opt/jee8pay-v2-production/bin/populate-v2-telegram-bot-token
 ```
 
 腳本將 Token 寫入 root-controlled `/opt/jee8pay-v2-production/secrets/telegram-bot-token`，檔案 owner 為 runtime uid `10001`、mode `0600`。Compose 將它掛載為 configtree key `telegram.daily-summary.bot-token`；群組 chat ID 由 Production Compose 設定。
