@@ -198,3 +198,21 @@ V1（Go `payment-service` 四方聚合支付）與 V2（JeePay Java）是兩套�
 | host reboot 後 V2 復原 | 未測（debt D1-D4） |
 | V1 edge 後續 | 已完成：edge 由 V2 compose 接管（`jee8pay-v2-production-edge`），V1 compose down 全清 |
 
+## V1 residual VPS cleanup（2026-08-23 完成）
+
+dev/prod 差異比對後，比照 dev 已驗證模式清理 prod VPS 的 V1 殘留（pre-state 快照：`state/v1-cleanup-20260823-070503/`）：
+
+| 項目 | 狀態 |
+| --- | --- |
+| `/opt/payment`（payment-service / payment-service-ccat-pilot / merchant-production-pilot） | 封存 `state/v1-cleanup-20260823-070503/opt-payment-archive.tar.gz` 後刪除 |
+| V1 volumes | `lp33ing-production_mysql-data`（主 DB 已封存 055935）、`lp33ing-production-ccat-pilot_mysql-data`（pilot DB 新 dump：`state/v1-cleanup-20260823-070503/db/payment_production_ccat_pilot.sql.gz`）、`lp33ing-production-pilot_callback-data`（`pilot-callbacks.db` 已封存）→ 全刪 |
+| V1 images（39 個 `lp33ing-production-*` / pilot / rollback tags） | 全刪（running 容器 images 不受影響） |
+| `/etc/lp33ing-production` V1 檔（payment-service.env、ccat-provider.env、ccat-pilot-payer.env、admin-bootstrap-password、edge-nginx.conf.pre-v2/bak、.provenance 等） | 封存於 `state/v1-cleanup-20260823-070503/etc-lp33ing-production-archive/`；僅保留 `edge-nginx.conf`、`edge-tls`、`cloudflare-token.ini` |
+| **UAT allowlist cron bug（比對發現）** | cron `UAT_EDGE_NAME` 用了舊容器名 `lp33ing-production-edge`（實際 `jee8pay-v2-production-edge`）→ 每分鐘 `FAILED nginx-test-failed-rolled-back`，白名單改動不生效。已修正，實測 `APPLIED … reload=OK` |
+| **cert renew hook（比對發現）** | hook 指向 V1 path `/opt/payment/payment-service/…/sync-production-edge-certificate.sh` 且腳本內 container 為舊名（renew 時不會 HUP 新 edge）。已新建 `/opt/jee8pay-v2-production/scripts/sync-edge-certificate.sh`（container `jee8pay-v2-production-edge`）並更新 renewal conf（`deploy/jee8pay-v2-production/scripts/sync-edge-certificate.sh` 為 repo 版本） |
+| 孤兒 V1 pilot cert（`lp33ing-production-ccat-pilot-edge`，SAN 為已刪除的 admin/api/pilot-callback.lp33ing.com） | 已 `certbot delete` |
+| 孤兒 hash volumes + build cache | `docker volume prune` + `docker builder prune` 清空（回收 ~5.5GB） |
+| release dirs | 保留 `654df8b6b1ed-32db2fda`（docs/rollback 參照的 candidate release）+ `de94ab8fd19d-366dae4ea50e`（current symlink chain 實體）；未刪除 |
+
+清理後驗證：V2 12/12 healthy、edge 路由（admin-v2 200 / api-v2 403 / ccat notify 400）、allowlist cron `APPLIED`、cert hook 正確、V1 containers/networks/volumes/images 全無、磁碟 19G → 9.2G。
+

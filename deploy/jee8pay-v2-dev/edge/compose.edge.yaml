@@ -1,0 +1,62 @@
+# Sandbox 公開 edge（V2 專屬，2026-08-23 V1 退役後接管）。
+# 取代 V1 專案（/opt/payment/payment-service-sandbox）內的 sandbox-edge 定義與
+# /opt/jee8pay-v2-dev/public-callback/compose.edge-overlay.yaml overlay。
+# container_name 沿用 nnviopp-sandbox-edge（certbot deploy-hook / 驗證腳本參照）。
+name: jee8pay-v2-dev-edge
+
+services:
+  sandbox-edge:
+    image: nnviopp-sandbox-edge
+    container_name: nnviopp-sandbox-edge
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 64
+    cpus: 0.25
+    mem_limit: 128m
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: "0"
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m,uid=10002,gid=10002,mode=0770
+      - /var/cache/nginx:rw,noexec,nosuid,size=16m,uid=10002,gid=10002,mode=0770
+    volumes:
+      - /etc/nnviopp-sandbox/edge-tls:/etc/nginx/tls:ro
+      - /opt/jee8pay-v2-dev/merchant-uat/nginx.proposed.conf:/etc/nginx/nginx.conf:ro
+      - /opt/jee8pay-v2-dev/edge-allowlist:/etc/nginx/allowlist:ro
+    ports:
+      - "159.198.40.128:80:80"
+      - "159.198.40.128:443:443"
+    networks:
+      - edge-transit
+      - v2
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          nginx -t >/dev/null 2>&1 &&
+          awk '$$4 == "0A" && $$2 ~ /:0050$$/ { p80=1 }
+          $$4 == "0A" && $$2 ~ /:01BB$$/ { p443=1 }
+          END { exit !(p80 && p443) }' /proc/net/tcp &&
+          test "$$(wget -q -O - http://127.0.0.1:80/edge-health)" = OK &&
+          test "$$(wget -q -O - http://jee8pay-v2-callback:8080/healthz)" = OK &&
+          test "$$(wget -q -O - http://jee8pay-v2-merchant-api:8080/healthz)" = OK
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+networks:
+  edge-transit:
+    external: true
+    name: jee8pay-v2-dev-edge-transit
+  v2:
+    external: true
+    name: jee8pay-v2-dev-network

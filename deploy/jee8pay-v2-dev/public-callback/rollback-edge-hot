@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-echo 'ROLLBACK=FAIL_SUPERSEDED_BY_CANONICAL_COMPOSE' >&2
-echo 'USE=/opt/jee8pay-v2-dev/bin/reconcile-sandbox-edge' >&2
-exit 2

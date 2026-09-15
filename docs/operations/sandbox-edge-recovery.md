@@ -2,19 +2,23 @@
 
 ## Scope and current state
 
-JEE-N01 recovered `nnviopp-sandbox-edge` on `server1.nnviopp.com` and replaced the prior runtime-only network/config attachment with a canonical Compose overlay. This runbook covers only the Sandbox edge, its stable V2 transit network, ingress config, healthcheck and edge-only lifecycle validation. It does not authorize application、database、Provider、Production or Cloudflare changes.
+JEE-N01 recovered `nnviopp-sandbox-edge` on `server1.nnviopp.com` and replaced the prior runtime-only network/config attachment with a canonical Compose overlay. This runbook covers the Sandbox edge, its stable V2 transit network, ingress config, healthcheck and edge-only lifecycle validation. It does not authorize application、database、Provider、Production or Cloudflare changes.
+
+> **2026-08-23 更新（V1 退役）**：edge 已由 V1 專案（`/opt/payment/payment-service-sandbox`）移出，改為 V2 standalone compose（`/opt/jee8pay-v2-dev/edge/compose.edge.yaml`，project `jee8pay-v2-dev-edge`）。V1 networks（`nnviopp-sandbox_edge` / `_edge-public`）已刪除；edge 只掛 `jee8pay-v2-dev-edge-transit` + `jee8pay-v2-dev-network`（transit 為 internal，port 發布需同時掛非 internal 的 v2 network）。N01 overlay 機制（`public-callback/compose.edge-overlay.yaml`）與 V1 baseline 已退役。
 
 Current canonical inputs:
 
 ```text
-V1 Compose directory = /opt/payment/payment-service-sandbox
-Edge overlay = /opt/jee8pay-v2-dev/public-callback/compose.edge-overlay.yaml
+Edge compose = /opt/jee8pay-v2-dev/edge/compose.edge.yaml
+Edge project = jee8pay-v2-dev-edge
+Edge container = nnviopp-sandbox-edge（沿用歷史名，cert deploy hook 參照）
 Ingress config = /opt/jee8pay-v2-dev/merchant-uat/nginx.proposed.conf
-Ingress config SHA256 = cb1500d31110f06e5211089976ac8436329567ba007ef854f4baceaaf24e56b6
+Ingress config SHA256 = 840afb1a28b46f783059c4186c449ad949a6b60f8e838034b32eecee22be1b3e
 Ingress config owner/mode = 0:10002 0640
-Overlay SHA256 = 6ba37f3fb1221b804acb8a7d2d270d4b90b87570101cb1d8b70d76c20542f236
-Overlay owner/mode = root:root 0600
+Config generator = /opt/jee8pay-v2-dev/merchant-uat/prepare-edge-nginx.py（自足純 V2，無 V1 baseline 依賴）
+Allowlist dir = /opt/jee8pay-v2-dev/edge-allowlist（host cron 每分鐘產生 uat.conf）
 Transit network = jee8pay-v2-dev-edge-transit
+V2 network = jee8pay-v2-dev-network
 Restart policy = unless-stopped
 ```
 
@@ -47,7 +51,7 @@ sudo env SANDBOX_EDGE_RECONCILE_APPROVED=YES \
   /opt/jee8pay-v2-dev/bin/reconcile-sandbox-edge
 ```
 
-The helper validates host identity、config/overlay checksums and ownership、route/allowlist invariants、stable transit availability and both V2 ingress health endpoints before running Compose. It uses `--no-deps --no-build --force-recreate sandbox-edge`; it does not restart application containers or remove orphans.
+The helper validates host identity、config/compose checksums and ownership、route/allowlist invariants、stable transit availability and both V2 ingress health endpoints before running Compose. It uses `--no-deps --no-build --force-recreate sandbox-edge` on the standalone `jee8pay-v2-dev-edge` project; it does not restart application containers or remove orphans.
 
 Do not run `docker network connect` for edge routing. Do not copy config into the container or bind mount a `/tmp` file. Do not render the full Compose model with the secret env file to terminal output; inspect only the selected edge fields.
 
@@ -61,16 +65,17 @@ The validator checks:
 
 - edge running/healthy and `unless-stopped`;
 - active config checksum and read-only durable mount;
-- canonical Compose provenance;
-- exact network set and resolvable network IDs;
+- canonical Compose provenance（project `jee8pay-v2-dev-edge`、config file `edge/compose.edge.yaml`）;
+- exact network set（`jee8pay-v2-dev-edge-transit` + `jee8pay-v2-dev-network`）and resolvable network IDs;
 - `nginx -t`;
 - local 80/443 listening sockets;
-- V1 edge health and both V2 ingress health endpoints;
-- V2 core `11/11` and V1 backend health;
+- both V2 ingress health endpoints（callback + merchant-api）;
+- V2 core `11/11` and V1 containers absent;
 - exact Create、Query and 黑貓 PAY（RYO/JAY/CHI）callback routes;
+- config 不含任何 V1 hostname/upstream 參照;
 - UAT allowlist unchanged and Production IP absent.
 
-Latest root-only evidence is `/opt/jee8pay-v2-dev/state/n01/validation-latest.txt`. Recovery-time evidence is `/opt/jee8pay-v2-dev/state/n01/forensic-before.txt`.
+Latest root-only evidence is `/opt/jee8pay-v2-dev/state/v1-retirement-20260822-222906/validation-after.txt`. Recovery-time evidence was `/opt/jee8pay-v2-dev/state/n01/forensic-before.txt`（N01 歷史）。
 
 ## External readiness gate
 

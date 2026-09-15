@@ -15,7 +15,7 @@ readonly expected_host=server1.nnviopp.com
 readonly deploy_root=/opt/jee8pay-v2-dev
 readonly renderer="$deploy_root/merchant-uat/prepare-edge-nginx.py"
 readonly active_config="$deploy_root/merchant-uat/nginx.proposed.conf"
-readonly pre_sha=88f89d370c65b936ce0997e2088e2c6f71c11fdab338cd6ba21058c7274191dc
+readonly pre_sha=840afb1a28b46f783059c4186c449ad949a6b60f8e838034b32eecee22be1b3e
 
 fail() {
   printf 'EDGE_CHANGE=FAIL_%s\n' "$1" >&2
@@ -38,8 +38,6 @@ validate_candidate() {
       -v "$candidate_path:/etc/nginx/nginx.conf:ro" \
       -v /etc/nnviopp-sandbox/edge-tls:/etc/nginx/tls:ro \
       "$(docker inspect "$edge" --format '{{.Config.Image}}')" nginx -t >/dev/null
-    docker network connect nnviopp-sandbox_edge "$validation_name"
-    docker network connect nnviopp-sandbox_edge-public "$validation_name"
     docker start -a "$validation_name" >/dev/null
   ); then
     fail CANDIDATE_NGINX_TEST

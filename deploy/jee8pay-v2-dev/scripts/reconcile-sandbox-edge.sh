@@ -4,20 +4,12 @@ set -euo pipefail
 readonly edge=nnviopp-sandbox-edge
 readonly expected_host=server1.nnviopp.com
 readonly sandbox_ip=159.198.40.128
-readonly expected_config_sha=cb1500d31110f06e5211089976ac8436329567ba007ef854f4baceaaf24e56b6
-readonly expected_overlay_sha=4e583abf4253e69daef8aa8c0dd7f612d669595528ff081330ef8b6c4eec5a9b
+readonly expected_config_sha=840afb1a28b46f783059c4186c449ad949a6b60f8e838034b32eecee22be1b3e
 readonly final_config=/opt/jee8pay-v2-dev/merchant-uat/nginx.proposed.conf
-readonly overlay=/opt/jee8pay-v2-dev/public-callback/compose.edge-overlay.yaml
-readonly v1_dir=/opt/payment/payment-service-sandbox
-readonly env_file=/etc/nnviopp-sandbox/payment-service.env
+readonly compose_file=/opt/jee8pay-v2-dev/edge/compose.edge.yaml
+readonly project=jee8pay-v2-dev-edge
 readonly transit_network=jee8pay-v2-dev-edge-transit
-
-readonly -a compose_files=(
-  "$v1_dir/compose.yaml"
-  "$v1_dir/compose.sandbox-hardened.yaml"
-  "$v1_dir/compose.sandbox-edge.yaml"
-  "$overlay"
-)
+readonly expected_network_set=jee8pay-v2-dev-edge-transit,jee8pay-v2-dev-network
 
 fail() {
   printf 'RECONCILE=FAIL_%s\n' "$1" >&2
@@ -30,19 +22,20 @@ fail() {
 [[ -f $final_config ]] || fail CONFIG_MISSING
 [[ $(sha256sum "$final_config" | awk '{print $1}') == "$expected_config_sha" ]] || fail CONFIG_CHECKSUM
 [[ $(stat -c '%u:%g:%a' "$final_config") == '0:10002:640' ]] || fail CONFIG_OWNER_MODE
-[[ -f $overlay ]] || fail OVERLAY_MISSING
-[[ $(sha256sum "$overlay" | awk '{print $1}') == "$expected_overlay_sha" ]] || fail OVERLAY_CHECKSUM
-[[ $(stat -c '%u:%g:%a' "$overlay") == '0:0:600' ]] || fail OVERLAY_OWNER_MODE
-[[ -f $env_file ]] || fail ENV_FILE_MISSING
+[[ -f $compose_file ]] || fail COMPOSE_MISSING
+[[ $(stat -c '%u:%g:%a' "$compose_file") == '0:0:644' ]] || fail COMPOSE_OWNER_MODE
 
+# V2 路由契約
 [[ $(grep -Fc 'location = /api/pay/unifiedOrder {' "$final_config") -eq 1 ]] || fail CREATE_ROUTE
 [[ $(grep -Fc 'location = /api/pay/query {' "$final_config") -eq 1 ]] || fail QUERY_ROUTE
 [[ $(grep -Fc 'location = /api/pay/notify/ryo {' "$final_config") -eq 1 ]] || fail CALLBACK_ROUTE_RYO
 [[ $(grep -Fc 'location = /api/pay/notify/jay {' "$final_config") -eq 1 ]] || fail CALLBACK_ROUTE_JAY
 [[ $(grep -Fc 'location = /api/pay/notify/chi {' "$final_config") -eq 1 ]] || fail CALLBACK_ROUTE_CHI
-# 白名單改為 include：主設定檔不再內嵌 allow，allow 檔由 host cron 依 allowlist.json 產生
 [[ $(grep -Fc 'include /etc/nginx/allowlist/uat.conf;' "$final_config") -eq 2 ]] || fail ALLOWLIST_INCLUDE
 ! grep -Fq '35.220.239.87' "$final_config" || fail PRODUCTION_IP_PRESENT
+# V1 已退役：config 不得含 V1 hostname / upstream
+! grep -Eq 'sandbox-api\.nnviopp\.com|sandbox\.nnviopp\.com|merchant-sandbox\.nnviopp\.com|upstream payment_(api|admin)|upstream merchant_receiver' "$final_config" ||
+  fail V1_REFERENCE_PRESENT
 # allow 檔內容：Talend 兩台測試機必須存在（系統保留）
 [[ -f /opt/jee8pay-v2-dev/edge-allowlist/uat.conf ]] || fail ALLOWLIST_FILE_MISSING
 [[ $(grep -Fc 'allow 34.92.245.74;' /opt/jee8pay-v2-dev/edge-allowlist/uat.conf) -eq 1 ]] || fail ALLOWLIST_PRIMARY
@@ -55,14 +48,8 @@ fail() {
 [[ $(docker inspect jee8pay-v2-dev-merchant-uat-merchant-api-ingress-1 --format '{{.State.Status}}|{{.State.Health.Status}}') == 'running|healthy' ]] ||
   fail MERCHANT_INGRESS_HEALTH
 
-compose_args=()
-for compose_file in "${compose_files[@]}"; do
-  compose_args+=( -f "$compose_file" )
-done
-
-cd "$v1_dir"
-docker compose --env-file "$env_file" -p nnviopp-sandbox \
-  "${compose_args[@]}" up -d --no-deps --no-build --force-recreate sandbox-edge
+cd /opt/jee8pay-v2-dev/edge
+docker compose -p "$project" -f "$compose_file" up -d --no-deps --no-build --force-recreate sandbox-edge
 
 state=
 for _ in $(seq 1 18); do
@@ -82,8 +69,7 @@ docker exec "$edge" nginx -t >/dev/null 2>&1 || fail NGINX_CONFIG
 
 network_names=$(docker inspect "$edge" --format '{{json .NetworkSettings.Networks}}' |
   jq -r 'keys | sort | join(",")')
-[[ $network_names == 'jee8pay-v2-dev-edge-transit,nnviopp-sandbox_edge,nnviopp-sandbox_edge-public' ]] ||
-  fail NETWORK_SET
+[[ $network_names == "$expected_network_set" ]] || fail NETWORK_SET
 while read -r network_id; do
   docker network inspect "$network_id" >/dev/null 2>&1 || fail NETWORK_ID
 done < <(docker inspect "$edge" --format '{{json .NetworkSettings.Networks}}' |
@@ -94,6 +80,7 @@ ss -H -lnt | grep -Fq "$sandbox_ip:443 " || fail PORT_443
 
 printf 'RECONCILE=PASS\n'
 printf 'EDGE=%s\n' "$edge"
+printf 'PROJECT=%s\n' "$project"
 printf 'ACTIVE_CONFIG_SHA256=%s\n' "$expected_config_sha"
 printf 'NETWORKS=%s\n' "$network_names"
 printf 'RESTART_POLICY=unless-stopped\n'

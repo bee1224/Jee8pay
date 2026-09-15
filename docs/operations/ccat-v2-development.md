@@ -2,9 +2,19 @@
 
 > **RENAME NOTE（2026-08-20）**：本文記錄 Development runtime 的歷史部署狀態。JeePay Provider 已由 `ccat` 改名為 `ryo`（`CCAT_IBON` → `RYO_IBON`），並新增 `jay` / `chi`；重新部署後 APN 路徑為 `/api/pay/notify/ryo`、`/api/pay/notify/jay`、`/api/pay/notify/chi`，secret 目錄改為 `secrets/ryo-provider`（及 jay/chi）。文中 `ccat-v2-dev.nnviopp.com` 域名與 `ccat-v2` 名稱保留為歷史命名。
 
+> **V1 RETIREMENT（2026-08-23）**：dev VPS（`server1.nnviopp.com` / `159.198.40.128`）的 V1（Go `payment-service` 四方聚合支付）已**完整退役並清理**。現況：
+> - V1 compose 專案全清：`nnviopp-sandbox`（`/opt/payment/payment-service-sandbox`）、`merchant-sandbox-sandbox`、孤兒 `nnviopp-production`（`/opt/payment/payment-service`）；`docker compose down` 全清 containers/networks，named volumes 已刪。
+> - V1 DB 封存：`payment_sandbox`、`payment_production` → `state/v1-retirement-20260822-222906/db/*.sql.gz`；`/opt/payment` 整包封存 → `state/v1-retirement-20260822-222906/opt-payment-archive.tar.gz`（含 edge Dockerfile、baseline nginx.conf、edge image tar）。
+> - V1 公開入口關閉：edge 改為**純 V2**（移除 sandbox-api/sandbox/merchant-sandbox server blocks，V1 hostnames 回 000/444）；V1 DNS records 已刪（`sandbox-api` / `sandbox` / `merchant-sandbox.nnviopp.com`）；cert SAN 收斂 3 個 V2 域名（`ccat-v2-dev` / `api-v2-dev` / `admin-v2-dev`）；孤兒 `nnviopp-production-edge` cert 與 `/etc/nnviopp-production` 已刪；`eth0:0` alias（159.198.42.146）已移除。
+> - **edge 收編**：`deploy/jee8pay-v2-dev/edge/compose.edge.yaml`（standalone project `jee8pay-v2-dev-edge`，container 名沿用 `nnviopp-sandbox-edge`）取代 V1 專案內定義與 `public-callback/compose.edge-overlay.yaml` overlay；edge 只掛 `jee8pay-v2-dev-edge-transit` + `jee8pay-v2-dev-network`（transit 為 internal，port 發布需同時掛非 internal 的 v2 network）。reconcile/validate 已更新為純 V2 版本（無 overlay、無 V1 health 檢查、config 不得含 V1 參照）。
+> - cert renewal 現以 V2 腳本 `/opt/jee8pay-v2-dev/scripts/sync-edge-certificate.sh` 為 renew/deploy hook（取代 `/opt/payment/.../sync-sandbox-edge-certificate.sh`）。
+> - 完整 gap 與驗證見下文「V1 retirement（2026-08-23 盤點）」。
+
 ## Current binding
 
 JEE-E02 binds source `1f313e776d03c2383adff5aa96b9aac9b78efedc` to Development VPS `server1.nnviopp.com` as Compose project `jee8pay-v2-dev`. The runtime is under `/opt/jee8pay-v2-dev/`; it does not use `/opt/payment/`, V1 databases, V1 volumes, V1 application networks, or public ports 80/443.
+
+> 2026-08-23 更新：V1 已退役並從本 VPS 移除（`/opt/payment` 封存於 `state/v1-retirement-20260822-222906/`），上述隔離敘述為歷史。V2 是此 VPS 唯一的支付平台。
 
 Runtime source and deployment inputs are in [`deploy/jee8pay-v2-dev/`](../../deploy/jee8pay-v2-dev/). Generated JAR/UI artifacts and local secrets are ignored. The deployed release records source and artifact checksums in `/opt/jee8pay-v2-dev/SOURCE` and `/opt/jee8pay-v2-dev/current/DEPLOYMENT-MANIFEST.sha256`.
 
@@ -33,7 +43,7 @@ ssh -N nnviopp-sandbox \
 
 ## Resource budget and staged start
 
-Compose hard limits total 3264 MiB including the one-shot volume initializer and callback ingress. The deployment gate requires at least 1536 MiB host/V1 reserve. Check `MemAvailable`、container restart/OOM state and V1 health after each phase.
+Compose hard limits total 3264 MiB including the one-shot volume initializer and callback ingress. (V1 已退役，部署 gate 不再需要 V1 reserve；歷史要求「至少 1536 MiB host/V1 reserve」與「V1 health 保持 11/11」已失效。)
 
 ```bash
 cd /opt/jee8pay-v2-dev/current
@@ -102,7 +112,7 @@ P04 sends `apn_url` dynamically on each `CvsOrderAppend`: `CcatIbon.pay` builds 
 
 The zero-stop runtime mount described above is historical E02 evidence. JEE-N01 recreated only the edge with the V2-owned Compose overlay、durable read-only final config and stable transit network, then passed edge-only recreate and Docker-managed restart regression. TD-010 is resolved. Current reconciliation and External readiness procedures are in [`sandbox-edge-recovery.md`](sandbox-edge-recovery.md).
 
-Read-only validation:
+Read-only validation（V1 hostnames 已退役，不再檢查）：
 
 ```bash
 getent ahostsv4 ccat-v2-dev.nnviopp.com
@@ -110,11 +120,10 @@ openssl s_client -connect 159.198.40.128:443 -servername ccat-v2-dev.nnviopp.com
   | openssl x509 -noout -ext subjectAltName
 curl -sS -o /dev/null -w '%{http_code}\n' https://ccat-v2-dev.nnviopp.com/
 curl -sS -o /dev/null -w '%{http_code}\n' -H 'Content-Type: application/json' \
-  --data '{}' https://ccat-v2-dev.nnviopp.com/api/pay/notify/ccat
-curl -sS -o /dev/null -w '%{http_code}\n' https://sandbox-api.nnviopp.com/
-curl -sS -o /dev/null -w '%{http_code}\n' https://sandbox.nnviopp.com/
-curl -sS -o /dev/null -w '%{http_code}\n' https://merchant-sandbox.nnviopp.com/
+  --data '{}' https://ccat-v2-dev.nnviopp.com/api/pay/notify/ryo
 ```
+
+> 下列 E02 時期 Rollback（restore three-SAN certificate / delete DNS record）為**退役前歷史程序**：V1 已退役，cert 現收斂 3 個 V2 域名，deploy/renew hook 為 `/opt/jee8pay-v2-dev/scripts/sync-edge-certificate.sh`；`rollback-v2-callback-edge-hot` 與 `manage-sandbox-ccat-v2-dns.sh rollback` 不再適用於現況。
 
 Rollback, in reverse ownership order:
 
@@ -150,6 +159,32 @@ sudo env SANDBOX_CCAT_V2_DNS_ROLLBACK_APPROVED=YES \
   rollback /etc/nnviopp-sandbox/cloudflare-token.ini \
   /opt/jee8pay-v2-dev/state/ccat-v2-dns-backup.json
 ```
+
+## V1 retirement（2026-08-23 盤點）
+
+V1（Go `payment-service` 四方聚合支付）與 V2（JeePay Java）是兩套獨立平台。2026-08-23 完成 dev VPS 的 V1 完整退役與清理：
+
+| 項目 | 狀態 |
+| --- | --- |
+| V1 公開入口（sandbox-api/sandbox/merchant-sandbox.nnviopp.com） | 已關閉（edge 移除 server blocks 回 000；DNS records 已刪，現 NXDOMAIN） |
+| `nnviopp-sandbox` containers（api/admin/mysql/squid egress/dbeaver proxy） | 已停止；`docker compose -p nnviopp-sandbox down` 全清（networks/volumes 已刪） |
+| `merchant-sandbox-sandbox`（V1 merchant receiver） | 已停止；compose down 全清 |
+| 孤兒 `nnviopp-production`（api/admin/mysql/edge，PUBLIC_BASE_URL=api.nnviopp.com） | 已停止；compose down 全清；其 cert 已 `certbot delete`，`/etc/nnviopp-production` 已刪 |
+| V1 DB | `payment_sandbox`、`payment_production` 封存於 `state/v1-retirement-20260822-222906/db/`（root-only） |
+| `/opt/payment` | 整包封存 `state/v1-retirement-20260822-222906/opt-payment-archive.tar.gz`（208MB，含 edge Dockerfile、baseline nginx.conf、edge image tar）後刪除 |
+| `nnviopp-sandbox-edge` | 由 V2 standalone compose 接管（`edge/compose.edge.yaml`，project `jee8pay-v2-dev-edge`）；純 V2 config（`nginx.proposed.conf` SHA `840afb1a…`） |
+| cert SAN | 收斂 3 個 V2 域名（ccat-v2-dev / api-v2-dev / admin-v2-dev）；renew/deploy hook → `/opt/jee8pay-v2-dev/scripts/sync-edge-certificate.sh` |
+| `eth0:0` alias（159.198.42.146） | 已移除（interfaces 檔與 runtime 均清） |
+| `/etc/nnviopp-sandbox` | 僅保留 `cloudflare-token.ini` + `edge-tls`；V1 檔案（payment-service.env、ccat-provider.env、admin creds 等）封存於 `state/v1-retirement-20260822-222906/etc-nnviopp-sandbox-archive/` |
+| Docker 清理 | V1 images、舊 V2 release images、build cache、33 個孤兒 volumes 全清；舊 release dirs 移除（保留 current + 1f313e rollback 兩代） |
+
+退役前快照：`state/v1-retirement-20260822-222906/`（DNS records、edge config、cert、containers/volumes/networks/images inventory、DB dumps、/opt/payment archive、V2 health baseline）。
+
+後續維護注意：
+
+- edge reconcile/validate：`/opt/jee8pay-v2-dev/bin/reconcile-sandbox-edge` / `validate-sandbox-edge`（需 `SANDBOX_EDGE_RECONCILE_APPROVED=YES`）；config 由 `merchant-uat/prepare-edge-nginx.py`（自足純 V2）生成，SHA 固定於腳本內。
+- edge container 名沿用 `nnviopp-sandbox-edge`（cert deploy hook 參照），但專案已是 `jee8pay-v2-dev-edge`。
+- V1 如需還原：`opt-payment-archive.tar.gz` + DB dumps 在 `state/v1-retirement-20260822-222906/`；V1 已不影響 V2 任何路由/資源。
 
 ## Merchant Notify receiver
 

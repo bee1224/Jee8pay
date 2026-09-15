@@ -44,5 +44,5 @@ Status vocabulary：`Open`、`In Progress`、`Resolved`、`Accepted`。
 | C5 | CCAT reconciliation 任務 | APN 遺失/Query 失敗仍會滯留；需定期稽核 CLOSED 訂單的排程任務 |
 | A1 | repo artifacts/manifest 與部署脫節 | 已更新 repo compose tags；artifacts 為 gitignored 需另行治理 |
 | A2 | 文件落後 runtime | 測試數已更新；I07R2-P05 驗收報告未補（runtime/ gitignored） |
-| D1-D4 | 營運：MQ memory / reboot 未測 / V1 退休 / prod 空資料 | 營運項 |
+| D1-D4 | 營運：MQ memory / reboot 未測 / prod 空資料（V1 退休已於 2026-08-23 完成：production 與 dev 均完整退役） | 營運項 |
 | 商戶自助 / 代付人工流程 / 結算模型 | 業務功能 | 需設計 + ADR + 實作任務 |
