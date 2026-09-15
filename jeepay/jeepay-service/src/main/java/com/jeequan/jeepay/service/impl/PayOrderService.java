@@ -200,6 +200,10 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         return payOrderMapper.payTypeCount(param);
     }
 
+    public Map<String, Object> dailyProviderAmount(Date successTimeStart, Date successTimeEnd) {
+        return payOrderMapper.selectDailyProviderAmount(successTimeStart, successTimeEnd);
+    }
+
     /** 更新订单为 超时状态 **/
     public Integer updateOrderExpired(){
 

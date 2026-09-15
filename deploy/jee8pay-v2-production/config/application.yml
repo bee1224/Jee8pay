@@ -53,3 +53,7 @@ rocketmq:
     retry-times-when-send-failed: 2
     retry-times-when-send-async-failed: 2
 
+telegram:
+  daily-summary:
+    enabled: ${TELEGRAM_DAILY_SUMMARY_ENABLED:false}
+    chat-id: ${TELEGRAM_DAILY_SUMMARY_CHAT_ID:}

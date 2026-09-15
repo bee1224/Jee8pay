@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly target_dir=/opt/jee8pay-v2-production/secrets
+readonly target=$target_dir/telegram-bot-token
+
+[[ $(id -u) -eq 0 ]] || { echo 'must run as root' >&2; exit 1; }
+[[ -t 0 && -t 1 ]] || { echo 'interactive TTY required' >&2; exit 1; }
+
+read -r -p 'Type PRODUCTION to confirm environment: ' environment
+[[ $environment == PRODUCTION ]] || { echo 'environment must be PRODUCTION' >&2; exit 1; }
+read -r -s -p 'Telegram Bot Token: ' bot_token
+printf '\n'
+[[ -n $bot_token ]] || { echo 'token must not be empty' >&2; exit 1; }
+[[ $bot_token =~ ^[0-9]+:[A-Za-z0-9_-]+$ ]] || { echo 'token format is invalid' >&2; exit 1; }
+
+install -d -o root -g root -m 0700 "$target_dir"
+temporary=$(mktemp /run/jee8pay-v2-production-telegram.XXXXXX)
+trap 'rm -f -- "$temporary"' EXIT
+umask 077
+printf '%s' "$bot_token" >"$temporary"
+unset bot_token
+install -o 10001 -g 10001 -m 0600 "$temporary" "$target"
+
+echo 'PROD_V2_TELEGRAM_BOT_TOKEN=READY'

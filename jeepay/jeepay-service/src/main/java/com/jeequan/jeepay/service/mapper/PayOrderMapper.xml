@@ -82,6 +82,21 @@
         ORDER BY groupDate desc
     </select>
 
+    <!-- 黑貓 PAY 四個 Provider 的每日成功收款總額（單位：分） -->
+    <select id="selectDailyProviderAmount" resultType="java.util.Map">
+        SELECT
+            IFNULL(SUM(CASE WHEN if_code = 'ryo' THEN amount ELSE 0 END), 0) AS ryoAmount,
+            IFNULL(SUM(CASE WHEN if_code = 'chi' THEN amount ELSE 0 END), 0) AS chiAmount,
+            IFNULL(SUM(CASE WHEN if_code = 'jay' THEN amount ELSE 0 END), 0) AS jayAmount,
+            IFNULL(SUM(CASE WHEN if_code = 'jhd' THEN amount ELSE 0 END), 0) AS jhdAmount
+        FROM t_pay_order
+        WHERE state = 2
+          AND UPPER(currency) = 'TWD'
+          AND success_time &gt;= #{successTimeStart}
+          AND success_time &lt; #{successTimeEnd}
+          AND if_code IN ('ryo', 'chi', 'jay', 'jhd')
+    </select>
+
     <!-- 更新订单退款金额和次数 -->
     <update id="updateRefundAmountAndCount">
 

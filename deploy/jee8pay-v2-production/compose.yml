@@ -188,6 +188,8 @@ services:
       PLATFORM_ENVIRONMENT: PRODUCTION
       SPRING_CONFIG_IMPORT: configtree:/run/secrets/
       SPRING_DATA_REDIS_DATABASE: 1
+      TELEGRAM_DAILY_SUMMARY_ENABLED: "true"
+      TELEGRAM_DAILY_SUMMARY_CHAT_ID: "-5211710664"
       JAVA_TOOL_OPTIONS: -Xms160m -Xmx256m -XX:+ExitOnOutOfMemoryError
       TZ: Asia/Taipei
     secrets:
@@ -195,6 +197,8 @@ services:
         target: spring.datasource.password
       - source: manager_jwt_secret
         target: isys.jwt-secret
+      - source: telegram_bot_token
+        target: telegram.daily-summary.bot-token
     volumes:
       - ./config/application.yml:/jeepayhomes/service/app/application.yml:ro
       - manager_logs:/jeepayhomes/service/logs
@@ -355,6 +359,8 @@ secrets:
     file: ${V2_SECRET_DIR:-./.secrets}/manager-jwt-secret
   merchant_jwt_secret:
     file: ${V2_SECRET_DIR:-./.secrets}/merchant-jwt-secret
+  telegram_bot_token:
+    file: ${V2_SECRET_DIR:-./.secrets}/telegram-bot-token
 
 networks:
   v2:
