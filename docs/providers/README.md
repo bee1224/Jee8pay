@@ -9,9 +9,10 @@ Provider documentation 只記錄特定 Provider 的 official contract、mapping�
 | RYO | `ryo` | Verification | ibon | [`ryo/README.md`](ryo/README.md) |
 | JAY | `jay` | Implementation | ibon | [`jay/README.md`](jay/README.md) |
 | CHI | `chi` | Implementation | ibon | [`chi/README.md`](chi/README.md) |
+| JHD | `jhd` | Implementation | ibon | [`jhd/README.md`](jhd/README.md) |
 | NewebPay | TBD | Deferred | TBD | — |
 
-Taiwan V2 目前 active 的是黑貓 PAY 平台上的三個統一客樂得上游：`RYO`（由原 `CCAT` 改名）/ `RYO_IBON`、`JAY` / `JAY_IBON`、`CHI` / `CHI_IBON`；三者共用同一平台契約（見 [`ryo/contract-evidence.md`](ryo/contract-evidence.md)）。NewebPay 已延後且不阻擋黑貓 PAY-only 使用。
+Taiwan V2 目前 active 的是黑貓 PAY 平台上的四個統一客樂得上游：`RYO`（由原 `CCAT` 改名）/ `RYO_IBON`、`JAY` / `JAY_IBON`、`CHI` / `CHI_IBON`、`JHD`（金匯達有限公司）/ `JHD_IBON`；四者共用同一平台契約（見 [`ryo/contract-evidence.md`](ryo/contract-evidence.md)）。NewebPay 已延後且不阻擋黑貓 PAY-only 使用。
 
 ## Provider Documentation Lifecycle
 

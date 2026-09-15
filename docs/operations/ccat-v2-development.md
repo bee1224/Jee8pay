@@ -172,7 +172,7 @@ V1（Go `payment-service` 四方聚合支付）與 V2（JeePay Java）是兩套�
 | 孤兒 `nnviopp-production`（api/admin/mysql/edge，PUBLIC_BASE_URL=api.nnviopp.com） | 已停止；compose down 全清；其 cert 已 `certbot delete`，`/etc/nnviopp-production` 已刪 |
 | V1 DB | `payment_sandbox`、`payment_production` 封存於 `state/v1-retirement-20260822-222906/db/`（root-only） |
 | `/opt/payment` | 整包封存 `state/v1-retirement-20260822-222906/opt-payment-archive.tar.gz`（208MB，含 edge Dockerfile、baseline nginx.conf、edge image tar）後刪除 |
-| `nnviopp-sandbox-edge` | 由 V2 standalone compose 接管（`edge/compose.edge.yaml`，project `jee8pay-v2-dev-edge`）；純 V2 config（`nginx.proposed.conf` SHA `840afb1a…`） |
+| `nnviopp-sandbox-edge` | 由 V2 standalone compose 接管（`edge/compose.edge.yaml`，project `jee8pay-v2-dev-edge`）；純 V2 config（`nginx.proposed.conf` SHA `7a393f33…`，含 ryo/jay/chi/jhd 四條 APN route） |
 | cert SAN | 收斂 3 個 V2 域名（ccat-v2-dev / api-v2-dev / admin-v2-dev）；renew/deploy hook → `/opt/jee8pay-v2-dev/scripts/sync-edge-certificate.sh` |
 | `eth0:0` alias（159.198.42.146） | 已移除（interfaces 檔與 runtime 均清） |
 | `/etc/nnviopp-sandbox` | 僅保留 `cloudflare-token.ini` + `edge-tls`；V1 檔案（payment-service.env、ccat-provider.env、admin creds 等）封存於 `state/v1-retirement-20260822-222906/etc-nnviopp-sandbox-archive/` |

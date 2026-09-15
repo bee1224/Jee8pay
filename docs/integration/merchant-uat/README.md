@@ -9,7 +9,7 @@
 | Base URL | `https://api-v2-dev.nnviopp.com` |
 | Merchant ID (`mchNo`) | `M_D01_EXTERNAL_UAT` |
 | App ID (`appId`) | `APP_D01_EXTERNAL_UAT` |
-| Channel code (`wayCode`) | `RYO_IBON`（另可選 `JAY_IBON`、`CHI_IBON`，皆為黑貓 PAY ibon 上游） |
+| Channel code (`wayCode`) | `RYO_IBON`（另可選 `JAY_IBON`、`CHI_IBON`、`JHD_IBON`，皆為黑貓 PAY ibon 上游） |
 | Currency | `TWD` |
 
 這是外部 Merchant UAT 平台，但這三個 `*_IBON` 通道都連接真實 Production payment provider。成功 Create 可能產生真實 ibon 訂單；請只提交已獲測試授權的金額與筆數。外部系統只串接本文件的 JeePay V2 API，不串接黑貓 PAY，也不需要任何黑貓 PAY upstream credential。
@@ -64,8 +64,8 @@ CONTENT-TYPE = application/json; charset=UTF-8
 | `mchNo` | string | 必填，secure handoff 的 Merchant ID |
 | `appId` | string | 必填，secure handoff 的 App ID |
 | `mchOrderNo` | string | 必填；同一 Merchant 必須唯一，重複會回「商戶訂單已存在」 |
-| `wayCode` | string | 必填，黑貓 PAY ibon 上游擇一：`RYO_IBON` / `JAY_IBON` / `CHI_IBON`（三者契約相同，僅上游帳號不同） |
-| `amount` | integer | 必填，JeePay amount units；`1 TWD = 100 JeePay amount units`；三個 `*_IBON` 通道皆要求可整除 100 |
+| `wayCode` | string | 必填，黑貓 PAY ibon 上游擇一：`RYO_IBON` / `JAY_IBON` / `CHI_IBON` / `JHD_IBON`（四者契約相同，僅上游帳號不同） |
+| `amount` | integer | 必填，JeePay amount units；`1 TWD = 100 JeePay amount units`；四個 `*_IBON` 通道皆要求可整除 100 |
 | `currency` | string | 必填，固定 uppercase `TWD` |
 | `subject` | string | 必填，商品／訂單標題 |
 | `body` | string | 必填，商品／訂單描述 |
@@ -99,7 +99,7 @@ export UAT_MERCHANT_ID=M_D01_EXTERNAL_UAT
 export UAT_APP_ID=APP_D01_EXTERNAL_UAT
 export UAT_APP_SECRET=<secure handoff 取得的 App Secret>
 export UAT_NOTIFY_URL=https://<你的接收端>/callback   # full UAT 必填；產生器 fail closed
-python3 examples/talend-request-gen.py --way-code RYO_IBON  # 可換 JAY_IBON／CHI_IBON；建單 + 查單
+python3 examples/talend-request-gen.py --way-code RYO_IBON  # 可換 JAY_IBON／CHI_IBON／JHD_IBON；建單 + 查單
 ```
 
 > `notifyUrl` 對 full UAT（含 Merchant Notify 驗收）是必填；產生器缺 `UAT_NOTIFY_URL` 會直接失敗，避免做出無法驗收 Notify 的訂單。純 Create/Query smoke 不需要本產生器。
@@ -241,7 +241,7 @@ UAT Merchant Notify outbound IP 已從 actual `jee8pay-v2-dev-payment` container
 2. 提供 UAT HTTPS Merchant Notify callback URL。
 3. 依 canonicalization 簽 Create request。
 4. 呼叫 public UAT Base URL；JeePay 建立 native PayOrder。
-5. JeePay 依 `RYO_IBON`／`JAY_IBON`／`CHI_IBON` 路由並同步回傳 ibon 付款資訊。
+5. JeePay 依 `RYO_IBON`／`JAY_IBON`／`CHI_IBON`／`JHD_IBON` 路由並同步回傳 ibon 付款資訊。
 6. 測試者依已授權金額完成真實付款。
 7. 黑貓 PAY 通知 JeePay；JeePay 將 native PayOrder 轉為 SUCCESS。
 8. JeePay 對 Merchant callback URL 發送 Merchant Notify。

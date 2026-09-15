@@ -37,6 +37,7 @@
 - [ ] RYO_IBON Create → 出單
 - [ ] JAY_IBON Create → 出單
 - [ ] CHI_IBON Create → 出單
+- [ ] JHD_IBON Create → 出單（需先完成 jhd credential 綁定與 passage）
 
 ## 3. 真實付款 + APN 驗證
 

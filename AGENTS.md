@@ -11,7 +11,7 @@ Taiwan payment companies are Providers.
 
 ```text
 Platform: 黑貓 PAY（www.ccat.com.tw）
-Active providers（統一客樂得上游，同一平台）：RYO（原 CCAT 改名）、JAY、CHI
+Active providers（統一客樂得上游，同一平台）：RYO（原 CCAT 改名）、JAY、CHI、JHD（金匯達有限公司）
 Current product: ibon CVS payment
 Current capabilities:
 - Create Payment
@@ -46,7 +46,7 @@ NormalMchParams
 → model/params/<ifCode>/<IfCode>NormalMchParams
 ```
 
-黑貓 PAY 上游預期為 `model/params/ryo/RyoNormalMchParams`、`model/params/jay/JayNormalMchParams`、`model/params/chi/ChiNormalMchParams`（三者的 params schema 相同，僅類別/ifCode 不同）。credentials 使用既有 `PayInterfaceConfig` / `if_params` JSON，Provider class 不得 hard-code credential。
+黑貓 PAY 上游預期為 `model/params/ryo/RyoNormalMchParams`、`model/params/jay/JayNormalMchParams`、`model/params/chi/ChiNormalMchParams`、`model/params/jhd/JhdNormalMchParams`（四者的 params schema 相同，僅類別/ifCode 不同）。credentials 使用既有 `PayInterfaceConfig` / `if_params` JSON，Provider class 不得 hard-code credential。
 
 ## PAYMENT QUERY RULE
 

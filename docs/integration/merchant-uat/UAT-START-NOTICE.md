@@ -12,7 +12,7 @@
 | UAT Base URL | `https://api-v2-dev.nnviopp.com` |
 | Merchant ID | `M_D01_EXTERNAL_UAT` |
 | App ID | `APP_D01_EXTERNAL_UAT` |
-| wayCode | `RYO_IBON`／`JAY_IBON`／`CHI_IBON` |
+| wayCode | `RYO_IBON`／`JAY_IBON`／`CHI_IBON`／`JHD_IBON` |
 | 平台環境 / Provider 環境 | DEVELOPMENT / **PRODUCTION（真實 ibon 帳單）** |
 | Allowlist 來源 IP | `34.92.245.74`、`34.92.52.162`（**只能從這兩個 IP 發送**，其他 IP 回 403）；edge 為 Cloudflare proxied 模式（CF-Connecting-IP 信任） |
 | 金額單位 | minor units：`4000` = TWD 40；必須被 100 整除 |
@@ -28,12 +28,15 @@
 | RYO 非 TWD 幣別 | 9999 | `RYO ibon 僅支援 TWD` |
 | JAY 非 TWD 幣別 | 9999 | `JAY ibon 僅支援 TWD` |
 | CHI 非 TWD 幣別 | 9999 | `CHI ibon 僅支援 TWD` |
+| JHD 非 TWD 幣別 | 9999 | `JHD ibon 僅支援 TWD` |
 | RYO channelExtra 非 JSON | 9999 | `RYO channelExtra 格式錯誤` |
 | JAY channelExtra 非 JSON | 9999 | `JAY channelExtra 格式錯誤` |
 | CHI channelExtra 非 JSON | 9999 | `CHI channelExtra 格式錯誤` |
+| JHD channelExtra 非 JSON | 9999 | `JHD channelExtra 格式錯誤` |
 | RYO channelExtra 缺 payer 欄位 | 9999 | `RYO channelExtra 缺少繳款人資料` |
 | JAY channelExtra 缺 payer 欄位 | 9999 | `JAY channelExtra 缺少繳款人資料` |
 | CHI channelExtra 缺 payer 欄位 | 9999 | `CHI channelExtra 缺少繳款人資料` |
+| JHD channelExtra 缺 payer 欄位 | 9999 | `JHD channelExtra 缺少繳款人資料` |
 | 不支援的 wayCode | 9999 | `商戶應用不支援該支付方式` |
 | 缺 subject | 9999 | `商品標題不能為空` |
 | 代付（未開放） | 9999 | `無此轉帳通道介面` |

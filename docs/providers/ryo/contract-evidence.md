@@ -1,6 +1,6 @@
 # CCAT ibon Contract Evidence
 
-> **SCOPE NOTE（2026-08-20）**：本文是**黑貓 PAY 平台**（`www.ccat.com.tw`）的契約證據，涵蓋該平台上的三個統一客樂得上游 `RYO` / `JAY` / `CHI`（`ryo/RYO_IBON`、`jay/JAY_IBON`、`chi/CHI_IBON`）。正文中的 `CCAT` 指平台本身（非 JeePay ifCode）；JeePay Provider 身份已於 2026-08-20 由 `ccat` 改名為 `ryo`，`jay` / `chi` 使用同一份契約。
+> **SCOPE NOTE（2026-08-20；2026-09-15 增補 JHD）**：本文是**黑貓 PAY 平台**（`www.ccat.com.tw`）的契約證據，涵蓋該平台上的四個統一客樂得上游 `RYO` / `JAY` / `CHI` / `JHD`（`ryo/RYO_IBON`、`jay/JAY_IBON`、`chi/CHI_IBON`、`jhd/JHD_IBON`）。正文中的 `CCAT` 指平台本身（非 JeePay ifCode）；JeePay Provider 身份已於 2026-08-20 由 `ccat` 改名為 `ryo`，`jay` / `chi` / `jhd` 使用同一份契約。`JHD` 為金匯達有限公司，於 2026-09-15 以同平台契約逐字複製新增。
 
 Status: `JEE-C03 — PASS-WITH-DEBT`
 Closure session: `JEE-C03`

@@ -4,7 +4,7 @@ set -euo pipefail
 readonly edge=nnviopp-sandbox-edge
 readonly expected_host=server1.nnviopp.com
 readonly sandbox_ip=159.198.40.128
-readonly expected_config_sha=840afb1a28b46f783059c4186c449ad949a6b60f8e838034b32eecee22be1b3e
+readonly expected_config_sha=7a393f332a6830c932a4e51b1754165af2be652b61a31640edcfbd79ca328ea4
 readonly final_config=/opt/jee8pay-v2-dev/merchant-uat/nginx.proposed.conf
 readonly compose_file=/opt/jee8pay-v2-dev/edge/compose.edge.yaml
 readonly project=jee8pay-v2-dev-edge
@@ -31,6 +31,7 @@ fail() {
 [[ $(grep -Fc 'location = /api/pay/notify/ryo {' "$final_config") -eq 1 ]] || fail CALLBACK_ROUTE_RYO
 [[ $(grep -Fc 'location = /api/pay/notify/jay {' "$final_config") -eq 1 ]] || fail CALLBACK_ROUTE_JAY
 [[ $(grep -Fc 'location = /api/pay/notify/chi {' "$final_config") -eq 1 ]] || fail CALLBACK_ROUTE_CHI
+[[ $(grep -Fc 'location = /api/pay/notify/jhd {' "$final_config") -eq 1 ]] || fail CALLBACK_ROUTE_JHD
 [[ $(grep -Fc 'include /etc/nginx/allowlist/uat.conf;' "$final_config") -eq 2 ]] || fail ALLOWLIST_INCLUDE
 ! grep -Fq '35.220.239.87' "$final_config" || fail PRODUCTION_IP_PRESENT
 # V1 已退役：config 不得含 V1 hostname / upstream

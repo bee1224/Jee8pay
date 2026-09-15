@@ -4,7 +4,7 @@ set -euo pipefail
 readonly edge=nnviopp-sandbox-edge
 readonly expected_host=server1.nnviopp.com
 readonly sandbox_ip=159.198.40.128
-readonly expected_config_sha=840afb1a28b46f783059c4186c449ad949a6b60f8e838034b32eecee22be1b3e
+readonly expected_config_sha=7a393f332a6830c932a4e51b1754165af2be652b61a31640edcfbd79ca328ea4
 readonly final_config=/opt/jee8pay-v2-dev/merchant-uat/nginx.proposed.conf
 readonly compose_file=/opt/jee8pay-v2-dev/edge/compose.edge.yaml
 readonly project=jee8pay-v2-dev-edge
@@ -80,6 +80,7 @@ v2_healthy=$(docker ps --filter label=com.docker.compose.project=jee8pay-v2-dev 
 [[ $(grep -Fc 'location = /api/pay/notify/ryo {' "$final_config") -eq 1 ]] || fail CALLBACK_ROUTE_RYO
 [[ $(grep -Fc 'location = /api/pay/notify/jay {' "$final_config") -eq 1 ]] || fail CALLBACK_ROUTE_JAY
 [[ $(grep -Fc 'location = /api/pay/notify/chi {' "$final_config") -eq 1 ]] || fail CALLBACK_ROUTE_CHI
+[[ $(grep -Fc 'location = /api/pay/notify/jhd {' "$final_config") -eq 1 ]] || fail CALLBACK_ROUTE_JHD
 # 白名單一律 include（unifiedOrder + query 兩處），config 不得內嵌 inline allow
 [[ $(grep -Fc 'include /etc/nginx/allowlist/uat.conf;' "$final_config") -eq 2 ]] || fail ALLOWLIST_INCLUDE
 ! grep -Eq '^\s*allow ' "$final_config" || fail ALLOWLIST_INLINE_PRESENT
@@ -111,7 +112,7 @@ v2_healthy=$(docker ps --filter label=com.docker.compose.project=jee8pay-v2-dev 
   printf 'V1_CONTAINERS=RETIRED\n'
   printf 'V2_CREATE_ROUTE=PASS\n'
   printf 'V2_QUERY_ROUTE=PASS\n'
-  printf 'RYO_JAY_CHI_CALLBACK_ROUTE=PASS\n'
+  printf 'RYO_JAY_CHI_JHD_CALLBACK_ROUTE=PASS\n'
   printf 'ALLOWLIST_PRIMARY=34.92.245.74\n'
   printf 'ALLOWLIST_SECONDARY=34.92.52.162\n'
   printf 'PRODUCTION_IP_IN_ALLOWLIST=NO\n'

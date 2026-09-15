@@ -54,14 +54,15 @@ JeePay remains the authoritative platform core.
 
 ## 2. Product Scope
 
-### RYO / JAY / CHI（黑貓 PAY ibon）
+### RYO / JAY / CHI / JHD（黑貓 PAY ibon）
 
-Phase 1 active Providers：黑貓 PAY 平台上的三個統一客樂得上游（原 `CCAT` 已改名 `RYO`）：
+Phase 1 active Providers：黑貓 PAY 平台上的四個統一客樂得上游（原 `CCAT` 已改名 `RYO`；`JHD` 為金匯達有限公司）：
 
 ```text
 RYO_IBON  (ifCode=ryo)
 JAY_IBON  (ifCode=jay)
 CHI_IBON  (ifCode=chi)
+JHD_IBON  (ifCode=jhd)
 ```
 
 Current scope（每個上游相同）：

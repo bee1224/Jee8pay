@@ -4,7 +4,7 @@
 Standalone generator: no V1 baseline dependency. V1 hostnames
 (sandbox-api/sandbox/merchant-sandbox.nnviopp.com) were retired 2026-08-23;
 the edge serves only V2 routes:
-  ccat-v2-dev.nnviopp.com   /api/pay/notify/{ryo,jay,chi} -> jee8pay_v2_callback
+  ccat-v2-dev.nnviopp.com   /api/pay/notify/{ryo,jay,chi,jhd} -> jee8pay_v2_callback
   api-v2-dev.nnviopp.com    /api/pay/unifiedOrder, /api/pay/query -> jee8pay_v2_merchant_api
   admin-v2-dev.nnviopp.com  / (admin UI) -> jee8pay_v2_merchant_api
 """
@@ -182,6 +182,19 @@ http {{
     }}
 
     location = /api/pay/notify/chi {{
+      proxy_http_version 1.1;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto https;
+      proxy_set_header Connection '';
+      proxy_connect_timeout 5s;
+      proxy_read_timeout 60s;
+      proxy_send_timeout 60s;
+      proxy_pass http://jee8pay_v2_callback;
+    }}
+
+    location = /api/pay/notify/jhd {{
       proxy_http_version 1.1;
       proxy_set_header Host $host;
       proxy_set_header X-Real-IP $remote_addr;

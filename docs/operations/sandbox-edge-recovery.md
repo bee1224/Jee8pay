@@ -13,7 +13,7 @@ Edge compose = /opt/jee8pay-v2-dev/edge/compose.edge.yaml
 Edge project = jee8pay-v2-dev-edge
 Edge container = nnviopp-sandbox-edge（沿用歷史名，cert deploy hook 參照）
 Ingress config = /opt/jee8pay-v2-dev/merchant-uat/nginx.proposed.conf
-Ingress config SHA256 = 840afb1a28b46f783059c4186c449ad949a6b60f8e838034b32eecee22be1b3e
+Ingress config SHA256 = 7a393f332a6830c932a4e51b1754165af2be652b61a31640edcfbd79ca328ea4
 Ingress config owner/mode = 0:10002 0640
 Config generator = /opt/jee8pay-v2-dev/merchant-uat/prepare-edge-nginx.py（自足純 V2，無 V1 baseline 依賴）
 Allowlist dir = /opt/jee8pay-v2-dev/edge-allowlist（host cron 每分鐘產生 uat.conf）
@@ -71,7 +71,7 @@ The validator checks:
 - local 80/443 listening sockets;
 - both V2 ingress health endpoints（callback + merchant-api）;
 - V2 core `11/11` and V1 containers absent;
-- exact Create、Query and 黑貓 PAY（RYO/JAY/CHI）callback routes;
+- exact Create、Query and 黑貓 PAY（RYO/JAY/CHI/JHD）callback routes;
 - config 不含任何 V1 hostname/upstream 參照;
 - UAT allowlist unchanged and Production IP absent.
 

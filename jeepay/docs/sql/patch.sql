@@ -353,3 +353,15 @@ VALUES ('chi', 'CHI（黑猫 PAY）', 1, 0, 1,
 ALTER TABLE t_pay_order MODIFY COLUMN client_ip VARCHAR(45) DEFAULT NULL COMMENT '客户端IP';
 ALTER TABLE t_refund_order MODIFY COLUMN client_ip VARCHAR(45) DEFAULT NULL COMMENT '客户端IP';
 ALTER TABLE t_transfer_order MODIFY COLUMN client_ip VARCHAR(45) DEFAULT NULL COMMENT '客户端IP';
+
+-- 4) 新增 JHD 定义（金匯達有限公司；与 RYO/JAY/CHI 同一黑猫 PAY 平台契约，仅契约会员帐号不同）
+DELETE FROM t_pay_way WHERE way_code IN ('JHD_IBON');
+INSERT INTO t_pay_way (way_code, way_name) VALUES ('JHD_IBON', 'JHD ibon 缴款');
+DELETE FROM t_pay_interface_define WHERE if_code IN ('jhd');
+INSERT INTO t_pay_interface_define (if_code, if_name, is_mch_mode, is_isv_mode, config_page_type, isv_params, isvsub_mch_params, normal_mch_params, way_codes, icon, bg_color, state, remark)
+VALUES ('jhd', 'JHD（黑猫 PAY）', 1, 0, 1,
+        NULL,
+        NULL,
+        '[{"name":"environment","desc":"Provider 环境","type":"radio","verify":"required","values":"TEST,PRODUCTION","titles":"测试环境,生产环境"},{"name":"custId","desc":"契客代号","type":"text","verify":"required"},{"name":"apiPassword","desc":"API 密码","type":"text","verify":"required","star":"1"}]',
+        '[{"wayCode":"JHD_IBON"}]',
+        '', '#222222', 1, '黑猫 PAY ibon 通道（上游四）');
