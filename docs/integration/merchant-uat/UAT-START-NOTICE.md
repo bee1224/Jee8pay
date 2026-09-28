@@ -37,7 +37,8 @@
 | JAY channelExtra 缺 payer 欄位 | 9999 | `JAY channelExtra 缺少繳款人資料` |
 | CHI channelExtra 缺 payer 欄位 | 9999 | `CHI channelExtra 缺少繳款人資料` |
 | JHD channelExtra 缺 payer 欄位 | 9999 | `JHD channelExtra 缺少繳款人資料` |
-| 不支援的 wayCode | 9999 | `商戶應用不支援該支付方式` |
+| 不存在的 wayCode（四個 `*_IBON` 以外，含已移除的中國支付方式如 `ALI_JSAPI`） | 9999 | `不支援的支付方式` |
+| 該應用未開通的 `*_IBON` wayCode | 9999 | `商戶應用不支援該支付方式` |
 | 缺 subject | 9999 | `商品標題不能為空` |
 | 代付（未開放） | 9999 | `無此轉帳通道介面` |
 | 退款-訂單不存在 | 9999 | `退款訂單不存在` |

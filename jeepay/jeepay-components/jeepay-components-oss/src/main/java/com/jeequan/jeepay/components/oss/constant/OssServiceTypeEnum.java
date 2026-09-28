@@ -26,9 +26,7 @@ import lombok.Getter;
 @Getter
 public enum OssServiceTypeEnum {
 
-    LOCAL("local"), //本地存储
-
-    ALIYUN_OSS("aliyun-oss");  //阿里云oss
+    LOCAL("local"); //本地存储
 
     /** 名称 **/
     private String serviceName;

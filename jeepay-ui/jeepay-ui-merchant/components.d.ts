@@ -56,7 +56,6 @@ declare module 'vue' {
     ATree: typeof import('ant-design-vue/es')['Tree']
     AUpload: typeof import('ant-design-vue/es')['Upload']
     AvatarDropdown: typeof import('./src/components/GlobalHeader/AvatarDropdown.vue')['default']
-    ChannelUserModal: typeof import('./src/components/ChannelUser/ChannelUserModal.vue')['default']
     GlobalFooter: typeof import('./src/components/GlobalFooter/index.vue')['default']
     GlobalLoad: typeof import('./src/components/GlobalLoad/GlobalLoad.vue')['default']
     JeepayCard: typeof import('./src/components/JeepayCard/JeepayCard.vue')['default']

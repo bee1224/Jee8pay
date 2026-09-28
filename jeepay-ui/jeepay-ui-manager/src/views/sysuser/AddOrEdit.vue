@@ -161,7 +161,7 @@ const infoFormModel = ref()
 const rules: any = reactive({
   realname: [{ required: true, message: '請輸入用戶姓名', trigger: 'blur' }],
   telphone: [
-    { required: true, pattern: /^[1][0-9]{10}$/, message: '請輸入正確的手機號碼', trigger: 'blur' },
+    { required: true, pattern: /^09\d{8}$/, message: '請輸入正確的手機號碼（09 開頭 10 碼）', trigger: 'blur' },
   ],
   userNo: [{ required: true, message: '請輸入編號', trigger: 'blur' }],
   loginUsername: [],

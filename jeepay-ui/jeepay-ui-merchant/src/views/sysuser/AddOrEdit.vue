@@ -161,8 +161,8 @@ const vdata: any = reactive({
     telphone: [
       {
         required: true,
-        pattern: /^[1][0-9]{10}$/,
-        message: '請輸入正確的手機號碼',
+        pattern: /^09\d{8}$/,
+        message: '請輸入正確的手機號碼（09 開頭 10 碼）',
         trigger: 'blur',
       },
     ],

@@ -298,10 +298,3 @@ export function mchNotifyResend (notifyId) {
   })
 }
 
-/** 查询支付宝授权地址URL **/
-export function queryAlipayIsvsubMchAuthUrl (mchAppId) {
-  return request.request({
-    url: '/api/mch/payConfigs/alipayIsvsubMchAuthUrls/' + mchAppId,
-    method: 'GET'
-  })
-}

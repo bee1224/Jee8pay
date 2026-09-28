@@ -243,7 +243,7 @@ def main():
             "P1_UNSUPPORTED_WAYCODE",
             f"BB-{stamp}-WAYCODE",
             {"wayCode": "ALI_JSAPI"},
-            "商戶應用不支援該支付方式",
+            "不支援的支付方式",
         ),
         (
             "P1_MISSING_SUBJECT",

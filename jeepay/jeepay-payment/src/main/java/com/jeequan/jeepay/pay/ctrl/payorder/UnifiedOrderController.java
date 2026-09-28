@@ -15,15 +15,12 @@
  */
 package com.jeequan.jeepay.pay.ctrl.payorder;
 
-import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayWay;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
-import com.jeequan.jeepay.core.utils.JeepayKit;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRS;
-import com.jeequan.jeepay.pay.rqrs.payorder.payway.AutoBarOrderRQ;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.service.impl.PayWayService;
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +66,7 @@ public class UnifiedOrderController extends AbstractPayOrderController {
         UnifiedOrderRS res = new UnifiedOrderRS();
         BeanUtils.copyProperties(bizRes, res);
 
-        //只有 訂單生成（QR_CASHIER） || 支付中 || 支付成功返回该数据
+        // 只有 訂單生成 || 支付中 || 支付成功返回付款資料
         if(bizRes.getOrderState() != null && (bizRes.getOrderState() == PayOrder.STATE_INIT || bizRes.getOrderState() == PayOrder.STATE_ING || bizRes.getOrderState() == PayOrder.STATE_SUCCESS) ){
             res.setPayDataType(bizRes.buildPayDataType());
             res.setPayData(bizRes.buildPayData());
@@ -81,21 +78,7 @@ public class UnifiedOrderController extends AbstractPayOrderController {
 
     private UnifiedOrderRQ buildBizRQ(UnifiedOrderRQ rq){
 
-        //支付方式  比如： ali_bar
         String wayCode = rq.getWayCode();
-
-        //jsapi 收银台聚合支付场景 (不校验是否存在payWayCode)
-        if(CS.PAY_WAY_CODE.QR_CASHIER.equals(wayCode)){
-            return rq.buildBizRQ();
-        }
-
-        //如果是自动分类条码
-        if(CS.PAY_WAY_CODE.AUTO_BAR.equals(wayCode)){
-
-            AutoBarOrderRQ bizRQ = (AutoBarOrderRQ)rq.buildBizRQ();
-            wayCode = JeepayKit.getPayWayCodeByBarCode(bizRQ.getAuthCode());
-            rq.setWayCode(wayCode.trim());
-        }
 
         if(payWayService.count(PayWay.gw().eq(PayWay::getWayCode, wayCode)) <= 0){
             throw new BizException("不支援的支付方式");

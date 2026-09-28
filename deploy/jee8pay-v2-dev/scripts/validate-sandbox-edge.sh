@@ -69,7 +69,8 @@ ss -H -lnt | grep -Fq "$sandbox_ip:443 " || fail PORT_443
 
 v2_healthy=$(docker ps --filter label=com.docker.compose.project=jee8pay-v2-dev \
   --filter health=healthy --format '{{.Names}}' | wc -l)
-[[ $v2_healthy -eq 11 ]] || fail V2_CORE_HEALTH
+# cashier 收銀台已移除（僅中國通道使用），核心健康容器數由 11 改為 10
+[[ $v2_healthy -eq 10 ]] || fail V2_CORE_HEALTH
 # V1 已退役：不得有 V1 容器運行
 ! docker ps -a --filter name=nnviopp-sandbox-api --format '{{.Names}}' | grep -q . || fail V1_API_PRESENT
 ! docker ps -a --filter name=nnviopp-production-api --format '{{.Names}}' | grep -q . || fail V1_PRODUCTION_PRESENT

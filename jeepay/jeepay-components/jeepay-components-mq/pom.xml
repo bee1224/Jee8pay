@@ -28,29 +28,7 @@
     <!-- ↓↓↓↓↓↓ MQ依赖包 ↓↓↓↓↓↓ -->
     <!-- 使用的厂商 scope=compile,  否则需要scope=provided(仅编译，不依赖) -->
 
-    <!-- ActiveMQ  和 连接池  -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-activemq</artifactId>
-<!--      <scope>provided</scope>-->
-    </dependency>
-    <dependency>
-      <groupId>org.apache.activemq</groupId>
-      <artifactId>activemq-pool</artifactId>
-<!--      <scope>provided</scope>-->
-    </dependency>
-    <dependency>
-      <groupId>org.messaginghub</groupId>
-      <artifactId>pooled-jms</artifactId>
-<!--      <scope>provided</scope>-->
-    </dependency>
 
-    <!-- RabbitMQ  -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-amqp</artifactId>
-      <scope>provided</scope>
-    </dependency>
 
     <!-- RocketMQ -->
     <!-- Docker/独立部署场景需要将 RocketMQ Spring 依赖实际打包进最终产物，
@@ -65,12 +43,6 @@
       <artifactId>javax.annotation-api</artifactId>
     </dependency>
 
-    <!-- AliyunRocketMQ -->
-    <dependency>
-      <groupId>com.aliyun.openservices</groupId>
-      <artifactId>ons-client</artifactId>
-      <scope>provided</scope>
-    </dependency>
 
     <dependency>
       <groupId>org.springframework.boot</groupId>

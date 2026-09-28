@@ -92,13 +92,6 @@
               style="width: 150px"
               placeholder="請輸入接收方帳號"
             />
-            <a-button
-              type="link"
-              v-if="record.accType == 0"
-              @click="showChannelUserModal('wxpay', record)"
-            >
-              掃碼獲取
-            </a-button>
           </template>
 
           <!-- 接收方姓名 -->
@@ -210,13 +203,6 @@
               style="width: 150px"
               placeholder="請輸入接收方帳號"
             />
-            <a-button
-              type="link"
-              v-if="record.accType == 0"
-              @click="showChannelUserModal('alipay', record)"
-            >
-              掃碼獲取
-            </a-button>
           </template>
 
           <!-- 接收方姓名 -->
@@ -275,17 +261,12 @@
       <a-button @click="onClose">關閉</a-button>
     </div>
 
-    <ChannelUserModal
-      ref="channelUserModal"
-      @changeChannelUserId="changeChannelUserIdFunc($event)"
-    />
   </a-drawer>
 </template>
 
 <script setup lang="tsx">
 // eslint-disable-next-line no-unused-vars
 import { genRowKey } from '@/utils/util'
-import ChannelUserModal from '@/components/ChannelUser/ChannelUserModal.vue'
 import {
   API_URL_DIVISION_RECEIVER,
   API_URL_DIVISION_RECEIVER_GROUP,
@@ -354,7 +335,6 @@ const vdata: any = reactive({
   receiverTableData: [], // 微信支付的分账用户列表集合
 })
 
-const channelUserModal = ref()
 
 // 弹层打开事件
 function show(appInfo) {
@@ -400,15 +380,6 @@ function changeRelationType(record, value) {
   }
 }
 
-// 显示获取用户ID的弹层
-function showChannelUserModal(ifCode, record) {
-  channelUserModal.value.showModal(vdata.appInfo.appId, ifCode, record)
-}
-
-// 接收到当前渠道用户ID信息
-function changeChannelUserIdFunc({ channelUserId, extObject }) {
-  extObject.accNo = channelUserId
-}
 
 // 添加一行账号信息
 function addReceiverRow(ifCode) {

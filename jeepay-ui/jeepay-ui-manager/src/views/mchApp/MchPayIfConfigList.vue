@@ -51,17 +51,6 @@
             </div>
             <!-- 卡片底部操作栏 -->
             <div class="jeepay-card-ops">
-              <a
-                v-if="
-                  record.mchType == 2 &&
-                  record.ifCode == 'alipay' &&
-                  $access('ENT_MCH_PAY_CONFIG_ADD')
-                "
-                @click="toAlipayAuthPageFunc(record)"
-              >
-                掃碼授權
-                <a-icon key="right" type="right" style="font-size: 13px" />
-              </a>
 
               <a v-if="$access('ENT_MCH_PAY_CONFIG_ADD')" @click="editPayIfConfigFunc(record)">
                 填寫參數
@@ -152,14 +141,8 @@
 
     <!-- 支付参数配置JSON渲染页面组件  -->
     <MchPayConfigAddOrEdit ref="mchPayConfigAddOrEdit" :callback-func="refCardList" />
-    <!-- 支付参数配置自定义页面组件 wxpay  -->
-    <WxpayPayConfig ref="wxpayPayConfig" :callback-func="refCardList" />
-    <!-- 支付参数配置自定义页面组件 alipay  -->
-    <AlipayPayConfig ref="alipayPayConfig" :callback-func="refCardList" />
     <!-- 支付通道配置页面组件  -->
     <MchPayPassageAddOrEdit ref="mchPayPassageAddOrEdit" :callback-func="searchFunc" />
-    <!-- 支付宝授权弹层  -->
-    <AlipayAuth ref="alipayAuthPage" :callback-func="refCardList" />
   </a-drawer>
 </template>
 
@@ -172,9 +155,6 @@ import {
 } from '@/api/manage'
 import MchPayConfigAddOrEdit from './MchPayConfigAddOrEdit.vue'
 import MchPayPassageAddOrEdit from './MchPayPassageAddOrEdit.vue'
-import WxpayPayConfig from './custom/WxpayPayConfig.vue'
-import AlipayPayConfig from './custom/AlipayPayConfig.vue'
-import AlipayAuth from './AlipayAuth.vue'
 import { reactive, ref, getCurrentInstance } from 'vue'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
@@ -197,9 +177,6 @@ const infoCard = ref()
 const infoTable = ref()
 const mchPayConfigAddOrEdit = ref()
 const mchPayPassageAddOrEdit = ref()
-const wxpayPayConfig = ref()
-const alipayPayConfig = ref()
-const alipayAuthPage = ref()
 
 const vdata: any = reactive({
   currentStep: 0, // 当前步骤条index
@@ -259,12 +236,6 @@ function editPayIfConfigFunc(record) {
     })
   } else if (record.configPageType === 1) {
     mchPayConfigAddOrEdit.value.show(vdata.appId, record)
-  } else if (record.configPageType === 2) {
-    if (record.ifCode == 'wxpay') {
-      wxpayPayConfig.value.show(vdata.appId, record)
-    } else if (record.ifCode == 'alipay') {
-      alipayPayConfig.value.show(vdata.appId, record)
-    }
   }
 }
 // 支付通道配置
@@ -285,17 +256,6 @@ function onClose() {
   vdata.open = false
 }
 
-// 支付宝子商户 扫码授权
-function toAlipayAuthPageFunc(record) {
-  if (!record) return
-  if (record.subMchIsvConfig === 0) {
-    return $infoBox.message.error({
-      title: '提示',
-      content: '當前應用所屬商戶為特約商戶，請先設定服務商支付參數！',
-    })
-  }
-  alipayAuthPage.value.show(vdata.appId)
-}
 
 defineExpose({ show })
 </script>

@@ -50,7 +50,7 @@ class JeepayRocketMqEnvironmentPostProcessorTest {
     void shouldLeaveEnvironmentUntouchedWhenVendorDoesNotMatch() {
         ConfigurableEnvironment environment = new StandardEnvironment();
         environment.getPropertySources().addFirst(new MapPropertySource("test", Map.of(
-                MQVenderCS.YML_VENDER_KEY, MQVenderCS.ACTIVE_MQ,
+                MQVenderCS.YML_VENDER_KEY, "otherVendor",
                 "spring.application.name", "jeepay-payment"
         )));
 

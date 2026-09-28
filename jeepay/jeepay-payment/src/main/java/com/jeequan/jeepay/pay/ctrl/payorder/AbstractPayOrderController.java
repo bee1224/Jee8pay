@@ -25,8 +25,6 @@ import com.jeequan.jeepay.core.entity.MchPayPassage;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
-import com.jeequan.jeepay.core.model.DBApplicationConfig;
-import com.jeequan.jeepay.core.model.QRCodeParams;
 import com.jeequan.jeepay.core.utils.AmountUtil;
 import com.jeequan.jeepay.core.utils.SeqKit;
 import com.jeequan.jeepay.core.utils.SpringBeansUtil;
@@ -38,13 +36,10 @@ import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRS;
-import com.jeequan.jeepay.pay.rqrs.payorder.payway.QrCashierOrderRQ;
-import com.jeequan.jeepay.pay.rqrs.payorder.payway.QrCashierOrderRS;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.service.PayOrderProcessService;
 import com.jeequan.jeepay.service.impl.MchPayPassageService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
-import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -67,7 +62,6 @@ public abstract class AbstractPayOrderController extends ApiController {
     @Autowired private PayOrderService payOrderService;
     @Autowired private ConfigContextQueryService configContextQueryService;
     @Autowired private PayOrderProcessService payOrderProcessService;
-    @Autowired private SysConfigService sysConfigService;
     @Autowired private IMQSender mqSender;
 
 
@@ -136,31 +130,6 @@ public abstract class AbstractPayOrderController extends ApiController {
 
             if(mchApp == null || mchApp.getState() != CS.YES){
                 throw new BizException("商戶應用狀態不可用");
-            }
-
-            //收银台支付并且只有新訂單需要走这里，  收银台二次下单的wayCode应该为实际支付方式。
-            if(isNewOrder && CS.PAY_WAY_CODE.QR_CASHIER.equals(wayCode)){
-
-                //生成訂單
-                payOrder = genPayOrder(bizRQ, mchInfo, mchApp, null, null);
-                String payOrderId = payOrder.getPayOrderId();
-                //訂單入库 訂單狀態： 生成狀態  此时没有和任何上游渠道产生交互。
-                payOrderService.save(payOrder);
-
-                QrCashierOrderRS qrCashierOrderRS = new QrCashierOrderRS();
-                QrCashierOrderRQ qrCashierOrderRQ = (QrCashierOrderRQ)bizRQ;
-
-                DBApplicationConfig dbApplicationConfig = sysConfigService.getDBApplicationConfig();
-
-                String payUrl = dbApplicationConfig.genUniJsapiPayUrl(QRCodeParams.TYPE_PAY_ORDER, payOrderId);
-                if(CS.PAY_DATA_TYPE.CODE_IMG_URL.equals(qrCashierOrderRQ.getPayDataType())){ //二维码地址
-                    qrCashierOrderRS.setCodeImgUrl(dbApplicationConfig.genScanImgUrl(payUrl));
-
-                }else{ //默认都为跳转地址方式
-                    qrCashierOrderRS.setPayUrl(payUrl);
-                }
-
-                return packageApiResByPayOrder(bizRQ, qrCashierOrderRS, payOrder);
             }
 
             // 根据支付方式， 查询出 该商戶 可用的支付介面

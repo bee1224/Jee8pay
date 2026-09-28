@@ -34,7 +34,7 @@ V1 edge 的 compose 屬 V1 legacy infra（不在本 repo），但 admin-v2 路�
 
 ## 前端
 
-- 三個前端（Manager/Merchant/Cashier）與 init.sql seed 已繁中化（zh-TW）。
+- 兩個前端（Manager/Merchant）與 init.sql seed 已繁中化（zh-TW）；收銀台前端已移除（只服務中國通道）。
 - 測試環境已部署繁中 build；正式環境 UI images 已建置於 candidate release。
 - 已部署的 `dist/index.html` 有 entry JS/CSS 的 `<link rel="preload">`（**build 後手動 patch 加入**，非 build pipeline 產出；
   source `index.html` 未含 — vite 2.9 對 build-time preload 路徑會 build 失敗）。fresh build 後需重新 patch 才會帶 preload。

@@ -25,7 +25,7 @@ Runtime source and deployment inputs are in [`deploy/jee8pay-v2-dev/`](../../dep
 | Payment | `payment:9216` | `127.0.0.1:19216` | Payment API and Provider callback runtime |
 | Manager | `manager:9217` | `127.0.0.1:19217` | Manager backend |
 | Merchant | `merchant:9218` | `127.0.0.1:19218` | Merchant backend and V2 test receiver |
-| Cashier | `cashier:80` | `127.0.0.1:19226` | Cashier UI |
+| ~~Cashier~~ | — | — | 已移除（2026-09-28 `test-env-overhaul`）：收銀台只服務中國通道，對外無路由 |
 | Manager UI | `manager-ui:80` | `127.0.0.1:19227` | Manager UI |
 | Merchant UI | `merchant-ui:80` | `127.0.0.1:19228` | Merchant UI |
 | Callback ingress | `jee8pay-v2-callback:8080` | none | Exact CCAT APN path only |

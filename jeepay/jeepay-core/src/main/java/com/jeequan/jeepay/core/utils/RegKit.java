@@ -24,15 +24,10 @@ package com.jeequan.jeepay.core.utils;
 */
 public class RegKit {
 
-	public static final String REG_MOBILE = "^1\\d{10}$"; //判断是否是手机号
-	public static final String REG_ALIPAY_USER_ID = "^2088\\d{12}$"; //判断是支付宝用户Id 以2088开头的纯16位数字
+	public static final String REG_MOBILE = "^09\\d{8}$"; // 台灣手機號：09 開頭共 10 碼
 
 	public static boolean isMobile(String str){
 		return match(str, REG_MOBILE);
-	}
-
-	public static boolean isAlipayUserId(String str){
-		return match(str, REG_ALIPAY_USER_ID);
 	}
 
 

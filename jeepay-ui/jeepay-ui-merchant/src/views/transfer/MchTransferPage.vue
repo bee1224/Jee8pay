@@ -85,13 +85,6 @@
                   v-model:value="vdata.reqData.accountNo"
                   style="width: 200px; margin-right: 10px"
                 />
-                <a-button
-                  v-show="vdata.reqData.entryType == 'WX_CASH'"
-                  size="small"
-                  @click="showChannelUserQR"
-                >
-                  自動獲取openID
-                </a-button>
               </div>
               <div style="margin-left: 10px; color: red">
                 提示：【微信官方】需要填入對應應用收款方的openID
@@ -143,11 +136,6 @@
       </div>
     </a-card>
 
-    <!-- 获取用户二维码 -->
-    <ChannelUserModal
-      ref="channelUserModal"
-      @changeChannelUserId="changeChannelUserIdFunc($event)"
-    />
 
     <!-- 用户确认二维码 -->
     <a-modal v-model:open="vdata.openTransConfirmModal" title="等待領取" :footer="null" :width="300">
@@ -163,7 +151,6 @@
 <script setup lang="tsx">
 import ReconnectingWebSocket from 'reconnectingwebsocket'
 import { API_URL_MCH_APP, req, queryMchTransferIfCode, doTransfer, getWebSocketPrefix } from '@/api/manage' // 接口
-import ChannelUserModal from '@/components/ChannelUser/ChannelUserModal.vue'
 import { use } from 'echarts'
 import { reactive, getCurrentInstance, ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
@@ -197,7 +184,6 @@ const vdata: any = reactive({
   transferOrderWebSocket: null, // 转账订单webSocket对象
 })
 
-const channelUserModal = ref()
 
 onMounted(() => {
   // 关闭上一个webSocket监听
@@ -362,16 +348,6 @@ function changeCurrentIfCode(ifCode) {
   }
 }
 
-// 显示自动获取渠道用户ID的二维码地址
-function showChannelUserQR() {
-  channelUserModal.value.showModal(vdata.reqData.appId, vdata.reqData.ifCode) // 打开弹窗
-}
-
-// 更新账户
-function changeChannelUserIdFunc({ channelUserId }) {
-  $infoBox.message.success('成功獲取渠道用戶ID')
-  vdata.reqData.accountNo = channelUserId
-}
 
 function handleClose() {
   if (vdata.transferOrderWebSocket) {

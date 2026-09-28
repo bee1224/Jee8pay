@@ -30,7 +30,7 @@ D01 沒有建立 Merchant portal login credential；外部系統串接只需要 
 
 ## Cashier
 
-Cashier UI 的 actual routes 只有 WeChat、Alipay、YSF JSAPI；沒有 `RYO_IBON` page／route。`RYO_IBON` native UnifiedOrder 直接回 `payDataType=ryoIbon` 與 `payData`，不使用 JeePay Cashier URL。
+收銀台前端（`jeepay-ui-cashier`）已於 2026-09-28 移除：它只有 WeChat、Alipay、YSF JSAPI 頁面，沒有任何 ibon 用途。`*_IBON` native UnifiedOrder 直接回 `payDataType` 與 `payData`，不使用收銀台 URL。
 
 Merchant UI 的 generic Pay Test modal 也只特別處理既有 QR／payurl types，沒有 `ryoIbon` renderer。因此本次外部 Merchant API flow 應自行 parse `payData` 顯示 payment code／expiry／可選 `shortUrl`，不依賴 JeePay frontend redesign。
 
@@ -39,5 +39,4 @@ Merchant UI 的 generic Pay Test modal 也只特別處理既有 QR／payurl type
 - Menu seed：`jeepay/docs/sql/init.sql` 的 Manager `ENT_MCH*`、`ENT_ORDER*`、`ENT_PC*` 與 Merchant `ENT_MCH_APP`／`ENT_PAY_ORDER`。
 - Manager component map：`jeepay-ui/jeepay-ui-manager/src/config/appConfig.js`。
 - Merchant component map：`jeepay-ui/jeepay-ui-merchant/src/config/appConfig.js`。
-- Cashier routes：`jeepay-ui/jeepay-ui-cashier/src/router/index.js` 與 `src/config/index.js`。
 - RYO response：`RyoIbonOrderRS`。

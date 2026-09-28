@@ -237,7 +237,7 @@ const rules: any = reactive({
     },
   ],
   contactTel: [
-    { required: true, pattern: /^1\d{10}$/, message: '請輸入正確的手機號', trigger: 'blur' },
+    { required: true, pattern: /^09\d{8}$/, message: '請輸入正確的手機號（09 開頭 10 碼）', trigger: 'blur' },
   ],
   newPwd: [
     { required: false, trigger: 'blur' },

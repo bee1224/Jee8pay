@@ -237,30 +237,6 @@ services:
       start_period: 60s
     mem_limit: 384m
 
-  cashier:
-    build:
-      context: .
-      dockerfile: Dockerfile.ui
-      args:
-        UI_DIR: ui-cashier
-    image: jee8pay-v2-dev-cashier:de94ab8fd19d-b20899e885
-    restart: unless-stopped
-    environment:
-      BACKEND_HOST: payment:9216
-    depends_on:
-      payment:
-        condition: service_healthy
-    ports:
-      - "127.0.0.1:19226:80"
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
-      interval: 15s
-      timeout: 5s
-      retries: 8
-    mem_limit: 64m
-    networks:
-      - v2
-
   manager-ui:
     build:
       context: .

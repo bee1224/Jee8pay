@@ -15,7 +15,6 @@
  */
 package com.jeequan.jeepay.mch.ctrl.transfer;
 
-import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.JeepayClient;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchApp;
@@ -24,8 +23,6 @@ import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.model.DBApplicationConfig;
-import com.jeequan.jeepay.core.utils.JeepayKit;
-import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.exception.JeepayException;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.model.TransferOrderCreateReqModel;
@@ -91,44 +88,6 @@ public class MchTransferController extends CommonCtrl {
         return ApiRes.ok(result);
     }
 
-
-
-    /** 获取渠道侧用户ID **/
-    @Operation(summary = "获取渠道侧用户ID")
-    @Parameters({
-            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
-            @Parameter(name = "appId", description = "应用ID", required = true),
-            @Parameter(name = "ifCode", description = "接口类型代码", required = true),
-            @Parameter(name = "extParam", description = "扩展参数", required = true)
-    })
-    @PreAuthorize("hasAuthority('ENT_MCH_TRANSFER_CHANNEL_USER')")
-    @GetMapping("/channelUserId")
-    public ApiRes channelUserId() {
-
-        String appId = getValStringRequired("appId");
-        MchApp mchApp = mchAppService.getById(appId);
-        if(mchApp == null || mchApp.getState() != CS.PUB_USABLE || !mchApp.getMchNo().equals(getCurrentMchNo())){
-            throw new BizException("商户应用不存在或不可用");
-        }
-
-        JSONObject param = getReqParamJSON();
-        param.put("mchNo", getCurrentMchNo());
-        param.put("appId", appId);
-        param.put("ifCode", getValStringRequired("ifCode"));
-        param.put("extParam", getValStringRequired("extParam"));
-        param.put("reqTime", System.currentTimeMillis() + "");
-        param.put("version", "1.0");
-        param.put("signType", "MD5");
-
-        DBApplicationConfig dbApplicationConfig = sysConfigService.getDBApplicationConfig();
-
-        param.put("redirectUrl", dbApplicationConfig.getMchSiteUrl() + "/api/anon/channelUserIdCallback");
-
-        param.put("sign", JeepayKit.getSign(param, mchApp.getAppSecret()));
-        String url = StringKit.appendUrlQuery(dbApplicationConfig.getPaySiteUrl() + "/api/channelUserId/jump", param);
-
-        return ApiRes.ok(url);
-    }
 
 
     /** 调起下单接口 **/

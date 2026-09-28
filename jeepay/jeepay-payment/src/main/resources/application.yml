@@ -24,7 +24,3 @@ knife4j:
   setting:
     language: zh_cn
     swagger-model-name: 公共响应
-  documents:
-    - name: API
-      locations: classpath:markdown/doc/*
-      group: default

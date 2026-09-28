@@ -148,16 +148,10 @@
         <a-button type="primary" @click="onSubmit" :loading="vdata.btnLoading">儲存</a-button>
       </div>
     </a-drawer>
-    <!-- 支付参数配置页面组件  -->
-    <WxpayPayConfig ref="wxpayPayConfig" :callbackFunc="refCardList" />
-    <!-- 支付参数配置页面组件  -->
-    <AlipayPayConfig ref="alipayPayConfig" :callbackFunc="refCardList" />
   </a-drawer>
 </template>
 
 <script setup lang="ts">
-import WxpayPayConfig from './custom/WxpayPayConfig.vue'
-import AlipayPayConfig from './custom/AlipayPayConfig.vue'
 import { API_URL_ISV_PAYCONFIGS_LIST, getIsvPayConfigUnique, req, upload } from '@/api/manage'
 import { reactive, ref, getCurrentInstance, nextTick } from 'vue'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
@@ -165,8 +159,6 @@ const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProp
 const infoCard = ref()
 const infoFormModel = ref()
 const isvParamFormModel = ref()
-const wxpayPayConfig = ref()
-const alipayPayConfig = ref()
 
 const vdata: any = reactive({
   btnLoading: false,
@@ -318,13 +310,6 @@ function editPayIfConfigFunc(record) {
 
       // that.$forceUpdate()
     })
-  } else if (record.configPageType === 2) {
-    // 自定义配置页面，页面放在custom目录下，配置模块命名规则：if_code + PayConfig
-    if (record.ifCode == 'wxpay') {
-      wxpayPayConfig.value.show(vdata.isvNo, record)
-    } else if (record.ifCode == 'alipay') {
-      alipayPayConfig.value.show(vdata.isvNo, record)
-    }
   }
 }
 // 表单提交

@@ -15,7 +15,6 @@
  */
 package com.jeequan.jeepay.mgr.ctrl.merchant;
 
-import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.components.mq.model.ResetIsvMchAppInfoConfigMQ;
 import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.aop.MethodLog;
@@ -26,14 +25,12 @@ import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
 import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.model.ApiRes;
-import com.jeequan.jeepay.core.model.DBApplicationConfig;
 import com.jeequan.jeepay.core.model.params.NormalMchParams;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
-import com.jeequan.jeepay.service.impl.SysConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -63,7 +60,6 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
     @Autowired private MchAppService mchAppService;
     @Autowired private IMQSender mqSender;
     @Autowired private MchInfoService mchInfoService;
-    @Autowired private SysConfigService sysConfigService;
 
     /**
      * @Author: ZhuXiao
@@ -182,29 +178,6 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
         mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_APP, null, mchApp.getMchNo(), infoId));
 
         return ApiRes.ok();
-    }
-
-
-
-    /** 查询支付宝商户授权URL **/
-    @Operation(summary = "查询支付宝商户授权URL")
-    @Parameters({
-            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
-            @Parameter(name = "mchAppId", description = "应用ID", required = true)
-    })
-    @GetMapping("/alipayIsvsubMchAuthUrls/{mchAppId}")
-    public ApiRes queryAlipayIsvsubMchAuthUrl(@PathVariable String mchAppId) {
-
-        MchApp mchApp = mchAppService.getById(mchAppId);
-        MchInfo mchInfo = mchInfoService.getById(mchApp.getMchNo());
-        DBApplicationConfig dbApplicationConfig = sysConfigService.getDBApplicationConfig();
-        String authUrl = dbApplicationConfig.genAlipayIsvsubMchAuthUrl(mchInfo.getIsvNo(), mchAppId);
-        String authQrImgUrl = dbApplicationConfig.genScanImgUrl(authUrl);
-
-        JSONObject result = new JSONObject();
-        result.put("authUrl", authUrl);
-        result.put("authQrImgUrl", authQrImgUrl);
-        return ApiRes.ok(result);
     }
 
 }

@@ -247,13 +247,6 @@ export function getWebSocketPrefix () {
   }
 }
 
-/** 查询支付宝授权地址URL **/
-export function queryAlipayIsvsubMchAuthUrl (mchAppId) {
-  return request.request({
-    url: '/api/mch/payConfigs/alipayIsvsubMchAuthUrls/' + mchAppId,
-    method: 'GET'
-  })
-}
 
 /** 查询商户转账支出的接口 **/
 export function queryMchTransferIfCode (appId) {
@@ -263,14 +256,6 @@ export function queryMchTransferIfCode (appId) {
   })
 }
 
-/** 获取渠道用户ID二维码地址 **/
-export function getChannelUserQrImgUrl (ifCode, appId, extParam) {
-  return request.request({
-    url: '/api/mchTransfers/channelUserId',
-    method: 'GET',
-    params: { ifCode, appId, extParam }
-  })
-}
 
 /** 转账 **/
 export function doTransfer (parameter) {

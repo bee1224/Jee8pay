@@ -30,7 +30,7 @@ export default {
        }
   },
 
-  mobile: { pattern: /^1\d{10}$/, message: '請輸入正確的手機號' },
+  mobile: { pattern: /^09\d{8}$/, message: '請輸入正確的手機號（09 開頭 10 碼）' },
   emall: { pattern: /^.+@.+(\.).+$/, message: '請輸入正確的郵箱' },
 
   date: { pattern: /^\d{4}-\d{2}-\d{2}$/, message: '請輸入正確的日期[yyyy-MM-dd]' },
