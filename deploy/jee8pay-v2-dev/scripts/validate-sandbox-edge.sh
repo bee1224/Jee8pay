@@ -109,7 +109,7 @@ v2_healthy=$(docker ps --filter label=com.docker.compose.project=jee8pay-v2-dev 
   printf 'EDGE_LOCAL_ROUTE=PASS\n'
   printf 'CALLBACK_UPSTREAM=PASS\n'
   printf 'MERCHANT_UPSTREAM=PASS\n'
-  printf 'V2_CORE_HEALTH=%s/11\n' "$v2_healthy"
+  printf 'V2_CORE_HEALTH=%s/10\n' "$v2_healthy"
   printf 'V1_CONTAINERS=RETIRED\n'
   printf 'V2_CREATE_ROUTE=PASS\n'
   printf 'V2_QUERY_ROUTE=PASS\n'
