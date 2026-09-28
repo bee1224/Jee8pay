@@ -10,6 +10,39 @@
 > - cert renewal 現以 V2 腳本 `/opt/jee8pay-v2-dev/scripts/sync-edge-certificate.sh` 為 renew/deploy hook（取代 `/opt/payment/.../sync-sandbox-edge-certificate.sh`）。
 > - 完整 gap 與驗證見下文「V1 retirement（2026-08-23 盤點）」。
 
+## 2026-09-29 test-env-overhaul 部署
+
+來源：分支 `test-env-overhaul`（`a3594721af26`；後端 JAR 建於 `e3cda9c`，其後僅前端與 SQL 變更）。正式環境未變更。
+
+| 項目 | 內容 |
+| --- | --- |
+| Release | `/opt/jee8pay-v2-dev/releases/a3594721af26-overhaul`（`current` 指向此處） |
+| 更新服務 | payment、manager、merchant、manager-ui、merchant-ui（映像標籤 `a3594721af26`）；其餘容器未重啟 |
+| 移除 | `cashier` 容器與 `artifacts/ui-cashier`；健康容器數 11 → 10（`bin/validate-sandbox-edge` 已同步） |
+| DB | 依序執行 `deploy/jee8pay-v2-dev/sql/` 的 `20260928-remove-china-providers.sql`、`20260929-add-jhd-definition.sql`、`20260929-planned-feature-entitlements.sql`、`20260929-wallet-placeholder-menus.sql`；執行前備份於 `state/overhaul-20260929/pre-cleanup-tables.sql.gz` |
+| callback-ingress | 換上 repo 版 `config/callback-ingress.conf`（新增 `/api/pay/notify/jhd`），只重建該容器 |
+| 驗證 | 隔離環境（`jee8pay-smoke`，驗完已銷毀）三服務啟動與路由冒煙 PASS；部署後 10/10 healthy、`validate-sandbox-edge` PASS、`run-d01-blackbox.py`（RYO_IBON）23 項 PASS、Provider Create 呼叫 0 次 |
+
+事故紀錄：第一次部署時 payment 因誤刪 `jeepay/conf/devCommons/config/application.yml`（三個 pom 以 resource 打包進 JAR）而出現 bean 循環依賴啟動失敗，已回滾（payment 停擺約 6 分鐘），還原該檔（`e3cda9c`）並經隔離環境驗證後重新部署。
+
+**待人工核准：公開 edge 的 jhd APN 路由（TD-014）**。測試環境的 `ccat-v2-dev.nnviopp.com/api/pay/notify/jhd` 目前回 404（callback-ingress 已支援，edge 設定尚未更新）。reconcile 腳本需人工核准旗標，請由 operator 執行：
+
+```bash
+ssh -tt nnviopp-sandbox
+D=/opt/jee8pay-v2-dev/merchant-uat; BIN=/opt/jee8pay-v2-dev/bin; BK=/opt/jee8pay-v2-dev/state/overhaul-20260929
+sudo cp -p $D/nginx.proposed.conf $BK/nginx.proposed.conf.pre-jhd; sudo cp -p $D/prepare-edge-nginx.py $BK/prepare-edge-nginx.py.pre-jhd
+sudo cp -p $BIN/reconcile-sandbox-edge $BK/; sudo cp -p $BIN/validate-sandbox-edge $BK/
+# 將 repo 的 deploy/jee8pay-v2-dev/merchant-uat/prepare-edge-nginx.py 安裝為 $D/prepare-edge-nginx.py（root 0700）後：
+sudo python3 $D/prepare-edge-nginx.py --origin-mode dns-only   # 預期 PROPOSED_SHA256=7a393f332a6830c932a4e51b1754165af2be652b61a31640edcfbd79ca328ea4
+sudo chown root:10002 $D/nginx.proposed.conf && sudo chmod 0640 $D/nginx.proposed.conf
+sudo sed -i "s/^readonly expected_config_sha=.*/readonly expected_config_sha=7a393f332a6830c932a4e51b1754165af2be652b61a31640edcfbd79ca328ea4/" $BIN/reconcile-sandbox-edge $BIN/validate-sandbox-edge
+sudo env SANDBOX_EDGE_RECONCILE_APPROVED=YES $BIN/reconcile-sandbox-edge && sudo $BIN/validate-sandbox-edge
+```
+
+新舊設定的差異僅為新增 `location = /api/pay/notify/jhd`（`dns-only` 模式；現行 SHA `840afb1a…`）。回滾：還原上述備份後再執行一次 reconcile。
+
+整體回滾（應用層）：將 `current` 指回 `releases/de94ab8fd19d-mgrui-20260929`，以其 compose 執行 `up -d --no-deps payment manager merchant manager-ui merchant-ui cashier`；DB 設定資料可由備份還原。
+
 ## Current binding
 
 JEE-E02 binds source `1f313e776d03c2383adff5aa96b9aac9b78efedc` to Development VPS `server1.nnviopp.com` as Compose project `jee8pay-v2-dev`. The runtime is under `/opt/jee8pay-v2-dev/`; it does not use `/opt/payment/`, V1 databases, V1 volumes, V1 application networks, or public ports 80/443.

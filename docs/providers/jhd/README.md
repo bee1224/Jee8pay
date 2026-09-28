@@ -77,6 +77,7 @@ Refund、Transfer、Division、Channel User、Close、COCS 與其他黑貓 PAY p
   - Provider Query：PASS（reissue 對上游查單 `status=OK`、`process_code=3`、`order_amount=40`、`bill_amount=40`）
   - APN route：PASS（`/api/pay/notify/jhd` 可達並 fail-closed 拒絕無效 payload）
 - **尚未**完成真實付款 / APN 轉態 / Merchant Notify E2E，因此不宣稱完整 E2E。
+- **測試環境（2026-09-29）**：已補上 JHD 介面定義與 `JHD_IBON` 支付方式（不含憑證），callback-ingress 已有 `/api/pay/notify/jhd`；公開 edge 路由待人工核准（TD-014），且需另行設定 JHD 參數後才能在測試環境建單。
 
 ## Sibling Upstreams
 
