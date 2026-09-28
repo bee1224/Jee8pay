@@ -2,7 +2,7 @@
 
 ## Existing configuration model
 
-JeePay loads service defaults from classpath `application.yml` and supports Spring Boot external `application.yml` override locations. Deployable examples under `jeepay/conf/` carry datasource、Redis、MQ、logging and `isys` settings. `SystemYmlConfig` binds application-level `isys` values; DB-backed `DBApplicationConfig.paySiteUrl` generates payment/callback URLs. Frontend builds use per-project `.env` files and the root Nginx template.
+JeePay loads service defaults from classpath `application.yml` and supports Spring Boot external `application.yml` override locations. Environment-specific external configuration lives under `deploy/<environment>/config/application.yml` and carries datasource、Redis、MQ、logging and `isys` settings. `SystemYmlConfig` binds application-level `isys` values; DB-backed `DBApplicationConfig.paySiteUrl` generates payment/callback URLs. Frontend builds use per-project `.env` files and the root Nginx template.
 
 No complete Spring-profile-based Development/Production binding, physical host inventory, or Provider environment assignment exists in this Workspace. Public upstream development defaults and placeholders are examples, not proof of secure Production configuration.
 

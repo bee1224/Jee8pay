@@ -12,4 +12,4 @@
 - [`platform-access.md`](platform-access.md)：營運平台公開網址（測試/正式）、登入帳號政策與前端繁中化狀態。
 - [`telegram-daily-summary.md`](telegram-daily-summary.md)：每日四個黑貓 PAY Provider 成功收款統計與 Telegram 發送、secret intake、驗證方式。
 
-Upstream deployment 文件保留在 `jeepay/docs/`，不納入 Taiwan Workspace governance；需要時從 Workspace 文件連結引用。
+上游 JeePay 的部署/安裝文件與 compose 已移除；實際部署一律以 `deploy/` 為準。

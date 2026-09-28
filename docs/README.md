@@ -37,10 +37,6 @@
 - Provider 相關內容放 `providers/<ifCode>/`，外部整合契約放 `integration/`，部署/營運放 `operations/`，未解債放 `debt/`，durable 決策放 `decisions/`（ADR）。
 - 每份 category README 都是該分類的導航入口，新增文件必須同時更新對應 README 的 index。
 
-## Workspace References
-
-- [`PROJECT_TREE.md`](../PROJECT_TREE.md) is a non-canonical generated snapshot; regenerate it before relying on current tree contents.
-
 ## Upstream Documentation Boundary
 
-`jeepay/docs/`, `jeepay/README.md`, and `jeepay-ui/README.md` are upstream project documentation. Taiwan Workspace governance does not modify or duplicate them; Workspace documents may link to them when needed.
+`jeepay/README.md` and `jeepay-ui/README.md` are upstream project documentation. Taiwan Workspace governance does not modify or duplicate them; Workspace documents may link to them when needed. Upstream deployment/install material (compose files, `jeepay/docker/`, `jeepay/conf/`, `jeepay/docs/deploy|install`) has been removed; `jeepay/docs/sql/` remains because deployments consume `init.sql`.
