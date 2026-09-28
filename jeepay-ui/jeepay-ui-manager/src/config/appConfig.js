@@ -34,6 +34,8 @@ export const asyncRouteDefine = {
   'TransferOrderListPage': { defaultPath: '/transferOrder', component: () => import('@/views/order/transfer/TransferOrderList.vue')  }, // 转账订单
   'MchNotifyListPage': { defaultPath: '/notify', component: () => import('@/views/order/notify/MchNotifyList.vue')  }, // 商户通知列表
   'SysConfigPage': { defaultPath: '/config', component: () => import('@/views/sys/config/SysConfig.vue')  }, // 系统配置
+  'WalletLedgerPage': { defaultPath: '/wallet/ledger', component: () => import('@/views/wallet/WalletLedger.vue')  }, // 餘額流水（規劃中）
+  'WithdrawAuditPage': { defaultPath: '/wallet/withdraw', component: () => import('@/views/wallet/WithdrawAudit.vue')  }, // 提現審核（規劃中）
   'UatEdgeAllowlistPage': { defaultPath: '/uatedge/allowlist', component: () => import('@/views/uatedge/UatEdgeAllowlist.vue')  }, // UAT Edge 白名單
   'SysLogPage': { defaultPath: '/log', component: () => import('@/views/sys/log/SysLog.vue')  } // 系统日志
 }

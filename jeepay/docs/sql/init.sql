@@ -531,6 +531,11 @@ insert into t_sys_entitlement values('ENT_ISV', '服务商管理', 'block', '', 
         insert into t_sys_entitlement values('ENT_ISV_PAY_CONFIG_VIEW', '服务商支付参数配置详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_ISV_PAY_CONFIG_LIST', '0', 'MGR', now(), now());
 
 -- 订单管理
+-- 錢包與提現（規劃中，P0 佔位；刪除這些列即可整體隱藏選單）
+insert into t_sys_entitlement values('ENT_WALLET', '錢包與提現（規劃中）', 'wallet', '', 'RouteView', 'ML', 0, 1,  'ROOT', '55', 'MGR', now(), now());
+    insert into t_sys_entitlement values('ENT_WALLET_LEDGER', '餘額流水', 'account-book', '/wallet/ledger', 'WalletLedgerPage', 'ML', 0, 1,  'ENT_WALLET', '10', 'MGR', now(), now());
+    insert into t_sys_entitlement values('ENT_WALLET_WITHDRAW', '提現審核', 'audit', '/wallet/withdraw', 'WithdrawAuditPage', 'ML', 0, 1,  'ENT_WALLET', '20', 'MGR', now(), now());
+
 insert into t_sys_entitlement values('ENT_ORDER', '订单管理', 'transaction', '', 'RouteView', 'ML', 0, 1,  'ROOT', '50', 'MGR', now(), now());
     insert into t_sys_entitlement values('ENT_PAY_ORDER', '支付订单', 'account-book', '/pay', 'PayOrderListPage', 'ML', 0, 1,  'ENT_ORDER', '10', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_ORDER_LIST', '页面：订单列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_PAY_ORDER', '0', 'MGR', now(), now());
@@ -631,6 +636,8 @@ insert into t_sys_entitlement values('ENT_MCH_CENTER', '商户中心', 'team', '
     insert into t_sys_entitlement values('ENT_MCH_TRANSFER', '转账', 'property-safety', '/doTransfer', 'MchTransferPage', 'ML', 0, 1,  'ENT_MCH_CENTER', '30', 'MCH', now(), now());
         insert into t_sys_entitlement values('ENT_MCH_TRANSFER_IF_CODE_LIST', '页面：获取全部代付通道', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_TRANSFER', '0', 'MCH', now(), now());
         insert into t_sys_entitlement values('ENT_MCH_TRANSFER_DO', '按钮：发起转账', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_TRANSFER', '0', 'MCH', now(), now());
+    -- 我的錢包（規劃中，P0 佔位）
+    insert into t_sys_entitlement values('ENT_MCH_WALLET', '我的錢包（規劃中）', 'wallet', '/wallet', 'MchWalletPage', 'ML', 0, 1,  'ENT_MCH_CENTER', '40', 'MCH', now(), now());
 
 -- 【商户系统】 订单管理
 insert into t_sys_entitlement values('ENT_ORDER', '订单中心', 'transaction', '', 'RouteView', 'ML', 0, 1,  'ROOT', '20', 'MCH', now(), now());
