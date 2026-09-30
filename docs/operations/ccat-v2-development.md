@@ -43,6 +43,21 @@ sudo env SANDBOX_EDGE_RECONCILE_APPROVED=YES $BIN/reconcile-sandbox-edge && sudo
 
 整體回滾（應用層）：將 `current` 指回 `releases/de94ab8fd19d-mgrui-20260929`，以其 compose 執行 `up -d --no-deps payment manager merchant manager-ui merchant-ui cashier`；DB 設定資料可由備份還原。
 
+## 2026-09-30 test-env-overhaul 部署（ADR-0009 與頭像）
+
+| Release | 內容 | 更新服務 | DB（`deploy/jee8pay-v2-dev/sql/`） |
+| --- | --- | --- | --- |
+| `a5378620627a-merchant-shells` | 刪除商戶平台空殼頁 | merchant、merchant-ui | `20260930-remove-merchant-shell-menus.sql` |
+| `72e41d7be676-agent-fee-p1` | ADR-0009 第一階段：代理、商戶綁定、四層費率 | manager、manager-ui | `20260930-agent-fee-waterfall-phase1.sql` |
+| `66e2ee8d7d2b-agent-fee-p2to4` | ADR-0009 第二～四階段：快照表、代理後台（登入預設關閉）、範本／批次／雙人覆核／風險檢查 | manager、manager-ui | `20260930-agent-fee-waterfall-phase2to4.sql` |
+| `75a7f8941a1e-local-avatars` | 預設頭像改本地圖、修正兩個 UI 的 favicon／載入 logo 404 | manager、merchant、manager-ui、merchant-ui | `20260930-local-default-avatars.sql` |
+
+- 每次部署前都在隔離環境 `jee8pay-smoke`（驗完即銷毀）做開機與端到端冒煙：第一階段 17 項、第二～四階段 33 項、頭像 6 項，全數 PASS；部署後 10/10 healthy。
+- 權限相關資料表部署前的備份放在 `state/overhaul-20260929/pre-*.sql`。
+- payment 仍為 `a3594721af26`，本日未更動。
+- 平臺費／渠道費改為雙人覆核，但測試環境目前只有一個啟用中的營運平台超管；要改平臺費，須先建立第二個具 `ENT_FEE_RULE_REVIEW` 的帳號。
+- 代理登入由 `isys.agent-portal.login-enabled` 控制，預設關閉，須先修正 TD-015。
+
 ## Current binding
 
 JEE-E02 binds source `1f313e776d03c2383adff5aa96b9aac9b78efedc` to Development VPS `server1.nnviopp.com` as Compose project `jee8pay-v2-dev`. The runtime is under `/opt/jee8pay-v2-dev/`; it does not use `/opt/payment/`, V1 databases, V1 volumes, V1 application networks, or public ports 80/443.
