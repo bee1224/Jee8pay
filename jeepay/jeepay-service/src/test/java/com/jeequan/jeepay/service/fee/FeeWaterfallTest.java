@@ -81,6 +81,20 @@ class FeeWaterfallTest {
     }
 
     @Test
+    void merchantOverrideOnAgentLayerIsIgnoredWithoutRecipient() {
+        List<FeeRule> rules = List.of(
+                rule(FeeRule.TARGET_MCH, "M1", FeeRule.LAYER_SR_AGENT, "0.003", 0),
+                rule(FeeRule.TARGET_MCH, "M1", FeeRule.LAYER_AGENT, "0.004", 100));
+
+        // 未綁定代理：兩個代理層都沒有收款人，覆寫不生效
+        assertEquals(0L, FeeWaterfall.compute(FeeWaterfall.resolve("M1", null, null, rules), 100_000).getTotalFee());
+        // 直屬高級代理：高代費生效，代理費仍無收款人
+        List<FeeWaterfall.LayerRule> resolved = FeeWaterfall.resolve("M1", SENIOR, SENIOR, rules);
+        assertEquals("MCH", resolved.get(2).getSource());
+        assertEquals("NONE", resolved.get(3).getSource());
+    }
+
+    @Test
     void computeRoundsHalfUpPerLayerAndFlagsFeesAboveAmount() {
         List<FeeWaterfall.LayerRule> resolved = FeeWaterfall.resolve("M1", null, null,
                 List.of(rule(FeeRule.TARGET_DEFAULT, "", FeeRule.LAYER_PLATFORM, "0.015", 0)));

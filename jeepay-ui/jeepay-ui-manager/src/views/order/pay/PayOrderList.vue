@@ -284,6 +284,21 @@
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
+          <!-- ADR-0009：下單當下的四層手續費快照 -->
+          <a-col :sm="24">
+            <a-descriptions>
+              <a-descriptions-item label="四層手續費">
+                <template v-if="vdata.feeSnapshot">
+                  平臺 {{ vdata.feeSnapshot.platformFee / 100 }}／渠道 {{ vdata.feeSnapshot.channelFee / 100 }}／高代
+                  {{ vdata.feeSnapshot.srAgentFee / 100 }}／代理 {{ vdata.feeSnapshot.agentFee / 100 }}，合計
+                  {{ vdata.feeSnapshot.totalFee / 100 }} 元
+                  <a-tag v-if="vdata.feeSnapshot.exceedsMchFee === 1" color="red">超過商戶手續費</a-tag>
+                  <span v-if="vdata.feeSnapshot.agentNo">（代理 {{ vdata.feeSnapshot.agentNo }}）</span>
+                </template>
+                <span v-else style="color: #999">無快照</span>
+              </a-descriptions-item>
+            </a-descriptions>
+          </a-col>
           <a-col :sm="12">
             <a-descriptions>
               <a-descriptions-item label="訂單狀態">
@@ -584,7 +599,7 @@
 </template>
 <script setup lang="ts">
 import RefundModal from './RefundModal.vue' // 退款弹出框
-import { API_URL_PAY_ORDER_LIST, API_URL_PAY_ORDER_MANUAL_NOTIFY, API_URL_PAYWAYS_LIST, req } from '@/api/manage'
+import { API_URL_PAY_ORDER_FEE, API_URL_PAY_ORDER_LIST, API_URL_PAY_ORDER_MANUAL_NOTIFY, API_URL_PAYWAYS_LIST, req } from '@/api/manage'
 import moment from 'moment'
 import { reactive, ref, getCurrentInstance, onMounted, watch } from 'vue'
 
@@ -646,6 +661,7 @@ const vdata: any = reactive({
   createdEnd: '', // 选择结束时间
   visible: false,
   detailData: {},
+  feeSnapshot: null,
   payWayList: [],
 
   dateOneFlag: false,
@@ -682,6 +698,10 @@ function openFunc(record, recordId) {
 function detailFunc(recordId) {
   req.getById(API_URL_PAY_ORDER_LIST, recordId).then((res) => {
     vdata.detailData = res
+  })
+  vdata.feeSnapshot = null
+  req.getById(API_URL_PAY_ORDER_FEE, recordId).then((res) => {
+    vdata.feeSnapshot = res
   })
   vdata.visible = true
 }

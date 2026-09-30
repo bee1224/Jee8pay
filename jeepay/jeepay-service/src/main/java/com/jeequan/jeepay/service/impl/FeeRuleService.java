@@ -6,7 +6,9 @@ import com.jeequan.jeepay.core.entity.AgentInfo;
 import com.jeequan.jeepay.core.entity.AgentMchRela;
 import com.jeequan.jeepay.core.entity.FeeRule;
 import com.jeequan.jeepay.core.entity.FeeRuleLog;
+import com.jeequan.jeepay.core.entity.MchPayPassage;
 import com.jeequan.jeepay.core.exception.BizException;
+import com.jeequan.jeepay.core.utils.AmountUtil;
 import com.jeequan.jeepay.service.fee.FeeWaterfall;
 import com.jeequan.jeepay.service.mapper.AgentInfoMapper;
 import com.jeequan.jeepay.service.mapper.AgentMchRelaMapper;
@@ -23,7 +25,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 四層手續費規則服務（ADR-0009 第一階段：僅設定面，不影響下單與結算）。
+ * 四層手續費規則服務（ADR-0009）：規則設定、解析與試算；下單快照見 PayOrderFeeService。
  * 為避免服務間循環依賴，代理與綁定資料直接經由 mapper 讀取。
  */
 @Service
@@ -33,6 +35,7 @@ public class FeeRuleService extends ServiceImpl<FeeRuleMapper, FeeRule> {
     @Autowired private AgentMchRelaMapper agentMchRelaMapper;
     @Autowired private FeeRuleLogMapper feeRuleLogMapper;
     @Autowired private MchInfoService mchInfoService;
+    @Autowired private MchPayPassageService mchPayPassageService;
 
     /** 平臺費、渠道費屬平台鎖定層；呼叫端須另具平台層權限才可修改。 */
     public static boolean isPlatformLayer(String layer) {
@@ -42,12 +45,7 @@ public class FeeRuleService extends ServiceImpl<FeeRuleMapper, FeeRule> {
     /** 依（支付方式、對象、費率層）新增或覆蓋規則，並寫入變更紀錄。 */
     @Transactional
     public FeeRule saveRule(FeeRule input, Long operatorUid, String operatorName) {
-        input.setTargetId(StringUtils.trimToEmpty(input.getTargetId()));
-        input.setRate(input.getRate() == null ? BigDecimal.ZERO : input.getRate());
-        input.setFixedAmount(input.getFixedAmount() == null ? 0L : input.getFixedAmount());
-        input.setState(input.getState() == null ? (byte) 1 : input.getState());
-        FeeWaterfall.validateRule(input);
-        validateTarget(input);
+        normalizeAndValidate(input);
 
         FeeRule existing = getOne(FeeRule.gw()
                 .eq(FeeRule::getWayCode, input.getWayCode())
@@ -91,18 +89,45 @@ public class FeeRuleService extends ServiceImpl<FeeRuleMapper, FeeRule> {
         writeLog(existing, FeeRuleLog.ACTION_DELETE, snapshot(existing), null, operatorUid, operatorName);
     }
 
-    /** 解析某商戶在某支付方式下的四層費率（含來源說明）。 */
-    public List<FeeWaterfall.LayerRule> resolveForMch(String mchNo, String wayCode) {
-        if (mchInfoService.getById(mchNo) == null) {
-            throw new BizException("商戶不存在");
+    /** 商戶當下的代理鏈：直屬代理、所屬高級代理（直屬即高級代理時相同）、推薦人代理號。 */
+    public static final class AgentChain {
+        private final AgentInfo direct;
+        private final AgentInfo senior;
+        private final String referrerAgentNo;
+
+        public AgentChain(AgentInfo direct, AgentInfo senior, String referrerAgentNo) {
+            this.direct = direct;
+            this.senior = senior;
+            this.referrerAgentNo = referrerAgentNo;
         }
+
+        public AgentInfo getDirect() { return direct; }
+        public AgentInfo getSenior() { return senior; }
+        public String getReferrerAgentNo() { return referrerAgentNo; }
+    }
+
+    public AgentChain agentChainOf(String mchNo) {
         AgentMchRela rela = agentMchRelaMapper.selectById(mchNo);
         AgentInfo direct = rela == null ? null : agentInfoMapper.selectById(rela.getAgentNo());
         AgentInfo senior = direct;
         if (direct != null && Objects.equals(direct.getAgentLevel(), AgentInfo.LEVEL_AGENT)) {
             senior = StringUtils.isBlank(direct.getParentAgentNo()) ? null : agentInfoMapper.selectById(direct.getParentAgentNo());
         }
+        return new AgentChain(direct, senior, rela == null ? null : StringUtils.trimToNull(rela.getReferrerAgentNo()));
+    }
 
+    /** 解析某商戶在某支付方式下的四層費率（含來源說明）。 */
+    public List<FeeWaterfall.LayerRule> resolveForMch(String mchNo, String wayCode) {
+        if (mchInfoService.getById(mchNo) == null) {
+            throw new BizException("商戶不存在");
+        }
+        return resolve(mchNo, wayCode, agentChainOf(mchNo));
+    }
+
+    /** 以指定代理鏈解析；下單快照先取代理鏈再解析，確保快照記錄的代理與費率一致。 */
+    public List<FeeWaterfall.LayerRule> resolve(String mchNo, String wayCode, AgentChain chain) {
+        AgentInfo direct = chain.getDirect();
+        AgentInfo senior = chain.getSenior();
         List<String> agentIds = new ArrayList<>();
         if (direct != null) {
             agentIds.add(direct.getAgentNo());
@@ -125,6 +150,60 @@ public class FeeRuleService extends ServiceImpl<FeeRuleMapper, FeeRule> {
 
     public FeeWaterfall.Breakdown preview(String mchNo, String wayCode, long amount) {
         return FeeWaterfall.compute(resolveForMch(mchNo, wayCode), amount);
+    }
+
+    /** 補預設值並檢查規則與對象；變更申請、範本與批次共用，確保與單筆儲存同一套檢查。 */
+    void normalizeAndValidate(FeeRule input) {
+        input.setTargetId(StringUtils.trimToEmpty(input.getTargetId()));
+        input.setRate(input.getRate() == null ? BigDecimal.ZERO : input.getRate());
+        input.setFixedAmount(input.getFixedAmount() == null ? 0L : input.getFixedAmount());
+        input.setState(input.getState() == null ? (byte) 1 : input.getState());
+        FeeWaterfall.validateRule(input);
+        validateTarget(input);
+    }
+
+    /** 批次儲存代理層費率（同一交易，任一筆失敗全部回滾）；平臺層須逐筆走雙人覆核。 */
+    @Transactional
+    public int saveBatch(List<FeeRule> rules, Long operatorUid, String operatorName) {
+        if (rules == null || rules.isEmpty()) {
+            throw new BizException("沒有要儲存的費率");
+        }
+        for (FeeRule rule : rules) {
+            if (isPlatformLayer(rule.getLayer())) {
+                throw new BizException("平臺費與渠道費不可批次修改，請逐筆送出覆核");
+            }
+            saveRule(rule, operatorUid, operatorName);
+        }
+        return rules.size();
+    }
+
+    /**
+     * 風險檢查：以參考金額試算，列出四層合計超過商戶手續費（支付通道費率）的商戶通道。
+     * 合計超過代表平台／代理分到的比商戶付的還多，須調整費率。
+     */
+    public List<JSONObject> riskCheck(String wayCode, long referenceAmount) {
+        List<MchPayPassage> passages = mchPayPassageService.list(MchPayPassage.gw()
+                .eq(MchPayPassage::getState, (byte) 1)
+                .eq(StringUtils.isNotBlank(wayCode), MchPayPassage::getWayCode, wayCode)
+                .orderByAsc(MchPayPassage::getMchNo, MchPayPassage::getWayCode));
+        List<JSONObject> result = new ArrayList<>();
+        for (MchPayPassage passage : passages) {
+            FeeWaterfall.Breakdown b = FeeWaterfall.compute(
+                    resolve(passage.getMchNo(), passage.getWayCode(), agentChainOf(passage.getMchNo())), referenceAmount);
+            long mchFee = AmountUtil.calPercentageFee(referenceAmount, passage.getRate() == null ? BigDecimal.ZERO : passage.getRate());
+            if (b.getTotalFee() > mchFee) {
+                JSONObject row = new JSONObject(true);
+                row.put("mchNo", passage.getMchNo());
+                row.put("appId", passage.getAppId());
+                row.put("wayCode", passage.getWayCode());
+                row.put("mchRate", passage.getRate());
+                row.put("mchFee", mchFee);
+                row.put("totalFee", b.getTotalFee());
+                row.put("layers", b.getLayers());
+                result.add(row);
+            }
+        }
+        return result;
     }
 
     private void validateTarget(FeeRule rule) {

@@ -79,6 +79,12 @@ export const API_URL_AGENT_INFO = '/api/agentInfo'
 export const API_URL_AGENT_MCH_RELA = '/api/agentMchRela'
 /** 四層費率規則 **/
 export const API_URL_FEE_RULES = '/api/feeRules'
+/** 費率範本 **/
+export const API_URL_FEE_TEMPLATES = '/api/feeTemplates'
+/** 代理後台（代理帳號自身資料） **/
+export const API_URL_AGENT_PORTAL = '/api/agentPortal'
+/** 訂單手續費快照 **/
+export const API_URL_PAY_ORDER_FEE = '/api/payOrderFee'
 export const API_URL_MCH_LIST = '/api/mchInfo'
 /** 商户App管理 **/
 export const API_URL_MCH_APP = '/api/mchApps'

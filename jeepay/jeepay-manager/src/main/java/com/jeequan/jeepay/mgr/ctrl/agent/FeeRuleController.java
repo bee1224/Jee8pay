@@ -6,12 +6,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.entity.FeeRule;
+import com.jeequan.jeepay.core.entity.FeeRuleChangeReq;
 import com.jeequan.jeepay.core.entity.FeeRuleLog;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
-import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.fee.FeeWaterfall;
+import com.jeequan.jeepay.service.impl.FeeRuleChangeService;
 import com.jeequan.jeepay.service.impl.FeeRuleService;
 import com.jeequan.jeepay.service.mapper.FeeRuleLogMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,25 +25,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
- * 四層手續費規則（ADR-0009 第一階段：僅設定面與試算，不影響下單與結算）。
- * 平臺費／渠道費為平台鎖定層：除了進入 API 的權限，還必須持有 ENT_FEE_RULE_PLATFORM_EDIT，
- * 在後端擋下，不只靠前端隱藏欄位。
+ * 四層手續費規則（ADR-0009）。
+ * 平臺費／渠道費為平台鎖定層：須持有 ENT_FEE_RULE_PLATFORM_EDIT 才能提出變更，
+ * 且變更一律經另一位具 ENT_FEE_RULE_REVIEW 者核准後才生效（雙人覆核），在後端擋下，不只靠前端。
  */
 @Tag(name = "費率設定")
 @RestController
 @RequestMapping("/api/feeRules")
-public class FeeRuleController extends CommonCtrl {
+public class FeeRuleController extends AgentBaseCtrl {
 
     private static final String PLATFORM_EDIT = "ENT_FEE_RULE_PLATFORM_EDIT";
 
     @Autowired private FeeRuleService feeRuleService;
+    @Autowired private FeeRuleChangeService feeRuleChangeService;
     @Autowired private FeeRuleLogMapper feeRuleLogMapper;
 
     @Operation(summary = "費率規則列表")
     @PreAuthorize("hasAuthority('ENT_FEE_RULE_LIST')")
     @RequestMapping(value = "", method = RequestMethod.GET)
     public ApiPageRes<FeeRule> list() {
+        requireAuthority("ENT_FEE_RULE_LIST");
         LambdaQueryWrapper<FeeRule> wrapper = FeeRule.gw();
         String wayCode = getValString("wayCode");
         String targetType = getValString("targetType");
@@ -66,10 +71,14 @@ public class FeeRuleController extends CommonCtrl {
     @MethodLog(remark = "儲存費率規則")
     @RequestMapping(value = "", method = RequestMethod.POST)
     public ApiRes save() {
+        requireAuthority("ENT_FEE_RULE_EDIT", "ENT_FEE_RULE_PLATFORM_EDIT");
         FeeRule rule = getObject(FeeRule.class);
         requireLayerPermission(rule.getLayer());
-        return ApiRes.ok(feeRuleService.saveRule(rule,
-                getCurrentUser().getSysUser().getSysUserId(), getCurrentUser().getSysUser().getRealname()));
+        // 平臺層不直接生效：建立變更申請，由另一位具覆核權限者核准後才寫入
+        if (FeeRuleService.isPlatformLayer(rule.getLayer())) {
+            return ApiRes.ok(pending(feeRuleChangeService.requestSave(rule, uid(), uname())));
+        }
+        return ApiRes.ok(feeRuleService.saveRule(rule, uid(), uname()));
     }
 
     @Operation(summary = "刪除費率規則")
@@ -77,19 +86,95 @@ public class FeeRuleController extends CommonCtrl {
     @MethodLog(remark = "刪除費率規則")
     @RequestMapping(value = "/{ruleId}", method = RequestMethod.DELETE)
     public ApiRes delete(@PathVariable("ruleId") Long ruleId) {
+        requireAuthority("ENT_FEE_RULE_EDIT", "ENT_FEE_RULE_PLATFORM_EDIT");
         FeeRule rule = feeRuleService.getById(ruleId);
         if (rule == null) {
             throw new BizException("費率規則不存在");
         }
         requireLayerPermission(rule.getLayer());
-        feeRuleService.removeRule(ruleId, getCurrentUser().getSysUser().getSysUserId(), getCurrentUser().getSysUser().getRealname());
+        if (FeeRuleService.isPlatformLayer(rule.getLayer())) {
+            return ApiRes.ok(pending(feeRuleChangeService.requestDelete(ruleId, uid(), uname())));
+        }
+        feeRuleService.removeRule(ruleId, uid(), uname());
         return ApiRes.ok();
+    }
+
+    @Operation(summary = "批次儲存代理層費率（同一交易；平臺層不可批次）")
+    @PreAuthorize("hasAuthority('ENT_FEE_RULE_BATCH')")
+    @MethodLog(remark = "批次儲存費率規則")
+    @RequestMapping(value = "/batch", method = RequestMethod.POST)
+    public ApiRes batch() {
+        requireAuthority("ENT_FEE_RULE_BATCH");
+        List<FeeRule> rules = JSONArray.parseArray(getValStringRequired("rules"), FeeRule.class);
+        for (FeeRule rule : rules) {
+            requireLayerPermission(rule.getLayer());
+        }
+        return ApiRes.ok(feeRuleService.saveBatch(rules, uid(), uname()));
+    }
+
+    @Operation(summary = "風險檢查：四層合計超過商戶手續費的商戶通道")
+    @PreAuthorize("hasAuthority('ENT_FEE_RULE_LIST')")
+    @RequestMapping(value = "/risk", method = RequestMethod.GET)
+    public ApiRes risk() {
+        requireAuthority("ENT_FEE_RULE_LIST");
+        Long amount = getValLong("amount");
+        return ApiRes.ok(feeRuleService.riskCheck(getValString("wayCode"), amount == null || amount <= 0 ? 100_000L : amount));
+    }
+
+    @Operation(summary = "平臺層變更申請列表")
+    @PreAuthorize("hasAnyAuthority('ENT_FEE_RULE_LIST', 'ENT_FEE_RULE_REVIEW')")
+    @RequestMapping(value = "/changeReqs", method = RequestMethod.GET)
+    public ApiPageRes<FeeRuleChangeReq> changeReqs() {
+        requireAuthority("ENT_FEE_RULE_LIST", "ENT_FEE_RULE_REVIEW");
+        LambdaQueryWrapper<FeeRuleChangeReq> wrapper = FeeRuleChangeReq.gw();
+        Byte state = getValByte("state");
+        if (state != null) {
+            wrapper.eq(FeeRuleChangeReq::getState, state);
+        }
+        wrapper.orderByDesc(FeeRuleChangeReq::getReqId);
+        return ApiPageRes.pages(feeRuleChangeService.page(getIPage(true), wrapper));
+    }
+
+    @Operation(summary = "核准平臺層變更申請（不可覆核自己的申請）")
+    @PreAuthorize("hasAuthority('ENT_FEE_RULE_REVIEW')")
+    @MethodLog(remark = "核准費率變更申請")
+    @RequestMapping(value = "/changeReqs/{reqId}/approve", method = RequestMethod.POST)
+    public ApiRes approve(@PathVariable("reqId") Long reqId) {
+        requireAuthority("ENT_FEE_RULE_REVIEW");
+        feeRuleChangeService.approve(reqId, uid(), uname(), getValString("remark"));
+        return ApiRes.ok();
+    }
+
+    @Operation(summary = "駁回平臺層變更申請")
+    @PreAuthorize("hasAuthority('ENT_FEE_RULE_REVIEW')")
+    @MethodLog(remark = "駁回費率變更申請")
+    @RequestMapping(value = "/changeReqs/{reqId}/reject", method = RequestMethod.POST)
+    public ApiRes reject(@PathVariable("reqId") Long reqId) {
+        requireAuthority("ENT_FEE_RULE_REVIEW");
+        feeRuleChangeService.reject(reqId, uid(), uname(), getValString("remark"));
+        return ApiRes.ok();
+    }
+
+    private Long uid() {
+        return getCurrentUser().getSysUser().getSysUserId();
+    }
+
+    private String uname() {
+        return getCurrentUser().getSysUser().getRealname();
+    }
+
+    private static JSONObject pending(FeeRuleChangeReq req) {
+        JSONObject result = new JSONObject();
+        result.put("pendingReview", true);
+        result.put("reqId", req.getReqId());
+        return result;
     }
 
     @Operation(summary = "試算：某商戶在某支付方式下，指定金額（分）的四層手續費")
     @PreAuthorize("hasAuthority('ENT_FEE_RULE_LIST')")
     @RequestMapping(value = "/preview", method = RequestMethod.GET)
     public ApiRes<JSONObject> preview() {
+        requireAuthority("ENT_FEE_RULE_LIST");
         String mchNo = getValStringRequired("mchNo");
         String wayCode = getValStringRequired("wayCode");
         long amount = getValLongRequired("amount");
@@ -120,6 +205,7 @@ public class FeeRuleController extends CommonCtrl {
     @PreAuthorize("hasAuthority('ENT_FEE_RULE_LOG')")
     @RequestMapping(value = "/logs", method = RequestMethod.GET)
     public ApiPageRes<FeeRuleLog> logs() {
+        requireAuthority("ENT_FEE_RULE_LOG");
         LambdaQueryWrapper<FeeRuleLog> wrapper = FeeRuleLog.gw();
         String wayCode = getValString("wayCode");
         if (StringUtils.isNotEmpty(wayCode)) {

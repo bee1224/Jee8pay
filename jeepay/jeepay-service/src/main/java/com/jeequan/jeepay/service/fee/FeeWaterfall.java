@@ -90,7 +90,14 @@ public final class FeeWaterfall {
      */
     public static List<LayerRule> resolve(String mchNo, AgentInfo directAgent, AgentInfo seniorAgent, List<FeeRule> rules) {
         List<LayerRule> result = new ArrayList<>(LAYERS.size());
+        boolean hasSenior = seniorAgent != null;
+        boolean hasLevel2Agent = directAgent != null && Objects.equals(directAgent.getAgentLevel(), AgentInfo.LEVEL_AGENT);
         for (String layer : LAYERS) {
+            // 代理層沒有對應的收款代理時一律為 0，即使商戶有覆寫也不收（避免收了無人可分的費用）
+            if ((FeeRule.LAYER_SR_AGENT.equals(layer) && !hasSenior) || (FeeRule.LAYER_AGENT.equals(layer) && !hasLevel2Agent)) {
+                result.add(new LayerRule(layer, BigDecimal.ZERO, 0L, "NONE"));
+                continue;
+            }
             FeeRule mchOverride = find(rules, FeeRule.TARGET_MCH, mchNo, layer);
             if (mchOverride != null) {
                 result.add(toLayerRule(mchOverride, FeeRule.TARGET_MCH));
@@ -101,11 +108,10 @@ public final class FeeWaterfall {
             if (FeeRule.LAYER_PLATFORM.equals(layer) || FeeRule.LAYER_CHANNEL.equals(layer)) {
                 base = find(rules, FeeRule.TARGET_DEFAULT, "", layer);
                 source = FeeRule.TARGET_DEFAULT;
-            } else if (FeeRule.LAYER_SR_AGENT.equals(layer) && seniorAgent != null) {
+            } else if (FeeRule.LAYER_SR_AGENT.equals(layer)) {
                 base = find(rules, FeeRule.TARGET_AGENT, seniorAgent.getAgentNo(), layer);
                 source = FeeRule.TARGET_AGENT + ":" + seniorAgent.getAgentNo();
-            } else if (FeeRule.LAYER_AGENT.equals(layer) && directAgent != null
-                    && Objects.equals(directAgent.getAgentLevel(), AgentInfo.LEVEL_AGENT)) {
+            } else if (FeeRule.LAYER_AGENT.equals(layer)) {
                 base = find(rules, FeeRule.TARGET_AGENT, directAgent.getAgentNo(), layer);
                 source = FeeRule.TARGET_AGENT + ":" + directAgent.getAgentNo();
             }

@@ -6,7 +6,6 @@ import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.entity.AgentMchRela;
 import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
-import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.AgentMchRelaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "商戶代理綁定")
 @RestController
 @RequestMapping("/api/agentMchRela")
-public class AgentMchRelaController extends CommonCtrl {
+public class AgentMchRelaController extends AgentBaseCtrl {
 
     @Autowired private AgentMchRelaService agentMchRelaService;
 
@@ -30,6 +29,7 @@ public class AgentMchRelaController extends CommonCtrl {
     @PreAuthorize("hasAnyAuthority('ENT_MCH_AGENT_BIND', 'ENT_AGENT_LIST')")
     @RequestMapping(value = "", method = RequestMethod.GET)
     public ApiPageRes<AgentMchRela> list() {
+        requireAuthority("ENT_MCH_AGENT_BIND", "ENT_AGENT_LIST");
         LambdaQueryWrapper<AgentMchRela> wrapper = AgentMchRela.gw();
         String mchNo = getValString("mchNo");
         String agentNo = getValString("agentNo");
@@ -52,6 +52,7 @@ public class AgentMchRelaController extends CommonCtrl {
     @PreAuthorize("hasAuthority('ENT_MCH_AGENT_BIND')")
     @RequestMapping(value = "/{mchNo}", method = RequestMethod.GET)
     public ApiRes<AgentMchRela> detail(@PathVariable("mchNo") String mchNo) {
+        requireAuthority("ENT_MCH_AGENT_BIND");
         return ApiRes.ok(agentMchRelaService.getById(mchNo));
     }
 
@@ -60,6 +61,7 @@ public class AgentMchRelaController extends CommonCtrl {
     @MethodLog(remark = "綁定商戶代理")
     @RequestMapping(value = "/{mchNo}", method = RequestMethod.PUT)
     public ApiRes bind(@PathVariable("mchNo") String mchNo) {
+        requireAuthority("ENT_MCH_AGENT_BIND");
         agentMchRelaService.bind(mchNo, getValStringRequired("agentNo"), getValString("referrerAgentNo"),
                 getCurrentUser().getSysUser().getSysUserId(), getCurrentUser().getSysUser().getRealname());
         return ApiRes.ok();
@@ -70,6 +72,7 @@ public class AgentMchRelaController extends CommonCtrl {
     @MethodLog(remark = "解除商戶代理綁定")
     @RequestMapping(value = "/{mchNo}", method = RequestMethod.DELETE)
     public ApiRes unbind(@PathVariable("mchNo") String mchNo) {
+        requireAuthority("ENT_MCH_AGENT_BIND");
         agentMchRelaService.unbind(mchNo);
         return ApiRes.ok();
     }
