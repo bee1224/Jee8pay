@@ -421,6 +421,71 @@ CREATE TABLE `t_risk_blacklist` (
         UNIQUE KEY `uni_entry` (`list_type`, `list_value`, `scope`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='風控黑名單';
 
+-- 通道路由規則（ADR-0011）：別名代碼 → 實際支付方式，依金額／時段／權重分流
+CREATE TABLE `t_way_route` (
+        `route_id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '規則ID',
+        `alias_way_code` VARCHAR(20) NOT NULL COMMENT '別名代碼（商戶下單用）',
+        `target_way_code` VARCHAR(20) NOT NULL COMMENT '實際支付方式代碼',
+        `mch_no` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '商戶號，空字串表示全部商戶',
+        `min_amount` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '金額下限（含），單位分，0 不限',
+        `max_amount` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '金額上限（含），單位分，0 不限',
+        `weight` INT(11) NOT NULL DEFAULT 1 COMMENT '權重 1-9',
+        `time_start` VARCHAR(5) DEFAULT NULL COMMENT '時段起 HH:mm（台北時間）',
+        `time_end` VARCHAR(5) DEFAULT NULL COMMENT '時段迄 HH:mm（不含，可跨午夜）',
+        `state` TINYINT(6) NOT NULL DEFAULT 1 COMMENT '狀態: 0-停用, 1-啟用',
+        `remark` VARCHAR(128) DEFAULT NULL COMMENT '備註',
+        `updated_by` VARCHAR(64) DEFAULT NULL COMMENT '最後修改者',
+        `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '建立時間',
+        `updated_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新時間',
+        PRIMARY KEY (`route_id`),
+        KEY `idx_alias` (`alias_way_code`, `mch_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='通道路由規則';
+
+-- 路由決策紀錄
+CREATE TABLE `t_way_route_log` (
+        `log_id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '紀錄ID',
+        `mch_no` VARCHAR(64) NOT NULL COMMENT '商戶號',
+        `app_id` VARCHAR(64) DEFAULT NULL COMMENT '應用ID',
+        `mch_order_no` VARCHAR(64) DEFAULT NULL COMMENT '商戶訂單號',
+        `alias_way_code` VARCHAR(20) NOT NULL COMMENT '別名代碼',
+        `amount` BIGINT(20) DEFAULT NULL COMMENT '訂單金額，單位分',
+        `chosen_way_code` VARCHAR(20) DEFAULT NULL COMMENT '選中的支付方式',
+        `candidates` VARCHAR(512) DEFAULT NULL COMMENT '候選與權重（JSON）',
+        `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '建立時間',
+        PRIMARY KEY (`log_id`),
+        KEY `idx_mch_order` (`mch_no`, `mch_order_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='路由決策紀錄';
+
+-- 背景匯出工作（下載中心）
+CREATE TABLE `t_export_job` (
+        `job_id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '工作ID',
+        `sys_type` VARCHAR(8) NOT NULL COMMENT '所屬系統: MGR/MCH',
+        `belong_info_id` VARCHAR(64) NOT NULL DEFAULT '0' COMMENT '所屬（商戶平台為商戶號）',
+        `owner_uid` BIGINT(20) NOT NULL COMMENT '申請人用戶ID',
+        `owner_name` VARCHAR(64) DEFAULT NULL COMMENT '申請人',
+        `job_type` VARCHAR(32) NOT NULL COMMENT '匯出類型',
+        `params` VARCHAR(1024) DEFAULT NULL COMMENT '篩選條件（JSON）',
+        `state` TINYINT(6) NOT NULL DEFAULT 0 COMMENT '狀態: 0-排隊中, 1-產生中, 2-完成, 3-失敗',
+        `file_name` VARCHAR(128) DEFAULT NULL COMMENT '下載檔名',
+        `row_count` BIGINT(20) DEFAULT NULL COMMENT '資料筆數',
+        `error_msg` VARCHAR(256) DEFAULT NULL COMMENT '失敗原因',
+        `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '建立時間',
+        `finished_at` DATETIME DEFAULT NULL COMMENT '完成時間',
+        PRIMARY KEY (`job_id`),
+        KEY `idx_owner` (`sys_type`, `owner_uid`, `job_id`),
+        KEY `idx_state` (`sys_type`, `state`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='背景匯出工作';
+
+-- 已關閉訂單補查進度（C5，延伸 ADR-0007；旁表，不修改 t_pay_order）
+CREATE TABLE `t_pay_order_audit` (
+        `pay_order_id` VARCHAR(30) NOT NULL COMMENT '支付訂單號',
+        `audit_count` INT(11) NOT NULL DEFAULT 0 COMMENT '已補查次數',
+        `last_result` VARCHAR(32) DEFAULT NULL COMMENT '最後一次查詢結果',
+        `reopened` TINYINT(6) NOT NULL DEFAULT 0 COMMENT '是否轉回支付成功: 0-否, 1-是',
+        `last_audit_at` DATETIME DEFAULT NULL COMMENT '最後補查時間',
+        PRIMARY KEY (`pay_order_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='關閉訂單補查紀錄';
+
 -- 支付方式表  pay_way
 DROP TABLE IF EXISTS t_pay_way;
 CREATE TABLE `t_pay_way` (
@@ -766,7 +831,6 @@ insert into t_sys_entitlement values('ENT_MCH', '商户管理', 'shop', '', 'Rou
         insert into t_sys_entitlement values('ENT_MCH_PAY_PASSAGE_LIST', '应用支付通道配置列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_APP', '0', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_MCH_PAY_PASSAGE_CONFIG', '应用支付通道配置入口', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_PAY_PASSAGE_LIST', '0', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_MCH_PAY_PASSAGE_ADD', '应用支付通道配置保存', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_PAY_PASSAGE_LIST', '0', 'MGR', now(), now());
-        insert into t_sys_entitlement values('ENT_MCH_PAY_ROUTING_CONFIG', '支付通道進階路由規則（規劃中）', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_PAY_PASSAGE_LIST', '0', 'MGR', now(), now());
 
 -- 服务商管理
 -- 代理管理（ADR-0009 第一階段：代理、商戶綁定、四層費率設定與試算）
@@ -804,6 +868,12 @@ insert into t_sys_entitlement values('ENT_RISK_BLACKLIST_EDIT', '按鈕：新增
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_FEE_EDIT', '按鈕：設定下級代理費率（限高級代理）', 'no-icon', '', '', 'PB', 0, 1,  'ENT_AGENT_PORTAL_HOME', '0', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_MCH_WALLET_WITHDRAW', '按鈕：申請／取消提現', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_WALLET', '0', 'MCH', now(), now());
 insert into t_sys_entitlement values('ENT_MCH_WALLET_PAYOUT_EDIT', '按鈕：設定收款帳戶', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_WALLET', '0', 'MCH', now(), now());
+
+insert into t_sys_entitlement values('ENT_WAY_ROUTE', '通道路由', 'branches', '/wayRoutes', 'WayRoutePage', 'ML', 0, 1,  'ENT_PC', '30', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_WAY_ROUTE_EDIT', '按鈕：新增／修改／刪除路由規則', 'no-icon', '', '', 'PB', 0, 1,  'ENT_WAY_ROUTE', '0', 'MGR', now(), now());
+
+insert into t_sys_entitlement values('ENT_EXPORT_CENTER', '下載中心', 'download', '/exports', 'ExportCenterPage', 'ML', 0, 1,  'ROOT', '190', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_MCH_EXPORT_CENTER', '下載中心', 'download', '/exports', 'ExportCenterPage', 'ML', 0, 1,  'ROOT', '190', 'MCH', now(), now());
 
 insert into t_sys_entitlement values('ENT_ISV', '服务商管理', 'block', '', 'RouteView', 'ML', 0, 1,  'ROOT', '40', 'MGR', now(), now());
     insert into t_sys_entitlement values('ENT_ISV_INFO', '服务商列表', 'profile', '/isv', 'IsvListPage', 'ML', 0, 1,  'ENT_ISV', '10', 'MGR', now(), now());

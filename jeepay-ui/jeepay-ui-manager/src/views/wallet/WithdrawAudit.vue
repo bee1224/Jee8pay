@@ -20,6 +20,7 @@
         </a-form-item>
         <a-form-item><a-input v-model:value="vdata.query.ownerId" placeholder="商戶號／代理號" allow-clear @pressEnter="search" /></a-form-item>
         <a-form-item><a-button type="primary" @click="search">搜尋</a-button></a-form-item>
+        <a-form-item v-if="$access('ENT_EXPORT_CENTER')"><a-button @click="exportFunc">匯出</a-button></a-form-item>
       </a-form>
       <a-table :columns="columns" :data-source="vdata.records" size="small" row-key="withdrawId"
         :pagination="{ current: vdata.page, pageSize: 20, total: vdata.total, onChange: (p) => { vdata.page = p; load() } }">
@@ -73,6 +74,7 @@
 import { API_URL_WITHDRAWS, req } from '@/api/manage'
 import { reactive, getCurrentInstance } from 'vue'
 import { OWNER_TYPE_NAMES, RISK_FLAG_NAMES, WITHDRAW_STATES, yuan } from '@/components/WalletPanel/walletText'
+import { submitExport } from '@/utils/exportJob'
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
 
 const columns = [
@@ -99,6 +101,9 @@ function load() {
     vdata.records = res.records || []
     vdata.total = res.total || 0
   })
+}
+function exportFunc() {
+  submitExport('WITHDRAW', vdata.query).then(() => $infoBox.message.success('已建立匯出，完成後請到「下載中心」下載'))
 }
 function search() {
   vdata.page = 1

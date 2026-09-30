@@ -89,6 +89,7 @@
               >
                 重置
               </a-button>
+              <a-button v-if="$access('ENT_EXPORT_CENTER')" style="margin-left: 8px" @click="exportFunc">匯出</a-button>
             </span>
           </div>
         </a-form>
@@ -602,6 +603,7 @@
 import RefundModal from './RefundModal.vue' // 退款弹出框
 import { API_URL_PAY_ORDER_FEE, API_URL_PAY_ORDER_LIST, API_URL_PAY_ORDER_MANUAL_NOTIFY, API_URL_PAYWAYS_LIST, req } from '@/api/manage'
 import moment from 'moment'
+import { submitExport } from '@/utils/exportJob'
 import { reactive, ref, getCurrentInstance, onMounted, watch } from 'vue'
 
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
@@ -746,6 +748,13 @@ function changeStr2ellipsis(orderNo, baseLength) {
     '...' +
     orderNo.substring(orderNo.length - halfLengh, orderNo.length)
   )
+}
+
+// 背景匯出：沿用目前的篩選條件（商戶號、支付方式、狀態、建立時間），完成後到下載中心下載
+function exportFunc() {
+  submitExport('PAY_ORDER', vdata.searchData).then(() => {
+    $infoBox.message.success('已建立匯出，完成後請到「下載中心」下載')
+  })
 }
 </script>
 <style lang="less" scoped>

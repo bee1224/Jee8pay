@@ -17,6 +17,7 @@
         <a-form-item><a-input v-model:value="vdata.query.bizId" placeholder="訂單號／提現單號" allow-clear /></a-form-item>
         <a-form-item><a-range-picker v-model:value="vdata.range" value-format="YYYY-MM-DD" /></a-form-item>
         <a-form-item><a-button type="primary" @click="search">搜尋</a-button></a-form-item>
+        <a-form-item v-if="$access('ENT_EXPORT_CENTER')"><a-button @click="exportFunc">匯出</a-button></a-form-item>
       </a-form>
       <a-table :columns="columns" :data-source="vdata.records" size="small" row-key="ledgerId"
         :pagination="{ current: vdata.page, pageSize: 20, total: vdata.total, onChange: (p) => { vdata.page = p; load() } }">
@@ -36,7 +37,9 @@
 
 <script setup lang="ts">
 import { API_URL_WALLET, req } from '@/api/manage'
-import { reactive } from 'vue'
+import { reactive, getCurrentInstance } from 'vue'
+import { submitExport } from '@/utils/exportJob'
+const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
 import { BIZ_TYPE_NAMES, OWNER_TYPE_NAMES, yuan } from '@/components/WalletPanel/walletText'
 
 const columns = [
@@ -59,6 +62,10 @@ function load() {
     vdata.records = res.records || []
     vdata.total = res.total || 0
   })
+}
+function exportFunc() {
+  const [startDate, endDate] = vdata.range || []
+  submitExport('WALLET_LEDGER', { ...vdata.query, startDate, endDate }).then(() => $infoBox.message.success('已建立匯出，完成後請到「下載中心」下載'))
 }
 function search() {
   vdata.page = 1

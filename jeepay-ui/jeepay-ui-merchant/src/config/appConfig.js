@@ -30,6 +30,7 @@ export const asyncRouteDefine = {
   RolePage: { defaultPath: '/roles', component: () => import('@/views/role/RolePage.vue') },
 
   MchAppPage: { defaultPath: '/apps', component: () => import('@/views/mchApp/List.vue') }, // 商户应用列表
+  ExportCenterPage: { defaultPath: '/exports', component: () => import('@/views/export/ExportCenter.vue') }, // 下載中心
   MchWalletPage: { defaultPath: '/wallet', component: () => import('@/views/wallet/MchWallet.vue') }, // 我的錢包（ADR-0010）
 
   PayOrderListPage: {

@@ -52,10 +52,13 @@ sudo env SANDBOX_EDGE_RECONCILE_APPROVED=YES $BIN/reconcile-sandbox-edge && sudo
 | `66e2ee8d7d2b-agent-fee-p2to4` | ADR-0009 第二～四階段：快照表、代理後台（登入預設關閉）、範本／批次／雙人覆核／風險檢查 | manager、manager-ui | `20260930-agent-fee-waterfall-phase2to4.sql` |
 | `75a7f8941a1e-local-avatars` | 預設頭像改本地圖、修正兩個 UI 的 favicon／載入 logo 404 | manager、merchant、manager-ui、merchant-ui | `20260930-local-default-avatars.sql` |
 | `d280fd030ffc-method-security` | 使用者核准：啟用 `@PreAuthorize`（TD-015）、下單寫入費率快照（TD-017）、代理登入預設開啟 | payment、manager、merchant、manager-ui | 無（`ENT_UAT_EDGE_ALLOWLIST` 測試環境已存在，只補 `init.sql`） |
+| `79df3f7a1c10-wallet` | ADR-0010：錢包、T+N 結算、提現、風控黑名單、人工調帳；推薦佣金層；UI nginx 重新解析（TD-013） | payment、manager、merchant、兩個 UI | `20260930-wallet-settlement.sql` |
+| （本次）`-route-export` | ADR-0011：別名路由（IBON）與決策紀錄；兩個平台的下載中心（背景匯出） | payment、manager、merchant、兩個 UI | `20260930-way-route-export.sql` |
 
 - 每次部署前都在隔離環境 `jee8pay-smoke`（驗完即銷毀）做開機與端到端冒煙：第一階段 17 項、第二～四階段 33 項、頭像 6 項、權限與快照全面回歸 42 項，都通過（權限回歸只有一項是腳本在 log 輸出前就檢查的時序誤判）；部署後 10/10 healthy。`d280fd030ffc` 部署後，`run-d01-blackbox.py`（M_D01_EXTERNAL_UAT、RYO_IBON）23/23 PASS，訂單數不變。
 - 權限相關資料表部署前的備份放在 `state/overhaul-20260929/pre-*.sql`。
-- 平臺費／渠道費改為雙人覆核，但測試環境目前只有一個啟用中的營運平台超管；要改平臺費，須先建立第二個具 `ENT_FEE_RULE_REVIEW` 的帳號。
+- 平臺費／渠道費、人工調帳都是雙人覆核，但測試環境目前只有一個啟用中的營運平台超管；使用前須先建立第二個具覆核權限的帳號。
+- 分潤結算排程每 5 分鐘執行，只結算有快照的新訂單；T+N 與提現限額在「系統管理 → 系統配置 → 錢包與提現」調整。
 - 代理登入由 `isys.agent-portal.login-enabled` 控制；TD-015 在測試環境修正後預設開啟。正式環境仍未修正 TD-015。
 - 測試環境尚未有新下單，因此 `t_pay_order_fee` 目前為 0 筆；下一筆經授權的真實下單會產生第一筆快照。
 

@@ -72,23 +72,14 @@
         </a-col>
       </a-row>
 
-      <!-- 進階路由規則：規劃中功能，僅有 ENT_MCH_PAY_ROUTING_CONFIG 權限碼時可見；未串接後端前為唯讀空清單 -->
-      <template v-if="$access('ENT_MCH_PAY_ROUTING_CONFIG')">
-        <a-divider orientation="left">
-          進階路由規則 <a-tag color="purple">規劃中</a-tag>
-        </a-divider>
-        <a-table
-          :columns="routingRuleColumns"
-          :data-source="[]"
-          :pagination="false"
-          size="small"
-        >
-          <template #emptyText>路由規則功能開發中，尚無資料</template>
-        </a-table>
-        <a-button disabled style="margin-top: 8px">
-          ＋ 新增路由規則 <a-tag style="margin-left: 6px">尚未實作</a-tag>
-        </a-button>
-      </template>
+      <!-- 路由規則（ADR-0011）統一在「支付配置 → 通道路由」設定：以別名代碼在多個已開通的通道間依金額／時段／權重分流 -->
+      <a-alert
+        v-if="$access('ENT_WAY_ROUTE')"
+        type="info"
+        show-icon
+        style="margin-top: 8px"
+        message="要讓商戶以同一個代碼（例如 IBON）在多個通道間分流，請到「支付配置 → 通道路由」設定路由規則。"
+      />
 
       <div
         :style="{
@@ -121,15 +112,6 @@ const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProp
 const props = defineProps({
   callbackFunc: { type: Function, default: () => ({}) },
 })
-
-// 進階路由規則：規劃中功能，資料表與 API 尚未存在，先固定空清單
-const routingRuleColumns = [
-  { title: '金額下限', dataIndex: 'minAmt' },
-  { title: '金額上限', dataIndex: 'maxAmt' },
-  { title: '權重(1-9)', dataIndex: 'weight' },
-  { title: '可用時段', dataIndex: 'timeRange' },
-  { title: '操作', dataIndex: 'op' },
-]
 
 const vdata: any = reactive({
   cardList: [],

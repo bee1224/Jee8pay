@@ -54,7 +54,7 @@ CONTENT-TYPE = application/json; charset=UTF-8
 | `mchNo` | string | 必填，secure handoff 的 Merchant ID |
 | `appId` | string | 必填，secure handoff 的 App ID |
 | `mchOrderNo` | string | 必填；同一 Merchant 必須唯一，重複會回「商戶訂單已存在」 |
-| `wayCode` | string | 必填，黑貓 PAY ibon 上游擇一：`RYO_IBON` / `JAY_IBON` / `CHI_IBON` / `JHD_IBON` |
+| `wayCode` | string | 必填，黑貓 PAY ibon 上游擇一：`RYO_IBON` / `JAY_IBON` / `CHI_IBON` / `JHD_IBON`；或使用平台提供的別名（例如 `IBON`），由平台依路由規則選擇上游。使用別名時，回應與查單的 `wayCode` 是實際選中的代碼。 |
 | `amount` | integer | 必填，JeePay amount units；`1 TWD = 100 JeePay amount units`；四個 `*_IBON` 通道皆要求可整除 100 |
 | `currency` | string | 必填，固定 uppercase `TWD` |
 | `subject` | string | 必填，商品／訂單標題 |

@@ -23,6 +23,7 @@ import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRS;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.service.impl.PayWayService;
+import com.jeequan.jeepay.service.route.WayRouteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UnifiedOrderController extends AbstractPayOrderController {
 
     @Autowired private PayWayService payWayService;
+    @Autowired private WayRouteService wayRouteService;
     @Autowired private ConfigContextQueryService configContextQueryService;
 
     /**
@@ -79,6 +81,13 @@ public class UnifiedOrderController extends AbstractPayOrderController {
     private UnifiedOrderRQ buildBizRQ(UnifiedOrderRQ rq){
 
         String wayCode = rq.getWayCode();
+
+        // ADR-0011：別名代碼（例如 IBON）依路由規則換成實際支付方式；非別名時回傳 null，流程照舊
+        String routed = wayRouteService.resolve(rq.getMchNo(), rq.getAppId(), rq.getMchOrderNo(), wayCode, rq.getAmount());
+        if(routed != null){
+            wayCode = routed;
+            rq.setWayCode(routed);
+        }
 
         if(payWayService.count(PayWay.gw().eq(PayWay::getWayCode, wayCode)) <= 0){
             throw new BizException("不支援的支付方式");

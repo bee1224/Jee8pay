@@ -89,6 +89,8 @@ export const API_URL_PAY_ORDER_FEE = '/api/payOrderFee'
 export const API_URL_WALLET = '/api/wallet'
 export const API_URL_WITHDRAWS = '/api/withdraws'
 export const API_URL_RISK_BLACKLIST = '/api/riskBlacklist'
+/** 通道路由（ADR-0011） **/
+export const API_URL_WAY_ROUTES = '/api/wayRoutes'
 export const API_URL_MCH_LIST = '/api/mchInfo'
 /** 商户App管理 **/
 export const API_URL_MCH_APP = '/api/mchApps'

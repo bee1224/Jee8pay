@@ -51,6 +51,7 @@
           </a-table>
         </a-tab-pane>
         <a-tab-pane key="l" tab="錢包流水">
+          <a-button v-if="$access('ENT_MCH_EXPORT_CENTER')" style="margin-bottom: 8px" @click="exportLedger">匯出全部流水</a-button>
           <a-table :columns="ledgerColumns" :data-source="vdata.ledger" size="small" row-key="ledgerId" :pagination="false">
             <template #bodyCell="{ column, record }">
               <template v-if="column.key === 'bizType'">{{ BIZ_TYPES[record.bizType] || record.bizType }}</template>
@@ -81,6 +82,7 @@
 <script setup lang="ts">
 import { API_URL_MCH_WALLET, req } from '@/api/manage'
 import { reactive, getCurrentInstance } from 'vue'
+import { submitExport } from '@/utils/exportJob'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 const BIZ_TYPES = {
@@ -146,6 +148,9 @@ function load() {
 }
 load()
 
+function exportLedger() {
+  submitExport('WALLET_LEDGER', {}).then(() => $infoBox.message.success('已建立匯出，完成後請到「下載中心」下載'))
+}
 function applyFunc() {
   if (!vdata.apply.amount) {
     $infoBox.message.warning('請輸入提現金額')

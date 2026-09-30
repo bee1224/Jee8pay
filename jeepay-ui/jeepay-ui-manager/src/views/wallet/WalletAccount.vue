@@ -3,6 +3,8 @@
     <a-card :bordered="false">
       <template #title>錢包帳戶</template>
       <template #extra>
+        <a-range-picker v-if="$access('ENT_EXPORT_CENTER')" v-model:value="vdata.reportRange" value-format="YYYY-MM-DD" style="margin-right: 8px" />
+        <a-button v-if="$access('ENT_EXPORT_CENTER')" style="margin-right: 8px" @click="exportDaily">匯出每日結算彙總</a-button>
         <a-button v-if="$access('ENT_WALLET_SETTLE_RUN')" :loading="vdata.settling" @click="settleNow">立即結算</a-button>
       </template>
       <a-alert
@@ -90,6 +92,7 @@
 import { API_URL_WALLET, req } from '@/api/manage'
 import { reactive, getCurrentInstance } from 'vue'
 import { BIZ_TYPE_NAMES, OWNER_TYPE_NAMES, yuan } from '@/components/WalletPanel/walletText'
+import { submitExport } from '@/utils/exportJob'
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
 
 const columns = [
@@ -124,6 +127,7 @@ const vdata: any = reactive({
   accounts: [],
   pending: [],
   settling: false,
+  reportRange: [],
   query: { ownerType: undefined, ownerId: '' },
   ledger: { open: false, title: '', records: [] },
   adjust: { open: false, title: '', accountId: null, amount: undefined, reason: '' },
@@ -139,6 +143,10 @@ function loadAll() {
 }
 loadAll()
 
+function exportDaily() {
+  const [startDate, endDate] = vdata.reportRange || []
+  submitExport('SETTLE_DAILY', { startDate, endDate }).then(() => $infoBox.message.success('已建立匯出（未選日期為近 30 天），完成後請到「下載中心」下載'))
+}
 function settleNow() {
   vdata.settling = true
   req
