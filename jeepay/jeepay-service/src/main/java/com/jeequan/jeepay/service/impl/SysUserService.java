@@ -83,11 +83,11 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
             throw new BizException("员工号已存在！");
         }
 
-        //女  默认头像
+        //女  默认头像；使用營運平台與商戶平台各自 public/imgs 下的本地圖片，不依賴上游的北京 OSS
         if(sysUser.getSex() != null && CS.SEX_FEMALE == sysUser.getSex()){
-            sysUser.setAvatarUrl("https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/defava_f.png");
+            sysUser.setAvatarUrl("/imgs/defava_f.png");
         }else{
-            sysUser.setAvatarUrl("https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/defava_m.png");
+            sysUser.setAvatarUrl("/imgs/defava_m.png");
         }
 
         //1. 插入用户主表
