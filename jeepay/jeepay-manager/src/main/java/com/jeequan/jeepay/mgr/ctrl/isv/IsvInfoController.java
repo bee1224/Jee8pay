@@ -69,7 +69,8 @@ public class IsvInfoController extends CommonCtrl {
             @Parameter(name = "isvName", description = "服务商名称"),
             @Parameter(name = "state", description = "状态: 0-停用, 1-正常")
     })
-    @PreAuthorize("hasAuthority('ENT_ISV_LIST')")
+    // 商戶新增／修改表單需載入服務商下拉選單
+    @PreAuthorize("hasAnyAuthority('ENT_ISV_LIST', 'ENT_MCH_INFO_ADD', 'ENT_MCH_INFO_EDIT')")
     @RequestMapping(value="", method = RequestMethod.GET)
     public ApiPageRes<IsvInfo> list() {
         IsvInfo isvInfo = getObject(IsvInfo.class);

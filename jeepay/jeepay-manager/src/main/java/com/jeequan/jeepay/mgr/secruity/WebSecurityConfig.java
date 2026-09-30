@@ -26,6 +26,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -51,6 +52,8 @@ import static org.springframework.security.config.Customizer.withDefaults;
 */
 @Configuration
 @EnableWebSecurity
+// 啟用 @PreAuthorize（TD-015）：未啟用時控制器上的權限註解全部不生效，任何登入者都能呼叫全部 API
+@EnableMethodSecurity
 public class WebSecurityConfig{
 
     @Autowired private UserDetailsService userDetailsService;

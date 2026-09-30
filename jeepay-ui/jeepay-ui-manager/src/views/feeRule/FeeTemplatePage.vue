@@ -60,7 +60,7 @@
 <script setup lang="ts">
 import { API_URL_AGENT_INFO, API_URL_FEE_TEMPLATES, API_URL_MCH_LIST, API_URL_PAYWAYS_LIST, req } from '@/api/manage'
 import { reactive, getCurrentInstance } from 'vue'
-const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
+const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 const LAYER_NAMES = { SR_AGENT: '高代費', AGENT: '代理費' }
 const columns = [
@@ -152,9 +152,12 @@ function openApply(record) {
   req.list(API_URL_AGENT_INFO, { pageSize: -1 }).then((res) => {
     vdata.agentOptions = (res.records || []).map((a) => ({ value: a.agentNo, label: `${a.agentLevel === 1 ? '［高級］' : '［一般］'}${a.agentName}（${a.agentNo}）` }))
   })
-  req.list(API_URL_MCH_LIST, { pageSize: 100 }).then((res) => {
-    vdata.mchOptions = (res.records || []).map((m) => ({ value: m.mchNo, label: `${m.mchName}（${m.mchNo}）` }))
-  })
+  // 沒有商戶列表權限時不載入選項，仍可直接輸入商戶號
+  if ($access('ENT_MCH_LIST')) {
+    req.list(API_URL_MCH_LIST, { pageSize: 100 }).then((res) => {
+      vdata.mchOptions = (res.records || []).map((m) => ({ value: m.mchNo, label: `${m.mchName}（${m.mchNo}）` }))
+    })
+  }
 }
 
 function submitApply() {

@@ -39,6 +39,7 @@ import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRS;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.service.PayOrderProcessService;
 import com.jeequan.jeepay.service.impl.MchPayPassageService;
+import com.jeequan.jeepay.service.impl.PayOrderFeeService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -59,6 +60,7 @@ import java.util.Date;
 public abstract class AbstractPayOrderController extends ApiController {
 
     @Autowired private MchPayPassageService mchPayPassageService;
+    @Autowired private PayOrderFeeService payOrderFeeService;
     @Autowired private PayOrderService payOrderService;
     @Autowired private ConfigContextQueryService configContextQueryService;
     @Autowired private PayOrderProcessService payOrderProcessService;
@@ -169,6 +171,9 @@ public abstract class AbstractPayOrderController extends ApiController {
                 //訂單入库 訂單狀態： 生成狀態  此时没有和任何上游渠道产生交互。
                 payOrderService.save(payOrder);
             }
+
+            // ADR-0009：記錄下單當下的四層手續費快照（旁表、已存在不覆寫、失敗不阻斷收款）
+            payOrderFeeService.snapshotQuietly(payOrder);
 
             //调起上游支付介面
             bizRS = (UnifiedOrderRS) paymentService.pay(bizRQ, payOrder, mchAppConfigContext);

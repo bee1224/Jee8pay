@@ -816,6 +816,7 @@ insert into t_sys_entitlement values('ENT_ORDER', '订单中心', 'transaction',
 -- 【商户系统】 系统管理
 insert into t_sys_entitlement values('ENT_SYS_CONFIG', '系统管理', 'setting', '', 'RouteView', 'ML', 0, 1,  'ROOT', '200', 'MCH', now(), now());
     insert into t_sys_entitlement values('ENT_UR', '用户角色管理', 'team', '', 'RouteView', 'ML', 0, 1,  'ENT_SYS_CONFIG', '10', 'MCH', now(), now());
+    insert into t_sys_entitlement values('ENT_UAT_EDGE_ALLOWLIST', 'UAT Edge 白名單', 'safety', '/uatedge/allowlist', 'UatEdgeAllowlistPage', 'ML', 0, 1,  'ENT_SYS_CONFIG', '25', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_UR_USER', '操作员管理', 'contacts', '/users', 'SysUserPage', 'ML', 0, 1,  'ENT_UR', '10', 'MCH', now(), now());
             insert into t_sys_entitlement values('ENT_UR_USER_LIST', '页面：操作员列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_UR_USER', '0', 'MCH', now(), now());
             insert into t_sys_entitlement values('ENT_UR_USER_SEARCH', '按钮：搜索', 'no-icon', '', '', 'PB', 0, 1,  'ENT_UR_USER', '0', 'MCH', now(), now());

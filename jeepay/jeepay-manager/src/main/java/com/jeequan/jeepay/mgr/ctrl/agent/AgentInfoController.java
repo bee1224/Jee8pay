@@ -32,17 +32,17 @@ public class AgentInfoController extends AgentBaseCtrl {
     @Autowired private AgentPortalService agentPortalService;
 
     /**
-     * 代理登入開關，預設關閉。營運平台的 @PreAuthorize 目前未生效（TD-015），
-     * 開通代理帳號等於讓代理可呼叫全部平台 API；須先修正全域權限檢查並驗證後才可開啟。
+     * 代理登入開關（緊急關閉用），預設開啟。前提是 WebSecurityConfig 已啟用 @EnableMethodSecurity（TD-015）；
+     * 若日後在未啟用方法層級權限的分支上使用，必須設為 false，否則代理帳號可呼叫全部平台 API。
      */
-    @Value("${isys.agent-portal.login-enabled:false}")
+    @Value("${isys.agent-portal.login-enabled:true}")
     private boolean agentLoginEnabled;
 
     @Operation(summary = "代理列表")
-    @PreAuthorize("hasAnyAuthority('ENT_AGENT_LIST', 'ENT_FEE_RULE_LIST', 'ENT_MCH_AGENT_BIND')")
+    @PreAuthorize("hasAnyAuthority('ENT_AGENT_LIST', 'ENT_FEE_RULE_LIST', 'ENT_MCH_AGENT_BIND', 'ENT_FEE_TEMPLATE')")
     @RequestMapping(value = "", method = RequestMethod.GET)
     public ApiPageRes<AgentInfo> list() {
-        requireAuthority("ENT_AGENT_LIST", "ENT_FEE_RULE_LIST", "ENT_MCH_AGENT_BIND");
+        requireAuthority("ENT_AGENT_LIST", "ENT_FEE_RULE_LIST", "ENT_MCH_AGENT_BIND", "ENT_FEE_TEMPLATE");
         AgentInfo query = getObject(AgentInfo.class);
         LambdaQueryWrapper<AgentInfo> wrapper = AgentInfo.gw();
         if (StringUtils.isNotEmpty(query.getAgentNo())) {
@@ -123,7 +123,7 @@ public class AgentInfoController extends AgentBaseCtrl {
     public ApiRes createAccount(@PathVariable("agentNo") String agentNo) {
         requireAuthority("ENT_AGENT_ACCOUNT");
         if (!agentLoginEnabled) {
-            throw new BizException("代理登入尚未開放：需先修正營運平台權限檢查（TD-015），否則代理帳號可存取平台全部資料");
+            throw new BizException("代理登入已由系統設定關閉（isys.agent-portal.login-enabled=false）");
         }
         SysUser user = agentPortalService.createAccount(agentNo, getObject(SysUser.class));
         return ApiRes.ok(user.getSysUserId());
