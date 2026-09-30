@@ -61,43 +61,6 @@
           </a-form-item>
         </a-col>
       </a-row>
-
-      <!-- 代理層級與費率瀑布：規劃中功能，僅有 ENT_ISV_TIER_CONFIG 權限碼時可見；未串接後端前所有欄位皆停用 -->
-      <template v-if="$access('ENT_ISV_TIER_CONFIG')">
-        <a-divider orientation="left">
-          代理層級與費率瀑布 <a-tag color="purple">規劃中</a-tag>
-        </a-divider>
-        <a-row justify="space-between" type="flex">
-          <a-col :span="10">
-            <a-form-item>
-              <template #label>代理層級 <a-tag>尚未實作</a-tag></template>
-              <a-select placeholder="高級代理／一般代理" disabled />
-            </a-form-item>
-          </a-col>
-          <a-col :span="10">
-            <a-form-item>
-              <template #label>上級代理 <a-tag>尚未實作</a-tag></template>
-              <a-select placeholder="請選擇上級代理" disabled />
-            </a-form-item>
-          </a-col>
-        </a-row>
-        <a-row justify="space-between" type="flex">
-          <a-col :span="10">
-            <a-form-item>
-              <template #label>高代費（百分比＋單筆） <a-tag>尚未實作</a-tag></template>
-              <a-input-group compact>
-                <a-input style="width: 50%" placeholder="0.00" suffix="%" disabled />
-                <a-input style="width: 50%" placeholder="0" suffix="元" disabled />
-              </a-input-group>
-            </a-form-item>
-          </a-col>
-          <a-col :span="10">
-            <a-form-item label="平臺費（系統鎖定，租戶不可調整）">
-              <a-input placeholder="由平台統一設定" suffix="%" disabled />
-            </a-form-item>
-          </a-col>
-        </a-row>
-      </template>
     </a-form>
     <div class="drawer-btn-center">
       <a-button @click="onClose" style="margin-right: 8px">取消</a-button>

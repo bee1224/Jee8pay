@@ -50,7 +50,14 @@
       <scope>provided</scope>
     </dependency>
 
-  </dependencies>
+  
+        <!-- 單元測試（費率瀑布等純邏輯） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
   <build>
     <resources>

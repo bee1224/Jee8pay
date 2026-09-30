@@ -1,6 +1,6 @@
 # ADR-0009 — 多層代理租戶與四層手續費瀑布資料模型
 
-Status: Proposed
+Status: Accepted（2026-09-30 修訂：代理採獨立實體，分階段落地）
 Date: 2026-09-30
 
 ## Context
@@ -15,16 +15,42 @@ Jee8pay 的產品方向，是讓平台（Jee8pay 自身組織）把系統出租�
 
 目前管理端只有佔位畫面，以權限碼 `ENT_ISV_TIER_CONFIG`、`ENT_MCH_PAY_ROUTING_CONFIG` 控制顯示，尚未建立任何資料表或邏輯。
 
-## Decision（提案）
+## Decision
 
-1. **新增 `t_tenant`**，欄位包含 `tenant_type`（`PLATFORM` / `SR_AGENT` / `AGENT` / `MCH`）、`parent_id`，以及物化路徑 `tenant_path`（例如 `/1/5/12/`）。「查詢我管轄範圍」以前綴比對完成，不需要遞迴。
-2. 既有 `IsvInfo` / `MchInfo` 改為掛在 `t_tenant` 節點下，不另建第二套商戶主檔。
-3. 推薦人（中人）關係獨立存於 `t_merchant_referrer`，不寫入 `tenant_path`。這樣更換管轄時不影響推薦佣金。
-4. **新增 `t_fee_rule`**，欄位包含 `tenant_id`、`channel`、`layer`、`rate_pct`、`rate_flat`、`min_amt`、`max_amt`、`locked`。`PLATFORM` 層必須 `locked`，並在 API 與 UI 兩端同時阻擋修改，不能只靠隱藏欄位。
-5. 訂單建立時，把當下解析出的四層費率快照寫進訂單，例如 `PayOrder` 的 `fee_snapshot`。之後調整費率不得影響已建立的訂單。
-6. 費率變更要保留變更歷史，並經雙人覆核。寫入時拒絕負值，也拒絕四層加總超過商戶手續費的設定。
+2026-09-30 使用者決定「照競品做，代理用獨立實體」。原提案的通用 `t_tenant` 樹改為以下模型：
 
-路由規則（金額區間、權重、時段、餘額門檻）以旁表 `t_routing_rule` 掛在通道上。錢包與提現（複式記帳、提現狀態機）另立 ADR，不在本提案範圍。
+1. **代理是獨立實體 `t_agent_info`**，不與 `IsvInfo`（服務商）或 `MchInfo` 合併。
+   - `agent_level`：1 = 高級代理、2 = 一般代理。一般代理的上級必須是啟用中的高級代理。
+   - `agent_path` 物化路徑（例如 `/A1/A2/`）。層級與上級建立後不可變更，避免路徑失真。
+   - 仍有下級代理、綁定商戶或推薦關係時不可刪除。
+2. **商戶歸屬 `t_agent_mch_rela`**（一商戶一列）：`agent_no` 為直屬代理，`referrer_agent_no` 為推薦人（中人）。推薦關係獨立記錄，不寫入路徑，更換直屬代理不影響推薦。
+3. **費率規則 `t_fee_rule`**：`(way_code, target_type, target_id, layer)` 唯一。
+   - `target_type`：`DEFAULT`（平台預設）、`AGENT`、`MCH`（商戶覆寫）。
+   - `layer`：`PLATFORM`、`CHANNEL`、`SR_AGENT`、`AGENT`。
+   - 每層費用 = 金額 × `rate`（比率，最多 6 位小數，四捨五入到分）＋ `fixed_amount`（分）。
+   - 解析順序：商戶覆寫優先。平臺費與渠道費退回平台預設；高代費取高級代理的設定；代理費取直屬一般代理的設定。
+   - `DEFAULT` 只能設平臺費與渠道費，`AGENT` 只能設代理層，且層級必須與代理等級相符。
+4. **平臺費鎖定**：平臺費與渠道費需要權限 `ENT_FEE_RULE_PLATFORM_EDIT`，代理層需要 `ENT_FEE_RULE_EDIT`。後端 API 強制檢查，前端只是呈現。
+5. **變更紀錄 `t_fee_rule_log`**：每次儲存或刪除都記錄前後值與操作人。
+6. 移除佔位權限 `ENT_ISV_TIER_CONFIG`，改由「代理管理」與「費率瀑布」選單取代。
+
+### 分階段
+
+| 階段 | 範圍 | 狀態 |
+|------|------|------|
+| 1 | 代理實體、層級、商戶綁定、四層費率設定、試算、變更紀錄、營運平台管理畫面 | 已完成，已部署至測試環境 |
+| 2 | 訂單建立時寫入費率快照（觸及 PayOrder，屬 RED 範圍，需另行核准） | 未開始 |
+| 3 | 代理登入後台（依 `agent_path` 做資料權限） | 未開始 |
+| 4 | 費率範本與批次設定、雙人覆核 | 未開始 |
+
+原提案中的 `min_amt` / `max_amt`、雙人覆核、「四層加總不得超過商戶手續費」寫入檢查，延後到第 2 與第 4 階段。第 1 階段試算時會標示總費用是否超過交易金額。路由規則與錢包提現仍不在本 ADR 範圍。
+
+### 原提案（保留供追溯）
+
+原提案為通用 `t_tenant`（`tenant_type` / `parent_id` / `tenant_path`），並把 `IsvInfo` / `MchInfo` 掛在節點下。已改採上述獨立代理實體，原因如下：
+- 競品皆以代理為獨立實體。
+- 不需要改動既有服務商與商戶主檔。
+- 與 AGENTS.md「最小核心改動」一致。
 
 ## Decision Drivers
 
@@ -35,13 +61,17 @@ Jee8pay 的產品方向，是讓平台（Jee8pay 自身組織）把系統出租�
 
 ## Options Considered
 
-### Option A — 新增 `t_tenant` 物化路徑樹＋`t_fee_rule`（提案）
+### Option A — 新增 `t_tenant` 物化路徑樹＋`t_fee_rule`（原提案，未採用）
 
 查詢管轄範圍很便宜，層級深度也有彈性，費率可逐層設定與鎖定。代價是需要重新檢視所有「依商戶查歸屬」的查詢與報表。
 
 ### Option B — 在 `IsvInfo` 加上 `parent_isv_no`，在 `MchPayPassage` 增加四組費率欄位
 
 改動最小，但只能表達固定層數。查詢整個轄區時需要遞迴。費率鎖定與變更歷史也無處安放。
+
+### Option D — 獨立代理實體 `t_agent_info`（物化路徑）＋`t_agent_mch_rela`＋`t_fee_rule`（採用）
+
+貼近競品做法。既有 `IsvInfo`、`MchInfo`、`PayOrder` 在第 1 階段完全不動。代價是日後若要支援更多層級，需要調整 `agent_level` 與驗證規則。
 
 ### Option C — 以鄰接表（只有 `parent_id`）配合遞迴 CTE
 

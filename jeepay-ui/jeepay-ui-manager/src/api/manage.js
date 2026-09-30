@@ -73,6 +73,12 @@ export const API_URL_USER_ROLE_RELA_LIST = '/api/sysUserRoleRelas'
 
 /** 服务商、商户管理 **/
 export const API_URL_ISV_LIST = '/api/isvInfo'
+/** 代理管理（ADR-0009） **/
+export const API_URL_AGENT_INFO = '/api/agentInfo'
+/** 商戶代理綁定 **/
+export const API_URL_AGENT_MCH_RELA = '/api/agentMchRela'
+/** 四層費率規則 **/
+export const API_URL_FEE_RULES = '/api/feeRules'
 export const API_URL_MCH_LIST = '/api/mchInfo'
 /** 商户App管理 **/
 export const API_URL_MCH_APP = '/api/mchApps'

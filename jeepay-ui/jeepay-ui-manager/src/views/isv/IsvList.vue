@@ -60,12 +60,6 @@
               :text="record.state === 0 ? '停用' : '啟用'"
             />
           </template>
-          <template v-if="column.key === 'agentTier'">
-            <!-- 代理層級／費率瀑布尚未實作，先佔位顯示 -->
-            <a-tooltip title="代理層級功能開發中，尚未串接後端資料">
-              <a-tag>尚未設定</a-tag>
-            </a-tooltip>
-          </template>
           <template v-if="column.key === 'op'">
             <!-- 操作列插槽 -->
             <JeepayTableColumns>
@@ -109,7 +103,7 @@ import IsvPayIfConfigList from './IsvPayIfConfigList.vue'
 import { reactive, ref, getCurrentInstance } from 'vue'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
-const baseTableColumns = [
+const tableColumns = [
   {
     key: 'isvName',
     width: '200px',
@@ -130,23 +124,13 @@ const baseTableColumns = [
   },
 ]
 
-// 代理層級／費率瀑布：規劃中功能，欄位僅在有 ENT_ISV_TIER_CONFIG 權限碼時顯示（見 AddOrEdit.vue 同名開關）
-const agentTierColumn = {
-  key: 'agentTier',
-  title: '代理層級',
-  width: '140px',
-  scopedSlots: { customRender: 'agentTierSlot' },
-}
-
 const infoTable = ref()
 const infoAddOrEdit = ref()
 const isvPayIfConfigList = ref()
 
 const vdata: any = reactive({
   btnLoading: false,
-  tableColumns: $access('ENT_ISV_TIER_CONFIG')
-    ? [...baseTableColumns.slice(0, 3), agentTierColumn, ...baseTableColumns.slice(3)]
-    : baseTableColumns,
+  tableColumns: tableColumns,
   searchData: {},
 })
 

@@ -91,6 +91,13 @@
             </a-button>
             <a-button
               type="link"
+              @click="agentBindFunc(record.mchNo)"
+              v-if="$access('ENT_MCH_AGENT_BIND')"
+            >
+              代理綁定
+            </a-button>
+            <a-button
+              type="link"
               style="color: red"
               @click="delFunc(record.mchNo)"
               v-if="$access('ENT_MCH_INFO_DEL')"
@@ -105,12 +112,15 @@
     <InfoAddOrEdit ref="infoAddOrEdit" :callback-func="searchFunc" />
     <!-- 新增页面组件  -->
     <InfoDetail ref="infoDetail" :callback-func="searchFunc" />
+    <!-- 代理綁定（ADR-0009） -->
+    <MchAgentBind ref="mchAgentBind" :callback-func="searchFunc" />
   </page-header-wrapper>
 </template>
 <script setup lang="ts">
 import { API_URL_MCH_LIST, req, reqLoad } from '@/api/manage'
 import InfoAddOrEdit from './AddOrEdit.vue'
 import InfoDetail from './Detail.vue'
+import MchAgentBind from './MchAgentBind.vue'
 import { ref, reactive, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -119,6 +129,7 @@ const router = useRouter()
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 const infoDetail = ref()
+const mchAgentBind = ref()
 const infoAddOrEdit = ref()
 const infoTable = ref()
 
@@ -178,5 +189,8 @@ function mchAppConfig(recordId) {
     path: '/apps',
     query: { mchNo: recordId },
   })
+}
+function agentBindFunc(mchNo) {
+  mchAgentBind.value.show(mchNo)
 }
 </script>
