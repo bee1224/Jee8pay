@@ -32,7 +32,7 @@ Jee8pay 的產品方向，是讓平台（Jee8pay 自身組織）把系統出租�
    - `DEFAULT` 只能設平臺費與渠道費，`AGENT` 只能設代理層，且層級必須與代理等級相符。
 4. **平臺費鎖定**：平臺費與渠道費需要權限 `ENT_FEE_RULE_PLATFORM_EDIT`，代理層需要 `ENT_FEE_RULE_EDIT`。後端 API 強制檢查，前端只是呈現。
 5. **變更紀錄 `t_fee_rule_log`**：每次儲存或刪除都記錄前後值與操作人。
-6. 移除佔位權限 `ENT_ISV_TIER_CONFIG`，改由「代理管理」與「費率瀑布」選單取代。
+6. 移除佔位權限 `ENT_ISV_TIER_CONFIG`，改由「代理管理」選單（代理列表、費率設定）取代。
 
 ### 分階段
 
