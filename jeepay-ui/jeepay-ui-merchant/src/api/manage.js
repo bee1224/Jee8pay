@@ -89,15 +89,6 @@ export const API_URL_MCH_PAYPASSAGE_LIST = '/api/mch/payPassages'
 /** 转账订单管理 **/
 export const API_URL_TRANSFER_ORDER_LIST = '/api/transferOrders'
 
-/** 分账组管理 **/
-export const API_URL_DIVISION_RECEIVER_GROUP = '/api/divisionReceiverGroups'
-
-/** 分账账号管理 **/
-export const API_URL_DIVISION_RECEIVER = '/api/divisionReceivers'
-
-/** 分账记录管理 **/
-export const API_URL_PAY_ORDER_DIVISION_RECORD_LIST = '/api/division/records'
-
 /** 上传图片/文件地址 **/
 export const upload = {
   avatar: request.baseUrl + '/api/ossFiles/avatar',
@@ -142,23 +133,6 @@ export function getMchPayConfigUnique (infoId, ifCode) {
   return request.request({
     url: '/api/mch/payConfigs/' + infoId + '/' + ifCode,
     method: 'get'
-  })
-}
-
-/** 支付体验配置 **/
-export function payTest (appId) {
-  return request.request({
-    url: 'api/paytest/payways/' + appId,
-    method: 'GET'
-  })
-}
-
-/** 支付体验下单配置 **/
-export function payTestOrder (parameter) {
-  return request.request({
-    url: '/api/paytest/payOrders',
-    method: 'POST',
-    data: parameter
   })
 }
 
@@ -230,42 +204,6 @@ export function getUserInfo () {
   })
 }
 
-/** 获取到webSocket的前缀 （ws://localhost） **/
-export function getWebSocketPrefix () {
-  // 获取网站域名 +  端口号
-  let domain = document.location.protocol + '//' + document.location.host
-
-  // 判断api_base_url 是否设置
-  if (process.env.VUE_APP_API_BASE_URL && process.env.VUE_APP_API_BASE_URL !== '/') {
-    domain = process.env.VUE_APP_API_BASE_URL
-  }
-
-  if (domain.startsWith('https:')) {
-    return 'wss://' + domain.replace('https://', '')
-  } else {
-    return 'ws://' + domain.replace('http://', '')
-  }
-}
-
-
-/** 查询商户转账支出的接口 **/
-export function queryMchTransferIfCode (appId) {
-  return request.request({
-    url: 'api/mchTransfers/ifCodes/' + appId,
-    method: 'GET'
-  })
-}
-
-
-/** 转账 **/
-export function doTransfer (parameter) {
-  return request.request({
-    url: '/api/mchTransfers/doTransfer',
-    method: 'POST',
-    data: parameter
-  }, true, true, true)
-}
-
 /** 查询当前应用支持的支付接口 **/
 export function getIfCodeByAppId (appId) {
   return request.request({
@@ -283,10 +221,3 @@ export function payOrderRefund (payOrderId, refundAmount, refundReason) {
   })
 }
 
-/** 分账重试 */
-export function resendDivision (recordId) {
-  return request.request({
-    url: '/api/division/records/resend/' + recordId,
-    method: 'POST'
-  })
-}

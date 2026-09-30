@@ -629,13 +629,7 @@ insert into t_sys_entitlement values('ENT_MCH_CENTER', '商户中心', 'team', '
         insert into t_sys_entitlement values('ENT_MCH_PAY_PASSAGE_CONFIG', '应用支付通道配置入口', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_PAY_PASSAGE_LIST', '0', 'MCH', now(), now());
         insert into t_sys_entitlement values('ENT_MCH_PAY_PASSAGE_ADD', '应用支付通道配置保存', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_PAY_PASSAGE_LIST', '0', 'MCH', now(), now());
 
-    insert into t_sys_entitlement values('ENT_MCH_PAY_TEST', '支付测试', 'transaction', '/paytest', 'PayTestPage', 'ML', 0, 1,  'ENT_MCH_CENTER', '20', 'MCH', now(), now());
-        insert into t_sys_entitlement values('ENT_MCH_PAY_TEST_PAYWAY_LIST', '页面：获取全部支付方式', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_PAY_TEST', '0', 'MCH', now(), now());
-        insert into t_sys_entitlement values('ENT_MCH_PAY_TEST_DO', '按钮：支付测试', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_PAY_TEST', '0', 'MCH', now(), now());
 
-    insert into t_sys_entitlement values('ENT_MCH_TRANSFER', '转账', 'property-safety', '/doTransfer', 'MchTransferPage', 'ML', 0, 1,  'ENT_MCH_CENTER', '30', 'MCH', now(), now());
-        insert into t_sys_entitlement values('ENT_MCH_TRANSFER_IF_CODE_LIST', '页面：获取全部代付通道', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_TRANSFER', '0', 'MCH', now(), now());
-        insert into t_sys_entitlement values('ENT_MCH_TRANSFER_DO', '按钮：发起转账', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_TRANSFER', '0', 'MCH', now(), now());
     -- 我的錢包（規劃中，P0 佔位）
     insert into t_sys_entitlement values('ENT_MCH_WALLET', '我的錢包（規劃中）', 'wallet', '/wallet', 'MchWalletPage', 'ML', 0, 1,  'ENT_MCH_CENTER', '40', 'MCH', now(), now());
 
@@ -654,23 +648,6 @@ insert into t_sys_entitlement values('ENT_ORDER', '订单中心', 'transaction',
         insert into t_sys_entitlement values('ENT_TRANSFER_ORDER_VIEW', '按钮：详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_TRANSFER_ORDER', '0', 'MCH', now(), now());
 
 -- 【商户系统】 分账管理
-insert into t_sys_entitlement values('ENT_DIVISION', '分账管理', 'apartment', '', 'RouteView', 'ML', 0, 1,  'ROOT', '30', 'MCH', now(), now());
-    insert into t_sys_entitlement values('ENT_DIVISION_RECEIVER_GROUP', '账号组管理', 'team', '/divisionReceiverGroup', 'DivisionReceiverGroupPage', 'ML', 0, 1,  'ENT_DIVISION', '10', 'MCH', now(), now());
-        insert into t_sys_entitlement values('ENT_DIVISION_RECEIVER_GROUP_LIST', '页面：数据列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECEIVER_GROUP', '0', 'MCH', now(), now());
-        insert into t_sys_entitlement values('ENT_DIVISION_RECEIVER_GROUP_VIEW', '按钮：详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECEIVER_GROUP', '0', 'MCH', now(), now());
-        insert into t_sys_entitlement values('ENT_DIVISION_RECEIVER_GROUP_ADD', '按钮：新增', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECEIVER_GROUP', '0', 'MCH', now(), now());
-        insert into t_sys_entitlement values('ENT_DIVISION_RECEIVER_GROUP_EDIT', '按钮：修改', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECEIVER_GROUP', '0', 'MCH', now(), now());
-        insert into t_sys_entitlement values('ENT_DIVISION_RECEIVER_GROUP_DELETE', '按钮：删除', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECEIVER_GROUP', '0', 'MCH', now(), now());
-    insert into t_sys_entitlement values('ENT_DIVISION_RECEIVER', '收款账号管理', 'trademark', '/divisionReceiver', 'DivisionReceiverPage', 'ML', 0, 1,  'ENT_DIVISION', '20', 'MCH', now(), now());
-        insert into t_sys_entitlement values('ENT_DIVISION_RECEIVER_LIST', '页面：数据列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECEIVER', '0', 'MCH', now(), now());
-        insert into t_sys_entitlement values('ENT_DIVISION_RECEIVER_VIEW', '按钮：详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECEIVER', '0', 'MCH', now(), now());
-        insert into t_sys_entitlement values('ENT_DIVISION_RECEIVER_ADD', '按钮：新增收款账号', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECEIVER', '0', 'MCH', now(), now());
-        insert into t_sys_entitlement values('ENT_DIVISION_RECEIVER_DELETE', '按钮：删除收款账号', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECEIVER', '0', 'MCH', now(), now());
-        insert into t_sys_entitlement values('ENT_DIVISION_RECEIVER_EDIT', '按钮：修改账号信息', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECEIVER', '0', 'MCH', now(), now());
-    insert into t_sys_entitlement values('ENT_DIVISION_RECORD', '分账记录', 'unordered-list', '/divisionRecord', 'DivisionRecordPage', 'ML', 0, 1,  'ENT_DIVISION', '30', 'MCH', now(), now());
-        insert into t_sys_entitlement values('ENT_DIVISION_RECORD_LIST', '页面：数据列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECORD', '0', 'MCH', now(), now());
-        insert into t_sys_entitlement values('ENT_DIVISION_RECORD_VIEW', '按钮：详情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECORD', '0', 'MCH', now(), now());
-        insert into t_sys_entitlement values('ENT_DIVISION_RECORD_RESEND', '按钮：重试', 'no-icon', '', '', 'PB', 0, 1,  'ENT_DIVISION_RECORD', '0', 'MCH', now(), now());
 
 
 -- 【商户系统】 系统管理

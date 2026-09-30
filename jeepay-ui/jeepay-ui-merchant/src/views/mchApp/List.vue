@@ -71,16 +71,6 @@
               >
                 支付配置
               </a-button>
-              <a-button type="link" v-if="$access('ENT_MCH_PAY_TEST') && record.state">
-                <router-link :to="{ name: 'ENT_MCH_PAY_TEST', params: { appId: record.appId } }">
-                  支付測試
-                </router-link>
-              </a-button>
-              <a-button type="link" v-if="$access('ENT_MCH_TRANSFER') && record.state">
-                <router-link :to="{ name: 'ENT_MCH_TRANSFER', params: { appId: record.appId } }">
-                  發起轉帳
-                </router-link>
-              </a-button>
               <a-button
                 type="link"
                 v-if="$access('ENT_MCH_APP_DEL')"

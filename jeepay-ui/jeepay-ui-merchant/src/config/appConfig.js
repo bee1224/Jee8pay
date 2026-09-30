@@ -31,11 +31,6 @@ export const asyncRouteDefine = {
 
   MchAppPage: { defaultPath: '/apps', component: () => import('@/views/mchApp/List.vue') }, // 商户应用列表
   MchWalletPage: { defaultPath: '/wallet', component: () => import('@/views/wallet/MchWallet.vue') }, // 我的錢包（規劃中）
-  PayTestPage: { defaultPath: '/paytest', component: () => import('@/views/payTest/PayTest.vue') }, // 支付测试
-  MchTransferPage: {
-    defaultPath: '/doTransfer',
-    component: () => import('@/views/transfer/MchTransferPage.vue'),
-  }, // 转账
 
   PayOrderListPage: {
     defaultPath: '/payOrder',
@@ -50,16 +45,4 @@ export const asyncRouteDefine = {
     component: () => import('@/views/order/transfer/TransferOrderList.vue'),
   }, // 转账订单
 
-  DivisionReceiverGroupPage: {
-    defaultPath: '/divisionReceiverGroup',
-    component: () => import('@/views/division/group/DivisionReceiverGroupPage.vue'),
-  }, // 分账账号组管理
-  DivisionReceiverPage: {
-    defaultPath: '/divisionReceiver',
-    component: () => import('@/views/division/receiver/DivisionReceiverPage.vue'),
-  }, // 分账账号管理
-  DivisionRecordPage: {
-    defaultPath: '/divisionRecord',
-    component: () => import('@/views/division/record/DivisionRecordPage.vue'),
-  }, // 分账记录
 }
