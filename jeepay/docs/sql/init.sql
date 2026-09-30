@@ -845,7 +845,7 @@ insert into t_sys_role_ent_rela values ('ROLE_AGENT_PORTAL', 'ENT_COMMONS'), ('R
 
 -- 超管用户： jeepay / jeepay123
 insert into t_sys_user values (801, 'jeepay', '超管', '13000000001', '1', '/imgs/defava_m.png', 'D0001', 1, 1, 'MGR', '0', '2020-06-13', '2020-06-13');
-insert into t_sys_user_auth values (801, '801', '1', 'jeepay', '$2a$10$WKuPJKE1XhX15ibqDM745eOCaZZVUiRitUjEyX6zVNd9k.cQXfzGa', 'testkey', 'MGR');
+insert into t_sys_user_auth values (801, '801', '1', 'jeepay', '$2a$10$eFKb3B384Qq5.NGM6i6W8OxViX.6TXJpUYm9tMdJCzqdRw2JZ21Bi', 'testkey', 'MGR');
 
 -- insert into t_sys_user_role_rela values (801, 801);
 
