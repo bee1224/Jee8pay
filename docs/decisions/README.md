@@ -13,6 +13,8 @@
 | [ADR-0005](ADR-0005-environment-isolation.md) | Platform environment and Provider connectivity fail closed | Accepted | Security and deployment boundary |
 | [ADR-0006](ADR-0006-taipei-platform-timezone.md) | Asia/Taipei is the Taiwan platform runtime default timezone | Accepted | Cross-service runtime locale |
 | [ADR-0007](ADR-0007-closed-order-paid-apn-reopen.md) | Validated paid-APN may reopen a locally CLOSED PayOrder to SUCCESS | Accepted | Payment state machine / settlement integrity |
+| [ADR-0008](ADR-0008-remove-legacy-china-providers.md) | 移除中國／海外支付通道與其衍生功能，只保留黑貓 PAY 四個 ibon 上游 | Accepted | Cross-provider scope / security boundary |
+| [ADR-0009](ADR-0009-multi-tier-agent-tenancy-and-fee-waterfall.md) | 多層代理租戶（t_tenant 物化路徑）與四層手續費瀑布（t_fee_rule、訂單費率快照） | Proposed | Data model / transaction semantics |
 
 ## Qualification Rule
 
