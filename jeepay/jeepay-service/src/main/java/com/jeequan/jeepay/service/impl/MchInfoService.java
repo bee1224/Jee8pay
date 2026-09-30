@@ -58,6 +58,8 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
 
     @Autowired private MchAppService mchAppService;
 
+    @Autowired private com.jeequan.jeepay.service.mapper.WalletAccountMapper walletAccountMapper;
+
     @Transactional(rollbackFor = Exception.class)
     public void addMch(MchInfo mchInfo, String loginUserName) {
 
@@ -127,6 +129,13 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
             long payCount = payOrderService.count(PayOrder.gw().eq(PayOrder::getMchNo, mchNo));
             if (payCount > 0) {
                 throw new BizException("该商户已存在交易数据，不可删除");
+            }
+
+            // ADR-0010：錢包仍有餘額（例如人工調帳）或提現處理中時不可刪除
+            WalletAccount wallet = walletAccountMapper.selectOne(WalletAccount.gw()
+                    .eq(WalletAccount::getOwnerType, WalletAccount.OWNER_MCH).eq(WalletAccount::getOwnerId, mchNo));
+            if (wallet != null && (wallet.getBalance() != 0 || wallet.getFrozen() != 0)) {
+                throw new BizException("該商戶錢包仍有餘額或提現處理中，不可刪除");
             }
 
             // 2.删除当前商户配置的支付通道

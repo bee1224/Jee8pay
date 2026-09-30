@@ -13,6 +13,7 @@ import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.service.impl.AgentPortalService;
 import com.jeequan.jeepay.service.impl.PayWayService;
 import com.jeequan.jeepay.service.mapper.WalletLedgerMapper;
+import com.jeequan.jeepay.service.wallet.Money;
 import com.jeequan.jeepay.service.wallet.WalletService;
 import com.jeequan.jeepay.service.wallet.WithdrawService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -127,7 +128,7 @@ public class AgentPortalController extends AgentBaseCtrl {
     @RequestMapping(value = "/wallet/withdraws", method = RequestMethod.POST)
     public ApiRes<WithdrawOrder> applyWithdraw() {
         requireAuthority("ENT_AGENT_PORTAL_VIEW");
-        long fen = new BigDecimal(getValStringRequired("amount")).movePointRight(2).longValueExact();
+        long fen = Money.yuanToFen(getValString("amount"));
         return ApiRes.ok(withdrawService.apply(WalletAccount.OWNER_AGENT, me().getAgentNo(), fen, getValStringRequired("reqNo"),
                 getCurrentUser().getSysUser().getSysUserId(), getCurrentUser().getSysUser().getRealname()));
     }

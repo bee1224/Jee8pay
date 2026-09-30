@@ -72,11 +72,6 @@ public class WithdrawService extends ServiceImpl<WithdrawOrderMapper, WithdrawOr
         if (StringUtils.isBlank(reqNo) || reqNo.length() > 64) {
             throw new BizException("缺少申請編號");
         }
-        WithdrawOrder existing = getOne(WithdrawOrder.gw().eq(WithdrawOrder::getOwnerType, ownerType)
-                .eq(WithdrawOrder::getOwnerId, ownerId).eq(WithdrawOrder::getReqNo, reqNo));
-        if (existing != null) {
-            return existing;
-        }
         long min = walletConfig.withdrawMinFen();
         long max = walletConfig.withdrawMaxFen();
         long fee = walletConfig.withdrawFeeFen();
@@ -88,6 +83,13 @@ public class WithdrawService extends ServiceImpl<WithdrawOrderMapper, WithdrawOr
         }
         WalletAccount account = walletService.getOrCreate(ownerType, ownerId);
         WalletAccount locked = walletAccountMapper.lockById(account.getAccountId());
+        // 冪等檢查放在鎖帳戶之後，並用鎖定讀取（FOR UPDATE）：REPEATABLE READ 下一般查詢讀的是交易開始時的快照，
+        // 看不到並行申請剛提交的那一筆；鎖定讀取讀最新提交資料，後到的申請會直接回傳先完成的那一筆
+        WithdrawOrder existing = getOne(WithdrawOrder.gw().eq(WithdrawOrder::getOwnerType, ownerType)
+                .eq(WithdrawOrder::getOwnerId, ownerId).eq(WithdrawOrder::getReqNo, reqNo).last("FOR UPDATE"));
+        if (existing != null) {
+            return existing;
+        }
         if (StringUtils.isAnyBlank(locked.getPayoutAccountNo(), locked.getPayoutBankCode(), locked.getPayoutAccountName())) {
             throw new BizException("請先設定收款帳戶");
         }

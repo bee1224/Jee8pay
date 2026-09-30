@@ -8,6 +8,7 @@ import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.mapper.WalletLedgerMapper;
+import com.jeequan.jeepay.service.wallet.Money;
 import com.jeequan.jeepay.service.wallet.WalletConfig;
 import com.jeequan.jeepay.service.wallet.WalletService;
 import com.jeequan.jeepay.service.wallet.WithdrawService;
@@ -73,7 +74,7 @@ public class MchWalletController extends CommonCtrl {
     @MethodLog(remark = "商戶申請提現")
     @RequestMapping(value = "/withdraws", method = RequestMethod.POST)
     public ApiRes<WithdrawOrder> apply() {
-        long fen = new BigDecimal(getValStringRequired("amount")).movePointRight(2).longValueExact();
+        long fen = Money.yuanToFen(getValString("amount"));
         return ApiRes.ok(withdrawService.apply(WalletAccount.OWNER_MCH, getCurrentMchNo(), fen, getValStringRequired("reqNo"),
                 getCurrentUser().getSysUser().getSysUserId(), getCurrentUser().getSysUser().getRealname()));
     }

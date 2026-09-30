@@ -53,6 +53,8 @@ public class ExportService extends ServiceImpl<ExportJobMapper, ExportJob> {
     private static final Set<String> MGR_TYPES = Set.of(PAY_ORDER, WALLET_LEDGER, WITHDRAW, SETTLE_DAILY);
     private static final Set<String> MCH_TYPES = Set.of(PAY_ORDER, WALLET_LEDGER);
     private static final int MAX_ROWS = 200_000;
+    private static final String[] PARAM_KEYS = {"mchNo", "wayCode", "state", "createdStart", "createdEnd",
+            "ownerType", "ownerId", "bizType", "startDate", "endDate"};
     private static final int PAGE = 1000;
     private static final Map<String, String> TYPE_NAMES = Map.of(PAY_ORDER, "支付訂單", WALLET_LEDGER, "錢包流水",
             WITHDRAW, "提現單", SETTLE_DAILY, "每日結算彙總");
@@ -71,8 +73,18 @@ public class ExportService extends ServiceImpl<ExportJobMapper, ExportJob> {
         if (running >= 3) {
             throw new BizException("已有 3 個匯出正在處理，請稍後再試");
         }
+        // 只保存匯出會用到的篩選欄位，避免列表頁其他參數塞爆欄位或被誤用
+        JSONObject kept = new JSONObject(true);
+        if (params != null) {
+            for (String key : PARAM_KEYS) {
+                String v = params.getString(key);
+                if (StringUtils.isNotBlank(v)) {
+                    kept.put(key, StringUtils.abbreviate(v.trim(), 64));
+                }
+            }
+        }
         ExportJob job = new ExportJob().setSysType(sysType).setBelongInfoId(belongInfoId).setOwnerUid(uid).setOwnerName(name)
-                .setJobType(jobType).setParams(params == null ? "{}" : params.toJSONString()).setState(ExportJob.STATE_QUEUED)
+                .setJobType(jobType).setParams(kept.toJSONString()).setState(ExportJob.STATE_QUEUED)
                 .setFileName(TYPE_NAMES.get(jobType) + "_" + DateUtil.format(new Date(), "yyyyMMdd_HHmmss") + ".csv");
         save(job);
         return job;

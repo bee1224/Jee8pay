@@ -46,6 +46,8 @@ public class FeeRuleService extends ServiceImpl<FeeRuleMapper, FeeRule> {
     @Transactional
     public FeeRule saveRule(FeeRule input, Long operatorUid, String operatorName) {
         normalizeAndValidate(input);
+        // 覆核、範本、代理後台會在姓名後附加來源說明，截到欄位長度（64）避免寫入失敗
+        operatorName = StringUtils.abbreviate(operatorName, 64);
 
         FeeRule existing = getOne(FeeRule.gw()
                 .eq(FeeRule::getWayCode, input.getWayCode())
@@ -79,6 +81,7 @@ public class FeeRuleService extends ServiceImpl<FeeRuleMapper, FeeRule> {
 
     @Transactional
     public void removeRule(Long ruleId, Long operatorUid, String operatorName) {
+        operatorName = StringUtils.abbreviate(operatorName, 64);
         FeeRule existing = getById(ruleId);
         if (existing == null) {
             throw new BizException("費率規則不存在");

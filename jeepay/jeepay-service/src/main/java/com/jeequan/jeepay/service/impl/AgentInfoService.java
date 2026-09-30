@@ -6,8 +6,10 @@ import com.jeequan.jeepay.core.entity.AgentMchRela;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.FeeRule;
 import com.jeequan.jeepay.core.entity.SysUser;
+import com.jeequan.jeepay.core.entity.WalletAccount;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.service.mapper.AgentInfoMapper;
+import com.jeequan.jeepay.service.mapper.WalletAccountMapper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,7 @@ public class AgentInfoService extends ServiceImpl<AgentInfoMapper, AgentInfo> {
     @Autowired private AgentMchRelaService agentMchRelaService;
     @Autowired private FeeRuleService feeRuleService;
     @Autowired private SysUserService sysUserService;
+    @Autowired private WalletAccountMapper walletAccountMapper;
 
     @Transactional
     public AgentInfo create(AgentInfo agent, Long operatorUid, String operatorName) {
@@ -94,6 +97,12 @@ public class AgentInfoService extends ServiceImpl<AgentInfoMapper, AgentInfo> {
         }
         if (agentMchRelaService.count(AgentMchRela.gw().eq(AgentMchRela::getReferrerAgentNo, agentNo)) > 0) {
             throw new BizException("該代理仍是商戶的推薦人，不可刪除");
+        }
+        // 錢包仍有餘額或提現處理中時不可刪除，否則款項會變成無主帳戶
+        WalletAccount wallet = walletAccountMapper.selectOne(WalletAccount.gw()
+                .eq(WalletAccount::getOwnerType, WalletAccount.OWNER_AGENT).eq(WalletAccount::getOwnerId, agentNo));
+        if (wallet != null && (wallet.getBalance() != 0 || wallet.getFrozen() != 0)) {
+            throw new BizException("該代理錢包仍有餘額或提現處理中，請先結清再刪除");
         }
         // 代理登入帳號的 belong_info_id 指向代理號，先刪帳號避免留下無主帳號
         if (sysUserService.count(SysUser.gw().eq(SysUser::getSysType, CS.SYS_TYPE.MGR).eq(SysUser::getBelongInfoId, agentNo)) > 0) {

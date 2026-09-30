@@ -44,8 +44,8 @@ Status vocabulary：`Open`、`In Progress`、`Resolved`、`Accepted`。
 | TD-007 | 既有 DB TWD migration | 需 migration 設計 + 驗證 |
 | TD-008 | 中國 adapter 不驗證 currency | 需逐 adapter 修 + regression |
 | TD-012 | 無原生入口恢復任意 INIT 訂單 | 需需求/設計決策 |
-| TD-013 | UI nginx 靜態 `proxy_pass` 緩存舊 backend IP | 需改 variable proxy_pass + resolver 或部署後 reload；見 2026-08-23 502 事件 |
-| C5 | CCAT reconciliation 任務 | APN 遺失/Query 失敗仍會滯留；需定期稽核 CLOSED 訂單的排程任務 |
+| TD-013 | UI nginx 靜態 `proxy_pass` 緩存舊 backend IP | 測試環境已於 2026-09-30 修正（見上方 TD-013 列）；正式環境範本待合併後處理 |
+| C5 | CCAT reconciliation 任務 | 2026-09-30 測試環境新增 `ClosedOrderAuditTask`：到期後 72 小時內的關閉訂單，於 1／24／48 小時各查一次上游，查到已付款依 ADR-0007 轉回成功並通知商戶（`t_pay_order_audit` 記錄進度）；正式環境待合併 |
 | A1 | repo artifacts/manifest 與部署脫節 | 已更新 repo compose tags；artifacts 為 gitignored 需另行治理 |
 | A2 | 文件落後 runtime | 測試數已更新；I07R2-P05 驗收報告未補（runtime/ gitignored） |
 | D1-D4 | 營運：MQ memory / reboot 未測 / prod 空資料（V1 退休已於 2026-08-23 完成：production 與 dev 均完整退役） | 營運項 |

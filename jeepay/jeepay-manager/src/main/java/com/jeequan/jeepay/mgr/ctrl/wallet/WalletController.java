@@ -11,6 +11,7 @@ import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.mapper.WalletLedgerMapper;
+import com.jeequan.jeepay.service.wallet.Money;
 import com.jeequan.jeepay.service.wallet.SettlementService;
 import com.jeequan.jeepay.service.wallet.WalletAdjustService;
 import com.jeequan.jeepay.service.wallet.WalletService;
@@ -107,7 +108,7 @@ public class WalletController extends CommonCtrl {
     @MethodLog(remark = "提出人工調帳")
     @RequestMapping(value = "/adjusts", method = RequestMethod.POST)
     public ApiRes requestAdjust() {
-        long fen = new BigDecimal(getValStringRequired("amount")).movePointRight(2).longValueExact();
+        long fen = Money.yuanToFen(getValString("amount"));
         return ApiRes.ok(walletAdjustService.request(getValLongRequired("accountId"), fen, getValString("reason"),
                 getCurrentUser().getSysUser().getSysUserId(), getCurrentUser().getSysUser().getRealname()));
     }
