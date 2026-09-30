@@ -39,6 +39,8 @@ public class FeeRule extends BaseModel implements Serializable {
     public static final String LAYER_CHANNEL = "CHANNEL";
     public static final String LAYER_SR_AGENT = "SR_AGENT";
     public static final String LAYER_AGENT = "AGENT";
+    /** 推薦佣金：歸商戶的推薦人代理，與管轄鏈無關；未設定則為 0 */
+    public static final String LAYER_REFERRER = "REFERRER";
 
     @Schema(title = "ruleId", description = "規則ID")
     @TableId(value = "rule_id", type = IdType.AUTO)

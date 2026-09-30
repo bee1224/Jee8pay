@@ -3,8 +3,13 @@ server {
     server_name localhost;
     root /usr/share/nginx/html;
 
+    # TD-013：proxy_pass 用變數並指定 Docker 內建 DNS，每 10 秒重新解析，
+    # 後端容器重建換 IP 後不必重載 UI 容器；靜態寫法只在 nginx 啟動時解析一次。
+    resolver 127.0.0.11 valid=10s ipv6=off;
+    set $backend_upstream "http://$BACKEND_HOST";
+
     location /api/ {
-        proxy_pass http://$BACKEND_HOST;
+        proxy_pass $backend_upstream;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

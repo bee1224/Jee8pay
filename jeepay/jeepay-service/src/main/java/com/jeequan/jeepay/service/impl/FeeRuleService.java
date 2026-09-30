@@ -93,17 +93,18 @@ public class FeeRuleService extends ServiceImpl<FeeRuleMapper, FeeRule> {
     public static final class AgentChain {
         private final AgentInfo direct;
         private final AgentInfo senior;
-        private final String referrerAgentNo;
+        private final AgentInfo referrer;
 
-        public AgentChain(AgentInfo direct, AgentInfo senior, String referrerAgentNo) {
+        public AgentChain(AgentInfo direct, AgentInfo senior, AgentInfo referrer) {
             this.direct = direct;
             this.senior = senior;
-            this.referrerAgentNo = referrerAgentNo;
+            this.referrer = referrer;
         }
 
         public AgentInfo getDirect() { return direct; }
         public AgentInfo getSenior() { return senior; }
-        public String getReferrerAgentNo() { return referrerAgentNo; }
+        public AgentInfo getReferrer() { return referrer; }
+        public String getReferrerAgentNo() { return referrer == null ? null : referrer.getAgentNo(); }
     }
 
     public AgentChain agentChainOf(String mchNo) {
@@ -113,7 +114,13 @@ public class FeeRuleService extends ServiceImpl<FeeRuleMapper, FeeRule> {
         if (direct != null && Objects.equals(direct.getAgentLevel(), AgentInfo.LEVEL_AGENT)) {
             senior = StringUtils.isBlank(direct.getParentAgentNo()) ? null : agentInfoMapper.selectById(direct.getParentAgentNo());
         }
-        return new AgentChain(direct, senior, rela == null ? null : StringUtils.trimToNull(rela.getReferrerAgentNo()));
+        String referrerNo = rela == null ? null : StringUtils.trimToNull(rela.getReferrerAgentNo());
+        AgentInfo referrer = referrerNo == null ? null : agentInfoMapper.selectById(referrerNo);
+        // 停用的推薦人不再分佣
+        if (referrer != null && !Objects.equals(referrer.getState(), (byte) 1)) {
+            referrer = null;
+        }
+        return new AgentChain(direct, senior, referrer);
     }
 
     /** 解析某商戶在某支付方式下的四層費率（含來源說明）。 */
@@ -135,6 +142,9 @@ public class FeeRuleService extends ServiceImpl<FeeRuleMapper, FeeRule> {
         if (senior != null && !agentIds.contains(senior.getAgentNo())) {
             agentIds.add(senior.getAgentNo());
         }
+        if (chain.getReferrer() != null && !agentIds.contains(chain.getReferrer().getAgentNo())) {
+            agentIds.add(chain.getReferrer().getAgentNo());
+        }
         List<FeeRule> rules = list(FeeRule.gw()
                 .eq(FeeRule::getWayCode, wayCode)
                 .eq(FeeRule::getState, (byte) 1)
@@ -145,7 +155,7 @@ public class FeeRuleService extends ServiceImpl<FeeRuleMapper, FeeRule> {
                         w.or(x -> x.eq(FeeRule::getTargetType, FeeRule.TARGET_AGENT).in(FeeRule::getTargetId, agentIds));
                     }
                 }));
-        return FeeWaterfall.resolve(mchNo, direct, senior, rules);
+        return FeeWaterfall.resolve(mchNo, direct, senior, chain.getReferrer(), rules);
     }
 
     public FeeWaterfall.Breakdown preview(String mchNo, String wayCode, long amount) {
@@ -182,9 +192,18 @@ public class FeeRuleService extends ServiceImpl<FeeRuleMapper, FeeRule> {
      * 合計超過代表平台／代理分到的比商戶付的還多，須調整費率。
      */
     public List<JSONObject> riskCheck(String wayCode, long referenceAmount) {
+        return riskCheck(wayCode, referenceAmount, null);
+    }
+
+    /** 限定商戶範圍的風險檢查；mchNos 為 null 表示全部，空集合表示沒有需要檢查的商戶。 */
+    public List<JSONObject> riskCheck(String wayCode, long referenceAmount, java.util.Collection<String> mchNos) {
+        if (mchNos != null && mchNos.isEmpty()) {
+            return new ArrayList<>();
+        }
         List<MchPayPassage> passages = mchPayPassageService.list(MchPayPassage.gw()
                 .eq(MchPayPassage::getState, (byte) 1)
                 .eq(StringUtils.isNotBlank(wayCode), MchPayPassage::getWayCode, wayCode)
+                .in(mchNos != null, MchPayPassage::getMchNo, mchNos)
                 .orderByAsc(MchPayPassage::getMchNo, MchPayPassage::getWayCode));
         List<JSONObject> result = new ArrayList<>();
         for (MchPayPassage passage : passages) {

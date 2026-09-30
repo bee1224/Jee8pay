@@ -48,7 +48,7 @@ public class FeeTemplateService extends ServiceImpl<FeeTemplateMapper, FeeTempla
         Set<String> keys = new HashSet<>();
         for (FeeTemplateItem item : items) {
             if (FeeRuleService.isPlatformLayer(item.getLayer())) {
-                throw new BizException("範本只能包含高代費與代理費");
+                throw new BizException("範本只能包含高代費、代理費與推薦佣金");
             }
             if (!keys.add(item.getWayCode() + "|" + item.getLayer())) {
                 throw new BizException("範本中同一支付方式與費率層重複：" + item.getWayCode() + " " + item.getLayer());
@@ -127,7 +127,8 @@ public class FeeTemplateService extends ServiceImpl<FeeTemplateMapper, FeeTempla
     }
 
     static boolean layerMatches(String layer, AgentInfo agent) {
-        return (FeeRule.LAYER_SR_AGENT.equals(layer) && AgentInfo.LEVEL_SENIOR == agent.getAgentLevel())
+        return FeeRule.LAYER_REFERRER.equals(layer)
+                || (FeeRule.LAYER_SR_AGENT.equals(layer) && AgentInfo.LEVEL_SENIOR == agent.getAgentLevel())
                 || (FeeRule.LAYER_AGENT.equals(layer) && AgentInfo.LEVEL_AGENT == agent.getAgentLevel());
     }
 }

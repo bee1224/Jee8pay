@@ -6,7 +6,7 @@
         type="info"
         show-icon
         style="margin-bottom: 16px"
-        message="範本只包含高代費與代理費，可一次套用到多個代理或商戶。套用會逐筆寫入費率並留下變更紀錄；之後修改範本不會回溯已套用的費率。"
+        message="範本只包含高代費、代理費與推薦佣金，可一次套用到多個代理或商戶。套用會逐筆寫入費率並留下變更紀錄；之後修改範本不會回溯已套用的費率。"
       />
       <a-button v-if="$access('ENT_FEE_TEMPLATE_EDIT')" type="primary" style="margin-bottom: 16px" @click="openEdit(null)">新增範本</a-button>
       <a-table :columns="columns" :data-source="vdata.templates" :pagination="false" size="small" row-key="templateId">
@@ -46,7 +46,7 @@
             <a-radio value="MCH">商戶（寫入商戶覆寫）</a-radio>
           </a-radio-group>
         </a-form-item>
-        <a-form-item v-if="vdata.apply.targetType === 'AGENT'" label="代理（可多選；高級代理只套高代費、一般代理只套代理費）">
+        <a-form-item v-if="vdata.apply.targetType === 'AGENT'" label="代理（可多選；高級代理套高代費、一般代理套代理費，推薦佣金兩者都套）">
           <a-select v-model:value="vdata.apply.targetIds" mode="multiple" show-search option-filter-prop="label" :options="vdata.agentOptions" />
         </a-form-item>
         <a-form-item v-else label="商戶號（可多選，也可直接輸入商戶號後按 Enter）">
@@ -62,7 +62,7 @@ import { API_URL_AGENT_INFO, API_URL_FEE_TEMPLATES, API_URL_MCH_LIST, API_URL_PA
 import { reactive, getCurrentInstance } from 'vue'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
-const LAYER_NAMES = { SR_AGENT: '高代費', AGENT: '代理費' }
+const LAYER_NAMES = { SR_AGENT: '高代費', AGENT: '代理費', REFERRER: '推薦佣金' }
 const columns = [
   { title: '範本ID', dataIndex: 'templateId', width: '80px' },
   { title: '名稱', dataIndex: 'templateName' },
@@ -108,7 +108,7 @@ function openEdit(templateId) {
   const build = (items) => {
     const rows = []
     vdata.wayCodes.forEach((wayCode) => {
-      ;['SR_AGENT', 'AGENT'].forEach((layer) => {
+      ;['SR_AGENT', 'AGENT', 'REFERRER'].forEach((layer) => {
         const it = items.find((x) => x.wayCode === wayCode && x.layer === layer)
         rows.push({ key: wayCode + layer, wayCode, layer, pct: it ? toPct(it.rate) : 0, fixedYuan: it ? toYuan(it.fixedAmount) : 0, include: !!it })
       })

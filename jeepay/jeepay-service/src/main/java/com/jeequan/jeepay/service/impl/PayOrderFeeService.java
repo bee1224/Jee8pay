@@ -56,7 +56,7 @@ public class PayOrderFeeService extends ServiceImpl<PayOrderFeeMapper, PayOrderF
                 .setAgentNo(chain.getDirect() == null ? null : chain.getDirect().getAgentNo())
                 .setSrAgentNo(chain.getSenior() == null ? null : chain.getSenior().getAgentNo())
                 .setReferrerAgentNo(chain.getReferrerAgentNo())
-                .setPlatformFee(0L).setChannelFee(0L).setSrAgentFee(0L).setAgentFee(0L)
+                .setPlatformFee(0L).setChannelFee(0L).setSrAgentFee(0L).setAgentFee(0L).setReferrerFee(0L)
                 .setTotalFee(breakdown.getTotalFee());
 
         JSONArray detail = new JSONArray();
@@ -66,6 +66,7 @@ public class PayOrderFeeService extends ServiceImpl<PayOrderFeeMapper, PayOrderF
                 case FeeRule.LAYER_CHANNEL: fee.setChannelFee(layer.getFee()); break;
                 case FeeRule.LAYER_SR_AGENT: fee.setSrAgentFee(layer.getFee()); break;
                 case FeeRule.LAYER_AGENT: fee.setAgentFee(layer.getFee()); break;
+                case FeeRule.LAYER_REFERRER: fee.setReferrerFee(layer.getFee()); break;
                 default: break;
             }
             JSONObject item = new JSONObject(true);

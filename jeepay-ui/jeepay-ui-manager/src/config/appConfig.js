@@ -38,8 +38,10 @@ export const asyncRouteDefine = {
   'TransferOrderListPage': { defaultPath: '/transferOrder', component: () => import('@/views/order/transfer/TransferOrderList.vue')  }, // 转账订单
   'MchNotifyListPage': { defaultPath: '/notify', component: () => import('@/views/order/notify/MchNotifyList.vue')  }, // 商户通知列表
   'SysConfigPage': { defaultPath: '/config', component: () => import('@/views/sys/config/SysConfig.vue')  }, // 系统配置
-  'WalletLedgerPage': { defaultPath: '/wallet/ledger', component: () => import('@/views/wallet/WalletLedger.vue')  }, // 餘額流水（規劃中）
-  'WithdrawAuditPage': { defaultPath: '/wallet/withdraw', component: () => import('@/views/wallet/WithdrawAudit.vue')  }, // 提現審核（規劃中）
+  'WalletAccountPage': { defaultPath: '/wallet/accounts', component: () => import('@/views/wallet/WalletAccount.vue')  }, // 錢包帳戶（ADR-0010）
+  'WalletLedgerPage': { defaultPath: '/wallet/ledger', component: () => import('@/views/wallet/WalletLedger.vue')  }, // 餘額流水（ADR-0010）
+  'RiskBlacklistPage': { defaultPath: '/risk/blacklist', component: () => import('@/views/wallet/RiskBlacklist.vue')  }, // 風控黑名單（ADR-0010）
+  'WithdrawAuditPage': { defaultPath: '/wallet/withdraw', component: () => import('@/views/wallet/WithdrawAudit.vue')  }, // 提現審核（ADR-0010）
   'UatEdgeAllowlistPage': { defaultPath: '/uatedge/allowlist', component: () => import('@/views/uatedge/UatEdgeAllowlist.vue')  }, // UAT Edge 白名單
   'SysLogPage': { defaultPath: '/log', component: () => import('@/views/sys/log/SysLog.vue')  } // 系统日志
 }

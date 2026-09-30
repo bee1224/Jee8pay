@@ -68,7 +68,10 @@ public class PayOrderFee extends BaseModel implements Serializable {
     @Schema(title = "agentFee", description = "代理費，單位分")
     private Long agentFee;
 
-    @Schema(title = "totalFee", description = "四層合計，單位分")
+    @Schema(title = "referrerFee", description = "推薦佣金，單位分")
+    private Long referrerFee;
+
+    @Schema(title = "totalFee", description = "各層合計，單位分")
     private Long totalFee;
 
     @Schema(title = "exceedsMchFee", description = "四層合計是否超過商戶手續費: 0-否, 1-是（需人工檢查費率設定）")
@@ -76,6 +79,21 @@ public class PayOrderFee extends BaseModel implements Serializable {
 
     @Schema(title = "detail", description = "各層費率、固定金額與規則來源（JSON）")
     private String detail;
+
+    /** 未結算：尚未入帳 */
+    public static final byte SETTLE_PENDING = 0;
+    /** 已結算：已依快照入帳到各錢包 */
+    public static final byte SETTLE_DONE = 1;
+    /** 已沖回：結算後訂單退款，已反向沖銷 */
+    public static final byte SETTLE_REVERSED = 2;
+    /** 不結算：結算前訂單已退款或關閉 */
+    public static final byte SETTLE_SKIPPED = 3;
+
+    @Schema(title = "settleState", description = "結算狀態: 0-未結算, 1-已結算, 2-已沖回, 3-不結算")
+    private Byte settleState;
+
+    @Schema(title = "settledAt", description = "結算（或沖回）時間")
+    private Date settledAt;
 
     @Schema(title = "createdAt", description = "建立時間")
     private Date createdAt;

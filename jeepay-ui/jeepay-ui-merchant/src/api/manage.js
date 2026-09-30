@@ -78,6 +78,8 @@ export const API_URL_MAIN_STATISTIC = 'api/mainChart'
 export const API_URL_MCH_APP = '/api/mchApps'
 /** 支付订单管理 **/
 export const API_URL_PAY_ORDER_LIST = '/api/payOrder'
+/** 我的錢包（ADR-0010） **/
+export const API_URL_MCH_WALLET = '/api/mchWallet'
 /** 退款订单管理 **/
 export const API_URL_REFUND_ORDER_LIST = '/api/refundOrder'
 /** 支付方式列表 **/

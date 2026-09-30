@@ -85,6 +85,10 @@ export const API_URL_FEE_TEMPLATES = '/api/feeTemplates'
 export const API_URL_AGENT_PORTAL = '/api/agentPortal'
 /** 訂單手續費快照 **/
 export const API_URL_PAY_ORDER_FEE = '/api/payOrderFee'
+/** 錢包、提現、風控黑名單（ADR-0010） **/
+export const API_URL_WALLET = '/api/wallet'
+export const API_URL_WITHDRAWS = '/api/withdraws'
+export const API_URL_RISK_BLACKLIST = '/api/riskBlacklist'
 export const API_URL_MCH_LIST = '/api/mchInfo'
 /** 商户App管理 **/
 export const API_URL_MCH_APP = '/api/mchApps'

@@ -1,7 +1,7 @@
 <template>
   <div style="background: #fff; padding: 0 20px">
     <a-tabs @change="selectTabs">
-      <a-tab-pane key="applicationConfig" tab="應用設定">
+      <a-tab-pane v-for="tab in TABS" :key="tab.key" :tab="tab.name">
         <div class="account-settings-info-view">
           <a-form ref="configFormModel">
             <a-row>
@@ -37,6 +37,12 @@ import { API_URL_SYS_CONFIG, req, getConfigs } from '@/api/manage'
 import { reactive, ref, getCurrentInstance } from 'vue'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
+// 群組對應 t_sys_config.group_key；walletConfig 為錢包與提現（ADR-0010）
+const TABS = [
+  { key: 'applicationConfig', name: '應用設定' },
+  { key: 'walletConfig', name: '錢包與提現' },
+]
+
 const vdata: any = reactive({
   btnLoading: false,
   configData: {},
@@ -47,7 +53,7 @@ function detail() {
   // 获取基本信息
   getConfigs(vdata.groupKey).then((res) => {
     vdata.configData = res
-    vdata.groupKey = res[0].groupKey
+    if (res && res.length) vdata.groupKey = res[0].groupKey
   })
 }
 detail()
@@ -61,7 +67,7 @@ function selectTabs(key) {
 }
 function confirm(e) {
   // 确认更新
-  $infoBox.confirmPrimary('確認修改應用設定嗎？', '', () => {
+  $infoBox.confirmPrimary('確認修改這組設定嗎？', '', () => {
     vdata.btnLoading = true // 打开按钮上的 loading
     const formData = new FormData()
     for (var i in vdata.configData) {

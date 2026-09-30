@@ -254,11 +254,15 @@ CREATE TABLE `t_pay_order_fee` (
         `channel_fee` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '渠道費，單位分',
         `sr_agent_fee` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '高代費，單位分',
         `agent_fee` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '代理費，單位分',
-        `total_fee` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '四層合計，單位分',
+        `referrer_fee` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '推薦佣金，單位分',
+        `total_fee` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '各層合計，單位分',
         `exceeds_mch_fee` TINYINT(6) NOT NULL DEFAULT 0 COMMENT '四層合計是否超過商戶手續費: 0-否, 1-是',
         `detail` VARCHAR(1024) DEFAULT NULL COMMENT '各層費率、固定金額與規則來源（JSON）',
+        `settle_state` TINYINT(6) NOT NULL DEFAULT 0 COMMENT '結算狀態: 0-未結算, 1-已結算, 2-已沖回, 3-不結算',
+        `settled_at` DATETIME DEFAULT NULL COMMENT '結算（或沖回）時間',
         `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '建立時間',
         PRIMARY KEY (`pay_order_id`),
+        KEY `idx_settle_state` (`settle_state`),
         KEY `idx_sr_agent_no` (`sr_agent_no`),
         KEY `idx_agent_no` (`agent_no`),
         KEY `idx_mch_no` (`mch_no`)
@@ -308,6 +312,114 @@ CREATE TABLE `t_fee_rule_change_req` (
         PRIMARY KEY (`req_id`),
         KEY `idx_state` (`state`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='平臺費變更申請（雙人覆核）';
+
+-- 錢包帳戶（ADR-0010）：可用與凍結分桶；只能經 WalletService 記帳異動
+CREATE TABLE `t_wallet_account` (
+        `account_id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '帳戶ID',
+        `owner_type` VARCHAR(16) NOT NULL COMMENT '擁有者類型: MCH/AGENT/PLATFORM/CHANNEL',
+        `owner_id` VARCHAR(64) NOT NULL COMMENT '擁有者ID（商戶號／代理號／PLATFORM／ifCode）',
+        `balance` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '可用餘額，單位分',
+        `frozen` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '凍結金額，單位分',
+        `total_in` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '累計入帳，單位分',
+        `total_out` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '累計出帳，單位分',
+        `payout_bank_name` VARCHAR(64) DEFAULT NULL COMMENT '提現銀行名稱',
+        `payout_bank_code` VARCHAR(8) DEFAULT NULL COMMENT '提現銀行代碼',
+        `payout_branch` VARCHAR(64) DEFAULT NULL COMMENT '提現分行',
+        `payout_account_no` VARCHAR(32) DEFAULT NULL COMMENT '提現帳號',
+        `payout_account_name` VARCHAR(64) DEFAULT NULL COMMENT '提現戶名',
+        `payout_updated_at` DATETIME DEFAULT NULL COMMENT '收款帳戶最後變更時間',
+        `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '建立時間',
+        `updated_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新時間',
+        PRIMARY KEY (`account_id`),
+        UNIQUE KEY `uni_owner` (`owner_type`, `owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='錢包帳戶';
+
+-- 錢包流水（只增不改；唯一鍵保證結算與提現冪等）
+CREATE TABLE `t_wallet_ledger` (
+        `ledger_id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '流水ID',
+        `account_id` BIGINT(20) NOT NULL COMMENT '帳戶ID',
+        `owner_type` VARCHAR(16) NOT NULL COMMENT '擁有者類型',
+        `owner_id` VARCHAR(64) NOT NULL COMMENT '擁有者ID',
+        `biz_type` VARCHAR(32) NOT NULL COMMENT '業務類型: ORDER_SETTLE/ORDER_REVERSE/WITHDRAW_APPLY/WITHDRAW_RELEASE/WITHDRAW_PAID/WITHDRAW_FEE/ADJUST',
+        `biz_id` VARCHAR(64) NOT NULL COMMENT '業務單號',
+        `amount` BIGINT(20) NOT NULL COMMENT '可用餘額變動（正入負出），單位分',
+        `frozen_change` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '凍結金額變動，單位分',
+        `balance_before` BIGINT(20) NOT NULL COMMENT '變動前可用餘額',
+        `balance_after` BIGINT(20) NOT NULL COMMENT '變動後可用餘額',
+        `frozen_after` BIGINT(20) NOT NULL COMMENT '變動後凍結金額',
+        `remark` VARCHAR(256) DEFAULT NULL COMMENT '說明',
+        `operator_uid` BIGINT(20) DEFAULT NULL COMMENT '操作者用戶ID',
+        `operator_name` VARCHAR(64) DEFAULT NULL COMMENT '操作者',
+        `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '建立時間',
+        PRIMARY KEY (`ledger_id`),
+        UNIQUE KEY `uni_biz` (`account_id`, `biz_type`, `biz_id`),
+        KEY `idx_owner` (`owner_type`, `owner_id`, `ledger_id`),
+        KEY `idx_biz_id` (`biz_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='錢包流水';
+
+-- 提現單（平台人工匯款）
+CREATE TABLE `t_withdraw_order` (
+        `withdraw_id` VARCHAR(32) NOT NULL COMMENT '提現單號',
+        `owner_type` VARCHAR(16) NOT NULL COMMENT '擁有者類型: MCH/AGENT',
+        `owner_id` VARCHAR(64) NOT NULL COMMENT '擁有者ID',
+        `req_no` VARCHAR(64) NOT NULL COMMENT '申請端冪等鍵',
+        `amount` BIGINT(20) NOT NULL COMMENT '申請金額，單位分',
+        `fee` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '提現手續費，單位分',
+        `actual_amount` BIGINT(20) NOT NULL COMMENT '實際匯款金額，單位分',
+        `bank_name` VARCHAR(64) NOT NULL COMMENT '銀行名稱',
+        `bank_code` VARCHAR(8) NOT NULL COMMENT '銀行代碼',
+        `branch` VARCHAR(64) DEFAULT NULL COMMENT '分行',
+        `account_no` VARCHAR(32) NOT NULL COMMENT '帳號',
+        `account_name` VARCHAR(64) NOT NULL COMMENT '戶名',
+        `risk_flags` VARCHAR(128) DEFAULT NULL COMMENT '風控提示: BLACKLIST/DAILY_LIMIT/RESTRICTED_BANK/NEW_ACCOUNT',
+        `state` TINYINT(6) NOT NULL DEFAULT 0 COMMENT '狀態: 0-待審核, 1-已撥款, 2-已駁回, 3-已取消',
+        `apply_uid` BIGINT(20) DEFAULT NULL COMMENT '申請人用戶ID',
+        `apply_name` VARCHAR(64) DEFAULT NULL COMMENT '申請人',
+        `reviewer_uid` BIGINT(20) DEFAULT NULL COMMENT '審核人用戶ID',
+        `reviewer_name` VARCHAR(64) DEFAULT NULL COMMENT '審核人',
+        `paid_ref` VARCHAR(64) DEFAULT NULL COMMENT '匯款單號',
+        `review_remark` VARCHAR(128) DEFAULT NULL COMMENT '審核說明',
+        `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '申請時間',
+        `reviewed_at` DATETIME DEFAULT NULL COMMENT '審核時間',
+        PRIMARY KEY (`withdraw_id`),
+        UNIQUE KEY `uni_req` (`owner_type`, `owner_id`, `req_no`),
+        KEY `idx_state` (`state`, `created_at`),
+        KEY `idx_account_no` (`account_no`, `created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='提現單';
+
+-- 人工調帳申請（雙人覆核）
+CREATE TABLE `t_wallet_adjust_req` (
+        `req_id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '申請ID',
+        `account_id` BIGINT(20) NOT NULL COMMENT '帳戶ID',
+        `owner_type` VARCHAR(16) NOT NULL COMMENT '擁有者類型',
+        `owner_id` VARCHAR(64) NOT NULL COMMENT '擁有者ID',
+        `amount` BIGINT(20) NOT NULL COMMENT '調整金額（正加負減），單位分',
+        `reason` VARCHAR(128) NOT NULL COMMENT '調帳原因',
+        `state` TINYINT(6) NOT NULL DEFAULT 0 COMMENT '狀態: 0-待覆核, 1-已核准, 2-已駁回',
+        `requester_uid` BIGINT(20) NOT NULL COMMENT '申請人用戶ID',
+        `requester_name` VARCHAR(64) DEFAULT NULL COMMENT '申請人',
+        `reviewer_uid` BIGINT(20) DEFAULT NULL COMMENT '覆核人用戶ID',
+        `reviewer_name` VARCHAR(64) DEFAULT NULL COMMENT '覆核人',
+        `review_remark` VARCHAR(128) DEFAULT NULL COMMENT '覆核意見',
+        `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '申請時間',
+        `reviewed_at` DATETIME DEFAULT NULL COMMENT '覆核時間',
+        PRIMARY KEY (`req_id`),
+        KEY `idx_state` (`state`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='人工調帳申請';
+
+-- 風控黑名單（GLOBAL 或高級代理範圍）
+CREATE TABLE `t_risk_blacklist` (
+        `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+        `list_type` VARCHAR(16) NOT NULL COMMENT '類型: BANK_ACCOUNT/ACCOUNT_NAME/PHONE',
+        `list_value` VARCHAR(64) NOT NULL COMMENT '值',
+        `scope` VARCHAR(64) NOT NULL DEFAULT 'GLOBAL' COMMENT '範圍: GLOBAL 或高級代理號',
+        `remark` VARCHAR(128) DEFAULT NULL COMMENT '備註',
+        `created_uid` BIGINT(20) DEFAULT NULL COMMENT '建立者用戶ID',
+        `created_by` VARCHAR(64) DEFAULT NULL COMMENT '建立者',
+        `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '建立時間',
+        PRIMARY KEY (`id`),
+        UNIQUE KEY `uni_entry` (`list_type`, `list_value`, `scope`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='風控黑名單';
 
 -- 支付方式表  pay_way
 DROP TABLE IF EXISTS t_pay_way;
@@ -682,6 +794,17 @@ insert into t_sys_entitlement values('ENT_AGENT_PORTAL', '代理後台', 'team',
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_HOME', '我的代理後台', 'dashboard', '/agentPortal', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '10', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_VIEW', '頁面：代理後台資料', 'no-icon', '', '', 'PB', 0, 1,  'ENT_AGENT_PORTAL_HOME', '0', 'MGR', now(), now());
 
+insert into t_sys_entitlement values('ENT_WALLET_ACCOUNT', '錢包帳戶', 'wallet', '/wallet/accounts', 'WalletAccountPage', 'ML', 0, 1,  'ENT_WALLET', '5', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_WALLET_ADJUST', '按鈕：申請人工調帳', 'no-icon', '', '', 'PB', 0, 1,  'ENT_WALLET_ACCOUNT', '0', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_WALLET_ADJUST_REVIEW', '按鈕：覆核人工調帳', 'no-icon', '', '', 'PB', 0, 1,  'ENT_WALLET_ACCOUNT', '0', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_WALLET_SETTLE_RUN', '按鈕：立即結算', 'no-icon', '', '', 'PB', 0, 1,  'ENT_WALLET_ACCOUNT', '0', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_WALLET_WITHDRAW_REVIEW', '按鈕：審核提現（撥款／駁回）', 'no-icon', '', '', 'PB', 0, 1,  'ENT_WALLET_WITHDRAW', '0', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_RISK_BLACKLIST', '風控黑名單', 'stop', '/risk/blacklist', 'RiskBlacklistPage', 'ML', 0, 1,  'ENT_WALLET', '30', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_RISK_BLACKLIST_EDIT', '按鈕：新增／刪除黑名單', 'no-icon', '', '', 'PB', 0, 1,  'ENT_RISK_BLACKLIST', '0', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_FEE_EDIT', '按鈕：設定下級代理費率（限高級代理）', 'no-icon', '', '', 'PB', 0, 1,  'ENT_AGENT_PORTAL_HOME', '0', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_MCH_WALLET_WITHDRAW', '按鈕：申請／取消提現', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_WALLET', '0', 'MCH', now(), now());
+insert into t_sys_entitlement values('ENT_MCH_WALLET_PAYOUT_EDIT', '按鈕：設定收款帳戶', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_WALLET', '0', 'MCH', now(), now());
+
 insert into t_sys_entitlement values('ENT_ISV', '服务商管理', 'block', '', 'RouteView', 'ML', 0, 1,  'ROOT', '40', 'MGR', now(), now());
     insert into t_sys_entitlement values('ENT_ISV_INFO', '服务商列表', 'profile', '/isv', 'IsvListPage', 'ML', 0, 1,  'ENT_ISV', '10', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_ISV_LIST', '页面：服务商列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_ISV_INFO', '0', 'MGR', now(), now());
@@ -695,7 +818,7 @@ insert into t_sys_entitlement values('ENT_ISV', '服务商管理', 'block', '', 
 
 -- 订单管理
 -- 錢包與提現（規劃中，P0 佔位；刪除這些列即可整體隱藏選單）
-insert into t_sys_entitlement values('ENT_WALLET', '錢包與提現（規劃中）', 'wallet', '', 'RouteView', 'ML', 0, 1,  'ROOT', '55', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_WALLET', '錢包與提現', 'wallet', '', 'RouteView', 'ML', 0, 1,  'ROOT', '55', 'MGR', now(), now());
     insert into t_sys_entitlement values('ENT_WALLET_LEDGER', '餘額流水', 'account-book', '/wallet/ledger', 'WalletLedgerPage', 'ML', 0, 1,  'ENT_WALLET', '10', 'MGR', now(), now());
     insert into t_sys_entitlement values('ENT_WALLET_WITHDRAW', '提現審核', 'audit', '/wallet/withdraw', 'WithdrawAuditPage', 'ML', 0, 1,  'ENT_WALLET', '20', 'MGR', now(), now());
 
@@ -794,7 +917,7 @@ insert into t_sys_entitlement values('ENT_MCH_CENTER', '商户中心', 'team', '
 
 
     -- 我的錢包（規劃中，P0 佔位）
-    insert into t_sys_entitlement values('ENT_MCH_WALLET', '我的錢包（規劃中）', 'wallet', '/wallet', 'MchWalletPage', 'ML', 0, 1,  'ENT_MCH_CENTER', '40', 'MCH', now(), now());
+    insert into t_sys_entitlement values('ENT_MCH_WALLET', '我的錢包', 'wallet', '/wallet', 'MchWalletPage', 'ML', 0, 1,  'ENT_MCH_CENTER', '40', 'MCH', now(), now());
 
 -- 【商户系统】 订单管理
 insert into t_sys_entitlement values('ENT_ORDER', '订单中心', 'transaction', '', 'RouteView', 'ML', 0, 1,  'ROOT', '20', 'MCH', now(), now());
@@ -840,7 +963,8 @@ insert into t_sys_role values ('ROLE_OP', '普通操作员', 'MGR', '0', '2021-0
 -- 代理帳號固定角色：只含代理後台與個人中心，不含任何平台權限
 insert into t_sys_role values ('ROLE_AGENT_PORTAL', '代理帳號（系統角色）', 'MGR', '0', now());
 insert into t_sys_role_ent_rela values ('ROLE_AGENT_PORTAL', 'ENT_COMMONS'), ('ROLE_AGENT_PORTAL', 'ENT_C_USERINFO'),
-    ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_HOME'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_VIEW');
+    ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_HOME'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_VIEW'),
+    ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_FEE_EDIT');
 -- 角色权限关联， [超管]用户 拥有所有权限
 -- insert into t_sys_role_ent_rela select '801', ent_id from t_sys_entitlement;
 
@@ -854,6 +978,12 @@ INSERT INTO `t_sys_config` VALUES ('mgrSiteUrl', '运营平台网址(不包含�
 INSERT INTO `t_sys_config` VALUES ('mchSiteUrl', '商户平台网址(不包含结尾/)', '商户平台网址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9218', 'text', 0, '2021-5-18 14:46:10');
 INSERT INTO `t_sys_config` VALUES ('paySiteUrl', '支付网关地址(不包含结尾/)', '支付网关地址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9216', 'text', 0, '2021-5-18 14:46:10');
 INSERT INTO `t_sys_config` VALUES ('ossPublicSiteUrl', '公共oss访问地址(不包含结尾/)', '公共oss访问地址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9217/api/anon/localOssFiles', 'text', 0, '2021-5-18 14:46:10');
+INSERT INTO `t_sys_config` VALUES ('walletSettleDelayDays', '結算延遲天數', '0 = 成功即結算（T+0）；1 = 隔日結算（T+1）', 'walletConfig', '錢包與提現', '1', 'text', 10, now());
+INSERT INTO `t_sys_config` VALUES ('withdrawMinAmount', '單筆最低提現金額（元）', '低於此金額不可申請', 'walletConfig', '錢包與提現', '100', 'text', 20, now());
+INSERT INTO `t_sys_config` VALUES ('withdrawMaxAmount', '單筆最高提現金額（元）', '高於此金額不可申請', 'walletConfig', '錢包與提現', '500000', 'text', 30, now());
+INSERT INTO `t_sys_config` VALUES ('withdrawFeeAmount', '每筆提現手續費（元）', '撥款時自申請金額扣除並記入平台帳戶', 'walletConfig', '錢包與提現', '0', 'text', 40, now());
+INSERT INTO `t_sys_config` VALUES ('withdrawDailyLimitPerAccount', '同一收款帳號每日提現次數提示門檻', '超過會在審核畫面標記 DAILY_LIMIT', 'walletConfig', '錢包與提現', '3', 'text', 50, now());
+INSERT INTO `t_sys_config` VALUES ('withdrawRestrictedBankCodes', '需特別注意的銀行代碼（逗號分隔）', '命中會在審核畫面標記 RESTRICTED_BANK', 'walletConfig', '錢包與提現', '', 'text', 60, now());
 
 
 -- 初始化支付方式：僅黑貓 PAY 平台上的四個 ibon 上游

@@ -6,7 +6,7 @@
         type="info"
         show-icon
         style="margin-bottom: 16px"
-        message="商戶手續費 = 平臺費 + 渠道費 + 高代費 + 代理費，每層為「百分比 + 單筆固定金額」。單一商戶覆寫優先於預設。"
+        message="各層手續費 = 平臺費 + 渠道費 + 高代費 + 代理費 + 推薦佣金，每層為「百分比 + 單筆固定金額」，應不超過商戶在支付通道上的費率（可用「風險檢查」確認）。單一商戶覆寫優先於預設。"
         description="平臺費與渠道費的變更須由另一位具覆核權限的管理者核准後才生效；高代費與代理費儲存即生效。"
       />
       <a-form layout="inline" style="margin-bottom: 16px">
@@ -62,8 +62,8 @@
           </a-row>
         </a-card>
 
-        <a-card size="small" title="代理費率（高級代理設高代費、一般代理設代理費）" style="margin-bottom: 16px">
-          <a-table :columns="agentColumns" :data-source="vdata.agentRows" :pagination="false" size="small" row-key="agentNo">
+        <a-card size="small" title="代理費率（高級代理設高代費、一般代理設代理費；任何代理都可設擔任推薦人時的推薦佣金）" style="margin-bottom: 16px">
+          <a-table :columns="agentColumns" :data-source="vdata.agentRows" :pagination="false" size="small" row-key="key">
             <template #bodyCell="{ column, record }">
               <template v-if="column.key === 'agentName'">
                 <a-tag :color="record.agentLevel === 1 ? 'purple' : 'blue'">{{ record.agentLevel === 1 ? '高級' : '一般' }}</a-tag>
@@ -148,7 +148,7 @@
         </a-form-item>
         <a-form-item v-if="vdata.batch.targetType === 'AGENT'">
           <a-select v-model:value="vdata.batch.targetId" style="width: 280px" placeholder="選擇代理" show-search option-filter-prop="label"
-            :options="vdata.agentRows.map((a) => ({ value: a.agentNo, label: (a.agentLevel === 1 ? '［高級］' : '［一般］') + a.agentName }))" @change="loadBatch" />
+            :options="[...new Map(vdata.agentRows.map((a) => [a.agentNo, { value: a.agentNo, label: (a.agentLevel === 1 ? '［高級］' : '［一般］') + a.agentName }])).values()]" @change="loadBatch" />
         </a-form-item>
         <a-form-item v-else>
           <a-input v-model:value="vdata.batch.targetId" style="width: 200px" placeholder="商戶號" @pressEnter="loadBatch" />
@@ -189,9 +189,9 @@ import { API_URL_AGENT_INFO, API_URL_FEE_RULES, API_URL_PAYWAYS_LIST, req } from
 import { computed, reactive, getCurrentInstance } from 'vue'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
-const ALL_LAYERS = ['PLATFORM', 'CHANNEL', 'SR_AGENT', 'AGENT']
+const ALL_LAYERS = ['PLATFORM', 'CHANNEL', 'SR_AGENT', 'AGENT', 'REFERRER']
 const platformLayers = ['PLATFORM', 'CHANNEL']
-const LAYER_NAMES = { PLATFORM: '平臺費', CHANNEL: '渠道費', SR_AGENT: '高代費', AGENT: '代理費' }
+const LAYER_NAMES = { PLATFORM: '平臺費', CHANNEL: '渠道費', SR_AGENT: '高代費', AGENT: '代理費', REFERRER: '推薦佣金' }
 
 const canPlatform = computed(() => $access('ENT_FEE_RULE_PLATFORM_EDIT'))
 const canAgent = computed(() => $access('ENT_FEE_RULE_EDIT'))
@@ -323,7 +323,7 @@ function openBatch() {
   vdata.batch = { open: true, targetType: 'AGENT', targetId: undefined, rows: [] }
   if (!vdata.agentRows.length) {
     req.list(API_URL_AGENT_INFO, { pageSize: -1 }).then((res) => {
-      vdata.agentRows = (res.records || []).map((a) => ({ ...a, layer: a.agentLevel === 1 ? 'SR_AGENT' : 'AGENT' }))
+      vdata.agentRows = (res.records || []).map((a) => ({ ...a, key: a.agentNo, layer: a.agentLevel === 1 ? 'SR_AGENT' : 'AGENT' }))
     })
   }
 }
@@ -332,10 +332,10 @@ function loadBatch() {
   const b = vdata.batch
   b.rows = []
   if (!b.targetId) return
-  let layers = ['SR_AGENT', 'AGENT']
+  let layers = ['SR_AGENT', 'AGENT', 'REFERRER']
   if (b.targetType === 'AGENT') {
     const agent = vdata.agentRows.find((a) => a.agentNo === b.targetId)
-    layers = [agent && agent.agentLevel === 1 ? 'SR_AGENT' : 'AGENT']
+    layers = [agent && agent.agentLevel === 1 ? 'SR_AGENT' : 'AGENT', 'REFERRER']
   }
   req.list(API_URL_FEE_RULES, { targetType: b.targetType, targetId: b.targetId, pageSize: -1 }).then((res) => {
     const rules = res.records || []
@@ -392,10 +392,14 @@ function reloadAll() {
       const r = rules.find((x) => x.targetType === 'DEFAULT' && x.layer === layer)
       vdata.defaults[layer] = { pct: r ? toPct(r.rate) : 0, fixedYuan: r ? Number(toYuan(r.fixedAmount)) : 0 }
     })
-    vdata.agentRows = (agentRes.records || []).map((a) => {
-      const layer = a.agentLevel === 1 ? 'SR_AGENT' : 'AGENT'
-      return { ...a, layer, rule: rules.find((x) => x.targetType === 'AGENT' && x.targetId === a.agentNo && x.layer === layer) }
+    // 每個代理兩列：依層級的高代費／代理費，以及擔任推薦人時的推薦佣金
+    const rows = []
+    ;(agentRes.records || []).forEach((a) => {
+      ;[a.agentLevel === 1 ? 'SR_AGENT' : 'AGENT', 'REFERRER'].forEach((layer) => {
+        rows.push({ ...a, key: a.agentNo + layer, layer, rule: rules.find((x) => x.targetType === 'AGENT' && x.targetId === a.agentNo && x.layer === layer) })
+      })
     })
+    vdata.agentRows = rows
     vdata.mchRules = rules.filter((x) => x.targetType === 'MCH')
   })
   if ($access('ENT_FEE_RULE_LOG')) {

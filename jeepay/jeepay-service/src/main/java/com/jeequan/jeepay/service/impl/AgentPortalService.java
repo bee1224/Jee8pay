@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -100,6 +101,36 @@ public class AgentPortalService {
         return feeRuleService.list(FeeRule.gw().eq(FeeRule::getTargetType, FeeRule.TARGET_AGENT)
                 .in(FeeRule::getTargetId, agentNos)
                 .orderByAsc(FeeRule::getWayCode, FeeRule::getTargetId, FeeRule::getLayer));
+    }
+
+    /**
+     * 高級代理設定下級代理的代理費（或自己轄下代理的推薦佣金）。
+     * 防呆：設定後，受影響商戶以 1000 元試算的各層合計不得超過其支付通道手續費，否則整筆回滾。
+     */
+    @Transactional
+    public FeeRule saveSubAgentRule(AgentInfo me, FeeRule input, Long uid, String name) {
+        if (!Objects.equals(me.getAgentLevel(), AgentInfo.LEVEL_SENIOR)) {
+            throw new BizException("只有高級代理可以設定下級代理的費率");
+        }
+        AgentInfo target = agentInfoMapper.selectById(input.getTargetId());
+        if (target == null || !me.getAgentNo().equals(target.getParentAgentNo())) {
+            throw new BizException("只能設定自己的下級代理");
+        }
+        if (!FeeRule.LAYER_AGENT.equals(input.getLayer()) && !FeeRule.LAYER_REFERRER.equals(input.getLayer())) {
+            throw new BizException("代理後台只能設定代理費或推薦佣金");
+        }
+        input.setTargetType(FeeRule.TARGET_AGENT);
+        FeeRule saved = feeRuleService.saveRule(input, uid, name + "（代理 " + me.getAgentNo() + "）");
+        List<String> affected = agentMchRelaMapper.selectList(AgentMchRela.gw()
+                        .eq(FeeRule.LAYER_AGENT.equals(input.getLayer()), AgentMchRela::getAgentNo, target.getAgentNo())
+                        .eq(FeeRule.LAYER_REFERRER.equals(input.getLayer()), AgentMchRela::getReferrerAgentNo, target.getAgentNo()))
+                .stream().map(AgentMchRela::getMchNo).collect(Collectors.toList());
+        List<JSONObject> violations = feeRuleService.riskCheck(input.getWayCode(), 100_000L, affected);
+        if (!violations.isEmpty()) {
+            throw new BizException("設定後有 " + violations.size() + " 個商戶的手續費合計會超過商戶費率（例如 "
+                    + violations.get(0).getString("mchNo") + "），請調低費率");
+        }
+        return saved;
     }
 
     public Map<String, Object> profitSummary(String agentNo, Date start, Date end) {
