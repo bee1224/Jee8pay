@@ -366,7 +366,7 @@ VALUES ('jhd', 'JHD（黑猫 PAY）', 1, 0, 1,
         '[{"wayCode":"JHD_IBON"}]',
         '', '#222222', 1, '黑猫 PAY ibon 通道（上游四）');
 
--- 5) 新增 FYZ 定义（豐盈利；与 RYO/JAY/CHI/FYZ 同一黑猫 PAY 平台契约，仅契约会员帐号不同）
+-- 5) 新增 FYZ 定义（豐盈利；与 RYO/JAY/CHI/JHD 同一黑猫 PAY 平台契约，仅契约会员帐号不同）
 DELETE FROM t_pay_way WHERE way_code IN ('FYZ_IBON');
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('FYZ_IBON', 'FYZ ibon 缴款');
 DELETE FROM t_pay_interface_define WHERE if_code IN ('fyz');
