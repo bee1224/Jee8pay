@@ -71,7 +71,7 @@ The validator checks:
 - local 80/443 listening sockets;
 - both V2 ingress health endpoints（callback + merchant-api）;
 - V2 core `11/11` and V1 containers absent;
-- exact Create、Query and 黑貓 PAY（RYO/JAY/CHI/JHD）callback routes;
+- exact Create、Query and 黑貓 PAY（RYO/JAY/CHI/JHD/FYZ）callback routes;
 - config 不含任何 V1 hostname/upstream 參照;
 - UAT allowlist unchanged and Production IP absent.
 

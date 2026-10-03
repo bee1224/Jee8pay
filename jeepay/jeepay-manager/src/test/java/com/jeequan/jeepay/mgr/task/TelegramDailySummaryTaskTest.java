@@ -26,13 +26,14 @@ class TelegramDailySummaryTaskTest {
     @Mock private TelegramBotClient telegramBotClient;
 
     @Test
-    void midnightSummaryUsesPreviousTaipeiDayAndFormatsFourProvidersAndSum() {
+    void midnightSummaryUsesPreviousTaipeiDayAndFormatsFiveProvidersAndSum() {
         Clock clock = Clock.fixed(Instant.parse("2026-09-15T16:00:00Z"), TelegramDailySummaryTask.REPORT_ZONE);
         Map<String, Object> amounts = new HashMap<>();
         amounts.put("ryoAmount", 123_400L);
         amounts.put("chiAmount", 20_000_000L);
         amounts.put("jayAmount", 0L);
         amounts.put("jhdAmount", 6_600L);
+        amounts.put("fyzAmount", 50_000L);
         when(payOrderService.dailyProviderAmount(any(), any())).thenReturn(amounts);
 
         TelegramDailySummaryTask task = new TelegramDailySummaryTask(
@@ -49,6 +50,7 @@ class TelegramDailySummaryTaskTest {
                 + "CHI：NT$ 200,000\n"
                 + "JAY：NT$ 0\n"
                 + "JHD：NT$ 66\n"
-                + "SUM：NT$ 201,300");
+                + "FYZ：NT$ 500\n"
+                + "SUM：NT$ 201,800");
     }
 }

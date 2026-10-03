@@ -15,7 +15,7 @@ readonly expected_host=server1.nnviopp.com
 readonly deploy_root=/opt/jee8pay-v2-dev
 readonly renderer="$deploy_root/merchant-uat/prepare-edge-nginx.py"
 readonly active_config="$deploy_root/merchant-uat/nginx.proposed.conf"
-readonly pre_sha=7a393f332a6830c932a4e51b1754165af2be652b61a31640edcfbd79ca328ea4
+readonly pre_sha=b371b09dc20d5d651d350dbb8d98cec8e8f385e393214c747ba5ff3f3c647837
 
 fail() {
   printf 'EDGE_CHANGE=FAIL_%s\n' "$1" >&2
