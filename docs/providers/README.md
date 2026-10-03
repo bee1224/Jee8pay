@@ -10,7 +10,7 @@ Provider documentation 只記錄特定 Provider 的 official contract、mapping�
 | JAY | `jay` | Implementation | ibon | [`jay/README.md`](jay/README.md) |
 | CHI | `chi` | Implementation | ibon | [`chi/README.md`](chi/README.md) |
 | JHD | `jhd` | Verification | ibon | [`jhd/README.md`](jhd/README.md) |
-| FYZ | `fyz` | Implementation | ibon | [`fyz/README.md`](fyz/README.md) |
+| FYZ | `fyz` | Verification | ibon | [`fyz/README.md`](fyz/README.md) |
 | NewebPay | TBD | Deferred | TBD | — |
 
 Taiwan V2 目前 active 的是黑貓 PAY 平台上的五個統一客樂得上游：`RYO`（由原 `CCAT` 改名）/ `RYO_IBON`、`JAY` / `JAY_IBON`、`CHI` / `CHI_IBON`、`JHD`（金匯達有限公司）/ `JHD_IBON`、`FYZ`（豐盈利）/ `FYZ_IBON`；五者共用同一平台契約（見 [`ryo/contract-evidence.md`](ryo/contract-evidence.md)）。NewebPay 已延後且不阻擋黑貓 PAY-only 使用。

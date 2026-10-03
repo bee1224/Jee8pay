@@ -4,15 +4,15 @@
 
 ```text
 Provider: FYZ / 黑貓 PAY（豐盈利）
-Status: Implementation
+Status: Verification
 ifCode: fyz
 wayCode: FYZ_IBON
 Capability: ibon CVS Create Payment / Provider Query / APN
-Production Deployment: NOT STARTED
-Production Token Auth: NOT STARTED
-Production Create: NOT STARTED
-Production Merchant Query: NOT STARTED
-Production Provider Query: NOT STARTED
+Production Deployment: PASS
+Production Token Auth: PASS
+Production Create: PASS
+Production Merchant Query: PASS
+Production Provider Query: PASS
 Live Payment / APN E2E: NOT STARTED
 ```
 
@@ -67,7 +67,20 @@ Refund、Transfer、Division、Channel User、Close、COCS 與其他黑貓 PAY p
 
 ## Verification
 
-- 尚無 runtime 證據。
+- **Adapter 一致性**：與 JHD 命名正規化後 19/19 檔逐字元相同（0 diff）。
+- **測試**：`mvn -B test` 0 failures；FYZ 9 個測試類別、82 tests / 0 failures（dev VPS `maven:3.9.16-eclipse-temurin-17` 容器）。
+- **部署前隔離驗證**：以 production compose/config 在 dev VPS 起隔離 stack（internal network、無對外 port），payment/manager 正常啟動、`patch.sql` 第 5 段可重複執行、`/api/pay/notify/fyz` 進入 `fyzChannelNoticeService` 並 fail-closed 400；新 prod `edge-nginx.conf` `nginx -t` 通過。
+- **Production（`jee8pay-v2-production`，release `749262893269-fyz`，2026-10-03 14:24 切換）**
+  - 只替換 payment 與 manager image；DB 先備份 `t_pay_way` / `t_pay_interface_define` 再寫入定義；edge / callback-ingress 重建後五家 `notify` 皆 400、`admin-v2` 200。
+  - `fyz` 支付參數（`PRODUCTION`）與 `FYZ_IBON` passage 由 operator 於 Manager 設定。
+  - Token authentication：PASS（Create 成功即代表 Token 取得成功）
+  - `FYZ_IBON` Create：PASS（PayOrder `P2106270937685344257`，TWD 40，ibon code `CCAT627609106873`，`expire_date` 2026-10-03）
+  - Merchant Query：PASS（local `PayOrder`，`ifCode=fyz` / `wayCode=FYZ_IBON` / `state=1`）
+  - Provider Query：PASS（reissue 對上游查單 `status=OK`、`process_code=3`、`order_amount=40`、`bill_amount=40`）
+  - APN route：PASS（`https://ccat-v2.lp33ing.com/api/pay/notify/fyz` 可達並 fail-closed 拒絕無效 payload）
+  - Log 未出現 `custId` / `apiPassword` 明文。
+- **尚未**完成真實付款 / APN 轉態 / Merchant Notify E2E，因此不宣稱完整 E2E。
+- **測試環境**：程式與 callback-ingress 設定已具備，但 dev 尚未部署本 release、DB 無 FYZ 定義，dev edge 公開路由隨 TD-014 待人工核准。
 
 ## Sibling Upstreams
 
