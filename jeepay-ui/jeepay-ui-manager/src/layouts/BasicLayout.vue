@@ -18,15 +18,20 @@
     <!-- 菜单头部渲染插槽 -->
     <template #menuHeaderRender>
       <router-link :to="{ path: '/' }" style="display: flex; align-items: center">
-        <div v-if="!proLayoutObject.collapsed">
-          <img src="@/assets/logo-j.svg" alt="jeequan" />
+        <!-- 白標：高級代理啟用品牌後，自己與旗下代理看到的是他的站名與 Logo -->
+        <div v-if="vdata.brand" style="display: flex; align-items: center; overflow: hidden">
+          <img v-if="vdata.brand.logo" :src="vdata.brand.logo" alt="logo" style="height: 32px; max-width: 150px" />
+          <span v-if="!proLayoutObject.collapsed && (!vdata.brand.logo || vdata.brand.title)" class="brand-title">{{ vdata.brand.title }}</span>
+        </div>
+        <div v-else-if="!proLayoutObject.collapsed">
+          <img src="@/assets/logo-icon.png" alt="logo" style="height: 32px" />
           <img
-            src="@/assets/svg/jeepay.svg"
+            src="@/assets/logo-text.png"
             alt="jeepay"
             style="width: 90px; margin: 5px 0 0 5px"
           />
         </div>
-        <div v-else><img src="@/assets/logo-j.svg" alt="jeequan" /></div>
+        <div v-else><img src="@/assets/logo-icon-collapsed.png" alt="logo" style="height: 32px" /></div>
       </router-link>
     </template>
 
@@ -72,16 +77,6 @@
 
         <!-- 个人信息部分 -->
         <div style="display: flex; align-items: center">
-          <a-button @click="openUrl('https://www.jeequan.com/ifstore/list.html')">
-            介面市場
-          </a-button>
-          <a-button
-            @click="openUrl('https://www.jeequan.com/product/jeepay4plus.html')"
-            style="margin: 0 10px"
-          >
-            Plus商業版
-          </a-button>
-
           <a-dropdown>
             <template #overlay>
               <a-menu>
@@ -111,6 +106,7 @@ import { useRouter, useRoute, createRouterMatcher } from 'vue-router'
 import { reactive, computed, watchEffect, nextTick, getCurrentInstance } from 'vue'
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons-vue'
 import { generatorDynamicRouter } from '@/router/generator-routers'
+import { API_URL_AGENT_PORTAL, req } from '@/api/manage'
 import { useUserStore } from '@/store/modules/user'
 
 const { $infoBox, $access, $hasAgentEnt } = getCurrentInstance()!.appContext.config.globalProperties
@@ -137,6 +133,7 @@ const vdata: any = reactive({
   layout: 'side',
   theme: 'light',
   menuData: [],
+  brand: null,
   //刷新
   isRouterAlive: true,
   isSpin: false,
@@ -173,9 +170,27 @@ const matchHandle = (currentMatch) => {
 // menu对象信息
 generatorDynamicRouter().then((resRouter: any) => {
   // 过滤掉系统通用菜单
-  vdata.menuData = resRouter[0].children.filter(
+  const menus = resRouter[0].children.filter(
     (item) => item.name != 'ENT_COMMONS' && item.name != 'ENT_C_USERINFO'
   )
+  // 「代理後台」只給代理帳號：平台帳號（含超管）不顯示；代理帳號則把底下的選單攤平到第一層
+  const belong = userStore.userInfo['belongInfoId']
+  const isAgentUser = !!belong && belong !== '0'
+  vdata.menuData = menus.flatMap((item) => {
+    if (item.name !== 'ENT_AGENT_PORTAL') return [item]
+    return isAgentUser ? item.children || [] : []
+  })
+  if (isAgentUser) {
+    req
+      .list(API_URL_AGENT_PORTAL + '/branch/brand', {})
+      .then((brand) => {
+        if (brand && (brand.title || brand.logo)) {
+          vdata.brand = brand
+          if (brand.title) document.title = brand.title
+        }
+      })
+      .catch(() => {})
+  }
 
   vdata.routerMatch = createRouterMatcher(vdata.menuData, {})
 })
@@ -216,10 +231,6 @@ const breadcrumb = computed(() =>
   })
 )
 
-function openUrl(url) {
-  window.open(url, '_blank')
-}
-
 const handleCollapsed = () => {
   vdata.collapsed = !vdata.collapsed
 }
@@ -235,6 +246,15 @@ const clickRefsh = () => {
 </script>
 
 <style scoped lang="less">
+.brand-title {
+  margin-left: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 :deep(.ant-pro-global-header-layout-side) {
   background-color: transparent;
   box-shadow: none;

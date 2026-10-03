@@ -1,6 +1,18 @@
 <template>
   <page-header-wrapper>
     <a-card>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px">
+        <a-radio-group v-model:value="vdata.view" button-style="solid">
+          <a-radio-button value="tree">家族樹</a-radio-button>
+          <a-radio-button value="list">列表</a-radio-button>
+        </a-radio-group>
+        <a-button v-if="vdata.view === 'tree' && $access('ENT_AGENT_INFO_ADD')" type="primary" @click="addFunc">新建代理</a-button>
+      </div>
+
+      <AgentFamilyTree v-if="vdata.view === 'tree'" ref="familyTree"
+        @edit="(a) => editFunc(a.agentNo)" @accounts="showAccounts" @profit="showProfit" @remove="(a) => delFunc(a.agentNo)" />
+
+      <div v-show="vdata.view === 'list'">
       <div class="table-page-search-wrapper">
         <a-form layout="inline" class="table-head-ground">
           <div class="table-layer">
@@ -67,6 +79,7 @@
           </template>
         </template>
       </JeepayTable>
+      </div>
     </a-card>
 
     <AgentAddOrEdit ref="infoAddOrEdit" :callbackFunc="searchFunc" />
@@ -86,7 +99,7 @@
         type="info"
         show-icon
         style="margin-bottom: 12px"
-        message="代理帳號登入營運平台後只會看到「代理後台」。初始密碼為系統預設密碼，請通知代理首次登入後立即修改；停用或刪除帳號請至「系統管理 → 操作員」。"
+        message="代理帳號登入營運平台後只會看到「代理後台」。開通後系統產生 8 碼隨機密碼並顯示一次，請複製後交給代理；停用或刪除帳號請至「系統管理 → 操作員」。"
       />
       <a-table :columns="accountColumns" :data-source="vdata.account.records" :pagination="false" size="small" row-key="sysUserId" style="margin-bottom: 16px">
         <template #bodyCell="{ column, record }">
@@ -101,14 +114,18 @@
         <a-form-item><a-button type="primary" @click="createAccount">開通</a-button></a-form-item>
       </a-form>
     </a-modal>
+    <AgentCredentialModal ref="credentialModal" />
   </page-header-wrapper>
 </template>
 <script setup lang="ts">
 import { API_URL_AGENT_INFO, API_URL_AGENT_MCH_RELA, req } from '@/api/manage'
 import AgentAddOrEdit from './AgentAddOrEdit.vue'
+import AgentFamilyTree from './AgentFamilyTree.vue'
+import AgentCredentialModal from './AgentCredentialModal.vue'
 import AgentProfitPanel from '@/components/AgentProfit/AgentProfitPanel.vue'
 import { reactive, ref, getCurrentInstance } from 'vue'
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
+const credentialModal = ref()
 
 const tableColumns = [
   { key: 'agentName', title: '代理名稱', width: '200px', fixed: 'left' },
@@ -138,7 +155,9 @@ const accountColumns = [
 const infoTable = ref()
 const infoAddOrEdit = ref()
 
+const familyTree = ref()
 const vdata: any = reactive({
+  view: 'tree',
   btnLoading: false,
   searchData: {},
   mchModal: { open: false, agentName: '', records: [] },
@@ -155,6 +174,7 @@ function reqTableDataFunc(params) {
 }
 function searchFunc() {
   infoTable.value.refTable(true)
+  if (familyTree.value) familyTree.value.load()
 }
 function addFunc() {
   infoAddOrEdit.value.show()
@@ -166,6 +186,7 @@ function delFunc(agentNo) {
   $infoBox.confirmDanger('確認刪除？', '需先移除旗下一般代理與商戶綁定；該代理的費率規則會一併刪除並留下紀錄', () => {
     req.delById(API_URL_AGENT_INFO, agentNo).then(() => {
       infoTable.value.refTable(false)
+      if (familyTree.value) familyTree.value.load()
       $infoBox.message.success('刪除成功')
     })
   })
@@ -201,10 +222,10 @@ function createAccount() {
     $infoBox.message.warning('請填寫登入帳號、姓名與正確的手機號（09 開頭 10 碼）')
     return
   }
-  req.add(`${API_URL_AGENT_INFO}/${vdata.account.agentNo}/accounts`, f).then(() => {
-    $infoBox.message.success('已開通，初始密碼為系統預設密碼')
+  req.add(`${API_URL_AGENT_INFO}/${vdata.account.agentNo}/accounts`, f).then((res) => {
     vdata.account.form = {}
     loadAccounts()
+    credentialModal.value.show({ ...res, agentName: vdata.account.agentName })
   })
 }
 </script>

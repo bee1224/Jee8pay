@@ -1,17 +1,6 @@
 <template>
   <page-header-wrapper>
     <div style="background-color: #f0f2f5; padding: 20px; border-radius: 10px">
-      <a-alert message="" type="info" style="width: calc(100% - 24px); margin-bottom: 20px">
-        <template #description>
-          <p style="display: flex; justify-content: space-between; margin: 0 0 4px">
-            計全科技已開放支付介面購買渠道，官方團隊開發、原始碼提供、下載後直接使用。
-            <a href="https://docs.jeequan.com/docs/jeepay/jeepay-1ejdnsuhveb16" target="_blank">
-              介面下載、安裝說明。
-            </a>
-            <a href="https://www.jeequan.com/ifstore/list.html" target="_blank">前往介面市場 ></a>
-          </p>
-        </template>
-      </a-alert>
       <JeepayCard
         ref="infoCard"
         :reqCardListFunc="reqCardListFunc"

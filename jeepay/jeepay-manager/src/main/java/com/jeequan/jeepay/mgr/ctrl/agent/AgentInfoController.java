@@ -72,8 +72,14 @@ public class AgentInfoController extends AgentBaseCtrl {
     public ApiRes add() {
         requireAuthority("ENT_AGENT_INFO_ADD");
         AgentInfo agent = getObject(AgentInfo.class);
-        agentInfoService.create(agent, getCurrentUser().getSysUser().getSysUserId(), getCurrentUser().getSysUser().getRealname());
-        return ApiRes.ok(agent);
+        Long uid = getCurrentUser().getSysUser().getSysUserId();
+        String operator = getCurrentUser().getSysUser().getRealname();
+        if (!agentLoginEnabled) {
+            agentInfoService.create(agent, uid, operator);
+            return ApiRes.ok(agent);
+        }
+        // 新增代理時一併開通登入帳號，回傳一次性的初始密碼
+        return ApiRes.ok(agentPortalService.createAgentWithAccount(agent, getValString("loginUsername"), uid, operator));
     }
 
     @Operation(summary = "代理詳情")
@@ -116,7 +122,7 @@ public class AgentInfoController extends AgentBaseCtrl {
         return ApiRes.ok(agentPortalService.accounts(agentNo));
     }
 
-    @Operation(summary = "開通代理登入帳號（預設密碼，首次登入後自行修改）")
+    @Operation(summary = "開通代理登入帳號（隨機初始密碼，只在回應中出現一次）")
     @PreAuthorize("hasAuthority('ENT_AGENT_ACCOUNT')")
     @MethodLog(remark = "開通代理登入帳號")
     @RequestMapping(value = "/{agentNo}/accounts", method = RequestMethod.POST)
@@ -125,8 +131,7 @@ public class AgentInfoController extends AgentBaseCtrl {
         if (!agentLoginEnabled) {
             throw new BizException("代理登入已由系統設定關閉（isys.agent-portal.login-enabled=false）");
         }
-        SysUser user = agentPortalService.createAccount(agentNo, getObject(SysUser.class));
-        return ApiRes.ok(user.getSysUserId());
+        return ApiRes.ok(agentPortalService.createAccount(agentNo, getObject(SysUser.class)));
     }
 
     @Operation(summary = "代理分潤統計")

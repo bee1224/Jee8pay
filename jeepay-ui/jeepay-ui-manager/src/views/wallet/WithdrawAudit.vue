@@ -21,6 +21,7 @@
         <a-form-item><a-input v-model:value="vdata.query.ownerId" placeholder="商戶號／代理號" allow-clear @pressEnter="search" /></a-form-item>
         <a-form-item><a-button type="primary" @click="search">搜尋</a-button></a-form-item>
         <a-form-item v-if="$access('ENT_EXPORT_CENTER')"><a-button @click="exportFunc">匯出</a-button></a-form-item>
+        <a-form-item v-if="$access('ENT_EXPORT_CENTER')"><a-button @click="exportDrawer.open()">匯出紀錄</a-button></a-form-item>
       </a-form>
       <a-table :columns="columns" :data-source="vdata.records" size="small" row-key="withdrawId"
         :pagination="{ current: vdata.page, pageSize: 20, total: vdata.total, onChange: (p) => { vdata.page = p; load() } }">
@@ -41,6 +42,7 @@
           </template>
           <template v-if="column.key === 'state'">
             <a-tag :color="WITHDRAW_STATES[record.state].color">{{ WITHDRAW_STATES[record.state].text }}</a-tag>
+            <div v-if="record.agentApproveBy" style="font-size: 12px; color: #389e0d">上級代理已同意：{{ record.agentApproveBy }}</div>
             <div v-if="record.paidRef" style="font-size: 12px">單號 {{ record.paidRef }}</div>
             <div v-if="record.reviewRemark" style="font-size: 12px; color: #888">{{ record.reviewRemark }}</div>
           </template>
@@ -53,6 +55,7 @@
         </template>
         <template #emptyText>沒有符合條件的提現單</template>
       </a-table>
+      <ExportJobsDrawer ref="exportDrawer" :job-types="['WITHDRAW']" />
     </a-card>
 
     <a-modal v-model:open="vdata.review.open" :title="vdata.review.action === 'paid' ? '標記已撥款' : '駁回提現'" ok-text="確認" @ok="submitReview">
@@ -72,9 +75,10 @@
 
 <script setup lang="ts">
 import { API_URL_WITHDRAWS, req } from '@/api/manage'
-import { reactive, getCurrentInstance } from 'vue'
+import { reactive, ref, getCurrentInstance } from 'vue'
 import { OWNER_TYPE_NAMES, RISK_FLAG_NAMES, WITHDRAW_STATES, yuan } from '@/components/WalletPanel/walletText'
 import { submitExport } from '@/utils/exportJob'
+import ExportJobsDrawer from '@/components/ExportJobs/ExportJobsDrawer.vue'
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
 
 const columns = [
@@ -88,6 +92,7 @@ const columns = [
   { key: 'op', title: '操作', width: '150px' },
 ]
 
+const exportDrawer = ref()
 const vdata: any = reactive({
   query: { state: 0, ownerId: '' },
   records: [],
@@ -103,7 +108,10 @@ function load() {
   })
 }
 function exportFunc() {
-  submitExport('WITHDRAW', vdata.query).then(() => $infoBox.message.success('已建立匯出，完成後請到「下載中心」下載'))
+  submitExport('WITHDRAW', vdata.query).then(() => {
+    $infoBox.message.success('已建立匯出，完成後可在匯出紀錄下載')
+    exportDrawer.value.open()
+  })
 }
 function search() {
   vdata.page = 1

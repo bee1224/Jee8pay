@@ -19,14 +19,14 @@
     <template #menuHeaderRender>
       <router-link :to="{ path: '/' }" style="display: flex; align-items: center">
         <div v-if="!proLayoutObject.collapsed">
-          <img src="@/assets/logo-j.svg" alt="jeequan" />
+          <img src="@/assets/logo-icon.png" alt="logo" style="height: 32px" />
           <img
-            src="@/assets/svg/jeepay.svg"
+            src="@/assets/logo-text.png"
             alt="jeepay"
             style="width: 90px; margin: 5px 0 0 5px"
           />
         </div>
-        <div v-else><img src="@/assets/logo-j.svg" alt="jeequan" /></div>
+        <div v-else><img src="@/assets/logo-icon-collapsed.png" alt="logo" style="height: 32px" /></div>
       </router-link>
     </template>
 
@@ -72,16 +72,6 @@
 
         <!-- 个人信息部分 -->
         <div style="display: flex; align-items: center">
-          <a-button @click="openUrl('https://www.jeequan.com/ifstore/list.html')">
-            接口市場
-          </a-button>
-          <a-button
-            @click="openUrl('https://www.jeequan.com/product/jeepay4plus.html')"
-            style="margin: 0 10px"
-          >
-            Plus商業版
-          </a-button>
-
           <a-dropdown>
             <template #overlay>
               <a-menu>
@@ -215,10 +205,6 @@ const breadcrumb = computed(() =>
     }
   })
 )
-
-function openUrl(url) {
-  window.open(url, '_blank')
-}
 
 const handleCollapsed = () => {
   vdata.collapsed = !vdata.collapsed

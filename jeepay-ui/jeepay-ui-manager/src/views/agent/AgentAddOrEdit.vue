@@ -40,6 +40,14 @@
         </a-col>
       </a-row>
 
+      <a-row v-if="vdata.isAdd" justify="space-between" type="flex">
+        <a-col :span="22">
+          <a-form-item label="登入帳號" name="loginUsername" extra="代理登入營運平台用的帳號；儲存後系統產生 8 碼隨機密碼並顯示一次。">
+            <a-input placeholder="4～32 碼英文、數字或底線" v-model:value="vdata.saveObject.loginUsername" autocomplete="off" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+
       <a-row justify="space-between" type="flex">
         <a-col :span="10">
           <a-form-item label="聯絡人姓名" name="contactName">
@@ -76,11 +84,13 @@
       <a-button type="primary" @click="handleOkFunc" :loading="vdata.btnLoading">儲存</a-button>
     </div>
   </a-drawer>
+  <AgentCredentialModal ref="credentialModal" />
 </template>
 
 <script setup lang="ts">
 import { API_URL_AGENT_INFO, req } from '@/api/manage'
 import { reactive, ref, getCurrentInstance } from 'vue'
+import AgentCredentialModal from './AgentCredentialModal.vue'
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
 
 const props = defineProps({
@@ -88,6 +98,7 @@ const props = defineProps({
 })
 
 const infoFormModel = ref()
+const credentialModal = ref()
 
 const vdata: any = reactive({
   btnLoading: false,
@@ -100,7 +111,9 @@ const vdata: any = reactive({
     agentName: [{ required: true, message: '請輸入代理名稱', trigger: 'blur' }],
     agentLevel: [{ required: true, message: '請選擇代理層級', trigger: 'change' }],
     parentAgentNo: [{ required: true, message: '請選擇上級高級代理', trigger: 'change' }],
-    contactTel: [{ required: false, pattern: /^09\d{8}$/, message: '請輸入正確的手機號（09 開頭 10 碼）', trigger: 'blur' }],
+    loginUsername: [{ required: true, pattern: /^[A-Za-z0-9_]{4,32}$/, message: '請輸入 4～32 碼英文、數字或底線', trigger: 'blur' }],
+    // 新增時必填：登入帳號需要綁定手機號
+    contactTel: [{ required: true, pattern: /^09\d{8}$/, message: '請輸入正確的手機號（09 開頭 10 碼）', trigger: 'blur' }],
     contactEmail: [
       { required: false, pattern: /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/, message: '請輸入正確的信箱', trigger: 'blur' },
     ],
@@ -119,6 +132,7 @@ function loadSeniorOptions() {
 
 function show(recordId) {
   vdata.isAdd = !recordId
+  vdata.rules.contactTel[0].required = vdata.isAdd
   vdata.saveObject = { state: 1, agentLevel: 1 }
   if (infoFormModel.value) {
     infoFormModel.value.resetFields()
@@ -142,7 +156,11 @@ function handleOkFunc() {
       props.callbackFunc()
     }
     const request = vdata.isAdd
-      ? req.add(API_URL_AGENT_INFO, vdata.saveObject).then(() => done('新增成功'))
+      ? req.add(API_URL_AGENT_INFO, vdata.saveObject).then((res) => {
+          done('新增成功')
+          // 後端有開通登入帳號時回傳一次性初始密碼
+          if (res && res.initPassword) credentialModal.value.show(res)
+        })
       : req.updateById(API_URL_AGENT_INFO, vdata.recordId, vdata.saveObject).then(() => done('修改成功'))
     request.finally(() => {
       vdata.btnLoading = false

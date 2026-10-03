@@ -8,7 +8,7 @@
 
 /** 应用配置项 **/
 export default {
-  APP_TITLE: 'Jeepay營運平台', // 设置浏览器title
+  APP_TITLE: '三把扇-營運平台', // 设置浏览器title
   ACCESS_TOKEN_NAME: 'iToken' // 设置请求token的名字， 用于请求header 和 localstorage中存在名称
 }
 
@@ -29,7 +29,7 @@ export const asyncRouteDefine = {
   'AgentListPage': { defaultPath: '/agents', component: () => import('@/views/agent/AgentList.vue')  }, // 代理列表（ADR-0009）
   'FeeRulePage': { defaultPath: '/feeRules', component: () => import('@/views/feeRule/FeeRulePage.vue')  }, // 四層費率設定（ADR-0009）
   'FeeTemplatePage': { defaultPath: '/feeTemplates', component: () => import('@/views/feeRule/FeeTemplatePage.vue')  }, // 費率範本（ADR-0009 第四階段）
-  'AgentPortalPage': { defaultPath: '/agentPortal', component: () => import('@/views/agentPortal/AgentPortalPage.vue')  }, // 代理後台（ADR-0009 第三階段）
+  'AgentPortalPage': { defaultPath: '/agentPortal', component: () => import('@/views/agentPortal/AgentPortalPage.vue')  }, // 代理後台（ADR-0009 第三階段）；五個選單共用同一頁，依 route name 顯示對應區塊
   'IsvListPage': { defaultPath: '/isv', component: () => import('@/views/isv/IsvList.vue')  }, // 服务商列表
   'MchListPage': { defaultPath: '/mch', component: () => import('@/views/mch/MchList.vue')  }, // 商户列表
   'MchAppPage': { defaultPath: '/apps', component: () => import ('@/views/mchApp/List.vue')  }, // 商户应用列表
@@ -40,7 +40,8 @@ export const asyncRouteDefine = {
   'SysConfigPage': { defaultPath: '/config', component: () => import('@/views/sys/config/SysConfig.vue')  }, // 系统配置
   'WalletAccountPage': { defaultPath: '/wallet/accounts', component: () => import('@/views/wallet/WalletAccount.vue')  }, // 錢包帳戶（ADR-0010）
   'WalletLedgerPage': { defaultPath: '/wallet/ledger', component: () => import('@/views/wallet/WalletLedger.vue')  }, // 餘額流水（ADR-0010）
-  'ExportCenterPage': { defaultPath: '/exports', component: () => import('@/views/export/ExportCenter.vue')  }, // 下載中心
+  'HistoryPayPage': { defaultPath: '/history/pay', component: () => import('@/views/history/HistoryPay.vue')  }, // 歷史查詢：代收查詢
+  'HistoryPayoutPage': { defaultPath: '/history/payout', component: () => import('@/views/history/HistoryPayout.vue')  }, // 歷史查詢：代付查詢（尚未實作）
   'WayRoutePage': { defaultPath: '/wayRoutes', component: () => import('@/views/payconfig/wayRoute/WayRoutePage.vue')  }, // 通道路由（ADR-0011）
   'RiskBlacklistPage': { defaultPath: '/risk/blacklist', component: () => import('@/views/wallet/RiskBlacklist.vue')  }, // 風控黑名單（ADR-0010）
   'WithdrawAuditPage': { defaultPath: '/wallet/withdraw', component: () => import('@/views/wallet/WithdrawAudit.vue')  }, // 提現審核（ADR-0010）

@@ -100,4 +100,10 @@ public class WithdrawOrder extends BaseModel implements Serializable {
 
     @Schema(title = "reviewedAt", description = "審核時間")
     private Date reviewedAt;
+
+    @Schema(title = "agentApproveBy", description = "上級代理同意人（僅註記，撥款仍由平台審核）")
+    private String agentApproveBy;
+
+    @Schema(title = "agentApproveAt", description = "上級代理同意時間")
+    private Date agentApproveAt;
 }

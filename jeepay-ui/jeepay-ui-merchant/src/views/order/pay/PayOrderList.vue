@@ -1,7 +1,7 @@
 <template>
   <page-header-wrapper>
     <a-card>
-      <div class="table-page-search-wrapper">
+      <div v-if="history" class="table-page-search-wrapper">
         <a-form layout="inline" class="table-head-ground">
           <div class="table-layer">
             <a-form-item label="" class="table-head-layout">
@@ -71,26 +71,25 @@
               </a-button>
               <a-button
                 style="margin-left: 8px"
-                @click="
-                  () => {
-                    vdata.searchData = {}
-                    vdata.date = ''
-                  }
-                "
+                @click="resetFunc"
               >
                 重置
               </a-button>
-              <a-button v-if="$access('ENT_MCH_EXPORT_CENTER')" style="margin-left: 8px" @click="exportFunc">匯出</a-button>
+              <a-button v-if="vdata.applied && $access('ENT_MCH_EXPORT_CENTER')" style="margin-left: 8px" :loading="vdata.exporting" :disabled="!vdata.total" @click="exportFunc">匯出</a-button>
+              <a-button v-if="$access('ENT_MCH_EXPORT_CENTER')" style="margin-left: 8px" @click="exportDrawer.open()">匯出紀錄</a-button>
             </span>
           </div>
         </a-form>
       </div>
+      <div v-else class="today-hint">僅顯示今日訂單；查詢其他日期、篩選或匯出請到「歷史查詢 → 代收查詢」。</div>
 
       <!-- 列表渲染 -->
+      <a-empty v-if="history && !vdata.applied" style="padding: 60px 0" description="請先設定查詢條件，再按「搜尋」" />
       <JeepayTable
+        v-show="!history || vdata.applied"
         @btnLoadClose="vdata.btnLoading = false"
         ref="infoTable"
-        :initData="true"
+        :init-data="!history"
         :reqTableDataFunc="reqTableDataFunc"
         :tableColumns="vdata.tableColumns"
         :searchData="vdata.searchData"
@@ -205,6 +204,7 @@
           </template>
         </template>
       </JeepayTable>
+      <ExportJobsDrawer v-if="history" ref="exportDrawer" :job-types="['PAY_ORDER']" />
     </a-card>
     <!-- 退款弹出框 -->
     <refund-modal ref="refundModalInfo" :callbackFunc="searchFunc"></refund-modal>
@@ -514,6 +514,7 @@ import RefundModal from './RefundModal.vue' // 退款弹出框
 import { API_URL_PAY_ORDER_LIST, API_URL_PAYWAYS_LIST, req } from '@/api/manage'
 import moment from 'moment'
 import { submitExport } from '@/utils/exportJob'
+import ExportJobsDrawer from '@/components/ExportJobs/ExportJobsDrawer.vue'
 import { reactive, ref, getCurrentInstance, onMounted } from 'vue'
 
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
@@ -549,7 +550,14 @@ const tableColumns = [
   },
 ]
 
+// history=true 為「歷史查詢 → 代收查詢」（完整篩選與匯出）；否則為訂單管理，只顯示今日訂單
+const props = defineProps({ history: { type: Boolean, default: false } })
+const exportDrawer = ref()
+
 const vdata: any = reactive({
+  applied: null, // 歷史查詢：最近一次送出搜尋時的條件；null 表示尚未搜尋
+  total: 0, // 歷史查詢：最近一次搜尋的總筆數
+  exporting: false,
   btnLoading: false,
   tableColumns: tableColumns,
   searchData: {},
@@ -569,13 +577,44 @@ onMounted(() => {
     initPayWay()
   }
 })
+function cleanParams(obj) {
+  const r: any = {}
+  Object.keys(obj || {}).forEach((k) => {
+    if (obj[k] !== undefined && obj[k] !== null && obj[k] !== '') r[k] = obj[k]
+  })
+  return r
+}
 function queryFunc() {
+  if (props.history) {
+    const cond = cleanParams(vdata.searchData)
+    // 防呆：不允許空條件查全部歷史資料
+    if (!cond.unionOrderId && !(cond.createdStart && cond.createdEnd)) {
+      return $infoBox.message.warning('請先選擇日期區間，或輸入訂單號')
+    }
+    vdata.applied = cond
+  }
   vdata.btnLoading = true
   infoTable.value.refTable(true)
 }
+function resetFunc() {
+  vdata.searchData = {}
+  vdata.date = ''
+  vdata.applied = null
+  vdata.total = 0
+}
 // 请求table接口数据
 function reqTableDataFunc(params) {
-  return req.list(API_URL_PAY_ORDER_LIST, params)
+  if (!props.history) {
+    const today = moment().format('YYYY-MM-DD')
+    params = { ...params, createdStart: `${today} 00:00:00`, createdEnd: `${today} 23:59:59` }
+    return req.list(API_URL_PAY_ORDER_LIST, params)
+  }
+  // 歷史查詢：換頁也沿用送出搜尋時的條件，不受之後修改欄位影響
+  params = { pageNumber: params.pageNumber, pageSize: params.pageSize, ...vdata.applied }
+  return req.list(API_URL_PAY_ORDER_LIST, params).then((res) => {
+    vdata.total = res.total || 0
+    return res
+  })
 }
 function searchFunc() {
   // 点击【查询】按钮点击事件
@@ -620,14 +659,55 @@ function changeStr2ellipsis(orderNo, baseLength) {
   )
 }
 
-// 背景匯出：沿用目前的篩選條件（商戶號、支付方式、狀態、建立時間），完成後到下載中心下載
+// 背景匯出只支援這些條件（與後端 ExportService 一致）；其他條件會被忽略，因此有設定時不允許匯出
+const EXPORT_KEYS = ['mchNo', 'wayCode', 'state', 'createdStart', 'createdEnd']
+const UNSUPPORTED_NAMES = { unionOrderId: '訂單號', isvNo: '服務商號', appId: '應用AppId', notifyState: '回調狀態', divisionState: '分帳狀態' }
+const EXPORT_MAX_ROWS = 200000
+
+// 背景匯出：只匯出最近一次搜尋的結果，完成後在「匯出紀錄」下載
 function exportFunc() {
-  submitExport('PAY_ORDER', vdata.searchData).then(() => {
-    $infoBox.message.success('已建立匯出，完成後請到「下載中心」下載')
-  })
+  if (vdata.exporting) return
+  if (!vdata.applied) {
+    return $infoBox.message.warning('請先搜尋，確認結果後再匯出')
+  }
+  if (JSON.stringify(cleanParams(vdata.searchData)) !== JSON.stringify(vdata.applied)) {
+    return $infoBox.message.warning('查詢條件已變更，請先重新搜尋再匯出')
+  }
+  if (!vdata.total) {
+    return $infoBox.message.warning('目前的查詢沒有資料可匯出')
+  }
+  const unsupported = Object.keys(vdata.applied).filter((k) => !EXPORT_KEYS.includes(k))
+  if (unsupported.length) {
+    const names = unsupported.map((k) => UNSUPPORTED_NAMES[k] || k).join('、')
+    return $infoBox.message.warning(`匯出不支援以「${names}」篩選，請清除後重新搜尋再匯出`)
+  }
+  if (!(vdata.applied.createdStart && vdata.applied.createdEnd)) {
+    return $infoBox.message.warning('匯出需要指定日期區間，請選擇後重新搜尋')
+  }
+  if (vdata.total > EXPORT_MAX_ROWS) {
+    return $infoBox.message.warning(`查詢結果共 ${vdata.total} 筆，超過單次匯出上限 ${EXPORT_MAX_ROWS} 筆，請縮小日期區間`)
+  }
+  $infoBox.confirmPrimary(
+    '確認匯出',
+    `將匯出 ${vdata.applied.createdStart} ～ ${vdata.applied.createdEnd} 的查詢結果，共 ${vdata.total} 筆。`,
+    () => {
+      vdata.exporting = true
+      submitExport('PAY_ORDER', vdata.applied)
+        .then(() => {
+          $infoBox.message.success('已建立匯出，完成後可在匯出紀錄下載')
+          exportDrawer.value.open()
+        })
+        .finally(() => (vdata.exporting = false))
+    }
+  )
 }
 </script>
 <style lang="less" scoped>
+.today-hint {
+  margin-bottom: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+}
 ///deep/ .ant-table-fixed{
 //  tr{
 //    th{

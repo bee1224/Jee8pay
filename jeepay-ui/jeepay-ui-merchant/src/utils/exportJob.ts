@@ -1,4 +1,4 @@
-// 下載中心：列表頁的「匯出」只建立背景工作，完成後到「下載中心」下載
+// 背景匯出：查詢頁的「匯出」只建立背景工作，完成後在同一頁的「匯出紀錄」下載
 import { req } from '@/api/manage'
 import storage from '@/utils/jeepayStorageWrapper'
 import appConfig from '@/config/appConfig'

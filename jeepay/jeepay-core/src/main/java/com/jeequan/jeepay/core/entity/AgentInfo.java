@@ -77,4 +77,13 @@ public class AgentInfo extends BaseModel implements Serializable {
 
     @Schema(title = "updatedAt", description = "更新時間")
     private Date updatedAt;
+
+    @Schema(title = "brandEnabled", description = "白標是否啟用: 0-否, 1-是（僅高級代理）")
+    private Byte brandEnabled;
+
+    @Schema(title = "brandTitle", description = "白標站台名稱")
+    private String brandTitle;
+
+    @Schema(title = "brandLogo", description = "白標 Logo 圖片位址")
+    private String brandLogo;
 }

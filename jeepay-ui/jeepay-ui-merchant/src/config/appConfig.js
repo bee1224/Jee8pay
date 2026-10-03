@@ -8,7 +8,7 @@
 
 /** 应用配置项 **/
 export default {
-  APP_TITLE: 'Jeepay商戶系統', // 设置浏览器title
+  APP_TITLE: '三把扇-商戶平台', // 设置浏览器title
   ACCESS_TOKEN_NAME: 'iToken', // 设置请求token的名字， 用于请求header 和 localstorage中存在名称
 }
 
@@ -30,7 +30,8 @@ export const asyncRouteDefine = {
   RolePage: { defaultPath: '/roles', component: () => import('@/views/role/RolePage.vue') },
 
   MchAppPage: { defaultPath: '/apps', component: () => import('@/views/mchApp/List.vue') }, // 商户应用列表
-  ExportCenterPage: { defaultPath: '/exports', component: () => import('@/views/export/ExportCenter.vue') }, // 下載中心
+  HistoryPayPage: { defaultPath: '/history/pay', component: () => import('@/views/history/HistoryPay.vue') }, // 歷史查詢：代收查詢
+  HistoryPayoutPage: { defaultPath: '/history/payout', component: () => import('@/views/history/HistoryPayout.vue') }, // 歷史查詢：代付查詢（尚未實作）
   MchWalletPage: { defaultPath: '/wallet', component: () => import('@/views/wallet/MchWallet.vue') }, // 我的錢包（ADR-0010）
 
   PayOrderListPage: {

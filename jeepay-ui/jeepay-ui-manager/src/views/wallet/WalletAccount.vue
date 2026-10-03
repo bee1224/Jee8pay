@@ -5,6 +5,7 @@
       <template #extra>
         <a-range-picker v-if="$access('ENT_EXPORT_CENTER')" v-model:value="vdata.reportRange" value-format="YYYY-MM-DD" style="margin-right: 8px" />
         <a-button v-if="$access('ENT_EXPORT_CENTER')" style="margin-right: 8px" @click="exportDaily">匯出每日結算彙總</a-button>
+        <a-button v-if="$access('ENT_EXPORT_CENTER')" style="margin-right: 8px" @click="exportDrawer.open()">匯出紀錄</a-button>
         <a-button v-if="$access('ENT_WALLET_SETTLE_RUN')" :loading="vdata.settling" @click="settleNow">立即結算</a-button>
       </template>
       <a-alert
@@ -65,6 +66,7 @@
         </template>
         <template #emptyText>尚無帳戶（第一筆訂單結算後自動建立）</template>
       </a-table>
+      <ExportJobsDrawer ref="exportDrawer" :job-types="['SETTLE_DAILY']" />
     </a-card>
 
     <a-drawer v-model:open="vdata.ledger.open" :title="'流水：' + vdata.ledger.title" width="70%">
@@ -90,9 +92,10 @@
 
 <script setup lang="ts">
 import { API_URL_WALLET, req } from '@/api/manage'
-import { reactive, getCurrentInstance } from 'vue'
+import { reactive, ref, getCurrentInstance } from 'vue'
 import { BIZ_TYPE_NAMES, OWNER_TYPE_NAMES, yuan } from '@/components/WalletPanel/walletText'
 import { submitExport } from '@/utils/exportJob'
+import ExportJobsDrawer from '@/components/ExportJobs/ExportJobsDrawer.vue'
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
 
 const columns = [
@@ -122,6 +125,7 @@ const ledgerColumns = [
   { title: '操作者', dataIndex: 'operatorName' },
 ]
 
+const exportDrawer = ref()
 const vdata: any = reactive({
   summary: {},
   accounts: [],
@@ -145,7 +149,10 @@ loadAll()
 
 function exportDaily() {
   const [startDate, endDate] = vdata.reportRange || []
-  submitExport('SETTLE_DAILY', { startDate, endDate }).then(() => $infoBox.message.success('已建立匯出（未選日期為近 30 天），完成後請到「下載中心」下載'))
+  submitExport('SETTLE_DAILY', { startDate, endDate }).then(() => {
+    $infoBox.message.success('已建立匯出（未選日期為近 30 天），完成後可在匯出紀錄下載')
+    exportDrawer.value.open()
+  })
 }
 function settleNow() {
   vdata.settling = true

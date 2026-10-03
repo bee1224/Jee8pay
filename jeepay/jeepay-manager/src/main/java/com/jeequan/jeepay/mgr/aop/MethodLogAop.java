@@ -90,7 +90,9 @@ public class MethodLogAop {
         try {
             // 基础日志信息
             setBaseLogInfo(point, sysLog, JeeUserDetails.getCurrentUserDetails());
-            sysLog.setOptResInfo(JSONObject.toJSON(result).toString());
+            // 一次性初始密碼（initPassword）只回給操作者，不寫入操作日誌
+            sysLog.setOptResInfo(JSONObject.toJSON(result).toString()
+                    .replaceAll("\"initPassword\":\"[^\"]*\"", "\"initPassword\":\"***\""));
             scheduledThreadPool.execute(() -> sysLogService.save(sysLog));
         } catch (Exception e) {
             logger.error("methodLogError", e);

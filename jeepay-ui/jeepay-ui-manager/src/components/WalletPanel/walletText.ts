@@ -7,6 +7,8 @@ export const BIZ_TYPE_NAMES = {
   WITHDRAW_PAID: '提現撥款',
   WITHDRAW_FEE: '提現手續費',
   ADJUST: '人工調帳',
+  FREEZE: '人工凍結',
+  UNFREEZE: '人工解凍',
 }
 export const OWNER_TYPE_NAMES = { PLATFORM: '平台', MCH: '商戶', AGENT: '代理', CHANNEL: '上游渠道' }
 export const WITHDRAW_STATES = {

@@ -18,6 +18,7 @@
         <a-form-item><a-range-picker v-model:value="vdata.range" value-format="YYYY-MM-DD" /></a-form-item>
         <a-form-item><a-button type="primary" @click="search">搜尋</a-button></a-form-item>
         <a-form-item v-if="$access('ENT_EXPORT_CENTER')"><a-button @click="exportFunc">匯出</a-button></a-form-item>
+        <a-form-item v-if="$access('ENT_EXPORT_CENTER')"><a-button @click="exportDrawer.open()">匯出紀錄</a-button></a-form-item>
       </a-form>
       <a-table :columns="columns" :data-source="vdata.records" size="small" row-key="ledgerId"
         :pagination="{ current: vdata.page, pageSize: 20, total: vdata.total, onChange: (p) => { vdata.page = p; load() } }">
@@ -31,14 +32,16 @@
           <template v-if="column.key === 'balance'">{{ yuan(record.balanceBefore) }} → {{ yuan(record.balanceAfter) }}</template>
         </template>
       </a-table>
+      <ExportJobsDrawer ref="exportDrawer" :job-types="['WALLET_LEDGER']" />
     </a-card>
   </page-header-wrapper>
 </template>
 
 <script setup lang="ts">
 import { API_URL_WALLET, req } from '@/api/manage'
-import { reactive, getCurrentInstance } from 'vue'
+import { reactive, ref, getCurrentInstance } from 'vue'
 import { submitExport } from '@/utils/exportJob'
+import ExportJobsDrawer from '@/components/ExportJobs/ExportJobsDrawer.vue'
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
 import { BIZ_TYPE_NAMES, OWNER_TYPE_NAMES, yuan } from '@/components/WalletPanel/walletText'
 
@@ -54,6 +57,7 @@ const columns = [
   { title: '操作者', dataIndex: 'operatorName' },
 ]
 
+const exportDrawer = ref()
 const vdata: any = reactive({ query: {}, range: [], records: [], total: 0, page: 1 })
 
 function load() {
@@ -65,7 +69,10 @@ function load() {
 }
 function exportFunc() {
   const [startDate, endDate] = vdata.range || []
-  submitExport('WALLET_LEDGER', { ...vdata.query, startDate, endDate }).then(() => $infoBox.message.success('已建立匯出，完成後請到「下載中心」下載'))
+  submitExport('WALLET_LEDGER', { ...vdata.query, startDate, endDate }).then(() => {
+    $infoBox.message.success('已建立匯出，完成後可在匯出紀錄下載')
+    exportDrawer.value.open()
+  })
 }
 function search() {
   vdata.page = 1

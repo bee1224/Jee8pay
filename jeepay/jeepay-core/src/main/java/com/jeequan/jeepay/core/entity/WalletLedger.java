@@ -36,6 +36,9 @@ public class WalletLedger extends BaseModel implements Serializable {
     public static final String BIZ_WITHDRAW_PAID = "WITHDRAW_PAID";
     public static final String BIZ_WITHDRAW_FEE = "WITHDRAW_FEE";
     public static final String BIZ_ADJUST = "ADJUST";
+    /** 人工凍結／解凍：只在可用與凍結之間移動，不改變總額 */
+    public static final String BIZ_FREEZE = "FREEZE";
+    public static final String BIZ_UNFREEZE = "UNFREEZE";
 
     @Schema(title = "ledgerId", description = "流水ID")
     @TableId(value = "ledger_id", type = IdType.AUTO)

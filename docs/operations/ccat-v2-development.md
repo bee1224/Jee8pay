@@ -25,7 +25,7 @@
 
 事故紀錄：第一次部署時 payment 因誤刪 `jeepay/conf/devCommons/config/application.yml`（三個 pom 以 resource 打包進 JAR）而出現 bean 循環依賴啟動失敗，已回滾（payment 停擺約 6 分鐘），還原該檔（`e3cda9c`）並經隔離環境驗證後重新部署。
 
-**待人工核准：公開 edge 的 jhd APN 路由（TD-014）**。測試環境的 `ccat-v2-dev.nnviopp.com/api/pay/notify/jhd` 目前回 404（callback-ingress 已支援，edge 設定尚未更新）。reconcile 腳本需人工核准旗標，請由 operator 執行：
+**2026-10-03 已套用（TD-014 Resolved）**：operator 執行 `scripts/apply-edge-jhd-route.sh`，edge 現行 SHA `7a393f33…`，公開 jhd 回呼回 400。以下為當時的說明與手動步驟，保留作紀錄。原文：公開 edge 的 jhd APN 路由（TD-014）。測試環境的 `ccat-v2-dev.nnviopp.com/api/pay/notify/jhd` 目前回 404（callback-ingress 已支援，edge 設定尚未更新）。reconcile 腳本需人工核准旗標，請由 operator 執行：
 
 ```bash
 ssh -tt nnviopp-sandbox
@@ -55,6 +55,13 @@ sudo env SANDBOX_EDGE_RECONCILE_APPROVED=YES $BIN/reconcile-sandbox-edge && sudo
 | `79df3f7a1c10-wallet` | ADR-0010：錢包、T+N 結算、提現、風控黑名單、人工調帳；推薦佣金層；UI nginx 重新解析（TD-013） | payment、manager、merchant、兩個 UI | `20260930-wallet-settlement.sql` |
 | `913befd87796-route-export` | ADR-0011：別名路由（IBON）與決策紀錄；兩個平台的下載中心（背景匯出） | payment、manager、merchant、兩個 UI | `20260930-way-route-export.sql` |
 | `96b04e94998e-review-fixes` | 逆向驗證修正：seed 權限漂移、提現並行冪等、金額格式、操作者名稱長度、有餘額不可刪除、匯出參數白名單 | payment、manager、merchant | `20260930-seed-drift-entitlements.sql`（測試環境無變動） |
+| `96b04e94998e-callback-resolver`（2026-10-03） | `callback-ingress.conf` 改用 Docker DNS 於請求時解析 payment（TD-018）；其餘檔案與 `96b04e94998e-review-fixes` 相同（hardlink 複製） | callback-ingress | 無 |
+| `96b04e94998e-ui-brand-titles`（2026-10-03；取代同日的 `96b04e94998e-ui-branding`、`96b04e94998e-ui-brand-images`） | 移除上游「介面市場／Plus商業版」按鈕與支付介面頁的推銷橫幅；頁尾與載入畫面改為「三把扇科技」；換上品牌圖（主 logo、側欄展開／收合圖示、品牌文字、favicon、預設頭像、登入背景）；分頁標題改為「三把扇-營運平台」「三把扇-商戶平台」 | manager-ui、merchant-ui | 無 |
+| `96b04e94998e-history-query-guard`（2026-10-03；取代同日的 `96b04e94998e-history-query`） | 代收查詢送出搜尋後才顯示列表與匯出，匯出加防呆（需先搜尋、條件未變更、有日期區間、筆數上限、確認視窗）；以「歷史查詢」（代收查詢、代付查詢佔位頁）取代「下載中心」；訂單管理只顯示今日訂單、不含搜尋；匯出與「匯出紀錄」併入各查詢頁；後端未變動 | manager-ui、merchant-ui | `20261003-history-query-menus.sql`（備份於 `state/history-query-*/pre-entitlement.sql`） |
+| `96b04e94998e-agent-credential`（2026-10-03） | 新增代理時一併開通登入帳號（必填登入帳號與聯絡手機），密碼改為 8 碼隨機並以一次性視窗顯示（附複製按鈕）；「開通登入帳號」同樣改為隨機密碼；操作日誌遮蔽 `initPassword`。部署前於隔離環境 `jee8pay-smoke`（全新資料庫，驗完已銷毀）端到端 13 項 PASS | manager、manager-ui | 無 |
+| `96b04e94998e-agent-portal-menus`（2026-10-03） | 代理後台由單頁分頁改為五個左側選單（錢包與提現、分潤、旗下商戶、下級代理、費率），代理帳號登入後直接顯示在第一層；平台帳號（含超管）不再顯示「代理後台」 | manager-ui | `20261003-agent-portal-menus.sql`（備份於 `state/agent-portal-menus-*/pre-entitlement.sql`） |
+| `96b04e94998e-family-tree-p1`（2026-10-03） | 家族樹權限第一階段：代理後台新增「訂單」（只含自己與下級代理直屬商戶）、「操作紀錄」（下級代理帳號的操作）；高級代理可新增下級代理、代理可新增商戶（隨機一次性密碼）；一般代理改用獨立角色 `ROLE_AGENT_PORTAL_L2`。範圍一律由登入者的代理路徑推導。部署前於隔離環境 `jee8pay-smoke`（全新資料庫，含 merchant 服務，驗完已銷毀）端到端 31 項 PASS，含越權測試 | manager、manager-ui | `20261003-agent-family-tree.sql`（備份於 `state/family-tree-p1-*/pre-rbac.sql`） |
+| `96b04e94998e-family-tree-p2`（2026-10-03） | 家族樹權限第二階段：超管代理列表新增家族樹卡片；代理後台新增旗下錢包（含凍結／解凍）、提現審核（同意註記／駁回，撥款仍由平台）、統計報表、通道路由、黑名單、品牌設定（白標）、登入紀錄；費率頁可設高代費、代理費、推薦佣金與商戶覆寫並套用範本；商戶可更換歸屬與重設密碼；「下級代理」改名「旗下代理」。新增欄位 `t_agent_info.brand_*`、`t_withdraw_order.agent_approve_*`。部署前於隔離環境端到端 95 項 PASS（第一階段回歸 31＋第二階段 64，含越權測試） | manager、manager-ui | `20261003-agent-family-tree-p2.sql`（備份於 `state/family-tree-p2-*/pre-p2.sql`） |
 
 - 每次部署前都在隔離環境 `jee8pay-smoke`（驗完即銷毀）做開機與端到端冒煙：第一階段 17 項、第二～四階段 33 項、頭像 6 項、權限與快照全面回歸 42 項，都通過（權限回歸只有一項是腳本在 log 輸出前就檢查的時序誤判）；部署後 10/10 healthy。`d280fd030ffc` 部署後，`run-d01-blackbox.py`（M_D01_EXTERNAL_UAT、RYO_IBON）23/23 PASS，訂單數不變。
 - 權限相關資料表部署前的備份放在 `state/overhaul-20260929/pre-*.sql`。

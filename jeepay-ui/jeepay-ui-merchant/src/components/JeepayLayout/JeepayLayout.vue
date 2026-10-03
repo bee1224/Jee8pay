@@ -144,9 +144,7 @@
         <slot />
 
         <div class="foot">
-          Copyright © 2021-2026
-          <a href="https://www.jeequan.com" target="_blank">計全科技</a>
-          All rights reserved.
+          Copyright © 2025-2026 三把扇科技 All rights reserved.
         </div>
       </a-layout-content>
     </a-layout>

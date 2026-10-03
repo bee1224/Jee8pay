@@ -52,6 +52,7 @@
         </a-tab-pane>
         <a-tab-pane key="l" tab="錢包流水">
           <a-button v-if="$access('ENT_MCH_EXPORT_CENTER')" style="margin-bottom: 8px" @click="exportLedger">匯出全部流水</a-button>
+          <a-button v-if="$access('ENT_MCH_EXPORT_CENTER')" style="margin: 0 0 8px 8px" @click="exportDrawer.open()">匯出紀錄</a-button>
           <a-table :columns="ledgerColumns" :data-source="vdata.ledger" size="small" row-key="ledgerId" :pagination="false">
             <template #bodyCell="{ column, record }">
               <template v-if="column.key === 'bizType'">{{ BIZ_TYPES[record.bizType] || record.bizType }}</template>
@@ -64,6 +65,7 @@
           </a-table>
         </a-tab-pane>
       </a-tabs>
+      <ExportJobsDrawer ref="exportDrawer" :job-types="['WALLET_LEDGER']" />
     </a-card>
 
     <a-modal v-model:open="vdata.payout.open" title="收款帳戶" ok-text="儲存" @ok="savePayout">
@@ -81,8 +83,9 @@
 
 <script setup lang="ts">
 import { API_URL_MCH_WALLET, req } from '@/api/manage'
-import { reactive, getCurrentInstance } from 'vue'
+import { reactive, ref, getCurrentInstance } from 'vue'
 import { submitExport } from '@/utils/exportJob'
+import ExportJobsDrawer from '@/components/ExportJobs/ExportJobsDrawer.vue'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 const BIZ_TYPES = {
@@ -124,6 +127,7 @@ function newReqNo() {
   return 'R' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
 }
 
+const exportDrawer = ref()
 const vdata: any = reactive({
   account: {},
   withdraws: [],
@@ -149,7 +153,10 @@ function load() {
 load()
 
 function exportLedger() {
-  submitExport('WALLET_LEDGER', {}).then(() => $infoBox.message.success('已建立匯出，完成後請到「下載中心」下載'))
+  submitExport('WALLET_LEDGER', {}).then(() => {
+    $infoBox.message.success('已建立匯出，完成後可在匯出紀錄下載')
+    exportDrawer.value.open()
+  })
 }
 function applyFunc() {
   if (!vdata.apply.amount) {

@@ -187,6 +187,9 @@ CREATE TABLE `t_agent_info` (
         `created_by` VARCHAR(64) DEFAULT NULL COMMENT '建立者姓名',
         `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '建立時間',
         `updated_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新時間',
+        `brand_enabled` TINYINT(6) NOT NULL DEFAULT 0 COMMENT '白標是否啟用: 0-否, 1-是（僅高級代理）',
+        `brand_title` VARCHAR(32) DEFAULT NULL COMMENT '白標站台名稱',
+        `brand_logo` VARCHAR(255) DEFAULT NULL COMMENT '白標 Logo 圖片位址',
         PRIMARY KEY (`agent_no`),
         KEY `idx_parent_agent_no` (`parent_agent_no`),
         KEY `idx_agent_path` (`agent_path`)
@@ -381,6 +384,8 @@ CREATE TABLE `t_withdraw_order` (
         `review_remark` VARCHAR(128) DEFAULT NULL COMMENT '審核說明',
         `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '申請時間',
         `reviewed_at` DATETIME DEFAULT NULL COMMENT '審核時間',
+        `agent_approve_by` VARCHAR(64) DEFAULT NULL COMMENT '上級代理同意人（僅註記，撥款仍由平台審核）',
+        `agent_approve_at` DATETIME DEFAULT NULL COMMENT '上級代理同意時間',
         PRIMARY KEY (`withdraw_id`),
         UNIQUE KEY `uni_req` (`owner_type`, `owner_id`, `req_no`),
         KEY `idx_state` (`state`, `created_at`),
@@ -855,7 +860,23 @@ insert into t_sys_entitlement values('ENT_FEE_TEMPLATE', '費率範本', 'copy',
 insert into t_sys_entitlement values('ENT_FEE_TEMPLATE_EDIT', '按鈕：新增／修改／刪除範本', 'no-icon', '', '', 'PB', 0, 1,  'ENT_FEE_TEMPLATE', '0', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_FEE_TEMPLATE_APPLY', '按鈕：套用範本', 'no-icon', '', '', 'PB', 0, 1,  'ENT_FEE_TEMPLATE', '0', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL', '代理後台', 'team', '', 'RouteView', 'ML', 0, 1,  'ROOT', '46', 'MGR', now(), now());
-insert into t_sys_entitlement values('ENT_AGENT_PORTAL_HOME', '我的代理後台', 'dashboard', '/agentPortal', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '10', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_HOME', '錢包與提現', 'wallet', '/agentPortal/wallet', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '10', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_PROFIT', '分潤', 'pie-chart', '/agentPortal/profit', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '20', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_MCH', '旗下商戶', 'shop', '/agentPortal/merchants', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '30', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_SUB', '旗下代理', 'team', '/agentPortal/subAgents', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '40', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_FEE', '費率', 'percentage', '/agentPortal/fee', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '50', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_ORDER', '訂單', 'account-book', '/agentPortal/orders', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '25', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_OPLOG', '操作紀錄', 'file-text', '/agentPortal/opLogs', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '60', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_REPORT', '統計報表', 'bar-chart', '/agentPortal/report', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '22', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_BRANCH_WALLET', '旗下錢包', 'bank', '/agentPortal/branchWallets', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '42', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_FREEZE', '按鈕：凍結／解凍旗下資金（限高級代理）', 'no-icon', '', '', 'PB', 0, 1,  'ENT_AGENT_PORTAL_BRANCH_WALLET', '0', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_WITHDRAW_AUDIT', '提現審核', 'audit', '/agentPortal/withdrawAudit', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '44', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_ROUTE', '通道路由', 'branches', '/agentPortal/routes', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '52', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_BLACKLIST', '黑名單', 'stop', '/agentPortal/blacklist', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '54', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_BRAND', '品牌設定', 'skin', '/agentPortal/brand', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '70', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_MCH_EDIT', '按鈕：商戶歸屬與重設密碼', 'no-icon', '', '', 'PB', 0, 1,  'ENT_AGENT_PORTAL_MCH', '0', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_MCH_ADD', '按鈕：新增商戶', 'no-icon', '', '', 'PB', 0, 1,  'ENT_AGENT_PORTAL_MCH', '0', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_SUB_ADD', '按鈕：新增旗下代理（限高級代理）', 'no-icon', '', '', 'PB', 0, 1,  'ENT_AGENT_PORTAL_SUB', '0', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_VIEW', '頁面：代理後台資料', 'no-icon', '', '', 'PB', 0, 1,  'ENT_AGENT_PORTAL_HOME', '0', 'MGR', now(), now());
 
 insert into t_sys_entitlement values('ENT_WALLET_ACCOUNT', '錢包帳戶', 'wallet', '/wallet/accounts', 'WalletAccountPage', 'ML', 0, 1,  'ENT_WALLET', '5', 'MGR', now(), now());
@@ -872,8 +893,15 @@ insert into t_sys_entitlement values('ENT_MCH_WALLET_PAYOUT_EDIT', '按鈕：設
 insert into t_sys_entitlement values('ENT_WAY_ROUTE', '通道路由', 'branches', '/wayRoutes', 'WayRoutePage', 'ML', 0, 1,  'ENT_PC', '30', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_WAY_ROUTE_EDIT', '按鈕：新增／修改／刪除路由規則', 'no-icon', '', '', 'PB', 0, 1,  'ENT_WAY_ROUTE', '0', 'MGR', now(), now());
 
-insert into t_sys_entitlement values('ENT_EXPORT_CENTER', '下載中心', 'download', '/exports', 'ExportCenterPage', 'ML', 0, 1,  'ROOT', '190', 'MGR', now(), now());
-insert into t_sys_entitlement values('ENT_MCH_EXPORT_CENTER', '下載中心', 'download', '/exports', 'ExportCenterPage', 'ML', 0, 1,  'ROOT', '190', 'MCH', now(), now());
+-- 歷史查詢（代收查詢含匯出；代付查詢尚未實作）
+insert into t_sys_entitlement values('ENT_HISTORY', '歷史查詢', 'history', '', 'RouteView', 'ML', 0, 1,  'ROOT', '52', 'MGR', now(), now());
+    insert into t_sys_entitlement values('ENT_HISTORY_PAY', '代收查詢', 'file-search', '/history/pay', 'HistoryPayPage', 'ML', 0, 1,  'ENT_HISTORY', '10', 'MGR', now(), now());
+        insert into t_sys_entitlement values('ENT_EXPORT_CENTER', '按鈕：匯出與下載', 'no-icon', '', '', 'PB', 0, 1,  'ENT_HISTORY_PAY', '0', 'MGR', now(), now());
+    insert into t_sys_entitlement values('ENT_HISTORY_PAYOUT', '代付查詢', 'file-sync', '/history/payout', 'HistoryPayoutPage', 'ML', 0, 1,  'ENT_HISTORY', '20', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_HISTORY', '歷史查詢', 'history', '', 'RouteView', 'ML', 0, 1,  'ROOT', '25', 'MCH', now(), now());
+    insert into t_sys_entitlement values('ENT_HISTORY_PAY', '代收查詢', 'file-search', '/history/pay', 'HistoryPayPage', 'ML', 0, 1,  'ENT_HISTORY', '10', 'MCH', now(), now());
+        insert into t_sys_entitlement values('ENT_MCH_EXPORT_CENTER', '按鈕：匯出與下載', 'no-icon', '', '', 'PB', 0, 1,  'ENT_HISTORY_PAY', '0', 'MCH', now(), now());
+    insert into t_sys_entitlement values('ENT_HISTORY_PAYOUT', '代付查詢', 'file-sync', '/history/payout', 'HistoryPayoutPage', 'ML', 0, 1,  'ENT_HISTORY', '20', 'MCH', now(), now());
 
 insert into t_sys_entitlement values('ENT_ISV', '服务商管理', 'block', '', 'RouteView', 'ML', 0, 1,  'ROOT', '40', 'MGR', now(), now());
     insert into t_sys_entitlement values('ENT_ISV_INFO', '服务商列表', 'profile', '/isv', 'IsvListPage', 'ML', 0, 1,  'ENT_ISV', '10', 'MGR', now(), now());
@@ -1035,7 +1063,21 @@ insert into t_sys_role values ('ROLE_OP', '普通操作员', 'MGR', '0', '2021-0
 insert into t_sys_role values ('ROLE_AGENT_PORTAL', '代理帳號（系統角色）', 'MGR', '0', now());
 insert into t_sys_role_ent_rela values ('ROLE_AGENT_PORTAL', 'ENT_COMMONS'), ('ROLE_AGENT_PORTAL', 'ENT_C_USERINFO'),
     ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_HOME'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_VIEW'),
-    ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_FEE_EDIT');
+    ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_FEE_EDIT'),
+    ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_PROFIT'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_MCH'),
+    ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_SUB'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_FEE'),
+    ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_ORDER'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_OPLOG'),
+    ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_MCH_ADD'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_SUB_ADD'),
+    ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_REPORT'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_BRANCH_WALLET'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_FREEZE'),
+    ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_WITHDRAW_AUDIT'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_ROUTE'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_BLACKLIST'),
+    ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_BRAND'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_MCH_EDIT');
+-- 一般代理（第三代）帳號固定角色：沒有下級代理、操作紀錄與設定下級費率
+insert into t_sys_role values ('ROLE_AGENT_PORTAL_L2', '一般代理帳號（系統角色）', 'MGR', '0', now());
+insert into t_sys_role_ent_rela values ('ROLE_AGENT_PORTAL_L2', 'ENT_COMMONS'), ('ROLE_AGENT_PORTAL_L2', 'ENT_C_USERINFO'),
+    ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL'), ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_HOME'), ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_VIEW'),
+    ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_PROFIT'), ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_MCH'), ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_MCH_ADD'),
+    ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_ORDER'), ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_FEE'),
+    ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_REPORT'), ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_BRANCH_WALLET'), ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_MCH_EDIT');
 -- 角色权限关联， [超管]用户 拥有所有权限
 -- insert into t_sys_role_ent_rela select '801', ent_id from t_sys_entitlement;
 
