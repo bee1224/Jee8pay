@@ -120,7 +120,7 @@ services:
       timeout: 10s
       retries: 18
       start_period: 120s
-    mem_limit: 768m
+    mem_limit: 1024m
     networks:
       - v2
 
@@ -154,7 +154,7 @@ services:
       timeout: 5s
       retries: 16
       start_period: 60s
-    mem_limit: 512m
+    mem_limit: 768m
 
   callback-ingress:
     image: nginx:alpine
@@ -212,7 +212,7 @@ services:
       timeout: 5s
       retries: 16
       start_period: 60s
-    mem_limit: 384m
+    mem_limit: 512m
 
   merchant:
     <<: *backend-common
@@ -245,7 +245,7 @@ services:
       timeout: 5s
       retries: 16
       start_period: 60s
-    mem_limit: 384m
+    mem_limit: 512m
 
   cashier:
     build:
