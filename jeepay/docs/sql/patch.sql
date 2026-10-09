@@ -377,3 +377,15 @@ VALUES ('fyz', 'FYZ（黑猫 PAY）', 1, 0, 1,
         '[{"name":"environment","desc":"Provider 环境","type":"radio","verify":"required","values":"TEST,PRODUCTION","titles":"测试环境,生产环境"},{"name":"custId","desc":"契客代号","type":"text","verify":"required"},{"name":"apiPassword","desc":"API 密码","type":"text","verify":"required","star":"1"}]',
         '[{"wayCode":"FYZ_IBON"}]',
         '', '#222222', 1, '黑猫 PAY ibon 通道（上游五）');
+
+-- 6) 新增 YUC 定义（与 RYO/JAY/CHI/JHD/FYZ 同一黑猫 PAY 平台契约，仅契约会员帐号不同）
+DELETE FROM t_pay_way WHERE way_code IN ('YUC_IBON');
+INSERT INTO t_pay_way (way_code, way_name) VALUES ('YUC_IBON', 'YUC ibon 缴款');
+DELETE FROM t_pay_interface_define WHERE if_code IN ('yuc');
+INSERT INTO t_pay_interface_define (if_code, if_name, is_mch_mode, is_isv_mode, config_page_type, isv_params, isvsub_mch_params, normal_mch_params, way_codes, icon, bg_color, state, remark)
+VALUES ('yuc', 'YUC（黑猫 PAY）', 1, 0, 1,
+        NULL,
+        NULL,
+        '[{"name":"environment","desc":"Provider 环境","type":"radio","verify":"required","values":"TEST,PRODUCTION","titles":"测试环境,生产环境"},{"name":"custId","desc":"契客代号","type":"text","verify":"required"},{"name":"apiPassword","desc":"API 密码","type":"text","verify":"required","star":"1"}]',
+        '[{"wayCode":"YUC_IBON"}]',
+        '', '#222222', 1, '黑猫 PAY ibon 通道（上游六）');

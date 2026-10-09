@@ -11,7 +11,8 @@ CHI：NT$ 200,000
 JAY：NT$ 0
 JHD：NT$ 66
 FYZ：NT$ 500
-SUM：NT$ 201,800
+YUC：NT$ 700
+SUM：NT$ 202,500
 ```
 
 統計只讀 JeePay local `t_pay_order`，不呼叫 Provider。查詢口徑：
@@ -19,10 +20,10 @@ SUM：NT$ 201,800
 - `success_time >= 前日 00:00` 且 `< 今日 00:00`，時區 `Asia/Taipei`。
 - `state = 2`（支付成功）。
 - `currency = TWD`。
-- `if_code` 為 `ryo`、`chi`、`jay`、`jhd`、`fyz`。
+- `if_code` 為 `ryo`、`chi`、`jay`、`jhd`、`fyz`、`yuc`。
 - `amount` 以分儲存，輸出為整數 TWD 並使用千分位逗號。
 
-目前五個黑貓 PAY Provider 不提供 Refund capability，因此本報表不定義退款淨額；若未來加入退款，須另行確認 gross/net 口徑。
+目前六個黑貓 PAY Provider 不提供 Refund capability，因此本報表不定義退款淨額；若未來加入退款，須另行確認 gross/net 口徑。
 
 ## Secret intake
 

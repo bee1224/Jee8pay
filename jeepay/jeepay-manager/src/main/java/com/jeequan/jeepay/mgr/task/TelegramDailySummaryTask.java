@@ -60,7 +60,8 @@ public class TelegramDailySummaryTask {
         long jay = cents(amounts, "jayAmount");
         long jhd = cents(amounts, "jhdAmount");
         long fyz = cents(amounts, "fyzAmount");
-        long sum = Math.addExact(Math.addExact(Math.addExact(ryo, chi), Math.addExact(jay, jhd)), fyz);
+        long yuc = cents(amounts, "yucAmount");
+        long sum = Math.addExact(Math.addExact(Math.addExact(ryo, chi), Math.addExact(jay, jhd)), Math.addExact(fyz, yuc));
 
         return "📊 " + REPORT_DATE.format(reportDate) + " 收款總結\n"
                 + "RYO：NT$ " + formatTwd(ryo) + "\n"
@@ -68,6 +69,7 @@ public class TelegramDailySummaryTask {
                 + "JAY：NT$ " + formatTwd(jay) + "\n"
                 + "JHD：NT$ " + formatTwd(jhd) + "\n"
                 + "FYZ：NT$ " + formatTwd(fyz) + "\n"
+                + "YUC：NT$ " + formatTwd(yuc) + "\n"
                 + "SUM：NT$ " + formatTwd(sum);
     }
 

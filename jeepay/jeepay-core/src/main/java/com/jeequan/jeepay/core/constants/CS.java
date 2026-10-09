@@ -153,6 +153,7 @@ public class CS {
         String CHI = "chi";       // 黑猫 PAY ibon（統一客樂得上游三）
         String JHD = "jhd";       // 黑猫 PAY ibon（統一客樂得上游四；金匯達有限公司）
         String FYZ = "fyz";       // 黑猫 PAY ibon（統一客樂得上游五；豐盈利）
+        String YUC = "yuc";       // 黑猫 PAY ibon（統一客樂得上游六）
     }
 
 
@@ -196,6 +197,7 @@ public class CS {
         String CHI_IBON = "CHI_IBON"; // 黑猫 PAY ibon 缴款（上游三）
         String JHD_IBON = "JHD_IBON"; // 黑猫 PAY ibon 缴款（上游四；金匯達有限公司）
         String FYZ_IBON = "FYZ_IBON"; // 黑猫 PAY ibon 缴款（上游五；豐盈利）
+        String YUC_IBON = "YUC_IBON"; // 黑猫 PAY ibon 缴款（上游六）
     }
 
     //支付数据包 类型

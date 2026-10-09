@@ -15,7 +15,7 @@
 | Base URL | 【正式網址，啟用後公布】（UAT 為 `https://api-v2-dev.nnviopp.com`） |
 | Merchant ID (`mchNo`) | 【正式商戶號，secure handoff 交付】 |
 | App ID (`appId`) | 【正式應用 ID，secure handoff 交付】 |
-| Channel code (`wayCode`) | `RYO_IBON` / `JAY_IBON` / `CHI_IBON` / `JHD_IBON` / `FYZ_IBON` 五選一（黑貓 PAY ibon 上游，契約相同） |
+| Channel code (`wayCode`) | `RYO_IBON` / `JAY_IBON` / `CHI_IBON` / `JHD_IBON` / `FYZ_IBON` / `YUC_IBON` 六選一（黑貓 PAY ibon 上游，契約相同） |
 | Currency | `TWD` |
 
 ## B. Credential delivery
@@ -54,7 +54,7 @@ CONTENT-TYPE = application/json; charset=UTF-8
 | `mchNo` | string | 必填，secure handoff 的 Merchant ID |
 | `appId` | string | 必填，secure handoff 的 App ID |
 | `mchOrderNo` | string | 必填；同一 Merchant 必須唯一，重複會回「商戶訂單已存在」 |
-| `wayCode` | string | 必填，黑貓 PAY ibon 上游擇一：`RYO_IBON` / `JAY_IBON` / `CHI_IBON` / `JHD_IBON` / `FYZ_IBON` |
+| `wayCode` | string | 必填，黑貓 PAY ibon 上游擇一：`RYO_IBON` / `JAY_IBON` / `CHI_IBON` / `JHD_IBON` / `FYZ_IBON` / `YUC_IBON` |
 | `amount` | integer | 必填，JeePay amount units；`1 TWD = 100 JeePay amount units`；四個 `*_IBON` 通道皆要求可整除 100 |
 | `currency` | string | 必填，固定 uppercase `TWD` |
 | `subject` | string | 必填，商品／訂單標題 |
@@ -154,7 +154,7 @@ Merchant 應回 `HTTP 200`、`Content-Type: text/plain`、body `SUCCESS`（大�
 2. 提供正式 HTTPS Merchant Notify callback URL。
 3. 依 canonicalization 簽 Create request。
 4. 呼叫正式 Base URL；JeePay 建立 native PayOrder。
-5. JeePay 以 `RYO_IBON`／`JAY_IBON`／`CHI_IBON`／`JHD_IBON`／`FYZ_IBON` 路由並同步回傳 ibon 付款資訊。
+5. JeePay 以 `RYO_IBON`／`JAY_IBON`／`CHI_IBON`／`JHD_IBON`／`FYZ_IBON`／`YUC_IBON` 路由並同步回傳 ibon 付款資訊。
 6. 付款人依訂單金額完成真實付款。
 7. 黑貓 PAY 通知 JeePay；JeePay 將 native PayOrder 轉為 SUCCESS。
 8. JeePay 對 Merchant callback URL 發送 Merchant Notify。
@@ -167,7 +167,7 @@ Merchant 應回 `HTTP 200`、`Content-Type: text/plain`、body `SUCCESS`（大�
 
 | 問題 | 回答 |
 | --- | --- |
-| 代收 | 支援，`RYO_IBON` / `JAY_IBON` / `CHI_IBON` / `JHD_IBON` / `FYZ_IBON` |
+| 代收 | 支援，`RYO_IBON` / `JAY_IBON` / `CHI_IBON` / `JHD_IBON` / `FYZ_IBON` / `YUC_IBON` |
 | 退款 | 不支援（Provider Phase 1 non-goal） |
 | 通道 | ibon CVS 繳費碼（`paymentCode` = `ibonShopId` + `ibonCode`）；可選 `shortUrl` |
 | 查詢 | 只讀 JeePay local PayOrder（`/api/pay/query`），不會同步打黑貓 PAY |

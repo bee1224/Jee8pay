@@ -39,6 +39,7 @@
 - [ ] CHI_IBON Create → 出單
 - [ ] JHD_IBON Create → 出單（需先完成 jhd credential 綁定與 passage）
 - [ ] FYZ_IBON Create → 出單（需先完成 fyz credential 綁定與 passage）
+- [ ] YUC_IBON Create → 出單（需先完成 yuc credential 綁定與 passage）
 
 ## 3. 真實付款 + APN 驗證
 
