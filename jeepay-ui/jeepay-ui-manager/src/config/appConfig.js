@@ -28,6 +28,7 @@ export const asyncRouteDefine = {
   'IfDefinePage': { defaultPath: '/ifdefines', component: () => import('@/views/payconfig/payIfDefine/List.vue')  },
   'AgentListPage': { defaultPath: '/agents', component: () => import('@/views/agent/AgentList.vue')  }, // 代理列表（ADR-0009）
   'AgentDetailPage': { defaultPath: '/agents/detail', component: () => import('@/views/agent/AgentDetail.vue')  }, // 團長詳情：商戶、渠道、隊長（ADR-0012）
+  'ChannelAccountPage': { defaultPath: '/channels', component: () => import('@/views/agent/ChannelAccountList.vue')  }, // 渠道管理：全部團長的渠道帳號（ADR-0012）
   'FeeRulePage': { defaultPath: '/feeRules', component: () => import('@/views/feeRule/FeeRulePage.vue')  }, // 四層費率設定（ADR-0009）
   'FeeTemplatePage': { defaultPath: '/feeTemplates', component: () => import('@/views/feeRule/FeeTemplatePage.vue')  }, // 費率範本（ADR-0009 第四階段）
   'AgentPortalPage': { defaultPath: '/agentPortal', component: () => import('@/views/agentPortal/AgentPortalPage.vue')  }, // 代理後台（ADR-0009 第三階段）；五個選單共用同一頁，依 route name 顯示對應區塊

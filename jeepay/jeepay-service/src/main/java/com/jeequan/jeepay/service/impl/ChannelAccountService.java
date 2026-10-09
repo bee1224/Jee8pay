@@ -6,6 +6,7 @@ import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.AgentInfo;
 import com.jeequan.jeepay.core.entity.ChannelAccount;
 import com.jeequan.jeepay.core.entity.ChannelAccountAgent;
+import com.jeequan.jeepay.core.entity.ChannelAccountScope;
 import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
 import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.exception.BizException;
@@ -14,6 +15,7 @@ import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.service.mapper.AgentInfoMapper;
 import com.jeequan.jeepay.service.mapper.ChannelAccountAgentMapper;
 import com.jeequan.jeepay.service.mapper.ChannelAccountMapper;
+import com.jeequan.jeepay.service.mapper.ChannelAccountScopeMapper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,7 @@ import java.util.stream.Collectors;
 public class ChannelAccountService extends ServiceImpl<ChannelAccountMapper, ChannelAccount> {
 
     @Autowired private ChannelAccountAgentMapper channelAccountAgentMapper;
+    @Autowired private ChannelAccountScopeMapper channelAccountScopeMapper;
     @Autowired private AgentInfoMapper agentInfoMapper;
     @Autowired private PayInterfaceConfigService payInterfaceConfigService;
     @Autowired private PayInterfaceDefineService payInterfaceDefineService;
@@ -58,8 +61,9 @@ public class ChannelAccountService extends ServiceImpl<ChannelAccountMapper, Cha
         if (accounts.isEmpty()) {
             return accounts;
         }
-        Map<String, String> agentNames = agentInfoMapper.selectList(AgentInfo.gw().eq(AgentInfo::getAgentLevel, AgentInfo.LEVEL_SENIOR))
+        Map<String, String> agentNames = agentInfoMapper.selectList(AgentInfo.gw())
                 .stream().collect(Collectors.toMap(AgentInfo::getAgentNo, AgentInfo::getAgentName));
+        List<ChannelAccountScope> scopes = channelAccountScopeMapper.selectList(ChannelAccountScope.gw());
         Map<String, String> ifNames = payInterfaceDefineService.list()
                 .stream().collect(Collectors.toMap(PayInterfaceDefine::getIfCode, PayInterfaceDefine::getIfName));
         for (ChannelAccount account : accounts) {
@@ -73,6 +77,18 @@ public class ChannelAccountService extends ServiceImpl<ChannelAccountMapper, Cha
                     assigned.add(row);
                 }
             }
+            // 使用範圍：srAgentNo 有值時只列該團長的限定；空清單 = 該團長這一支全部可用
+            List<JSONObject> scoped = new ArrayList<>();
+            for (ChannelAccountScope sc : scopes) {
+                if (account.getAccountId().equals(sc.getAccountId()) && (StringUtils.isBlank(srAgentNo) || srAgentNo.equals(sc.getSrAgentNo()))) {
+                    JSONObject row = new JSONObject();
+                    row.put("srAgentNo", sc.getSrAgentNo());
+                    row.put("agentNo", sc.getAgentNo());
+                    row.put("agentName", agentNames.get(sc.getAgentNo()));
+                    scoped.add(row);
+                }
+            }
+            account.addExt("scopes", scoped);
             account.addExt("agents", assigned);
             account.addExt("ownerName", agentNames.get(account.getOwnerSrAgentNo()));
             account.addExt("ifName", ifNames.get(account.getIfCode()));
@@ -91,6 +107,7 @@ public class ChannelAccountService extends ServiceImpl<ChannelAccountMapper, Cha
             row.put("ifName", account.getExt().get("ifName"));
             row.put("state", account.getState());
             row.put("owned", srAgentNo.equals(account.getOwnerSrAgentNo()));
+            row.put("scopes", account.getExt().get("scopes"));
             rows.add(row);
         }
         return rows;
@@ -198,6 +215,51 @@ public class ChannelAccountService extends ServiceImpl<ChannelAccountMapper, Cha
                 .setAccountId(accountId).setSrAgentNo(srAgentNo).setCreatedBy(operatorName));
     }
 
+    /**
+     * 設定某位團長在這個帳號上的使用範圍：agentNos 為空 = 他這一支全部可用；否則只有列出的隊長的商戶可用。
+     * 隊長必須是該團長旗下的；帳號必須已派發給該團長。
+     */
+    @Transactional
+    public void setScope(String accountId, String srAgentNo, List<String> agentNos, String operatorName) {
+        requireAccount(accountId);
+        if (channelAccountAgentMapper.selectCount(ChannelAccountAgent.gw()
+                .eq(ChannelAccountAgent::getAccountId, accountId).eq(ChannelAccountAgent::getSrAgentNo, srAgentNo)) == 0) {
+            throw new BizException("此帳號尚未派發給該團長");
+        }
+        List<String> targets = agentNos == null ? Collections.emptyList()
+                : agentNos.stream().filter(StringUtils::isNotBlank).distinct().collect(Collectors.toList());
+        for (String agentNo : targets) {
+            AgentInfo agent = agentInfoMapper.selectById(agentNo);
+            if (agent == null || !Objects.equals(agent.getAgentLevel(), AgentInfo.LEVEL_AGENT) || !srAgentNo.equals(agent.getParentAgentNo())) {
+                throw new BizException("使用範圍只能指定該團長旗下的隊長");
+            }
+        }
+        channelAccountScopeMapper.delete(ChannelAccountScope.gw()
+                .eq(ChannelAccountScope::getAccountId, accountId).eq(ChannelAccountScope::getSrAgentNo, srAgentNo));
+        for (String agentNo : targets) {
+            channelAccountScopeMapper.insert(new ChannelAccountScope()
+                    .setAccountId(accountId).setSrAgentNo(srAgentNo).setAgentNo(agentNo).setCreatedBy(operatorName));
+        }
+    }
+
+    /**
+     * 商戶的直屬代理能否使用這個帳號（第二階段綁定與下單時檢查用）：
+     * 帳號須已派發給他那一支的團長；該團長若設了使用範圍，直屬代理必須在名單內。
+     */
+    public boolean usableBy(String accountId, AgentInfo directAgent) {
+        if (directAgent == null) {
+            return false;
+        }
+        String srAgentNo = Objects.equals(directAgent.getAgentLevel(), AgentInfo.LEVEL_SENIOR) ? directAgent.getAgentNo() : directAgent.getParentAgentNo();
+        if (StringUtils.isBlank(srAgentNo) || channelAccountAgentMapper.selectCount(ChannelAccountAgent.gw()
+                .eq(ChannelAccountAgent::getAccountId, accountId).eq(ChannelAccountAgent::getSrAgentNo, srAgentNo)) == 0) {
+            return false;
+        }
+        List<ChannelAccountScope> scopes = channelAccountScopeMapper.selectList(ChannelAccountScope.gw()
+                .eq(ChannelAccountScope::getAccountId, accountId).eq(ChannelAccountScope::getSrAgentNo, srAgentNo));
+        return scopes.isEmpty() || scopes.stream().anyMatch(sc -> sc.getAgentNo().equals(directAgent.getAgentNo()));
+    }
+
     /** 收回加派；擁有者的那一列不可收回。 */
     public void revoke(String accountId, String srAgentNo) {
         ChannelAccount account = requireAccount(accountId);
@@ -206,6 +268,8 @@ public class ChannelAccountService extends ServiceImpl<ChannelAccountMapper, Cha
         }
         channelAccountAgentMapper.delete(ChannelAccountAgent.gw()
                 .eq(ChannelAccountAgent::getAccountId, accountId).eq(ChannelAccountAgent::getSrAgentNo, srAgentNo));
+        channelAccountScopeMapper.delete(ChannelAccountScope.gw()
+                .eq(ChannelAccountScope::getAccountId, accountId).eq(ChannelAccountScope::getSrAgentNo, srAgentNo));
     }
 
     @Transactional
@@ -215,6 +279,7 @@ public class ChannelAccountService extends ServiceImpl<ChannelAccountMapper, Cha
             throw new BizException("此帳號已加派給其他團長，請先收回再刪除");
         }
         channelAccountAgentMapper.delete(ChannelAccountAgent.gw().eq(ChannelAccountAgent::getAccountId, accountId));
+        channelAccountScopeMapper.delete(ChannelAccountScope.gw().eq(ChannelAccountScope::getAccountId, accountId));
         payInterfaceConfigService.remove(PayInterfaceConfig.gw()
                 .eq(PayInterfaceConfig::getInfoType, CS.INFO_TYPE_CHANNEL_ACCOUNT)
                 .eq(PayInterfaceConfig::getInfoId, accountId)

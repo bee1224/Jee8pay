@@ -103,6 +103,25 @@ c1 = login('captain01', r['data']['initPassword'])
 r = call('GET', '/api/agentPortal/channels', c1)
 check('隊長看不到渠道列表', r.get('code') != 0, r)
 
+# 使用範圍：渠道仍屬於團長，但可限定只給某幾位隊長的商戶
+CAP = [a for a in call('GET', '/api/agentInfo', god, params={'parentAgentNo': T1, 'pageSize': -1})['data']['records']][0]['agentNo']
+r = call('PUT', '/api/channelAccounts/%s/scope' % ACC, god, body={'srAgentNo': T1, 'agentNos': [CAP]})
+check('限定給隊長', r.get('code') == 0, r)
+lst = call('GET', '/api/channelAccounts', god, params={'srAgentNo': T1})
+check('列表顯示使用範圍', [x['agentNo'] for x in lst['data'][0].get('scopes', [])] == [CAP], lst)
+ch = call('GET', '/api/agentPortal/channels', t1)
+check('團長看得到使用範圍', [x['agentNo'] for x in ch['data'][0].get('scopes', [])] == [CAP], ch)
+r = call('PUT', '/api/channelAccounts/%s/scope' % ACC, god, body={'srAgentNo': T1, 'agentNos': [T1]})
+check('範圍不可指定團長本人', r.get('code') != 0, r)
+r = call('PUT', '/api/channelAccounts/%s/scope' % ACC, god, body={'srAgentNo': 'A_HOUSE', 'agentNos': []})
+check('未派發的團長不可設範圍', r.get('code') != 0, r)
+r = call('PUT', '/api/channelAccounts/%s/scope' % ACC, t1, body={'srAgentNo': T1, 'agentNos': []})
+check('團長不可自行改範圍', r.get('code') != 0, r)
+r = call('DELETE', '/api/agentInfo/' + CAP, god)
+check('被指定的隊長不可刪除', r.get('code') != 0 and '使用範圍' in str(r.get('msg')), r)
+r = call('PUT', '/api/channelAccounts/%s/scope' % ACC, god, body={'srAgentNo': T1, 'agentNos': []})
+check('清空範圍 = 全部可用', r.get('code') == 0 and sql("select count(*) from t_channel_account_scope") == '0', r)
+
 r = call('DELETE', '/api/agentInfo/A_HOUSE', god)
 check('平台直屬不可刪', r.get('code') != 0, r)
 

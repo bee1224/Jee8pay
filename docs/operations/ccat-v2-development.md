@@ -26,6 +26,14 @@
 | 驗證 | 後端 `mvn package` 全部測試通過；隔離環境（全新資料庫）`scripts/smoke-channel-accounts.py` 41/41 PASS，涵蓋金鑰遮罩、派發與共用規則、團長／隊長越權、搬遷腳本可重複執行。畫面未做瀏覽器逐頁驗證 |
 | 已知限制 | 金鑰在第二階段切換前有兩份明文（商戶應用與渠道帳號），加重 TD-001 |
 
+### 2026-10-09 追加：渠道管理選單（release `91dcb24-channel-menu`）
+
+只重建 manager-ui，執行 `20261009-channel-menu.sql`。上帝新增「渠道管理 → 渠道列表」（`/channels`），列出全部團長的渠道帳號，可在此新增並指定所屬團長；後端沿用第一階段的 `/api/channelAccounts`。部署後 11 個容器皆 healthy。回滾：`current` 指回 `releases/b93be3d-channel-p1` 後重建 manager-ui，並刪除 SQL 檔尾所列兩筆選單。
+
+### 2026-10-09 追加：大渠道選單與渠道使用範圍（release `91dcb24-channel-scope`）
+
+重建 manager、manager-ui，執行 `20261009-channel-scope.sql`；另以 `20261009-channel-menu.sql` 末段把「支付介面」搬到「渠道管理」底下並改名「大渠道」（只改資料庫）。新增 `t_channel_account_scope` 與 `PUT /api/channelAccounts/{id}/scope`。隔離環境 `scripts/smoke-channel-accounts.py` 49/49 PASS；部署後 11 個容器皆 healthy。使用範圍在第二階段前只記錄與顯示，不影響下單。回滾：`current` 指回 `releases/91dcb24-channel-menu` 後重建 manager、manager-ui，並 `DROP TABLE t_channel_account_scope`。
+
 ## 2026-09-29 test-env-overhaul 部署
 
 來源：分支 `test-env-overhaul`（`a3594721af26`；後端 JAR 建於 `e3cda9c`，其後僅前端與 SQL 變更）。正式環境未變更。

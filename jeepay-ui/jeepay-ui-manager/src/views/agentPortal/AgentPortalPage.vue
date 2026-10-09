@@ -109,6 +109,9 @@
           <a-table :columns="channelColumns" :data-source="vdata.channels" :pagination="false" size="small" row-key="accountId">
             <template #bodyCell="{ column, record }">
               <template v-if="column.key === 'ifName'">{{ record.ifName || record.ifCode }}</template>
+              <template v-if="column.key === 'scope'">
+                {{ (record.scopes || []).length ? '只限：' + record.scopes.map((s) => s.agentName || s.agentNo).join('、') : '全部可用' }}
+              </template>
               <template v-if="column.key === 'owned'">
                 <a-tag :color="record.owned ? 'green' : 'orange'">{{ record.owned ? '自己的' : '共用' }}</a-tag>
               </template>
@@ -203,6 +206,7 @@ const channelColumns = [
   { title: '渠道名稱', dataIndex: 'accountName' },
   { key: 'ifName', title: '第三方支付' },
   { key: 'owned', title: '歸屬' },
+  { key: 'scope', title: '使用範圍' },
   { key: 'state', title: '狀態' },
 ]
 const mchColumns = [

@@ -79,6 +79,18 @@ public class ChannelAccountController extends AgentBaseCtrl {
         return ApiRes.ok();
     }
 
+    @Operation(summary = "設定某位團長在此帳號上的使用範圍（agentNos 為空 = 他這一支全部可用）")
+    @PreAuthorize("hasAuthority('ENT_CHANNEL_ACCOUNT_EDIT')")
+    @MethodLog(remark = "設定渠道使用範圍")
+    @RequestMapping(value = "/{accountId}/scope", method = RequestMethod.PUT)
+    public ApiRes scope(@PathVariable("accountId") String accountId) {
+        requireAuthority("ENT_CHANNEL_ACCOUNT_EDIT");
+        com.alibaba.fastjson.JSONArray agentNos = getReqParamJSON().getJSONArray("agentNos");
+        channelAccountService.setScope(accountId, getValStringRequired("srAgentNo"),
+                agentNos == null ? null : agentNos.toJavaList(String.class), getCurrentUser().getSysUser().getRealname());
+        return ApiRes.ok();
+    }
+
     @Operation(summary = "收回加派的渠道帳號")
     @PreAuthorize("hasAuthority('ENT_CHANNEL_ACCOUNT_EDIT')")
     @MethodLog(remark = "收回渠道帳號")

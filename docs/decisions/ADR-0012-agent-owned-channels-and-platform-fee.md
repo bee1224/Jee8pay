@@ -46,6 +46,14 @@ Date: 2026-10-03
 - `t_mch_pay_passage` 增加 `account_id`。商戶只能使用「自己那一支的高級代理」被派發的帳號；綁定時與下單時各檢查一次，派發被撤銷就拒絕下單（fail closed）。
 - 回呼依訂單找到通道與帳號，再由 provider adapter 驗證簽章與帳號身分；對不上就拒絕（AGENTS.md 的 callback ownership 不變）。
 
+#### 2026-10-09 補充：使用範圍與選單用語
+
+- 使用者決定：渠道帳號**仍只屬於團長**，不讓隊長擁有帳號；但上帝可以把帳號限定「只給該團長旗下某幾位隊長的商戶使用」。
+- 資料：`t_channel_account_scope(account_id, sr_agent_no, agent_no)`。某位團長在某帳號上沒有列 = 他這一支全部可用；有列 = 只有列出的隊長的商戶可用，團長直屬商戶也不可用。
+- 只有上帝能設定。被指定的隊長不可直接刪除（自動移除會讓限定悄悄變回全部可用）。
+- 判斷規則已寫在 `ChannelAccountService.usableBy`，第二階段在綁定與下單時呼叫；第一階段只記錄與顯示，尚未生效。
+- 選單用語對照競品：「大渠道」= 一家第三方支付的串接（`ifCode`，即原「支付介面」頁）；「渠道」= 渠道帳號。兩者都放在上帝的「渠道管理」底下。
+
 ### 3. 取參數（唯一需要動 payment shared core 的地方）
 
 `ConfigContextQueryService` 取 `NormalMchParams` 時：通道帶有 `account_id` 就依帳號取（`info_type=4`），否則照舊依商戶應用取。既有設定搬遷完成前照常運作。屬 YELLOW 修改；既有 extension point 不足的理由是唯一鍵把金鑰綁在商戶應用上，無法表達歸屬、派發與共用。

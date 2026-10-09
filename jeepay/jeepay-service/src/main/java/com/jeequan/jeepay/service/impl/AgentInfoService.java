@@ -30,6 +30,7 @@ public class AgentInfoService extends ServiceImpl<AgentInfoMapper, AgentInfo> {
     @Autowired private SysUserService sysUserService;
     @Autowired private WalletAccountMapper walletAccountMapper;
     @Autowired private com.jeequan.jeepay.service.mapper.ChannelAccountAgentMapper channelAccountAgentMapper;
+    @Autowired private com.jeequan.jeepay.service.mapper.ChannelAccountScopeMapper channelAccountScopeMapper;
 
     @Transactional
     public AgentInfo create(AgentInfo agent, Long operatorUid, String operatorName) {
@@ -96,6 +97,11 @@ public class AgentInfoService extends ServiceImpl<AgentInfoMapper, AgentInfo> {
         if (channelAccountAgentMapper.selectCount(com.jeequan.jeepay.core.entity.ChannelAccountAgent.gw()
                 .eq(com.jeequan.jeepay.core.entity.ChannelAccountAgent::getSrAgentNo, agentNo)) > 0) {
             throw new BizException("該代理仍有渠道帳號，請先刪除或收回");
+        }
+        // 自動移除會讓限定範圍變回「全部可用」，因此要求先人工調整
+        if (channelAccountScopeMapper.selectCount(com.jeequan.jeepay.core.entity.ChannelAccountScope.gw()
+                .eq(com.jeequan.jeepay.core.entity.ChannelAccountScope::getAgentNo, agentNo)) > 0) {
+            throw new BizException("該隊長仍被指定為渠道的使用對象，請先調整渠道的使用範圍");
         }
         if (count(AgentInfo.gw().eq(AgentInfo::getParentAgentNo, agentNo)) > 0) {
             throw new BizException("該代理下仍有隊長，不可刪除");

@@ -225,6 +225,19 @@ CREATE TABLE `t_channel_account_agent` (
         KEY `idx_sr_agent_no` (`sr_agent_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='渠道帳號派發表';
 
+-- 渠道帳號使用範圍表（帳號仍屬於團長；某位團長在某帳號上沒有列 = 他這一支全部可用，有列 = 只限列出的隊長的商戶）
+CREATE TABLE `t_channel_account_scope` (
+        `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+        `account_id` VARCHAR(64) NOT NULL COMMENT '渠道帳號ID',
+        `sr_agent_no` VARCHAR(64) NOT NULL COMMENT '隊長所屬的團長代理號',
+        `agent_no` VARCHAR(64) NOT NULL COMMENT '可使用的隊長代理號',
+        `created_by` VARCHAR(64) DEFAULT NULL COMMENT '設定者姓名',
+        `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '設定時間',
+        PRIMARY KEY (`id`),
+        UNIQUE KEY `uk_account_agent` (`account_id`, `agent_no`),
+        KEY `idx_agent_no` (`agent_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='渠道帳號使用範圍表';
+
 -- 商戶與代理綁定表（每個商戶一個直屬代理）
 CREATE TABLE `t_agent_mch_rela` (
         `mch_no` VARCHAR(64) NOT NULL COMMENT '商戶號',
@@ -890,6 +903,8 @@ insert into t_sys_entitlement values('ENT_FEE_TEMPLATE_APPLY', '按鈕：套用�
 insert into t_sys_entitlement values('ENT_AGENT_DETAIL', '團長詳情', 'no-icon', '/agents/detail', 'AgentDetailPage', 'MO', 0, 1,  'ENT_AGENT', '11', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_CHANNEL_ACCOUNT_LIST', '頁面：渠道帳號列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_AGENT_INFO', '0', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_CHANNEL_ACCOUNT_EDIT', '按鈕：新增／修改／派發渠道帳號', 'no-icon', '', '', 'PB', 0, 1,  'ENT_AGENT_INFO', '0', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_CHANNEL', '渠道管理', 'api', '', 'RouteView', 'ML', 0, 1,  'ROOT', '47', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_CHANNEL_ACCOUNT', '渠道列表', 'unordered-list', '/channels', 'ChannelAccountPage', 'ML', 0, 1,  'ENT_CHANNEL', '10', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_CHANNEL', '渠道列表', 'api', '/agentPortal/channels', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '32', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL', '代理後台', 'team', '', 'RouteView', 'ML', 0, 1,  'ROOT', '46', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_HOME', '錢包與提現', 'wallet', '/agentPortal/wallet', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '10', 'MGR', now(), now());
@@ -972,7 +987,8 @@ insert into t_sys_entitlement values('ENT_ORDER', '訂單中心', 'transaction',
 
 -- 支付配置菜单
 insert into t_sys_entitlement values('ENT_PC', '支付設定', 'file-done', '', 'RouteView', 'ML', 0, 1,  'ROOT', '60', 'MGR', now(), now());
-    insert into t_sys_entitlement values('ENT_PC_IF_DEFINE', '支付介面', 'interaction', '/ifdefines', 'IfDefinePage', 'ML', 0, 1,  'ENT_PC', '10', 'MGR', now(), now());
+    -- 大渠道 = 一家第三方支付的串接（ifCode）；選單放在「渠道管理」底下，與渠道列表並列
+    insert into t_sys_entitlement values('ENT_PC_IF_DEFINE', '大渠道', 'interaction', '/ifdefines', 'IfDefinePage', 'ML', 0, 1,  'ENT_CHANNEL', '5', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_PC_IF_DEFINE_LIST', '頁面：支付接口定義列表', 'no-icon', '', '', 'PB', 0, 1,  'ENT_PC_IF_DEFINE', '0', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_PC_IF_DEFINE_SEARCH', '頁面：搜尋', 'no-icon', '', '', 'PB', 0, 1,  'ENT_PC_IF_DEFINE', '0', 'MGR', now(), now());
         insert into t_sys_entitlement values('ENT_PC_IF_DEFINE_VIEW', '按鈕：詳情', 'no-icon', '', '', 'PB', 0, 1,  'ENT_PC_IF_DEFINE', '0', 'MGR', now(), now());
