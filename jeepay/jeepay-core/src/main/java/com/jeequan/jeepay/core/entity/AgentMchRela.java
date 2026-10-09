@@ -14,7 +14,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 商戶與代理綁定（ADR-0009）：直屬代理決定費率瀑布的代理層；推薦人獨立存放，更換直屬代理不影響推薦關係。
+ * 商戶與代理綁定（ADR-0009）：直屬代理決定費率瀑布的代理層。
  */
 @Schema(description = "商戶與代理綁定表")
 @Data
@@ -36,8 +36,6 @@ public class AgentMchRela extends BaseModel implements Serializable {
     @Schema(title = "agentNo", description = "直屬代理號")
     private String agentNo;
 
-    @Schema(title = "referrerAgentNo", description = "推薦人代理號")
-    private String referrerAgentNo;
 
     @Schema(title = "updatedUid", description = "最後修改者用戶ID")
     private Long updatedUid;

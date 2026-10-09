@@ -148,21 +148,21 @@ public class CurrentUserController extends CommonCtrl{
 			@Parameter(name = "originalPwd", description = "原密码")
 	})
 	@RequestMapping(value="modifyPwd", method = RequestMethod.PUT)
-	@MethodLog(remark = "修改密码")
+	@MethodLog(remark = "修改密碼")
 	public ApiRes modifyPwd() throws BizException{
 
 		//更改密码，验证当前用户信息
 		String currentUserPwd = Base64.decodeStr(getValStringRequired("originalPwd")); //当前用户登录密码
 		//验证当前密码是否正确
 		if(!sysUserAuthService.validateCurrentUserPwd(currentUserPwd)){
-			throw new BizException("原密码验证失败！");
+			throw new BizException("原密碼驗證失敗！");
 		}
 
 		String opUserPwd = Base64.decodeStr(getValStringRequired("confirmPwd"));
 
 		// 验证原密码与新密码是否相同
 		if (opUserPwd.equals(currentUserPwd)) {
-			throw new BizException("新密码与原密码不能相同！");
+			throw new BizException("新密碼與原密碼不能相同！");
 		}
 
 		sysUserAuthService.resetAuthInfo(getCurrentUser().getSysUser().getSysUserId(), null, null, opUserPwd, CS.SYS_TYPE.MGR);

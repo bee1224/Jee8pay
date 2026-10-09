@@ -53,7 +53,7 @@ public class JayIbon extends JayPaymentService {
             JayKit.toJayTwdAmount(payOrder.getAmount());
             parsePayer(bizRQ.getChannelExtra());
             if (payOrder.getExpiredTime() == null) {
-                return "JAY ibon 缴费期限不能為空";
+                return "JAY ibon 繳費期限不能為空";
             }
             return null;
         } catch (IllegalArgumentException e) {
@@ -95,7 +95,7 @@ public class JayIbon extends JayPaymentService {
         JSONObject payer = parsePayer(bizRQ.getChannelExtra());
         long orderAmount = JayKit.toJayTwdAmount(payOrder.getAmount());
         if (payOrder.getExpiredTime() == null) {
-            throw new IllegalArgumentException("JAY ibon 缴费期限不能為空");
+            throw new IllegalArgumentException("JAY ibon 繳費期限不能為空");
         }
 
         JSONObject request = new JSONObject(true);

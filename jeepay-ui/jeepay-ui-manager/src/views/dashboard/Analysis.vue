@@ -131,7 +131,7 @@
                 <div class="user-greet-all">
                   <span style="">{{ vdata.mainTips.helloTitle }}</span>
                   <div>
-                    <span style="font-size: 12px" v-if="vdata.isAdmin === 1">超級管理員</span>
+                    <span style="font-size: 12px" v-if="vdata.isAdmin === 1">上帝</span>
                     <span style="font-size: 12px" v-else>操作員</span>
                   </div>
                 </div>
@@ -310,7 +310,7 @@
             <a-col :span="24">
               <a-descriptions>
                 <a-descriptions-item label="權限">
-                  <a-tag color="#2db7f5" v-if="userStore.userInfo.isAdmin == '1'">超管</a-tag>
+                  <a-tag color="#2db7f5" v-if="userStore.userInfo.isAdmin == '1'">上帝</a-tag>
                   <a-tag color="#87d068" v-if="userStore.userInfo.isAdmin == '0'">操作員</a-tag>
                 </a-descriptions-item>
               </a-descriptions>

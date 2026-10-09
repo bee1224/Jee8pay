@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 費率範本（ADR-0009 第四階段）：只含高代費／代理費，平臺層不走範本（平臺層須逐筆雙人覆核）。
+ * 費率範本（ADR-0009 第四階段）：只含團長費／隊長費，平臺層不走範本（平臺層須逐筆雙人覆核）。
  * 套用即逐筆呼叫 FeeRuleService.saveRule，沿用同一套檢查與變更紀錄；範本日後修改不回溯已套用的規則。
  */
 @Service
@@ -48,7 +48,7 @@ public class FeeTemplateService extends ServiceImpl<FeeTemplateMapper, FeeTempla
         Set<String> keys = new HashSet<>();
         for (FeeTemplateItem item : items) {
             if (FeeRuleService.isPlatformLayer(item.getLayer())) {
-                throw new BizException("範本只能包含高代費、代理費與推薦佣金");
+                throw new BizException("範本只能包含團長費與隊長費");
             }
             if (!keys.add(item.getWayCode() + "|" + item.getLayer())) {
                 throw new BizException("範本中同一支付方式與費率層重複：" + item.getWayCode() + " " + item.getLayer());
@@ -88,7 +88,7 @@ public class FeeTemplateService extends ServiceImpl<FeeTemplateMapper, FeeTempla
 
     /**
      * 套用到多個代理或商戶（同一交易）。代理對象只套用與其層級相符的明細
-     * （高級代理取高代費、一般代理取代理費），其餘略過並計數回報。
+     * （團長取團長費、隊長取隊長費），其餘略過並計數回報。
      */
     @Transactional
     public JSONObject apply(Long templateId, String targetType, List<String> targetIds, Long uid, String name) {
@@ -127,8 +127,7 @@ public class FeeTemplateService extends ServiceImpl<FeeTemplateMapper, FeeTempla
     }
 
     static boolean layerMatches(String layer, AgentInfo agent) {
-        return FeeRule.LAYER_REFERRER.equals(layer)
-                || (FeeRule.LAYER_SR_AGENT.equals(layer) && AgentInfo.LEVEL_SENIOR == agent.getAgentLevel())
+        return (FeeRule.LAYER_SR_AGENT.equals(layer) && AgentInfo.LEVEL_SENIOR == agent.getAgentLevel())
                 || (FeeRule.LAYER_AGENT.equals(layer) && AgentInfo.LEVEL_AGENT == agent.getAgentLevel());
     }
 }

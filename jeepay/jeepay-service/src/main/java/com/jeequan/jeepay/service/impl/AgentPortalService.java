@@ -38,7 +38,7 @@ public class AgentPortalService {
 
     /** 代理帳號固定角色（由 SQL seed，僅含代理後台權限） */
     public static final String ROLE_AGENT_PORTAL = "ROLE_AGENT_PORTAL";
-    /** 一般代理（第三代）帳號固定角色：沒有旗下代理與操作紀錄選單 */
+    /** 隊長（第三代）帳號固定角色：沒有旗下代理與操作紀錄選單 */
     public static final String ROLE_AGENT_PORTAL_L2 = "ROLE_AGENT_PORTAL_L2";
 
     public static String roleOf(AgentInfo agent) {
@@ -80,12 +80,11 @@ public class AgentPortalService {
                 .orderByAsc(AgentInfo::getAgentPath));
     }
 
-    /** 轄區內直屬商戶＋自己推薦的商戶；relation 標示關係。 */
+    /** 轄區內直屬商戶；relation 標示是自己直屬還是旗下代理的。 */
     public List<JSONObject> merchants(AgentInfo me) {
         List<String> agentNos = jurisdiction(me).stream().map(AgentInfo::getAgentNo).collect(Collectors.toList());
         List<AgentMchRela> relas = agentMchRelaMapper.selectList(AgentMchRela.gw()
-                .in(AgentMchRela::getAgentNo, agentNos)
-                .or().eq(AgentMchRela::getReferrerAgentNo, me.getAgentNo()));
+                .in(AgentMchRela::getAgentNo, agentNos));
         if (relas.isEmpty()) {
             return Collections.emptyList();
         }
@@ -99,15 +98,13 @@ public class AgentPortalService {
             row.put("mchName", mch == null ? null : mch.getMchShortName());
             row.put("mchState", mch == null ? null : mch.getState());
             row.put("agentNo", rela.getAgentNo());
-            row.put("relation", agentNos.contains(rela.getAgentNo())
-                    ? (me.getAgentNo().equals(rela.getAgentNo()) ? "直屬" : "旗下代理")
-                    : "推薦");
+            row.put("relation", me.getAgentNo().equals(rela.getAgentNo()) ? "直屬" : "旗下代理");
             result.add(row);
         }
         return result;
     }
 
-    /** 轄區內代理的費率（唯讀）：自己的高代費／代理費與旗下代理的代理費。 */
+    /** 轄區內代理的費率（唯讀）：自己的團長費／隊長費與旗下代理的隊長費。 */
     public List<FeeRule> rules(AgentInfo me) {
         List<String> agentNos = jurisdiction(me).stream().map(AgentInfo::getAgentNo).collect(Collectors.toList());
         return feeRuleService.list(FeeRule.gw().eq(FeeRule::getTargetType, FeeRule.TARGET_AGENT)
@@ -116,26 +113,25 @@ public class AgentPortalService {
     }
 
     /**
-     * 高級代理設定旗下代理的代理費（或自己轄下代理的推薦佣金）。
+     * 團長設定旗下代理的隊長費。
      * 防呆：設定後，受影響商戶以 1000 元試算的各層合計不得超過其支付通道手續費，否則整筆回滾。
      */
     @Transactional
     public FeeRule saveSubAgentRule(AgentInfo me, FeeRule input, Long uid, String name) {
         if (!Objects.equals(me.getAgentLevel(), AgentInfo.LEVEL_SENIOR)) {
-            throw new BizException("只有高級代理可以設定旗下代理的費率");
+            throw new BizException("只有團長可以設定旗下代理的費率");
         }
         AgentInfo target = agentInfoMapper.selectById(input.getTargetId());
         if (target == null || !me.getAgentNo().equals(target.getParentAgentNo())) {
             throw new BizException("只能設定自己的旗下代理");
         }
-        if (!FeeRule.LAYER_AGENT.equals(input.getLayer()) && !FeeRule.LAYER_REFERRER.equals(input.getLayer())) {
-            throw new BizException("代理後台只能設定代理費或推薦佣金");
+        if (!FeeRule.LAYER_AGENT.equals(input.getLayer())) {
+            throw new BizException("代理後台只能設定隊長費");
         }
         input.setTargetType(FeeRule.TARGET_AGENT);
         FeeRule saved = feeRuleService.saveRule(input, uid, name + "（代理 " + me.getAgentNo() + "）");
         List<String> affected = agentMchRelaMapper.selectList(AgentMchRela.gw()
-                        .eq(FeeRule.LAYER_AGENT.equals(input.getLayer()), AgentMchRela::getAgentNo, target.getAgentNo())
-                        .eq(FeeRule.LAYER_REFERRER.equals(input.getLayer()), AgentMchRela::getReferrerAgentNo, target.getAgentNo()))
+                        .eq(AgentMchRela::getAgentNo, target.getAgentNo()))
                 .stream().map(AgentMchRela::getMchNo).collect(Collectors.toList());
         List<JSONObject> violations = feeRuleService.riskCheck(input.getWayCode(), 100_000L, affected);
         if (!violations.isEmpty()) {
@@ -228,21 +224,21 @@ public class AgentPortalService {
         return result;
     }
 
-    // ---------------- 家族樹權限：爺爺（平台）→ 爸爸（高級代理）→ 兒子（一般代理）→ 商戶 ----------------
+    // ---------------- 家族樹權限：爺爺（平台）→ 爸爸（團長）→ 兒子（隊長）→ 商戶 ----------------
     // 代理只能看到、操作自己這一支的後代；範圍一律由登入者的代理路徑推導，不接受前端指定。
 
-    /** 轄區內代理（含自己）直屬的商戶號；不含只有推薦關係的商戶。 */
+    /** 轄區內代理（含自己）直屬的商戶號。 */
     public List<String> directMchNos(AgentInfo me) {
         List<String> agentNos = jurisdiction(me).stream().map(AgentInfo::getAgentNo).collect(Collectors.toList());
         return agentMchRelaMapper.selectList(AgentMchRela.gw().in(AgentMchRela::getAgentNo, agentNos))
                 .stream().map(AgentMchRela::getMchNo).collect(Collectors.toList());
     }
 
-    /** 高級代理新增自己的下級（一般）代理並開通登入帳號；層級與上級由後端決定。 */
+    /** 團長新增自己的下級（一般）代理並開通登入帳號；層級與上級由後端決定。 */
     @Transactional
     public JSONObject createSubAgent(AgentInfo me, AgentInfo input, String loginUsername, Long uid, String name) {
         if (!Objects.equals(me.getAgentLevel(), AgentInfo.LEVEL_SENIOR)) {
-            throw new BizException("只有高級代理可以新增旗下代理");
+            throw new BizException("只有團長可以新增旗下代理");
         }
         AgentInfo agent = new AgentInfo();
         agent.setAgentName(input.getAgentName());
@@ -257,7 +253,7 @@ public class AgentPortalService {
     }
 
     /**
-     * 代理新增商戶：商戶直屬於自己，或（高級代理）指定給自己的旗下代理。
+     * 代理新增商戶：商戶直屬於自己，或（團長）指定給自己的旗下代理。
      * 商戶登入帳號的密碼同樣改為隨機 8 碼，只在回應出現一次。支付通道與費率仍由平台設定。
      */
     @Transactional
@@ -288,7 +284,7 @@ public class AgentPortalService {
         mch.setCreatedUid(uid);
         mch.setCreatedBy(name + "（代理 " + me.getAgentNo() + "）");
         mchInfoService.addMch(mch, loginUsername);
-        agentMchRelaService.bind(mch.getMchNo(), ownerNo, null, uid, name);
+        agentMchRelaService.bind(mch.getMchNo(), ownerNo, uid, name);
         String password = randomPassword();
         sysUserAuthService.resetAuthInfo(mchInfoService.getById(mch.getMchNo()).getInitUserId(), null, null, password, CS.SYS_TYPE.MCH);
         JSONObject result = new JSONObject();

@@ -6,7 +6,7 @@
         <a-descriptions :title="vdata.me.agentName" bordered size="small" :column="{ xs: 1, md: 3 }" style="margin-bottom: 16px">
           <a-descriptions-item label="代理號">{{ vdata.me.agentNo }}</a-descriptions-item>
           <a-descriptions-item label="層級">
-            <a-tag :color="vdata.me.agentLevel === 1 ? 'purple' : 'blue'">{{ vdata.me.agentLevel === 1 ? '高級代理' : '一般代理' }}</a-tag>
+            <a-tag :color="vdata.me.agentLevel === 1 ? 'purple' : 'blue'">{{ vdata.me.agentLevel === 1 ? '團長' : '隊長' }}</a-tag>
           </a-descriptions-item>
           <a-descriptions-item label="上級代理">{{ vdata.me.parentAgentNo || '—' }}</a-descriptions-item>
         </a-descriptions>
@@ -28,10 +28,10 @@
             <a-table :columns="mchColumns" :data-source="vdata.merchants" size="small" row-key="mchNo">
               <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'relation'">
-                  <a-tag :color="record.relation === '推薦' ? 'orange' : 'green'">{{ record.relation === '下級代理' ? '旗下代理' : record.relation }}</a-tag>
+                  <a-tag :color="record.relation === '直屬' ? 'green' : 'blue'">{{ record.relation }}</a-tag>
                 </template>
                 <template v-if="column.key === 'op'">
-                  <template v-if="record.relation !== '推薦' && $access('ENT_AGENT_PORTAL_MCH_EDIT')">
+                  <template v-if="$access('ENT_AGENT_PORTAL_MCH_EDIT')">
                     <a-button v-if="vdata.me.agentLevel === 1" type="link" @click="openBind(record)">更換歸屬</a-button>
                     <a-button type="link" @click="resetMchPwd(record)">重設密碼</a-button>
                   </template>
@@ -41,7 +41,7 @@
             </a-table>
         </template>
         <template v-else-if="section === 'sub'">
-            <a-alert v-if="vdata.me.agentLevel !== 1" type="info" show-icon message="只有高級代理才有旗下代理。" />
+            <a-alert v-if="vdata.me.agentLevel !== 1" type="info" show-icon message="只有團長才有旗下代理。" />
             <a-button v-if="vdata.me.agentLevel === 1 && $access('ENT_AGENT_PORTAL_SUB_ADD')" type="primary" style="margin-bottom: 12px" @click="openSubForm">新增旗下代理</a-button>
             <a-table v-else :columns="subColumns" :data-source="vdata.me.subAgents || []" size="small" row-key="agentNo">
               <template #bodyCell="{ column, record }">
@@ -93,16 +93,31 @@
                 <a-form-item><a-button type="primary" @click="saveSubRule">儲存</a-button></a-form-item>
                 <a-form-item><a-button @click="openTemplate">套用範本</a-button></a-form-item>
               </a-form>
-              <div style="margin-top: 6px; color: #888; font-size: 12px">可設定自己的高代費、旗下代理的代理費、推薦佣金，或對單一商戶覆寫。平臺費與渠道費由平台設定。儲存後若任何旗下商戶的手續費合計超過其商戶費率，系統會拒絕並提示。</div>
+              <div style="margin-top: 6px; color: #888; font-size: 12px">可設定自己的團長費、旗下代理的隊長費，或對單一商戶覆寫。平臺費與渠道費由平台設定。儲存後若任何旗下商戶的手續費合計超過其商戶費率，系統會拒絕並提示。</div>
             </a-card>
             <a-table :columns="feeColumns" :data-source="vdata.rules" size="small" row-key="ruleId">
               <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'target'"><a-tag>{{ record.targetType === 'MCH' ? '商戶' : '代理' }}</a-tag>{{ record.targetId }}</template>
-                <template v-if="column.key === 'layer'">{{ { SR_AGENT: '高代費', AGENT: '代理費', REFERRER: '推薦佣金' }[record.layer] }}</template>
+                <template v-if="column.key === 'layer'">{{ { SR_AGENT: '團長費', AGENT: '隊長費' }[record.layer] }}</template>
                 <template v-if="column.key === 'value'">{{ (Number(record.rate) * 100).toFixed(4) }}% + {{ (record.fixedAmount / 100).toFixed(2) }} 元</template>
               </template>
               <template #emptyText>尚未設定費率</template>
             </a-table>
+        </template>
+        <template v-else-if="section === 'channels'">
+          <a-alert type="info" show-icon style="margin-bottom: 12px" message="這裡列出平台派發給你的第三方支付渠道。要新增渠道或更換金鑰，請把資料交給平台處理。" />
+          <a-table :columns="channelColumns" :data-source="vdata.channels" :pagination="false" size="small" row-key="accountId">
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.key === 'ifName'">{{ record.ifName || record.ifCode }}</template>
+              <template v-if="column.key === 'owned'">
+                <a-tag :color="record.owned ? 'green' : 'orange'">{{ record.owned ? '自己的' : '共用' }}</a-tag>
+              </template>
+              <template v-if="column.key === 'state'">
+                <a-badge :status="record.state === 0 ? 'error' : 'processing'" :text="record.state === 0 ? '停用' : '啟用'" />
+              </template>
+            </template>
+            <template #emptyText>平台尚未派發渠道給你</template>
+          </a-table>
         </template>
         <BranchWallets v-else-if="section === 'branchWallets'" :me="vdata.me" />
         <WithdrawAudit v-else-if="section === 'withdrawAudit'" :me="vdata.me" />
@@ -143,7 +158,6 @@
     <a-modal v-model:open="vdata.bind.open" :title="'更換歸屬：' + vdata.bind.mchName" ok-text="儲存" cancel-text="取消" :confirm-loading="vdata.bind.saving" @ok="saveBind">
       <a-form layout="vertical">
         <a-form-item label="直屬代理" required><a-select v-model:value="vdata.bind.agentNo" :options="ownerOptions" /></a-form-item>
-        <a-form-item label="推薦人（選填）"><a-select v-model:value="vdata.bind.referrerAgentNo" :options="ownerOptions" allow-clear placeholder="不設定" /></a-form-item>
       </a-form>
       <div style="color: #888; font-size: 12px">更換後新訂單的分潤改歸新的直屬代理；已完成的訂單不受影響。</div>
     </a-modal>
@@ -185,6 +199,12 @@ import { computed, reactive, ref, watch, getCurrentInstance } from 'vue'
 import { useRoute } from 'vue-router'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
+const channelColumns = [
+  { title: '渠道名稱', dataIndex: 'accountName' },
+  { key: 'ifName', title: '第三方支付' },
+  { key: 'owned', title: '歸屬' },
+  { key: 'state', title: '狀態' },
+]
 const mchColumns = [
   { title: '商戶號', dataIndex: 'mchNo' },
   { title: '商戶名稱', dataIndex: 'mchName' },
@@ -209,10 +229,11 @@ const vdata: any = reactive({
   me: null,
   error: '',
   merchants: [],
+  channels: [],
   rules: [],
   sub: { targetKey: undefined, targetType: undefined, targetId: undefined, layer: undefined, wayCode: undefined, pct: 0, fixedYuan: 0 },
   logins: [],
-  bind: { open: false, saving: false, mchNo: '', mchName: '', agentNo: undefined, referrerAgentNo: undefined },
+  bind: { open: false, saving: false, mchNo: '', mchName: '', agentNo: undefined },
   tpl: { open: false, saving: false, list: [], templateId: undefined, targetType: 'AGENT', targetIds: [] },
   order: { range: [], unionOrderId: '', mchNo: '', state: undefined, records: [], total: 0, page: 1, loaded: false },
   log: { records: [], total: 0, page: 1, loaded: false },
@@ -225,6 +246,7 @@ const SECTIONS = {
   ENT_AGENT_PORTAL_HOME: 'wallet',
   ENT_AGENT_PORTAL_PROFIT: 'profit',
   ENT_AGENT_PORTAL_MCH: 'mch',
+  ENT_AGENT_PORTAL_CHANNEL: 'channels',
   ENT_AGENT_PORTAL_SUB: 'sub',
   ENT_AGENT_PORTAL_FEE: 'fee',
   ENT_AGENT_PORTAL_ORDER: 'orders',
@@ -308,6 +330,9 @@ function loadLogs() {
     vdata.log.loaded = true
   })
 }
+function loadChannels() {
+  req.list(API_URL_AGENT_PORTAL + '/channels', {}).then((r) => (vdata.channels = r || []))
+}
 function loadMe() {
   return req.list(API_URL_AGENT_PORTAL + '/me', {}).then((res) => (vdata.me = res))
 }
@@ -357,7 +382,7 @@ function loadRules() {
   req.list(API_URL_AGENT_PORTAL + '/branch/feeRules', {}).then((r) => (vdata.rules = r || []))
 }
 
-// 設定對象：自己（高代費）、旗下代理（代理費）、商戶（逐一覆寫）；推薦佣金三者皆可
+// 設定對象：自己（團長費）、旗下代理（隊長費）、商戶（逐一覆寫）
 const agentTargetOptions = computed(() =>
   vdata.me
     ? [{ value: vdata.me.agentNo, label: `自己（${vdata.me.agentName}）` }].concat(
@@ -366,7 +391,7 @@ const agentTargetOptions = computed(() =>
     : []
 )
 const mchTargetOptions = computed(() =>
-  vdata.merchants.filter((m) => m.relation !== '推薦').map((m) => ({ value: m.mchNo, label: `商戶：${m.mchName || ''}（${m.mchNo}）` }))
+  vdata.merchants.map((m) => ({ value: m.mchNo, label: `商戶：${m.mchName || ''}（${m.mchNo}）` }))
 )
 const feeTargetOptions = computed(() =>
   agentTargetOptions.value.map((o) => ({ value: 'AGENT:' + o.value, label: o.label }))
@@ -375,18 +400,18 @@ const feeTargetOptions = computed(() =>
 const feeLayerOptions = computed(() => {
   const s = vdata.sub
   const all = [
-    { value: 'SR_AGENT', label: '高代費' },
-    { value: 'AGENT', label: '代理費' },
-    { value: 'REFERRER', label: '推薦佣金' },
+    { value: 'SR_AGENT', label: '團長費' },
+    { value: 'AGENT', label: '隊長費' },
   ]
   if (s.targetType === 'MCH' || !s.targetType) return all
-  return all.filter((l) => l.value === 'REFERRER' || l.value === (s.targetId === vdata.me.agentNo ? 'SR_AGENT' : 'AGENT'))
+  return all.filter((l) => l.value === (s.targetId === vdata.me.agentNo ? 'SR_AGENT' : 'AGENT'))
 })
 function onFeeTarget(key) {
   const [type, id] = String(key).split(':')
   vdata.sub.targetType = type
   vdata.sub.targetId = id
-  vdata.sub.layer = undefined
+  // 代理對象只有一種費率層可設，直接帶入；商戶覆寫才需要自己選
+  vdata.sub.layer = type === 'AGENT' ? (id === vdata.me.agentNo ? 'SR_AGENT' : 'AGENT') : undefined
 }
 function saveSubRule() {
   const s = vdata.sub
@@ -429,13 +454,13 @@ function applyTemplate() {
     .finally(() => (t.saving = false))
 }
 function openBind(record) {
-  vdata.bind = { open: true, saving: false, mchNo: record.mchNo, mchName: record.mchName || record.mchNo, agentNo: record.agentNo, referrerAgentNo: undefined }
+  vdata.bind = { open: true, saving: false, mchNo: record.mchNo, mchName: record.mchName || record.mchNo, agentNo: record.agentNo }
 }
 function saveBind() {
   const b = vdata.bind
   b.saving = true
   req
-    .updateById(API_URL_AGENT_PORTAL + '/branch/merchants', b.mchNo + '/binding', { agentNo: b.agentNo, referrerAgentNo: b.referrerAgentNo || '' })
+    .updateById(API_URL_AGENT_PORTAL + '/branch/merchants', b.mchNo + '/binding', { agentNo: b.agentNo })
     .then(() => {
       $infoBox.message.success('已更換')
       b.open = false
@@ -463,6 +488,7 @@ loadMe()
       (sec) => {
         if (sec === 'orders' && !vdata.order.loaded) loadOrders()
         if (sec === 'oplog' && !vdata.log.loaded) loadLogs()
+        if (sec === 'channels') loadChannels()
       },
       { immediate: true }
     )

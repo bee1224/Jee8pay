@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-/** 風控黑名單（平台維護；scope 可為 GLOBAL 或高級代理號）。 */
+/** 風控黑名單（平台維護；scope 可為 GLOBAL 或團長號）。 */
 @Tag(name = "風控黑名單")
 @RestController
 @RequestMapping("/api/riskBlacklist")

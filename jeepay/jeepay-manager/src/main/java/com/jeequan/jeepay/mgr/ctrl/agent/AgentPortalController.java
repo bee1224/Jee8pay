@@ -44,6 +44,8 @@ import java.util.Objects;
 public class AgentPortalController extends AgentBaseCtrl {
 
     @Autowired private AgentPortalService agentPortalService;
+    @Autowired private com.jeequan.jeepay.service.impl.AgentInfoService agentInfoService;
+    @Autowired private com.jeequan.jeepay.service.impl.ChannelAccountService channelAccountService;
     @Autowired private WalletService walletService;
     @Autowired private PayWayService payWayService;
     @Autowired private WalletLedgerMapper walletLedgerMapper;
@@ -73,6 +75,15 @@ public class AgentPortalController extends AgentBaseCtrl {
     public ApiRes merchants() {
         requireAuthority("ENT_AGENT_PORTAL_VIEW");
         return ApiRes.ok(agentPortalService.merchants(me()));
+    }
+
+    @Operation(summary = "派發給我這一支的渠道帳號（唯讀，不含金鑰）")
+    @PreAuthorize("hasAuthority('ENT_AGENT_PORTAL_CHANNEL')")
+    @RequestMapping(value = "/channels", method = RequestMethod.GET)
+    public ApiRes channels() {
+        requireAuthority("ENT_AGENT_PORTAL_CHANNEL");
+        AgentInfo senior = agentInfoService.seniorOf(me());
+        return ApiRes.ok(senior == null ? java.util.Collections.emptyList() : channelAccountService.listForAgent(senior.getAgentNo()));
     }
 
     @Operation(summary = "轄區費率（唯讀）")
@@ -160,7 +171,7 @@ public class AgentPortalController extends AgentBaseCtrl {
         return ApiRes.ok(withdrawService.updatePayoutAccount(WalletAccount.OWNER_AGENT, me().getAgentNo(), getObject(WalletAccount.class)));
     }
 
-    @Operation(summary = "高級代理設定下級代理的代理費或推薦佣金")
+    @Operation(summary = "團長設定旗下代理的隊長費")
     @PreAuthorize("hasAuthority('ENT_AGENT_PORTAL_FEE_EDIT')")
     @MethodLog(remark = "代理設定下級費率")
     @RequestMapping(value = "/subAgentRules", method = RequestMethod.POST)
@@ -186,7 +197,7 @@ public class AgentPortalController extends AgentBaseCtrl {
         return ApiPageRes.pages(payOrderService.listByPage(getIPage(), getObject(PayOrder.class), getReqParamJSON(), wrapper));
     }
 
-    @Operation(summary = "高級代理新增下級代理並開通登入帳號")
+    @Operation(summary = "團長新增下級代理並開通登入帳號")
     @PreAuthorize("hasAuthority('ENT_AGENT_PORTAL_SUB_ADD')")
     @MethodLog(remark = "代理新增下級代理")
     @RequestMapping(value = "/subAgents", method = RequestMethod.POST)
@@ -196,7 +207,7 @@ public class AgentPortalController extends AgentBaseCtrl {
                 getCurrentUser().getSysUser().getSysUserId(), getCurrentUser().getSysUser().getRealname()));
     }
 
-    @Operation(summary = "代理新增商戶（直屬自己，或高級代理指定給下級代理）")
+    @Operation(summary = "代理新增商戶（直屬自己，或團長指定給下級代理）")
     @PreAuthorize("hasAuthority('ENT_AGENT_PORTAL_MCH_ADD')")
     @MethodLog(remark = "代理新增商戶")
     @RequestMapping(value = "/merchants", method = RequestMethod.POST)

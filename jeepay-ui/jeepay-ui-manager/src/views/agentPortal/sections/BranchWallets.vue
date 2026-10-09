@@ -1,5 +1,5 @@
 <template>
-  <!-- 旗下錢包：後代代理與轄下商戶的餘額、流水；高級代理可凍結／解凍 -->
+  <!-- 旗下錢包：後代代理與轄下商戶的餘額、流水；團長可凍結／解凍 -->
   <div>
     <a-table :columns="columns" :data-source="vdata.wallets" size="small" row-key="key" :pagination="false" style="margin-bottom: 20px">
       <template #bodyCell="{ column, record }">

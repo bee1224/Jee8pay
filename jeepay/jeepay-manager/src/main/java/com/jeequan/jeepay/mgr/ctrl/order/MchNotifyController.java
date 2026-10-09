@@ -159,7 +159,7 @@ public class MchNotifyController extends CommonCtrl {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         }
         if (mchNotify.getState() != MchNotifyRecord.STATE_FAIL) {
-            throw new BizException("请选择失败的通知记录");
+            throw new BizException("請選擇失敗的通知記錄");
         }
 
         //更新通知中
@@ -192,15 +192,15 @@ public class MchNotifyController extends CommonCtrl {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         }
         if (payOrder.getState() != PayOrder.STATE_SUCCESS && payOrder.getState() != PayOrder.STATE_FAIL) {
-            throw new BizException("仅支持已支付或已失败订单的通知发送");
+            throw new BizException("僅支持已支付或已失敗訂單的通知發送");
         }
 
         MchNotifyRecord mchNotify = mchNotifyService.findByPayOrder(payOrderId);
         if (mchNotify == null) {
-            throw new BizException("该订单无商户通知记录，无法手动发送");
+            throw new BizException("該訂單無商戶通知記錄，無法手動發送");
         }
         if (mchNotify.getState() == MchNotifyRecord.STATE_ING) {
-            throw new BizException("商户通知进行中，请稍后再试");
+            throw new BizException("商戶通知進行中，請稍後再試");
         }
 
         //更新通知中并增加一次允许发送次数，沿用原生通知MQ

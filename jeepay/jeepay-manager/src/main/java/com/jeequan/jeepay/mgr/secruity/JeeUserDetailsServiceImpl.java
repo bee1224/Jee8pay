@@ -65,7 +65,7 @@ public class JeeUserDetailsServiceImpl implements UserDetailsService {
         SysUserAuth auth = sysUserAuthService.selectByLogin(loginUsernameStr, identityType, CS.SYS_TYPE.MGR);
 
         if(auth == null){ //没有该用户信息
-            throw JeepayAuthenticationException.build("用户名/密码错误！");
+            throw JeepayAuthenticationException.build("用戶名/密碼錯誤！");
         }
 
         //用户ID
@@ -74,11 +74,11 @@ public class JeeUserDetailsServiceImpl implements UserDetailsService {
         SysUser sysUser = sysUserService.getById(userId);
 
         if (sysUser == null) {
-            throw JeepayAuthenticationException.build("用户名/密码错误！");
+            throw JeepayAuthenticationException.build("用戶名/密碼錯誤！");
         }
 
         if(CS.PUB_USABLE != sysUser.getState()){ //状态不合法
-            throw JeepayAuthenticationException.build("用户状态不可登录，请联系管理员！");
+            throw JeepayAuthenticationException.build("用戶狀態不可登入，請聯繫管理員！");
         }
 
         return new JeeUserDetails(sysUser, auth.getCredential());

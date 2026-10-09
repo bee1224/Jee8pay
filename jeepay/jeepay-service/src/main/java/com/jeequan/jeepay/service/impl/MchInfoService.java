@@ -68,7 +68,7 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
             // 当前服务商状态是否正确
             IsvInfo isvInfo = isvInfoService.getById(mchInfo.getIsvNo());
             if (isvInfo == null || isvInfo.getState() == CS.NO) {
-                throw new BizException("当前服务商不可用");
+                throw new BizException("當前服務商不可用");
             }
         }
 
@@ -94,7 +94,7 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
         MchApp mchApp = new MchApp();
         mchApp.setAppId(IdUtil.objectId());
         mchApp.setMchNo(mchInfo.getMchNo());
-        mchApp.setAppName("默认应用");
+        mchApp.setAppName("預設應用");
         mchApp.setAppSecret(RandomUtil.randomString(128));
         mchApp.setState(CS.YES);
         mchApp.setCreatedBy(sysUser.getRealname());
@@ -122,13 +122,13 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
             // 0.当前商户是否存在
             MchInfo mchInfo = getById(mchNo);
             if (mchInfo == null) {
-                throw new BizException("该商户不存在");
+                throw new BizException("該商戶不存在");
             }
 
             // 1.查看当前商户是否存在交易数据
             long payCount = payOrderService.count(PayOrder.gw().eq(PayOrder::getMchNo, mchNo));
             if (payCount > 0) {
-                throw new BizException("该商户已存在交易数据，不可删除");
+                throw new BizException("該商戶已存在交易資料，不可刪除");
             }
 
             // ADR-0010：錢包仍有餘額（例如人工調帳）或提現處理中時不可刪除
@@ -180,7 +180,7 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
             // 7.删除当前商户
             boolean removeMchInfo = removeById(mchNo);
             if (!removeMchInfo) {
-                throw new BizException("删除当前商户失败");
+                throw new BizException("刪除當前商戶失敗");
             }
             return userIdList;
         }catch (Exception e) {

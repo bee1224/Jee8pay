@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-/** 商戶與代理綁定（ADR-0009）：直屬代理與推薦人分開設定。 */
+/** 商戶與代理綁定（ADR-0009）：每個商戶一個直屬代理。 */
 @Tag(name = "商戶代理綁定")
 @RestController
 @RequestMapping("/api/agentMchRela")
@@ -33,15 +33,11 @@ public class AgentMchRelaController extends AgentBaseCtrl {
         LambdaQueryWrapper<AgentMchRela> wrapper = AgentMchRela.gw();
         String mchNo = getValString("mchNo");
         String agentNo = getValString("agentNo");
-        String referrerAgentNo = getValString("referrerAgentNo");
         if (StringUtils.isNotEmpty(mchNo)) {
             wrapper.eq(AgentMchRela::getMchNo, mchNo);
         }
         if (StringUtils.isNotEmpty(agentNo)) {
             wrapper.eq(AgentMchRela::getAgentNo, agentNo);
-        }
-        if (StringUtils.isNotEmpty(referrerAgentNo)) {
-            wrapper.eq(AgentMchRela::getReferrerAgentNo, referrerAgentNo);
         }
         wrapper.orderByDesc(AgentMchRela::getUpdatedAt);
         IPage<AgentMchRela> pages = agentMchRelaService.page(getIPage(true), wrapper);
@@ -56,14 +52,13 @@ public class AgentMchRelaController extends AgentBaseCtrl {
         return ApiRes.ok(agentMchRelaService.getById(mchNo));
     }
 
-    @Operation(summary = "綁定或變更商戶的直屬代理與推薦人")
+    @Operation(summary = "綁定或變更商戶的直屬代理")
     @PreAuthorize("hasAuthority('ENT_MCH_AGENT_BIND')")
     @MethodLog(remark = "綁定商戶代理")
     @RequestMapping(value = "/{mchNo}", method = RequestMethod.PUT)
     public ApiRes bind(@PathVariable("mchNo") String mchNo) {
         requireAuthority("ENT_MCH_AGENT_BIND");
-        agentMchRelaService.bind(mchNo, getValStringRequired("agentNo"), getValString("referrerAgentNo"),
-                getCurrentUser().getSysUser().getSysUserId(), getCurrentUser().getSysUser().getRealname());
+        agentMchRelaService.bind(mchNo, getValStringRequired("agentNo"), getCurrentUser().getSysUser().getSysUserId(), getCurrentUser().getSysUser().getRealname());
         return ApiRes.ok();
     }
 

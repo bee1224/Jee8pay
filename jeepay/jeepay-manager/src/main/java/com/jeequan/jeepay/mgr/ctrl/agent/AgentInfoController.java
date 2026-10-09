@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.entity.AgentInfo;
+import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.entity.SysUser;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-/** 代理管理（ADR-0009）：高級代理 → 一般代理 兩層，獨立於服務商。 */
+/** 代理管理（ADR-0009）：團長 → 隊長 兩層，獨立於服務商。 */
 @Tag(name = "代理管理")
 @RestController
 @RequestMapping("/api/agentInfo")
@@ -112,6 +113,32 @@ public class AgentInfoController extends AgentBaseCtrl {
         requireAuthority("ENT_AGENT_INFO_DEL");
         agentInfoService.removeAgent(agentNo, getCurrentUser().getSysUser().getSysUserId(), getCurrentUser().getSysUser().getRealname());
         return ApiRes.ok();
+    }
+
+    @Operation(summary = "代理這一支的商戶（上帝從團長點進去看）")
+    @PreAuthorize("hasAuthority('ENT_MCH_LIST')")
+    @RequestMapping(value = "/{agentNo}/merchants", method = RequestMethod.GET)
+    public ApiRes merchants(@PathVariable("agentNo") String agentNo) {
+        requireAuthority("ENT_MCH_LIST");
+        return ApiRes.ok(agentPortalService.merchants(requireExisting(agentNo)));
+    }
+
+    @Operation(summary = "在代理底下新增商戶並開通登入帳號（隨機初始密碼，只在回應中出現一次）")
+    @PreAuthorize("hasAuthority('ENT_MCH_INFO_ADD')")
+    @MethodLog(remark = "新增商戶")
+    @RequestMapping(value = "/{agentNo}/merchants", method = RequestMethod.POST)
+    public ApiRes addMerchant(@PathVariable("agentNo") String agentNo) {
+        requireAuthority("ENT_MCH_INFO_ADD");
+        return ApiRes.ok(agentPortalService.createMerchant(requireExisting(agentNo), getObject(MchInfo.class), getValString("loginUsername"),
+                getValString("targetAgentNo"), getCurrentUser().getSysUser().getSysUserId(), getCurrentUser().getSysUser().getRealname()));
+    }
+
+    private AgentInfo requireExisting(String agentNo) {
+        AgentInfo agent = agentInfoService.getById(agentNo);
+        if (agent == null) {
+            throw new BizException("代理不存在");
+        }
+        return agent;
     }
 
     @Operation(summary = "代理登入帳號列表")

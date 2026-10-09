@@ -45,7 +45,7 @@ public class OssFileController extends AbstractCtrl {
     public ApiRes singleFileUpload(@RequestParam("file") MultipartFile file, @PathVariable("bizType") String bizType) {
 
         if( file == null ) {
-            return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "选择文件不存在");
+            return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "選擇文件不存在");
         }
         try {
 
@@ -53,18 +53,18 @@ public class OssFileController extends AbstractCtrl {
 
             //1. 判断bizType 是否可用
             if(ossFileConfig == null){
-                throw new BizException("类型有误");
+                throw new BizException("類型有誤");
             }
 
             // 2. 判断文件是否支持
             String fileSuffix = FileKit.getFileSuffix(file.getOriginalFilename(), false);
             if( !ossFileConfig.isAllowFileSuffix(fileSuffix) ){
-                throw new BizException("上传文件格式不支持！");
+                throw new BizException("上傳文件格式不支持！");
             }
 
             // 3. 判断文件大小是否超限
             if( !ossFileConfig.isMaxSizeLimit(file.getSize()) ){
-                throw new BizException("上传大小请限制在["+ossFileConfig.getMaxSize() / 1024 / 1024 +"M]以内！");
+                throw new BizException("上傳大小請限制在["+ossFileConfig.getMaxSize() / 1024 / 1024 +"M]以內！");
             }
 
             // 新文件地址 (xxx/xxx.jpg 格式)

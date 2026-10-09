@@ -203,7 +203,7 @@ services:
       timeout: 5s
       retries: 16
       start_period: 60s
-    mem_limit: 384m
+    mem_limit: 512m
 
   merchant:
     <<: *backend-common
@@ -235,7 +235,7 @@ services:
       timeout: 5s
       retries: 16
       start_period: 60s
-    mem_limit: 384m
+    mem_limit: 512m
 
   manager-ui:
     build:

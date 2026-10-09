@@ -91,7 +91,7 @@ public class SysUserRoleRelaController extends CommonCtrl {
 	})
 	@PreAuthorize("hasAuthority( 'ENT_UR_USER_UPD_ROLE' )")
 	@RequestMapping(value="relas/{sysUserId}", method = RequestMethod.POST)
-	@MethodLog(remark = "更改用户角色信息")
+	@MethodLog(remark = "更改用戶角色信息")
 	public ApiRes relas(@PathVariable("sysUserId") Long sysUserId) {
 
 		List<String> roleIdList = JSONArray.parseArray(getValStringRequired("roleIdListStr"), String.class);

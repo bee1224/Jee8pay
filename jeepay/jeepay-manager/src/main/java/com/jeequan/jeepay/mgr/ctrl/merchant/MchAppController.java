@@ -91,7 +91,7 @@ public class MchAppController extends CommonCtrl {
             @Parameter(name = "state", description = "状态: 0-停用, 1-启用")
     })
     @PreAuthorize("hasAuthority('ENT_MCH_APP_ADD')")
-    @MethodLog(remark = "新建应用")
+    @MethodLog(remark = "新建應用")
     @PostMapping
     public ApiRes add() {
         MchApp mchApp = getObject(MchApp.class);
@@ -145,7 +145,7 @@ public class MchAppController extends CommonCtrl {
             @Parameter(name = "state", description = "状态: 0-停用, 1-启用")
     })
     @PreAuthorize("hasAuthority('ENT_MCH_APP_EDIT')")
-    @MethodLog(remark = "更新应用信息")
+    @MethodLog(remark = "更新應用信息")
     @PutMapping("/{appId}")
     public ApiRes update(@PathVariable("appId") String appId) {
         MchApp mchApp = getObject(MchApp.class);
@@ -170,7 +170,7 @@ public class MchAppController extends CommonCtrl {
             @Parameter(name = "appId", description = "应用ID", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_MCH_APP_DEL')")
-    @MethodLog(remark = "删除应用")
+    @MethodLog(remark = "刪除應用")
     @DeleteMapping("/{appId}")
     public ApiRes delete(@PathVariable("appId") String appId) {
 

@@ -10,7 +10,7 @@
       </div>
 
       <AgentFamilyTree v-if="vdata.view === 'tree'" ref="familyTree"
-        @edit="(a) => editFunc(a.agentNo)" @accounts="showAccounts" @profit="showProfit" @remove="(a) => delFunc(a.agentNo)" />
+        @open="openDetail" @edit="(a) => editFunc(a.agentNo)" @accounts="showAccounts" @profit="showProfit" @remove="(a) => delFunc(a.agentNo)" />
 
       <div v-show="vdata.view === 'list'">
       <div class="table-page-search-wrapper">
@@ -20,8 +20,8 @@
             <jeepay-text-up :placeholder="'代理名稱'" v-model:value="vdata.searchData.agentName" />
             <a-select v-model:value="vdata.searchData.agentLevel" placeholder="代理層級" class="table-head-layout">
               <a-select-option value="">全部層級</a-select-option>
-              <a-select-option value="1">高級代理</a-select-option>
-              <a-select-option value="2">一般代理</a-select-option>
+              <a-select-option value="1">團長</a-select-option>
+              <a-select-option value="2">隊長</a-select-option>
             </a-select>
             <a-select v-model:value="vdata.searchData.state" placeholder="狀態" class="table-head-layout">
               <a-select-option value="">全部</a-select-option>
@@ -53,11 +53,12 @@
 
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'agentName'">
-            <b>{{ record.agentName }}</b>
+            <a v-if="record.agentLevel === 1" @click="openDetail(record)"><b>{{ record.agentName }}</b></a>
+            <b v-else>{{ record.agentName }}</b>
           </template>
           <template v-if="column.key === 'agentLevel'">
             <a-tag :color="record.agentLevel === 1 ? 'purple' : 'blue'">
-              {{ record.agentLevel === 1 ? '高級代理' : '一般代理' }}
+              {{ record.agentLevel === 1 ? '團長' : '隊長' }}
             </a-tag>
           </template>
           <template v-if="column.key === 'parentAgentNo'">
@@ -86,7 +87,7 @@
 
     <a-modal v-model:open="vdata.mchModal.open" :title="'旗下商戶：' + vdata.mchModal.agentName" :footer="null" width="640px">
       <a-table :columns="mchColumns" :data-source="vdata.mchModal.records" :pagination="false" size="small" row-key="mchNo">
-        <template #emptyText>尚未綁定商戶（請至「商戶列表 → 代理綁定」設定）</template>
+        <template #emptyText>尚未綁定商戶</template>
       </a-table>
     </a-modal>
 
@@ -124,6 +125,9 @@ import AgentFamilyTree from './AgentFamilyTree.vue'
 import AgentCredentialModal from './AgentCredentialModal.vue'
 import AgentProfitPanel from '@/components/AgentProfit/AgentProfitPanel.vue'
 import { reactive, ref, getCurrentInstance } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
 const credentialModal = ref()
 
@@ -176,6 +180,10 @@ function searchFunc() {
   infoTable.value.refTable(true)
   if (familyTree.value) familyTree.value.load()
 }
+// 上帝一律從團長點進去看他的商戶、渠道與隊長
+function openDetail(agent) {
+  router.push({ path: '/agents/detail', query: { agentNo: agent.agentNo } })
+}
 function addFunc() {
   infoAddOrEdit.value.show()
 }
@@ -183,7 +191,7 @@ function editFunc(agentNo) {
   infoAddOrEdit.value.show(agentNo)
 }
 function delFunc(agentNo) {
-  $infoBox.confirmDanger('確認刪除？', '需先移除旗下一般代理與商戶綁定；該代理的費率規則會一併刪除並留下紀錄', () => {
+  $infoBox.confirmDanger('確認刪除？', '需先移除旗下隊長與商戶綁定；該代理的費率規則會一併刪除並留下紀錄', () => {
     req.delById(API_URL_AGENT_INFO, agentNo).then(() => {
       infoTable.value.refTable(false)
       if (familyTree.value) familyTree.value.load()
@@ -195,13 +203,8 @@ function showMchList(record) {
   vdata.mchModal.agentName = record.agentName
   vdata.mchModal.records = []
   vdata.mchModal.open = true
-  Promise.all([
-    req.list(API_URL_AGENT_MCH_RELA, { agentNo: record.agentNo, pageSize: -1 }),
-    req.list(API_URL_AGENT_MCH_RELA, { referrerAgentNo: record.agentNo, pageSize: -1 }),
-  ]).then(([direct, referred]) => {
-    const rows = (direct.records || []).map((r) => ({ ...r, relation: '直屬代理' }))
-    ;(referred.records || []).forEach((r) => rows.push({ ...r, relation: '推薦人' }))
-    vdata.mchModal.records = rows
+  req.list(API_URL_AGENT_MCH_RELA, { agentNo: record.agentNo, pageSize: -1 }).then((direct) => {
+    vdata.mchModal.records = (direct.records || []).map((r) => ({ ...r, relation: '直屬代理' }))
   })
 }
 function showProfit(record) {

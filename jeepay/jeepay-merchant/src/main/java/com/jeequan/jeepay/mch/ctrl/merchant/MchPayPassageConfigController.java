@@ -185,7 +185,7 @@ public class MchPayPassageConfigController extends CommonCtrl {
     })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_PASSAGE_ADD')")
     @PostMapping
-    @MethodLog(remark = "更新应用支付通道")
+    @MethodLog(remark = "更新應用支付通道")
     public ApiRes saveOrUpdate() {
 
         String reqParams = getValStringRequired("reqParams");

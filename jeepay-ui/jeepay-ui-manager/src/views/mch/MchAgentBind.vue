@@ -4,7 +4,7 @@
       type="info"
       show-icon
       style="margin-bottom: 16px"
-      message="直屬代理決定費率瀑布的高代費／代理費；推薦人獨立記錄，更換直屬代理不影響推薦關係。"
+      message="直屬代理決定這個商戶的團長費與隊長費歸誰。"
     />
     <a-form layout="vertical">
       <a-form-item label="直屬代理（必填）">
@@ -14,16 +14,6 @@
           show-search
           option-filter-prop="label"
           :options="vdata.agentOptions"
-        />
-      </a-form-item>
-      <a-form-item label="推薦人（選填）">
-        <a-select
-          v-model:value="vdata.referrerAgentNo"
-          placeholder="不設定推薦人"
-          allow-clear
-          show-search
-          option-filter-prop="label"
-          :options="vdata.referrerOptions"
         />
       </a-form-item>
     </a-form>
@@ -45,10 +35,8 @@ const vdata: any = reactive({
   btnLoading: false,
   mchNo: '',
   agentNo: undefined,
-  referrerAgentNo: undefined,
   bound: false,
   agentOptions: [],
-  referrerOptions: [],
 })
 
 function label(a) {
@@ -58,19 +46,16 @@ function label(a) {
 function show(mchNo) {
   vdata.mchNo = mchNo
   vdata.agentNo = undefined
-  vdata.referrerAgentNo = undefined
   vdata.bound = false
   vdata.open = true
   req.list(API_URL_AGENT_INFO, { pageSize: -1 }).then((res) => {
     const agents = res.records || []
     vdata.agentOptions = agents.map((a) => ({ value: a.agentNo, label: label(a), disabled: a.state === 0 }))
-    vdata.referrerOptions = agents.map((a) => ({ value: a.agentNo, label: label(a) }))
   })
   req.getById(API_URL_AGENT_MCH_RELA, mchNo).then((res) => {
     if (res) {
       vdata.bound = true
       vdata.agentNo = res.agentNo
-      vdata.referrerAgentNo = res.referrerAgentNo || undefined
     }
   })
 }
@@ -82,7 +67,7 @@ function saveFunc() {
   }
   vdata.btnLoading = true
   req
-    .updateById(API_URL_AGENT_MCH_RELA, vdata.mchNo, { agentNo: vdata.agentNo, referrerAgentNo: vdata.referrerAgentNo || '' })
+    .updateById(API_URL_AGENT_MCH_RELA, vdata.mchNo, { agentNo: vdata.agentNo })
     .then(() => {
       $infoBox.message.success('綁定成功')
       vdata.open = false
@@ -94,7 +79,7 @@ function saveFunc() {
 }
 
 function unbindFunc() {
-  $infoBox.confirmDanger('確認解除綁定？', '解除後該商戶不再計算高代費與代理費', () => {
+  $infoBox.confirmDanger('確認解除綁定？', '解除後該商戶不再計算團長費與隊長費', () => {
     req.delById(API_URL_AGENT_MCH_RELA, vdata.mchNo).then(() => {
       $infoBox.message.success('已解除綁定')
       vdata.open = false

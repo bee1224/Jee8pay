@@ -123,7 +123,7 @@ public class PayWayController extends CommonCtrl {
 		PayWay payWay = getObject(PayWay.class);
 
 		if (payWayService.count(PayWay.gw().eq(PayWay::getWayCode, payWay.getWayCode())) > 0) {
-			throw new BizException("支付方式代码已存在");
+			throw new BizException("支付方式代碼已存在");
 		}
 		payWay.setWayCode(payWay.getWayCode().toUpperCase());
 
@@ -170,13 +170,13 @@ public class PayWayController extends CommonCtrl {
 	})
 	@PreAuthorize("hasAuthority('ENT_PC_WAY_DEL')")
 	@DeleteMapping("/{wayCode}")
-	@MethodLog(remark = "删除支付方式")
+	@MethodLog(remark = "刪除支付方式")
 	public ApiRes delete(@PathVariable("wayCode") String wayCode) {
 
 		// 校验该支付方式是否有商户已配置通道或者已有订单
 		if (mchPayPassageService.count(MchPayPassage.gw().eq(MchPayPassage::getWayCode, wayCode)) > 0
 				|| payOrderService.count(PayOrder.gw().eq(PayOrder::getWayCode, wayCode)) > 0) {
-			throw new BizException("该支付方式已有商户配置通道或已发生交易，无法删除！");
+			throw new BizException("該支付方式已有商戶配置通道或已發生交易，無法刪除！");
 		}
 
 		boolean result = payWayService.removeById(wayCode);

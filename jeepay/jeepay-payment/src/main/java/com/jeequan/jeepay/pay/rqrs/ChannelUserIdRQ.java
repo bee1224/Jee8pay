@@ -30,7 +30,7 @@ import jakarta.validation.constraints.NotBlank;
 public class ChannelUserIdRQ extends AbstractMchAppRQ{
 
     /** 介面代码,  AUTO表示：自动獲取 **/
-    @NotBlank(message="介面代码不能為空")
+    @NotBlank(message="介面代碼不能為空")
     private String ifCode;
 
     /** 商戶扩展參數，将原样返回 **/

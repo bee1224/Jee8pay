@@ -38,7 +38,7 @@ public class MchAppService extends ServiceImpl<MchAppMapper, MchApp> {
         // 1.查看当前应用是否存在交易数据
         long payCount = payOrderService.count(PayOrder.gw().eq(PayOrder::getAppId, appId));
         if (payCount > 0) {
-            throw new BizException("该应用已存在交易数据，不可删除");
+            throw new BizException("該應用已存在交易資料，不可刪除");
         }
 
         // 2.删除应用关联的支付通道

@@ -50,11 +50,9 @@ public class PayOrderFee extends BaseModel implements Serializable {
     @Schema(title = "agentNo", description = "直屬代理號（下單當下）")
     private String agentNo;
 
-    @Schema(title = "srAgentNo", description = "高級代理號（下單當下）")
+    @Schema(title = "srAgentNo", description = "團長號（下單當下）")
     private String srAgentNo;
 
-    @Schema(title = "referrerAgentNo", description = "推薦人代理號（下單當下）")
-    private String referrerAgentNo;
 
     @Schema(title = "platformFee", description = "平臺費，單位分")
     private Long platformFee;
@@ -62,14 +60,12 @@ public class PayOrderFee extends BaseModel implements Serializable {
     @Schema(title = "channelFee", description = "渠道費，單位分")
     private Long channelFee;
 
-    @Schema(title = "srAgentFee", description = "高代費，單位分")
+    @Schema(title = "srAgentFee", description = "團長費，單位分")
     private Long srAgentFee;
 
-    @Schema(title = "agentFee", description = "代理費，單位分")
+    @Schema(title = "agentFee", description = "隊長費，單位分")
     private Long agentFee;
 
-    @Schema(title = "referrerFee", description = "推薦佣金，單位分")
-    private Long referrerFee;
 
     @Schema(title = "totalFee", description = "各層合計，單位分")
     private Long totalFee;

@@ -53,7 +53,7 @@ public class RyoIbon extends RyoPaymentService {
             RyoKit.toRyoTwdAmount(payOrder.getAmount());
             parsePayer(bizRQ.getChannelExtra());
             if (payOrder.getExpiredTime() == null) {
-                return "RYO ibon 缴费期限不能為空";
+                return "RYO ibon 繳費期限不能為空";
             }
             return null;
         } catch (IllegalArgumentException e) {
@@ -95,7 +95,7 @@ public class RyoIbon extends RyoPaymentService {
         JSONObject payer = parsePayer(bizRQ.getChannelExtra());
         long orderAmount = RyoKit.toRyoTwdAmount(payOrder.getAmount());
         if (payOrder.getExpiredTime() == null) {
-            throw new IllegalArgumentException("RYO ibon 缴费期限不能為空");
+            throw new IllegalArgumentException("RYO ibon 繳費期限不能為空");
         }
 
         JSONObject request = new JSONObject(true);

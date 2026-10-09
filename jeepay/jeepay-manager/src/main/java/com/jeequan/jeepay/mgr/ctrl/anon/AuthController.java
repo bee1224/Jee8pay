@@ -60,7 +60,7 @@ public class AuthController extends CommonCtrl {
 			@Parameter(name = "vt", description = "验证码token, vercode token ,  需要base64处理", required = true)
 	})
 	@RequestMapping(value = "/validate", method = RequestMethod.POST)
-	@MethodLog(remark = "登录认证")
+	@MethodLog(remark = "登入認證")
 	public ApiRes validate() throws BizException {
 
 		String account = Base64.decodeStr(getValStringRequired("ia"));  //用户名 i account, 已做base64处理
@@ -70,7 +70,7 @@ public class AuthController extends CommonCtrl {
 
         String cacheCode = RedisUtil.getString(CS.getCacheKeyImgCode(vercodeToken));
         if(StringUtils.isEmpty(cacheCode) || !cacheCode.equalsIgnoreCase(vercode)){
-            throw new BizException("验证码有误！");
+            throw new BizException("驗證碼有誤！");
         }
 
 		// 返回前端 accessToken

@@ -39,7 +39,7 @@ public class PayOrderDivisionExecRQ extends AbstractMchAppRQ {
     /**
      * 是否使用系統設定的自动分帳组： 0-否 1-是
      **/
-    @NotNull(message = "是否使用系統設定的自动分帳组不能為空")
+    @NotNull(message = "是否使用系統設定的自動分帳組不能為空")
     private Byte useSysAutoDivisionReceivers;
 
     /** 接收者帳號列表（JSONArray 转换为字符串类型）

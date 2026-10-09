@@ -203,7 +203,7 @@ public class SysRoleController extends CommonCtrl {
         }
 
 		if(sysUserRoleRelaService.count(SysUserRoleRela.gw().eq(SysUserRoleRela::getRoleId, recordId)) > 0){
-			throw new BizException("当前角色已分配到用户， 不可删除！");
+			throw new BizException("當前角色已分配到用戶， 不可刪除！");
 		}
 		sysRoleService.removeRole(recordId);
 		return ApiRes.ok();

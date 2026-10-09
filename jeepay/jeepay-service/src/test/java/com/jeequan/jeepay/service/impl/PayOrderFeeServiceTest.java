@@ -29,7 +29,7 @@ class PayOrderFeeServiceTest {
                 rule(FeeRule.TARGET_DEFAULT, "", FeeRule.LAYER_CHANNEL, "0.010", 500),
                 rule(FeeRule.TARGET_AGENT, "A_SR", FeeRule.LAYER_SR_AGENT, "0.003", 0),
                 rule(FeeRule.TARGET_AGENT, "A_AG", FeeRule.LAYER_AGENT, "0.005", 100));
-        FeeRuleService.AgentChain chain = new FeeRuleService.AgentChain(AGENT, SENIOR, new AgentInfo().setAgentNo("A_REF").setAgentLevel(AgentInfo.LEVEL_AGENT).setState((byte) 1));
+        FeeRuleService.AgentChain chain = new FeeRuleService.AgentChain(AGENT, SENIOR);
 
         PayOrderFee fee = PayOrderFeeService.build(order, chain,
                 FeeWaterfall.compute(FeeWaterfall.resolve("M1", AGENT, SENIOR, rules), order.getAmount()));
@@ -41,18 +41,16 @@ class PayOrderFeeServiceTest {
         assertEquals(2600L, fee.getTotalFee());
         assertEquals("A_AG", fee.getAgentNo());
         assertEquals("A_SR", fee.getSrAgentNo());
-        assertEquals("A_REF", fee.getReferrerAgentNo());
         // 四層合計 26 元 > 商戶手續費 25 元 → 標記需檢查
         assertEquals((byte) 1, fee.getExceedsMchFee());
-        assertEquals(5, JSON.parseArray(fee.getDetail()).size());
-        assertEquals(0L, fee.getReferrerFee());
+        assertEquals(4, JSON.parseArray(fee.getDetail()).size());
         assertEquals("AGENT:A_AG", JSON.parseArray(fee.getDetail()).getJSONObject(3).getString("source"));
     }
 
     @Test
     void unboundMerchantSnapshotHasNoAgents() {
         PayOrder order = new PayOrder().setPayOrderId("P2").setMchNo("M1").setWayCode("RYO_IBON").setAmount(10_000L);
-        FeeRuleService.AgentChain chain = new FeeRuleService.AgentChain(null, null, null);
+        FeeRuleService.AgentChain chain = new FeeRuleService.AgentChain(null, null);
 
         PayOrderFee fee = PayOrderFeeService.build(order, chain, FeeWaterfall.compute(FeeWaterfall.resolve("M1", null, null,
                 List.of(rule(FeeRule.TARGET_DEFAULT, "", FeeRule.LAYER_PLATFORM, "0.01", 0))), order.getAmount()));

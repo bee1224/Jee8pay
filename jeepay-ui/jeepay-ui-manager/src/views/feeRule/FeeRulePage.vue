@@ -6,8 +6,8 @@
         type="info"
         show-icon
         style="margin-bottom: 16px"
-        message="各層手續費 = 平臺費 + 渠道費 + 高代費 + 代理費 + 推薦佣金，每層為「百分比 + 單筆固定金額」，應不超過商戶在支付通道上的費率（可用「風險檢查」確認）。單一商戶覆寫優先於預設。"
-        description="平臺費與渠道費的變更須由另一位具覆核權限的管理者核准後才生效；高代費與代理費儲存即生效。"
+        message="各層手續費 = 平臺費 + 渠道費 + 團長費 + 隊長費，每層為「百分比 + 單筆固定金額」，應不超過商戶在支付通道上的費率（可用「風險檢查」確認）。單一商戶覆寫優先於預設。"
+        description="平臺費與渠道費的變更須由另一位具覆核權限的管理者核准後才生效；團長費與隊長費儲存即生效。"
       />
       <a-form layout="inline" style="margin-bottom: 16px">
         <a-form-item label="支付方式">
@@ -62,7 +62,7 @@
           </a-row>
         </a-card>
 
-        <a-card size="small" title="代理費率（高級代理設高代費、一般代理設代理費；任何代理都可設擔任推薦人時的推薦佣金）" style="margin-bottom: 16px">
+        <a-card size="small" title="代理費率（團長設團長費、隊長設隊長費）" style="margin-bottom: 16px">
           <a-table :columns="agentColumns" :data-source="vdata.agentRows" :pagination="false" size="small" row-key="key">
             <template #bodyCell="{ column, record }">
               <template v-if="column.key === 'agentName'">
@@ -189,9 +189,9 @@ import { API_URL_AGENT_INFO, API_URL_FEE_RULES, API_URL_PAYWAYS_LIST, req } from
 import { computed, reactive, getCurrentInstance } from 'vue'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
-const ALL_LAYERS = ['PLATFORM', 'CHANNEL', 'SR_AGENT', 'AGENT', 'REFERRER']
+const ALL_LAYERS = ['PLATFORM', 'CHANNEL', 'SR_AGENT', 'AGENT']
 const platformLayers = ['PLATFORM', 'CHANNEL']
-const LAYER_NAMES = { PLATFORM: '平臺費', CHANNEL: '渠道費', SR_AGENT: '高代費', AGENT: '代理費', REFERRER: '推薦佣金' }
+const LAYER_NAMES = { PLATFORM: '平臺費', CHANNEL: '渠道費', SR_AGENT: '團長費', AGENT: '隊長費' }
 
 const canPlatform = computed(() => $access('ENT_FEE_RULE_PLATFORM_EDIT'))
 const canAgent = computed(() => $access('ENT_FEE_RULE_EDIT'))
@@ -332,10 +332,10 @@ function loadBatch() {
   const b = vdata.batch
   b.rows = []
   if (!b.targetId) return
-  let layers = ['SR_AGENT', 'AGENT', 'REFERRER']
+  let layers = ['SR_AGENT', 'AGENT']
   if (b.targetType === 'AGENT') {
     const agent = vdata.agentRows.find((a) => a.agentNo === b.targetId)
-    layers = [agent && agent.agentLevel === 1 ? 'SR_AGENT' : 'AGENT', 'REFERRER']
+    layers = [agent && agent.agentLevel === 1 ? 'SR_AGENT' : 'AGENT']
   }
   req.list(API_URL_FEE_RULES, { targetType: b.targetType, targetId: b.targetId, pageSize: -1 }).then((res) => {
     const rules = res.records || []
@@ -392,10 +392,10 @@ function reloadAll() {
       const r = rules.find((x) => x.targetType === 'DEFAULT' && x.layer === layer)
       vdata.defaults[layer] = { pct: r ? toPct(r.rate) : 0, fixedYuan: r ? Number(toYuan(r.fixedAmount)) : 0 }
     })
-    // 每個代理兩列：依層級的高代費／代理費，以及擔任推薦人時的推薦佣金
+    // 每個代理一列：依層級為團長費或隊長費
     const rows = []
     ;(agentRes.records || []).forEach((a) => {
-      ;[a.agentLevel === 1 ? 'SR_AGENT' : 'AGENT', 'REFERRER'].forEach((layer) => {
+      ;[a.agentLevel === 1 ? 'SR_AGENT' : 'AGENT'].forEach((layer) => {
         rows.push({ ...a, key: a.agentNo + layer, layer, rule: rules.find((x) => x.targetType === 'AGENT' && x.targetId === a.agentNo && x.layer === layer) })
       })
     })

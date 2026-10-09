@@ -164,7 +164,7 @@ public class WithdrawService extends ServiceImpl<WithdrawOrderMapper, WithdrawOr
         }
     }
 
-    /** 黑名單比對範圍：全平台＋擁有者所屬的高級代理（商戶取其代理鏈的高級代理；代理取自己或上級）。 */
+    /** 黑名單比對範圍：全平台＋擁有者所屬的團長（商戶取其代理鏈的團長；代理取自己或上級）。 */
     List<String> blacklistScopes(String ownerType, String ownerId) {
         List<String> scopes = new ArrayList<>();
         scopes.add(RiskBlacklist.SCOPE_GLOBAL);

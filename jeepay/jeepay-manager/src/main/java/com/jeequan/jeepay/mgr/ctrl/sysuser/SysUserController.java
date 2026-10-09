@@ -118,7 +118,7 @@ public class SysUserController extends CommonCtrl {
 			@Parameter(name = "state", description = "状态: 0-停用, 1-启用", required = true)
 	})
 	@PreAuthorize("hasAuthority( 'ENT_UR_USER_ADD' )")
-	@MethodLog(remark = "添加操作员")
+	@MethodLog(remark = "添加操作員")
 	@RequestMapping(value="", method = RequestMethod.POST)
 	public ApiRes add() {
 		SysUser sysUser = getObject(SysUser.class);
@@ -140,14 +140,14 @@ public class SysUserController extends CommonCtrl {
 		String currentUserPwd = getValStringRequired("originalPwd"); //当前用户登录密码
 		//验证当前密码是否正确
 		if(!sysUserAuthService.validateCurrentUserPwd(currentUserPwd)){
-			throw new BizException("原密码验证失败！");
+			throw new BizException("原密碼驗證失敗！");
 		}
 
 		String opUserPwd = getValStringRequired("confirmPwd");
 
 		// 验证原密码与新密码是否相同
 		if (opUserPwd.equals(currentUserPwd)) {
-			throw new BizException("新密码与原密码相同！");
+			throw new BizException("新密碼與原密碼相同！");
 		}
 
 		sysUserAuthService.resetAuthInfo(opSysUserId, null, null, opUserPwd, CS.SYS_TYPE.MGR);
@@ -173,13 +173,13 @@ public class SysUserController extends CommonCtrl {
 	})
 	@PreAuthorize("hasAuthority( 'ENT_UR_USER_EDIT' )")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.PUT)
-	@MethodLog(remark = "修改操作员信息")
+	@MethodLog(remark = "修改操作員信息")
 	public ApiRes update(@PathVariable("recordId") Long recordId) {
 		SysUser sysUser = getObject(SysUser.class);
 		sysUser.setSysUserId(recordId);
 		//判断是否自己禁用自己
 		if(recordId.equals(getCurrentUser().getSysUser().getSysUserId()) && sysUser.getState() != null && sysUser.getState() == CS.PUB_DISABLE){
-			throw new BizException("系统不允许禁用当前登陆用户！");
+			throw new BizException("系統不允許停用當前登陸用戶！");
 		}
 		//判断是否重置密码
 		Boolean resetPass = getReqParamJSON().getBoolean("resetPass");
@@ -207,17 +207,17 @@ public class SysUserController extends CommonCtrl {
 	})
 	@PreAuthorize("hasAuthority( 'ENT_UR_USER_DELETE' )")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.DELETE)
-	@MethodLog(remark = "删除操作员信息")
+	@MethodLog(remark = "刪除操作員信息")
 	public ApiRes delete(@PathVariable("recordId") Long recordId) {
 		//查询该操作员信息
 		SysUser sysUser = sysUserService.getById(recordId);
 		if (sysUser == null) {
-			throw new BizException("该操作员不存在！");
+			throw new BizException("該操作員不存在！");
 		}
 
 		//判断是否自己删除自己
 		if(recordId.equals(getCurrentUser().getSysUser().getSysUserId())){
-			throw new BizException("系统不允许删除当前登陆用户！");
+			throw new BizException("系統不允許刪除當前登陸用戶！");
 		}
 		// 删除用户
 		sysUserService.removeUser(sysUser, CS.SYS_TYPE.MGR);

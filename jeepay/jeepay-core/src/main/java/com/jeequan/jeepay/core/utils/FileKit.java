@@ -48,7 +48,7 @@ public class FileKit {
 		if(CS.ALLOW_UPLOAD_IMG_SUFFIX.contains(suffix)){
 			return suffix;
 		}
-		throw new BizException("不支持的图片类型");
+		throw new BizException("不支持的圖片類型");
 	}
 
 }

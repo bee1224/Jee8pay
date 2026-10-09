@@ -16,7 +16,7 @@ import java.util.Date;
 
 /**
  * 四層手續費規則（ADR-0009）。每條規則 = 支付方式 × 對象（平台預設／代理／單一商戶）× 費率層。
- * 平臺費與渠道費只能由平台設定（DEFAULT 或 MCH 覆寫）；高代費掛在高級代理、代理費掛在一般代理，皆可被 MCH 覆寫。
+ * 平臺費與渠道費只能由平台設定（DEFAULT 或 MCH 覆寫）；團長費掛在團長、隊長費掛在隊長，皆可被 MCH 覆寫。
  */
 @Schema(description = "四層手續費規則表")
 @Data
@@ -39,8 +39,6 @@ public class FeeRule extends BaseModel implements Serializable {
     public static final String LAYER_CHANNEL = "CHANNEL";
     public static final String LAYER_SR_AGENT = "SR_AGENT";
     public static final String LAYER_AGENT = "AGENT";
-    /** 推薦佣金：歸商戶的推薦人代理，與管轄鏈無關；未設定則為 0 */
-    public static final String LAYER_REFERRER = "REFERRER";
 
     @Schema(title = "ruleId", description = "規則ID")
     @TableId(value = "rule_id", type = IdType.AUTO)

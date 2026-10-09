@@ -118,7 +118,7 @@ const tableColumns = [
   { title: '編號', dataIndex: 'userNo' },
   { title: '手機號', dataIndex: 'telphone' },
   {
-    title: '超管',
+    title: '上帝',
     dataIndex: 'isAdmin',
     customRender: ({ text, record, index, column }) => {
       return record.isAdmin === 1 ? '是' : '否'

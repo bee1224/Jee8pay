@@ -92,7 +92,7 @@ public class RefundOrderController extends ApiController {
             }
 
             if(payOrder.getRefundState() == PayOrder.REFUND_STATE_ALL || payOrder.getRefundAmount() >= payOrder.getAmount()){
-                throw new BizException("訂單已全额退款，本次申請失敗");
+                throw new BizException("訂單已全額退款，本次申請失敗");
             }
 
             if(payOrder.getRefundAmount() + rq.getRefundAmount() > payOrder.getAmount()){
@@ -106,7 +106,7 @@ public class RefundOrderController extends ApiController {
             //全部退款金額 （退款訂單表）
             Long sumSuccessRefundAmount = refundOrderService.getBaseMapper().sumSuccessRefundAmount(payOrder.getPayOrderId());
             if(sumSuccessRefundAmount >= payOrder.getAmount()){
-                throw new BizException("退款单已完成全部訂單退款，本次申請失敗");
+                throw new BizException("退款單已完成全部訂單退款，本次申請失敗");
             }
 
             if(sumSuccessRefundAmount + rq.getRefundAmount() > payOrder.getAmount()){

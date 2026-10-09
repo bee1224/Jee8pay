@@ -47,7 +47,7 @@ const props = defineProps({ me: { type: Object, required: true }, merchants: { t
 const BASE = API_URL_AGENT_PORTAL + '/branch/wayRoutes'
 
 const canEdit = computed(() => props.me.agentLevel === 1 && $access('ENT_AGENT_PORTAL_ROUTE'))
-const mchOptions = computed(() => (props.merchants as any[]).filter((m) => m.relation !== '推薦').map((m) => ({ value: m.mchNo, label: `${m.mchName || ''}（${m.mchNo}）` })))
+const mchOptions = computed(() => (props.merchants as any[]).map((m) => ({ value: m.mchNo, label: `${m.mchName || ''}（${m.mchNo}）` })))
 const wayOptions = computed(() => (props.me.payWays || []).map((w) => ({ value: w.wayCode, label: `${w.wayName}（${w.wayCode}）` })))
 const columns = [
   { title: '別名', dataIndex: 'aliasWayCode' },

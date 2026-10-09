@@ -33,15 +33,15 @@ import jakarta.validation.constraints.NotNull;
 public class TransferOrderRQ extends AbstractMchAppRQ {
 
     /** 商戶訂單号 **/
-    @NotBlank(message="商戶訂單号不能為空")
+    @NotBlank(message="商戶訂單號不能為空")
     private String mchOrderNo;
 
     /** 支付介面代码   **/
-    @NotBlank(message="支付介面代码不能為空")
+    @NotBlank(message="支付介面代碼不能為空")
     private String ifCode;
 
     /** 入账方式  **/
-    @NotBlank(message="入账方式不能為空")
+    @NotBlank(message="入帳方式不能為空")
     private String entryType;
 
     /** 支付金額， 单位：分 **/
@@ -50,7 +50,7 @@ public class TransferOrderRQ extends AbstractMchAppRQ {
     private Long amount;
 
     /** 货币代码 **/
-    @NotBlank(message="货币代码不能為空")
+    @NotBlank(message="貨幣代碼不能為空")
     private String currency;
 
     /** 收款帳號 **/
@@ -67,7 +67,7 @@ public class TransferOrderRQ extends AbstractMchAppRQ {
     private String clientIp;
 
     /** 轉帳备注資訊 **/
-    @NotBlank(message="轉帳备注資訊不能為空")
+    @NotBlank(message="轉帳備註資訊不能為空")
     private String transferDesc;
 
     /** 異步通知地址 **/

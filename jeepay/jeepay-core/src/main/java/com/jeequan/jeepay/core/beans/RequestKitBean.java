@@ -64,7 +64,7 @@ public class RequestKitBean {
 
             } catch (Exception e) {
                 log.error("请求参数转换异常！ params=[{}]", body);
-                throw new BizException(ApiCodeEnum.PARAMS_ERROR, "转换异常");
+                throw new BizException(ApiCodeEnum.PARAMS_ERROR, "轉換異常");
             }
         }else {
             return body;
@@ -89,7 +89,7 @@ public class RequestKitBean {
 
             } catch (Exception e) {
                 log.error("请求参数转换异常！ params=[{}]", body);
-                throw new BizException(ApiCodeEnum.PARAMS_ERROR, "转换异常");
+                throw new BizException(ApiCodeEnum.PARAMS_ERROR, "轉換異常");
             }
         }
 

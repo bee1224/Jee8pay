@@ -29,11 +29,11 @@ class FeeWaterfallTest {
 
         List<FeeWaterfall.LayerRule> resolved = FeeWaterfall.resolve("M1", AGENT, SENIOR, rules);
 
-        assertEquals(List.of("DEFAULT", "DEFAULT", "AGENT:A_SR", "AGENT:A_AG", "NONE"),
+        assertEquals(List.of("DEFAULT", "DEFAULT", "AGENT:A_SR", "AGENT:A_AG"),
                 resolved.stream().map(FeeWaterfall.LayerRule::getSource).toList());
         FeeWaterfall.Breakdown b = FeeWaterfall.compute(resolved, 100_000);
         // 100000 分 × 0.2% = 200；× 1% + 500 = 1500；× 0.3% = 300；× 0.5% + 100 = 600
-        assertEquals(List.of(200L, 1500L, 300L, 600L, 0L), b.getLayers().stream().map(FeeWaterfall.LayerFee::getFee).toList());
+        assertEquals(List.of(200L, 1500L, 300L, 600L), b.getLayers().stream().map(FeeWaterfall.LayerFee::getFee).toList());
         assertEquals(2600L, b.getTotalFee());
         assertEquals(97_400L, b.getNetAmount());
         assertTrue(b.isValid());
@@ -76,7 +76,7 @@ class FeeWaterfallTest {
 
         List<FeeWaterfall.LayerRule> resolved = FeeWaterfall.resolve("M1", null, null, rules);
 
-        assertEquals(List.of("DEFAULT", "NONE", "NONE", "NONE", "NONE"),
+        assertEquals(List.of("DEFAULT", "NONE", "NONE", "NONE"),
                 resolved.stream().map(FeeWaterfall.LayerRule::getSource).toList());
     }
 
@@ -88,29 +88,20 @@ class FeeWaterfallTest {
 
         // 未綁定代理：兩個代理層都沒有收款人，覆寫不生效
         assertEquals(0L, FeeWaterfall.compute(FeeWaterfall.resolve("M1", null, null, rules), 100_000).getTotalFee());
-        // 直屬高級代理：高代費生效，代理費仍無收款人
+        // 直屬團長：團長費生效，隊長費仍無收款人
         List<FeeWaterfall.LayerRule> resolved = FeeWaterfall.resolve("M1", SENIOR, SENIOR, rules);
         assertEquals("MCH", resolved.get(2).getSource());
         assertEquals("NONE", resolved.get(3).getSource());
     }
 
     @Test
-    void referrerCommissionComesFromReferrerAgentOrMerchantOverride() {
-        AgentInfo referrer = agent("A_REF", AgentInfo.LEVEL_AGENT, "A_SR");
-        List<FeeRule> rules = List.of(rule(FeeRule.TARGET_AGENT, "A_REF", FeeRule.LAYER_REFERRER, "0.001", 50));
-
-        List<FeeWaterfall.LayerRule> resolved = FeeWaterfall.resolve("M1", AGENT, SENIOR, referrer, rules);
-        assertEquals("AGENT:A_REF", resolved.get(4).getSource());
-        // 100000 × 0.1% + 50 = 150
-        assertEquals(150L, FeeWaterfall.compute(resolved, 100_000).getLayers().get(4).getFee());
-        // 沒有推薦人：推薦佣金為 0，即使商戶覆寫也不收
-        List<FeeRule> withOverride = List.of(rule(FeeRule.TARGET_MCH, "M1", FeeRule.LAYER_REFERRER, "0.002", 0));
-        assertEquals("NONE", FeeWaterfall.resolve("M1", AGENT, SENIOR, null, withOverride).get(4).getSource());
-        assertEquals("MCH", FeeWaterfall.resolve("M1", AGENT, SENIOR, referrer, withOverride).get(4).getSource());
-        // 任何層級的代理都可以設推薦佣金；平台預設不行
-        FeeWaterfall.validateAgentLayer(FeeRule.LAYER_REFERRER, SENIOR);
+    void referrerLayerNoLongerExists() {
+        // 推薦佣金已移除：只剩平臺、渠道、團長、代理四層，舊的 REFERRER 規則一律拒絕
+        assertEquals(4, FeeWaterfall.resolve("M1", AGENT, SENIOR, List.of()).size());
         assertThrows(BizException.class, () -> FeeWaterfall.validateRule(
-                rule(FeeRule.TARGET_DEFAULT, "", FeeRule.LAYER_REFERRER, "0.001", 0)));
+                rule(FeeRule.TARGET_AGENT, "A_SR", "REFERRER", "0.001", 0)));
+        assertThrows(BizException.class, () -> FeeWaterfall.validateRule(
+                rule(FeeRule.TARGET_MCH, "M1", "REFERRER", "0.001", 0)));
     }
 
     @Test

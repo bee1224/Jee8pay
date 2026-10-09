@@ -1,5 +1,5 @@
 <template>
-  <!-- 品牌設定（白標）：高級代理的站台名稱與 Logo，自己與旗下代理登入後套用 -->
+  <!-- 品牌設定（白標）：團長的站台名稱與 Logo，自己與旗下代理登入後套用 -->
   <div style="max-width: 560px">
     <a-alert type="info" show-icon style="margin-bottom: 16px"
       message="啟用後，你和旗下代理登入營運平台時，左上角與分頁標題會換成這裡設定的名稱與 Logo。商戶平台不受影響。" />

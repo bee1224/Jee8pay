@@ -71,7 +71,7 @@ public class JeeUserDetailsServiceImpl implements UserDetailsService {
         SysUserAuth auth = sysUserAuthService.selectByLogin(loginUsernameStr, identityType, CS.SYS_TYPE.MCH);
 
         if(auth == null){ //没有该用户信息
-            throw JeepayAuthenticationException.build("用户名/密码错误！");
+            throw JeepayAuthenticationException.build("用戶名/密碼錯誤！");
         }
 
         //用户ID
@@ -80,20 +80,20 @@ public class JeeUserDetailsServiceImpl implements UserDetailsService {
         SysUser sysUser = sysUserService.getById(userId);
 
         if (sysUser == null) {
-            throw JeepayAuthenticationException.build("用户名/密码错误！");
+            throw JeepayAuthenticationException.build("用戶名/密碼錯誤！");
         }
 
         MchInfo mchInfo = mchInfoService.getById(sysUser.getBelongInfoId());
         if (mchInfo == null) {
-            throw JeepayAuthenticationException.build("所属商户为空，请联系管理员！");
+            throw JeepayAuthenticationException.build("所屬商戶為空，請聯繫管理員！");
         }
 
         if (CS.PUB_USABLE != sysUser.getState()) {//用户角色状态停用
-            throw JeepayAuthenticationException.build("用户状态不可登录，请联系管理员！");
+            throw JeepayAuthenticationException.build("用戶狀態不可登入，請聯繫管理員！");
         }
 
         if(CS.PUB_USABLE != mchInfo.getState()){ //商户状态停用
-            throw JeepayAuthenticationException.build("商户状态停用，请联系管理员！");
+            throw JeepayAuthenticationException.build("商戶狀態停用，請聯繫管理員！");
         }
 
         return new JeeUserDetails(sysUser, auth.getCredential());

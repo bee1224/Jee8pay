@@ -83,7 +83,7 @@ public class TransferNoticeController extends AbstractCtrl {
             MutablePair<String, Object> mutablePair = transferNotifyService.parseParams(request, urlOrderId);
             if(mutablePair == null){ // 解析数据失敗， 响应已處理
                 log.error("{}, mutablePair is null ", logPrefix);
-                throw new BizException("解析数据異常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此異常。
+                throw new BizException("解析資料異常！"); //需要实现类自行抛出ResponseException, 不应该在这抛此異常。
             }
 
             // 解析到轉帳单号

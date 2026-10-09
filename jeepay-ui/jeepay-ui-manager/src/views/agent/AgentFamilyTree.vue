@@ -1,25 +1,27 @@
 <template>
-  <!-- 家族樹：每張卡片是一位高級代理（第二代），裡面依序是他的直屬商戶、旗下代理（第三代）與各自的商戶 -->
+  <!-- 家族樹：每張卡片是一位團長（第二代），裡面依序是他的直屬商戶、旗下代理（第三代）與各自的商戶 -->
   <div>
     <div class="tree-summary">
-      <span>高級代理 <b>{{ seniors.length }}</b></span>
-      <span>一般代理 <b>{{ agents.length - seniors.length }}</b></span>
+      <span>團長 <b>{{ seniors.length }}</b></span>
+      <span>隊長 <b>{{ agents.length - seniors.length }}</b></span>
       <span>已歸屬商戶 <b>{{ relas.length }}</b></span>
       <span v-if="orphans.length">未歸屬商戶 <b>{{ orphans.length }}</b></span>
       <a-button size="small" @click="load">重新整理</a-button>
     </div>
-    <a-empty v-if="loaded && !seniors.length" description="還沒有高級代理，請先按「新建代理」" />
+    <a-empty v-if="loaded && !seniors.length" description="還沒有團長，請先按「新建代理」" />
     <div class="tree-grid">
       <a-card v-for="senior in seniors" :key="senior.agentNo" class="family-card" size="small">
         <template #title>
           <div class="node-head">
-            <a-tag color="purple">高級代理</a-tag>
-            <b>{{ senior.agentName }}</b>
+            <a-tag color="purple">團長</a-tag>
+            <a @click="emit('open', senior)"><b>{{ senior.agentName }}</b></a>
+            <a-tag v-if="senior.isHouse === 1" color="gold">平台直屬</a-tag>
             <span class="no">{{ senior.agentNo }}</span>
             <a-badge :status="senior.state === 0 ? 'error' : 'processing'" :text="senior.state === 0 ? '停用' : '啟用'" />
           </div>
         </template>
         <template #extra>
+          <a-button type="link" size="small" @click="emit('open', senior)">進入</a-button>
           <a-dropdown>
             <a-button type="link" size="small">管理</a-button>
             <template #overlay>
@@ -43,7 +45,7 @@
 
         <div v-for="son in sonsOf(senior.agentNo)" :key="son.agentNo" class="son">
           <div class="node-head">
-            <a-tag color="blue">一般代理</a-tag>
+            <a-tag color="blue">隊長</a-tag>
             <b>{{ son.agentName }}</b>
             <span class="no">{{ son.agentNo }}</span>
             <a-badge :status="son.state === 0 ? 'error' : 'processing'" :text="son.state === 0 ? '停用' : '啟用'" />
@@ -65,7 +67,7 @@
         <div class="chips">
           <a-tag v-for="m in orphans" :key="m.mchNo">{{ m.mchShortName || m.mchName }}<span class="no">{{ m.mchNo }}</span></a-tag>
         </div>
-        <div class="none" style="margin-top: 8px">到「商戶列表 → 代理綁定」指定直屬代理。</div>
+        <div class="none" style="margin-top: 8px">這些商戶還沒有歸屬，請聯絡系統管理者處理。</div>
       </a-card>
     </div>
   </div>
@@ -75,7 +77,7 @@
 import { API_URL_AGENT_INFO, API_URL_AGENT_MCH_RELA, API_URL_MCH_LIST, req } from '@/api/manage'
 import { computed, ref } from 'vue'
 
-const emit = defineEmits(['edit', 'accounts', 'profit', 'remove'])
+const emit = defineEmits(['open', 'edit', 'accounts', 'profit', 'remove'])
 const agents = ref<any[]>([])
 const relas = ref<any[]>([])
 const mchs = ref<any[]>([])

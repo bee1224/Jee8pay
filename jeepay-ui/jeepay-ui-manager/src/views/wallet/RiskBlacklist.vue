@@ -6,7 +6,7 @@
         type="info"
         show-icon
         style="margin-bottom: 16px"
-        message="提現時比對收款帳號與戶名，命中即拒絕。範圍選「全平台」對所有人生效；選高級代理則只對該代理轄下的代理與商戶生效。"
+        message="提現時比對收款帳號與戶名，命中即拒絕。範圍選「全平台」對所有人生效；選團長則只對該代理轄下的代理與商戶生效。"
       />
       <a-form v-if="$access('ENT_RISK_BLACKLIST_EDIT')" layout="inline" style="margin-bottom: 16px">
         <a-form-item>
@@ -70,7 +70,7 @@ load()
 if ($access('ENT_AGENT_LIST')) {
   req.list(API_URL_AGENT_INFO, { agentLevel: 1, pageSize: -1 }).then((res) => {
     vdata.scopeOptions = [{ value: 'GLOBAL', label: '全平台' }].concat(
-      (res.records || []).map((a) => ({ value: a.agentNo, label: `高級代理 ${a.agentName}（${a.agentNo}）` })),
+      (res.records || []).map((a) => ({ value: a.agentNo, label: `團長 ${a.agentName}（${a.agentNo}）` })),
     )
   })
 }

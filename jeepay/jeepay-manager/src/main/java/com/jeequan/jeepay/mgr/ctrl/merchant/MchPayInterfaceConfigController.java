@@ -130,7 +130,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
     })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_CONFIG_ADD')")
     @PostMapping
-    @MethodLog(remark = "更新应用支付参数")
+    @MethodLog(remark = "更新應用支付參數")
     public ApiRes saveOrUpdate() {
 
         String infoId = getValStringRequired("infoId");
@@ -171,7 +171,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
 
         boolean result = payInterfaceConfigService.saveOrUpdate(payInterfaceConfig);
         if (!result) {
-            return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "配置失败");
+            return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "配置失敗");
         }
 
         // 推送mq到目前节点进行更新数据

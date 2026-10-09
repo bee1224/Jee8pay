@@ -169,7 +169,7 @@ public class MchPayPassageConfigController extends CommonCtrl {
     })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_PASSAGE_ADD')")
     @PostMapping
-    @MethodLog(remark = "更新商户支付通道")
+    @MethodLog(remark = "更新商戶支付通道")
     public ApiRes saveOrUpdate() {
 
         String reqParams = getValStringRequired("reqParams");
@@ -177,7 +177,7 @@ public class MchPayPassageConfigController extends CommonCtrl {
         try {
             List<MchPayPassage> mchPayPassageList = JSONArray.parseArray(reqParams, MchPayPassage.class);
             if (CollectionUtils.isEmpty(mchPayPassageList)) {
-                throw new BizException("操作失败");
+                throw new BizException("操作失敗");
             }
             MchApp mchApp = mchAppService.getById(mchPayPassageList.get(0).getAppId());
             if (mchApp == null || mchApp.getState() != CS.YES) {

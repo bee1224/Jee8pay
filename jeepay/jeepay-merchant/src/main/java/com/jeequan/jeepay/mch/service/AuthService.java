@@ -85,10 +85,10 @@ public class AuthService {
         } catch (JeepayAuthenticationException jex) {
             throw jex.getBizException() == null ? new BizException(jex.getMessage()) : jex.getBizException();
         } catch (BadCredentialsException e) {
-            throw new BizException("用户名/密码错误！");
+            throw new BizException("用戶名/密碼錯誤！");
         } catch (AuthenticationException e) {
             log.error("AuthenticationException:", e);
-            throw new BizException("认证服务出现异常， 请重试或联系系统管理员！");
+            throw new BizException("認證服務出現異常， 請重試或聯繫系統管理員！");
         }
         JeeUserDetails jeeUserDetails = (JeeUserDetails) authentication.getPrincipal();
 
@@ -98,7 +98,7 @@ public class AuthService {
 
         //非超级管理员 && 不包含左侧菜单 进行错误提示
         if(sysUser.getIsAdmin() != CS.YES && sysEntitlementMapper.userHasLeftMenu(sysUser.getSysUserId(), CS.SYS_TYPE.MCH) <= 0){
-            throw new BizException("当前用户未分配任何菜单权限，请联系管理员进行分配后再登录！");
+            throw new BizException("當前用戶未分配任何選單權限，請聯繫管理員進行分配後再登入！");
         }
 
         // 查询当前用户的商户信息
@@ -106,7 +106,7 @@ public class AuthService {
         if (mchInfo != null) {
             // 判断当前商户状态是否可用
             if (mchInfo.getState() == CS.NO) {
-                throw new BizException("当前商户状态不可用！");
+                throw new BizException("當前商戶狀態不可用！");
             }
         }
         // 放置权限集合

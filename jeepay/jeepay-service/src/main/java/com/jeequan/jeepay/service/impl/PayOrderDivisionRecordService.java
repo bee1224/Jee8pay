@@ -68,7 +68,7 @@ public class PayOrderDivisionRecordService extends ServiceImpl<PayOrderDivisionR
         int payOrderUpdateRow = payOrderMapper.update(updateRecord, PayOrder.gw().eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getDivisionState, PayOrder.DIVISION_STATE_FINISH));
 
         if(payOrderUpdateRow <= 0){
-             throw new BizException("更新订单分账状态失败");
+             throw new BizException("更新訂單分帳狀態失敗");
         }
 
         PayOrderDivisionRecord updateRecordByDiv = new PayOrderDivisionRecord();
@@ -81,7 +81,7 @@ public class PayOrderDivisionRecordService extends ServiceImpl<PayOrderDivisionR
         );
 
         if(!recordUpdateFlag){
-            throw new BizException("更新分账记录状态失败");
+            throw new BizException("更新分帳記錄狀態失敗");
         }
     }
 

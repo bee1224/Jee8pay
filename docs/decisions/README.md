@@ -15,8 +15,9 @@
 | [ADR-0007](ADR-0007-closed-order-paid-apn-reopen.md) | Validated paid-APN may reopen a locally CLOSED PayOrder to SUCCESS | Accepted | Payment state machine / settlement integrity |
 | [ADR-0008](ADR-0008-remove-legacy-china-providers.md) | 移除中國／海外支付通道與其衍生功能，只保留黑貓 PAY 四個 ibon 上游 | Accepted | Cross-provider scope / security boundary |
 | [ADR-0009](ADR-0009-multi-tier-agent-tenancy-and-fee-waterfall.md) | 多層代理（獨立實體 t_agent_info）與四層手續費瀑布（t_fee_rule；訂單快照於第 2 階段） | Accepted | Data model / transaction semantics |
-| [ADR-0010](ADR-0010-wallet-ledger-settlement-withdrawal.md) | 錢包記帳、T+N 分潤結算、人工提現、風控黑名單、人工調帳雙人覆核；推薦佣金層與下級費率 | Accepted | Money movement / data |
+| [ADR-0010](ADR-0010-wallet-ledger-settlement-withdrawal.md) | 錢包記帳、T+N 分潤結算、人工提現、風控黑名單、人工調帳雙人覆核；下級費率（推薦佣金層已於 2026-10-03 移除） | Accepted | Money movement / data |
 | [ADR-0011](ADR-0011-way-code-alias-routing.md) | 支付方式別名（例如 IBON）依金額／時段／權重路由到實際通道，並記錄每次決策 | Accepted | Payment routing |
+| [ADR-0012](ADR-0012-agent-owned-channels-and-platform-fee.md) | 渠道帳號屬於高級代理、金鑰由平台輸入並派發（預設專屬）；資金以高級代理為單位持有；平臺費逐位高級代理設定並記為應收 | Accepted（第一階段已實作） | Data model / payment config resolution / money movement |
 
 ## Qualification Rule
 

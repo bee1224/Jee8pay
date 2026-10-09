@@ -121,7 +121,7 @@ public class IsvPayInterfaceConfigController extends CommonCtrl {
     })
     @PreAuthorize("hasAuthority('ENT_ISV_PAY_CONFIG_ADD')")
     @PostMapping
-    @MethodLog(remark = "更新服务商支付参数")
+    @MethodLog(remark = "更新服務商支付參數")
     public ApiRes saveOrUpdate() {
 
         String infoId = getValStringRequired("infoId");
@@ -156,7 +156,7 @@ public class IsvPayInterfaceConfigController extends CommonCtrl {
 
         boolean result = payInterfaceConfigService.saveOrUpdate(payInterfaceConfig);
         if (!result) {
-            return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "配置失败");
+            return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "配置失敗");
         }
 
         // 推送mq到目前节点进行更新数据

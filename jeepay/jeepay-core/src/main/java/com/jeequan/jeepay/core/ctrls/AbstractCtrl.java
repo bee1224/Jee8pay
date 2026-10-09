@@ -222,7 +222,7 @@ public abstract class AbstractCtrl {
 
     /** 生成参数必填错误信息 **/
     private String genParamRequiredMsg(String key) {
-        return "参数" + key + "必填";
+        return "參數" + key + "必填";
     }
 
     /** 校验参数值不能为空 */

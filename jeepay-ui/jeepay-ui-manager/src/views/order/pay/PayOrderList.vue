@@ -290,9 +290,8 @@
             <a-descriptions>
               <a-descriptions-item label="四層手續費">
                 <template v-if="vdata.feeSnapshot">
-                  平臺 {{ vdata.feeSnapshot.platformFee / 100 }}／渠道 {{ vdata.feeSnapshot.channelFee / 100 }}／高代
-                  {{ vdata.feeSnapshot.srAgentFee / 100 }}／代理 {{ vdata.feeSnapshot.agentFee / 100 }}／推薦
-                  {{ (vdata.feeSnapshot.referrerFee || 0) / 100 }}，合計
+                  平臺 {{ vdata.feeSnapshot.platformFee / 100 }}／渠道 {{ vdata.feeSnapshot.channelFee / 100 }}／團長
+                  {{ vdata.feeSnapshot.srAgentFee / 100 }}／代理 {{ vdata.feeSnapshot.agentFee / 100 }}，合計
                   {{ vdata.feeSnapshot.totalFee / 100 }} 元
                   <a-tag v-if="vdata.feeSnapshot.exceedsMchFee === 1" color="red">超過商戶手續費</a-tag>
                   <span v-if="vdata.feeSnapshot.agentNo">（代理 {{ vdata.feeSnapshot.agentNo }}）</span>

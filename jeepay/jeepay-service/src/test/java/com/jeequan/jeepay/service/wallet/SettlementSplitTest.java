@@ -14,27 +14,26 @@ class SettlementSplitTest {
 
     @Test
     void splitsWholeOrderAmountAcrossAllParties() {
-        // 1000 元訂單、商戶手續費 30 元；平臺 2、渠道 15、高代 3、代理 6、推薦 1.5
-        PayOrderFee fee = fee(100_000, 3_000).setChannelFee(1_500L).setSrAgentFee(300L).setAgentFee(600L).setReferrerFee(150L)
-                .setSrAgentNo("A_SR").setAgentNo("A_AG").setReferrerAgentNo("A_REF");
+        // 1000 元訂單、商戶手續費 30 元；平臺 2、渠道 15、團長 3、代理 6
+        PayOrderFee fee = fee(100_000, 3_000).setChannelFee(1_500L).setSrAgentFee(300L).setAgentFee(600L)
+                .setSrAgentNo("A_SR").setAgentNo("A_AG");
 
         Map<String, Long> m = asMap(SettlementSplit.of(fee, "ryo"));
 
         assertEquals(97_000L, m.get("MCH:M1"));
         assertEquals(300L, m.get("AGENT:A_SR"));
         assertEquals(600L, m.get("AGENT:A_AG"));
-        assertEquals(150L, m.get("AGENT:A_REF"));
         assertEquals(1_500L, m.get("CHANNEL:ryo"));
-        // 平台 = 3000 - 1500 - 300 - 600 - 150 = 450（含平臺費 200 與未分配 250）
-        assertEquals(450L, m.get("PLATFORM:PLATFORM"));
+        // 平台 = 3000 - 1500 - 300 - 600 = 600（含平臺費 200 與未分配 400）
+        assertEquals(600L, m.get("PLATFORM:PLATFORM"));
         assertEquals(100_000L, m.values().stream().mapToLong(Long::longValue).sum());
     }
 
     @Test
     void mergesSharesOfSameAgentAndSkipsZeroAndMissingOwners() {
-        // 推薦人同時是高級代理：合併成一筆；無直屬一般代理
-        PayOrderFee fee = fee(10_000, 200).setSrAgentFee(30L).setReferrerFee(20L).setAgentFee(0L)
-                .setSrAgentNo("A_SR").setReferrerAgentNo("A_SR");
+        // 同一個代理同時出現在團長與代理兩個欄位（防禦性）：合併成一筆
+        PayOrderFee fee = fee(10_000, 200).setSrAgentFee(30L).setAgentFee(20L)
+                .setSrAgentNo("A_SR").setAgentNo("A_SR");
 
         List<SettlementSplit.Share> shares = SettlementSplit.of(fee, "jhd");
         Map<String, Long> m = asMap(shares);
@@ -58,7 +57,7 @@ class SettlementSplitTest {
 
     private static PayOrderFee fee(long amount, long mchFee) {
         return new PayOrderFee().setPayOrderId("P1").setMchNo("M1").setAmount(amount).setMchFeeAmount(mchFee)
-                .setPlatformFee(0L).setChannelFee(0L).setSrAgentFee(0L).setAgentFee(0L).setReferrerFee(0L);
+                .setPlatformFee(0L).setChannelFee(0L).setSrAgentFee(0L).setAgentFee(0L);
     }
 
     private static Map<String, Long> asMap(List<SettlementSplit.Share> shares) {

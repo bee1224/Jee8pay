@@ -53,7 +53,7 @@ public class JhdIbon extends JhdPaymentService {
             JhdKit.toJhdTwdAmount(payOrder.getAmount());
             parsePayer(bizRQ.getChannelExtra());
             if (payOrder.getExpiredTime() == null) {
-                return "JHD ibon 缴费期限不能為空";
+                return "JHD ibon 繳費期限不能為空";
             }
             return null;
         } catch (IllegalArgumentException e) {
@@ -95,7 +95,7 @@ public class JhdIbon extends JhdPaymentService {
         JSONObject payer = parsePayer(bizRQ.getChannelExtra());
         long orderAmount = JhdKit.toJhdTwdAmount(payOrder.getAmount());
         if (payOrder.getExpiredTime() == null) {
-            throw new IllegalArgumentException("JHD ibon 缴费期限不能為空");
+            throw new IllegalArgumentException("JHD ibon 繳費期限不能為空");
         }
 
         JSONObject request = new JSONObject(true);

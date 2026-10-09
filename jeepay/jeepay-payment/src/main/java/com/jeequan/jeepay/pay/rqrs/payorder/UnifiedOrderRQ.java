@@ -36,7 +36,7 @@ import jakarta.validation.constraints.NotNull;
 public class UnifiedOrderRQ extends AbstractMchAppRQ {
 
     /** 商戶訂單号 **/
-    @NotBlank(message="商戶訂單号不能為空")
+    @NotBlank(message="商戶訂單號不能為空")
     private String mchOrderNo;
 
     /** 支付方式  如： wxpay_jsapi,alipay_wap等   **/
@@ -49,7 +49,7 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
     private Long amount;
 
     /** 货币代码 **/
-    @NotBlank(message="货币代码不能為空")
+    @NotBlank(message="貨幣代碼不能為空")
     private String currency;
 
     /** 客户端IP地址 **/
@@ -79,7 +79,7 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
     private String extParam;
 
     /** 分帳模式： 0-该笔訂單不允许分帳, 1-支付成功按設定自动完成分帳, 2-商戶手动分帳(解冻商戶金額) **/
-    @Range(min = 0, max = 2, message = "分帳模式设置值有误")
+    @Range(min = 0, max = 2, message = "分帳模式設置值有誤")
     private Byte divisionMode;
 
     /** 返回真实的bizRQ **/

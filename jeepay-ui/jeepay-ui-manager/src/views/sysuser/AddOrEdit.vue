@@ -53,7 +53,7 @@
         </a-col>
 
         <a-col :span="10">
-          <a-form-item label="是否為超級管理員：" name="isAdmin">
+          <a-form-item label="是否為上帝：" name="isAdmin">
             <a-radio-group v-model:value="vdata.saveObject.isAdmin">
               <a-radio :value="1">是</a-radio>
               <a-radio :value="0">否</a-radio>

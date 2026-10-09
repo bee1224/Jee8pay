@@ -37,8 +37,8 @@ public class CS {
         Map<String, String> SYS_TYPE_MAP = new HashMap<>();
     }
     static {
-        SYS_TYPE.SYS_TYPE_MAP.put(SYS_TYPE.MCH, "商户系统");
-        SYS_TYPE.SYS_TYPE_MAP.put(SYS_TYPE.MGR, "运营平台");
+        SYS_TYPE.SYS_TYPE_MAP.put(SYS_TYPE.MCH, "商戶系統");
+        SYS_TYPE.SYS_TYPE_MAP.put(SYS_TYPE.MGR, "營運平台");
     }
 
     /** yes or no **/
@@ -61,6 +61,8 @@ public class CS {
     public static final byte INFO_TYPE_ISV = 1;
     public static final byte INFO_TYPE_MCH = 2;
     public static final byte INFO_TYPE_MCH_APP = 3;
+    /** 渠道帳號（ADR-0012） */
+    public static final byte INFO_TYPE_CHANNEL_ACCOUNT = 4;
 
 
     /**

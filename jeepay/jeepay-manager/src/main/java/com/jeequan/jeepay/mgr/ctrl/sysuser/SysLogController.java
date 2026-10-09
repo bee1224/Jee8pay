@@ -132,7 +132,7 @@ public class SysLogController extends CommonCtrl {
             @Parameter(name = "selectedIds", description = "系统日志ID（若干个ID用英文逗号拼接）", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_SYS_LOG_DEL')")
-    @MethodLog(remark = "删除日志信息")
+    @MethodLog(remark = "刪除日誌信息")
     @RequestMapping(value="/{selectedIds}", method = RequestMethod.DELETE)
     public ApiRes delete(@PathVariable("selectedIds") String selectedIds) {
         String[] ids = selectedIds.split(",");

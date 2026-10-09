@@ -128,7 +128,7 @@ public class TransferOrderReissueService {
 
         }else{
 
-            throw new BizException("ChannelState 返回异常！");
+            throw new BizException("ChannelState 返回異常！");
         }
 
     }
@@ -145,13 +145,13 @@ public class TransferOrderReissueService {
 
         boolean isSuccess = transferOrderService.updateInit2Ing(transferOrder.getTransferId(), transferOrder.getChannelResData());
         if(!isSuccess){
-            throw new BizException("更新转账单异常!");
+            throw new BizException("更新轉帳單異常!");
         }
 
         isSuccess = transferOrderService.updateIng2SuccessOrFail(transferOrder.getTransferId(), transferOrder.getState(),
                 channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelErrCode(), channelRetMsg.getChannelErrMsg());
         if(!isSuccess){
-            throw new BizException("更新转账订单异常!");
+            throw new BizException("更新轉帳訂單異常!");
         }
     }
 

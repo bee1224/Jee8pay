@@ -195,12 +195,12 @@ public class SysRoleController extends CommonCtrl {
 			@Parameter(name = "recordId", description = "角色ID, ROLE_开头", required = true)
 	})
 	@PreAuthorize("hasAuthority('ENT_UR_ROLE_DEL')")
-	@MethodLog(remark = "删除角色")
+	@MethodLog(remark = "刪除角色")
 	@RequestMapping(value="/{recordId}", method = RequestMethod.DELETE)
 	public ApiRes del(@PathVariable("recordId") String recordId) {
 
 		if(sysUserRoleRelaService.count(SysUserRoleRela.gw().eq(SysUserRoleRela::getRoleId, recordId)) > 0){
-			throw new BizException("当前角色已分配到用户, 不可删除！");
+			throw new BizException("當前角色已分配到用戶, 不可刪除！");
 		}
 		sysRoleService.removeRole(recordId);
 		return ApiRes.ok();

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-/** 風控黑名單（ADR-0010）：GLOBAL 全平台，或以高級代理為範圍，由該代理轄下共用。 */
+/** 風控黑名單（ADR-0010）：GLOBAL 全平台，或以團長為範圍，由該代理轄下共用。 */
 @Service
 public class RiskBlacklistService extends ServiceImpl<RiskBlacklistMapper, RiskBlacklist> {
 

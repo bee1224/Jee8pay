@@ -92,22 +92,18 @@ public class FeeRuleService extends ServiceImpl<FeeRuleMapper, FeeRule> {
         writeLog(existing, FeeRuleLog.ACTION_DELETE, snapshot(existing), null, operatorUid, operatorName);
     }
 
-    /** 商戶當下的代理鏈：直屬代理、所屬高級代理（直屬即高級代理時相同）、推薦人代理號。 */
+    /** 商戶當下的代理鏈：直屬代理、所屬團長（直屬即團長時相同）。 */
     public static final class AgentChain {
         private final AgentInfo direct;
         private final AgentInfo senior;
-        private final AgentInfo referrer;
 
-        public AgentChain(AgentInfo direct, AgentInfo senior, AgentInfo referrer) {
+        public AgentChain(AgentInfo direct, AgentInfo senior) {
             this.direct = direct;
             this.senior = senior;
-            this.referrer = referrer;
         }
 
         public AgentInfo getDirect() { return direct; }
         public AgentInfo getSenior() { return senior; }
-        public AgentInfo getReferrer() { return referrer; }
-        public String getReferrerAgentNo() { return referrer == null ? null : referrer.getAgentNo(); }
     }
 
     public AgentChain agentChainOf(String mchNo) {
@@ -117,13 +113,7 @@ public class FeeRuleService extends ServiceImpl<FeeRuleMapper, FeeRule> {
         if (direct != null && Objects.equals(direct.getAgentLevel(), AgentInfo.LEVEL_AGENT)) {
             senior = StringUtils.isBlank(direct.getParentAgentNo()) ? null : agentInfoMapper.selectById(direct.getParentAgentNo());
         }
-        String referrerNo = rela == null ? null : StringUtils.trimToNull(rela.getReferrerAgentNo());
-        AgentInfo referrer = referrerNo == null ? null : agentInfoMapper.selectById(referrerNo);
-        // 停用的推薦人不再分佣
-        if (referrer != null && !Objects.equals(referrer.getState(), (byte) 1)) {
-            referrer = null;
-        }
-        return new AgentChain(direct, senior, referrer);
+        return new AgentChain(direct, senior);
     }
 
     /** 解析某商戶在某支付方式下的四層費率（含來源說明）。 */
@@ -145,9 +135,6 @@ public class FeeRuleService extends ServiceImpl<FeeRuleMapper, FeeRule> {
         if (senior != null && !agentIds.contains(senior.getAgentNo())) {
             agentIds.add(senior.getAgentNo());
         }
-        if (chain.getReferrer() != null && !agentIds.contains(chain.getReferrer().getAgentNo())) {
-            agentIds.add(chain.getReferrer().getAgentNo());
-        }
         List<FeeRule> rules = list(FeeRule.gw()
                 .eq(FeeRule::getWayCode, wayCode)
                 .eq(FeeRule::getState, (byte) 1)
@@ -158,7 +145,7 @@ public class FeeRuleService extends ServiceImpl<FeeRuleMapper, FeeRule> {
                         w.or(x -> x.eq(FeeRule::getTargetType, FeeRule.TARGET_AGENT).in(FeeRule::getTargetId, agentIds));
                     }
                 }));
-        return FeeWaterfall.resolve(mchNo, direct, senior, chain.getReferrer(), rules);
+        return FeeWaterfall.resolve(mchNo, direct, senior, rules);
     }
 
     public FeeWaterfall.Breakdown preview(String mchNo, String wayCode, long amount) {

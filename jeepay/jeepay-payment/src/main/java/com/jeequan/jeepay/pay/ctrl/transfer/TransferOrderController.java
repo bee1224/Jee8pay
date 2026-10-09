@@ -107,7 +107,7 @@ public class TransferOrderController extends ApiController {
             }
 
             if(!transferService.isSupport(bizRQ.getEntryType())){
-                throw new BizException("该介面不支援该入账方式");
+                throw new BizException("該介面不支援該入帳方式");
             }
 
             transferOrder = genTransferOrder(bizRQ, mchInfo, mchApp, ifCode);

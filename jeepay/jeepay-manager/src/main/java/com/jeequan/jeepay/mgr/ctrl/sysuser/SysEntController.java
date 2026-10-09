@@ -81,7 +81,7 @@ public class SysEntController extends CommonCtrl {
 			@Parameter(name = "state", description = "状态 0-停用, 1-启用")
 	})
 	@PreAuthorize("hasAuthority( 'ENT_UR_ROLE_ENT_EDIT')")
-	@MethodLog(remark = "更新资源权限")
+	@MethodLog(remark = "更新資源權限")
 	@RequestMapping(value="/{entId}", method = RequestMethod.PUT)
 	public ApiRes updateById(@PathVariable("entId") String entId) {
 

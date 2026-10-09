@@ -18,7 +18,7 @@
     <!-- 菜单头部渲染插槽 -->
     <template #menuHeaderRender>
       <router-link :to="{ path: '/' }" style="display: flex; align-items: center">
-        <!-- 白標：高級代理啟用品牌後，自己與旗下代理看到的是他的站名與 Logo -->
+        <!-- 白標：團長啟用品牌後，自己與旗下代理看到的是他的站名與 Logo -->
         <div v-if="vdata.brand" style="display: flex; align-items: center; overflow: hidden">
           <img v-if="vdata.brand.logo" :src="vdata.brand.logo" alt="logo" style="height: 32px; max-width: 150px" />
           <span v-if="!proLayoutObject.collapsed && (!vdata.brand.logo || vdata.brand.title)" class="brand-title">{{ vdata.brand.title }}</span>

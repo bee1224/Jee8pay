@@ -21,7 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-/** 代理資訊服務（ADR-0009）：高級代理 → 一般代理 兩層，上級建立後不可更改以保持物化路徑一致。 */
+/** 代理資訊服務（ADR-0009）：團長 → 隊長 兩層，上級建立後不可更改以保持物化路徑一致。 */
 @Service
 public class AgentInfoService extends ServiceImpl<AgentInfoMapper, AgentInfo> {
 
@@ -29,6 +29,7 @@ public class AgentInfoService extends ServiceImpl<AgentInfoMapper, AgentInfo> {
     @Autowired private FeeRuleService feeRuleService;
     @Autowired private SysUserService sysUserService;
     @Autowired private WalletAccountMapper walletAccountMapper;
+    @Autowired private com.jeequan.jeepay.service.mapper.ChannelAccountAgentMapper channelAccountAgentMapper;
 
     @Transactional
     public AgentInfo create(AgentInfo agent, Long operatorUid, String operatorName) {
@@ -42,14 +43,14 @@ public class AgentInfoService extends ServiceImpl<AgentInfoMapper, AgentInfo> {
         } else if (Objects.equals(level, AgentInfo.LEVEL_AGENT)) {
             AgentInfo parent = StringUtils.isBlank(agent.getParentAgentNo()) ? null : getById(agent.getParentAgentNo());
             if (parent == null || !Objects.equals(parent.getAgentLevel(), AgentInfo.LEVEL_SENIOR)) {
-                throw new BizException("一般代理的上級必須是高級代理");
+                throw new BizException("隊長的上級必須是團長");
             }
             if (!Objects.equals(parent.getState(), (byte) 1)) {
-                throw new BizException("上級高級代理已停用");
+                throw new BizException("上級團長已停用");
             }
             parentPath = parent.getAgentPath();
         } else {
-            throw new BizException("代理層級必須為 1（高級代理）或 2（一般代理）");
+            throw new BizException("代理層級必須為 1（團長）或 2（隊長）");
         }
 
         String agentNo = "A" + new SimpleDateFormat("yyMMddHHmmss").format(new Date()) + RandomStringUtils.randomNumeric(3);
@@ -89,14 +90,18 @@ public class AgentInfoService extends ServiceImpl<AgentInfoMapper, AgentInfo> {
         if (agent == null) {
             throw new BizException("代理不存在");
         }
+        if (Objects.equals(agent.getIsHouse(), (byte) 1)) {
+            throw new BizException("平台直屬不可刪除");
+        }
+        if (channelAccountAgentMapper.selectCount(com.jeequan.jeepay.core.entity.ChannelAccountAgent.gw()
+                .eq(com.jeequan.jeepay.core.entity.ChannelAccountAgent::getSrAgentNo, agentNo)) > 0) {
+            throw new BizException("該代理仍有渠道帳號，請先刪除或收回");
+        }
         if (count(AgentInfo.gw().eq(AgentInfo::getParentAgentNo, agentNo)) > 0) {
-            throw new BizException("該代理下仍有一般代理，不可刪除");
+            throw new BizException("該代理下仍有隊長，不可刪除");
         }
         if (agentMchRelaService.count(AgentMchRela.gw().eq(AgentMchRela::getAgentNo, agentNo)) > 0) {
             throw new BizException("該代理仍有綁定的商戶，不可刪除");
-        }
-        if (agentMchRelaService.count(AgentMchRela.gw().eq(AgentMchRela::getReferrerAgentNo, agentNo)) > 0) {
-            throw new BizException("該代理仍是商戶的推薦人，不可刪除");
         }
         // 錢包仍有餘額或提現處理中時不可刪除，否則款項會變成無主帳戶
         WalletAccount wallet = walletAccountMapper.selectOne(WalletAccount.gw()
@@ -118,7 +123,7 @@ public class AgentInfoService extends ServiceImpl<AgentInfoMapper, AgentInfo> {
         }
     }
 
-    /** 回傳商戶直屬代理所屬的高級代理（直屬代理本身即高級代理時回傳自己）。 */
+    /** 回傳商戶直屬代理所屬的團長（直屬代理本身即團長時回傳自己）。 */
     public AgentInfo seniorOf(AgentInfo directAgent) {
         if (directAgent == null) {
             return null;

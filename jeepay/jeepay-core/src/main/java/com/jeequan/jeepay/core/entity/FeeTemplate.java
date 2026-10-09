@@ -13,7 +13,7 @@ import lombok.experimental.Accessors;
 import java.io.Serializable;
 import java.util.Date;
 
-/** 費率範本：一組支付方式 × 代理層費率，可批次套用到多個代理或商戶；只含高代費／代理費，平臺層不走範本。 */
+/** 費率範本：一組支付方式 × 代理層費率，可批次套用到多個代理或商戶；只含團長費／隊長費，平臺層不走範本。 */
 @Schema(description = "費率範本")
 @Data
 @EqualsAndHashCode(callSuper = false)

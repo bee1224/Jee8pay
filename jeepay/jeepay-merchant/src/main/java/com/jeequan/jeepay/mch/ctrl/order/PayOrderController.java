@@ -157,7 +157,7 @@ public class PayOrderController extends CommonCtrl {
             @Parameter(name = "refundAmount", description = "退款金额", required = true),
             @Parameter(name = "refundReason", description = "退款原因", required = true)
     })
-    @MethodLog(remark = "发起订单退款")
+    @MethodLog(remark = "發起訂單退款")
     @PreAuthorize("hasAuthority('ENT_PAY_ORDER_REFUND')")
     @PostMapping("/refunds/{payOrderId}")
     public ApiRes refund(@PathVariable("payOrderId") String payOrderId) {
@@ -171,11 +171,11 @@ public class PayOrderController extends CommonCtrl {
         }
 
         if(payOrder.getState() != PayOrder.STATE_SUCCESS){
-            throw new BizException("订单状态不正确");
+            throw new BizException("訂單狀態不正確");
         }
 
         if(payOrder.getRefundAmount() + refundAmount > payOrder.getAmount()){
-            throw new BizException("退款金额超过订单可退款金额！");
+            throw new BizException("退款金額超過訂單可退款金額！");
         }
 
 

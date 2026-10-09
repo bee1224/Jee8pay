@@ -53,7 +53,7 @@ public class ChiIbon extends ChiPaymentService {
             ChiKit.toChiTwdAmount(payOrder.getAmount());
             parsePayer(bizRQ.getChannelExtra());
             if (payOrder.getExpiredTime() == null) {
-                return "CHI ibon 缴费期限不能為空";
+                return "CHI ibon 繳費期限不能為空";
             }
             return null;
         } catch (IllegalArgumentException e) {
@@ -95,7 +95,7 @@ public class ChiIbon extends ChiPaymentService {
         JSONObject payer = parsePayer(bizRQ.getChannelExtra());
         long orderAmount = ChiKit.toChiTwdAmount(payOrder.getAmount());
         if (payOrder.getExpiredTime() == null) {
-            throw new IllegalArgumentException("CHI ibon 缴费期限不能為空");
+            throw new IllegalArgumentException("CHI ibon 繳費期限不能為空");
         }
 
         JSONObject request = new JSONObject(true);

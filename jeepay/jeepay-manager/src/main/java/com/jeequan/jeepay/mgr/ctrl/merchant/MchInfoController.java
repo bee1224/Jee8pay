@@ -131,7 +131,7 @@ public class MchInfoController extends CommonCtrl {
             @Parameter(name = "type", description = "类型: 1-普通商户, 2-特约商户(服务商模式)")
     })
     @PreAuthorize("hasAuthority('ENT_MCH_INFO_ADD')")
-    @MethodLog(remark = "新增商户")
+    @MethodLog(remark = "新增商戶")
     @RequestMapping(value="", method = RequestMethod.POST)
     public ApiRes add() {
         MchInfo mchInfo = getObject(MchInfo.class);
@@ -158,7 +158,7 @@ public class MchInfoController extends CommonCtrl {
             @Parameter(name = "mchNo", description = "商户号", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_MCH_INFO_DEL')")
-    @MethodLog(remark = "删除商户")
+    @MethodLog(remark = "刪除商戶")
     @RequestMapping(value="/{mchNo}", method = RequestMethod.DELETE)
     public ApiRes delete(@PathVariable("mchNo") String mchNo) {
         List<Long> userIdList = mchInfoService.removeByMchNo(mchNo);
@@ -193,7 +193,7 @@ public class MchInfoController extends CommonCtrl {
             @Parameter(name = "defaultPass", description = "是否默认密码")
     })
     @PreAuthorize("hasAuthority('ENT_MCH_INFO_EDIT')")
-    @MethodLog(remark = "更新商户信息")
+    @MethodLog(remark = "更新商戶信息")
     @RequestMapping(value="/{mchNo}", method = RequestMethod.PUT)
     public ApiRes update(@PathVariable("mchNo") String mchNo) {
 

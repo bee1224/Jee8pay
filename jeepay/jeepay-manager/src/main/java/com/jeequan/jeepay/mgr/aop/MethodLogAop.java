@@ -111,7 +111,7 @@ public class MethodLogAop {
         final SysLog sysLog = new SysLog();
         // 基础日志信息
         setBaseLogInfo(joinPoint, sysLog, JeeUserDetails.getCurrentUserDetails());
-        sysLog.setOptResInfo(e instanceof BizException ? e.getMessage() : "请求异常");
+        sysLog.setOptResInfo(e instanceof BizException ? e.getMessage() : "請求異常");
         scheduledThreadPool.execute(() -> sysLogService.save(sysLog));
     }
 

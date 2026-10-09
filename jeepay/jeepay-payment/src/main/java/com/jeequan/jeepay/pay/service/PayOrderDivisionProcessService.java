@@ -87,13 +87,13 @@ public class PayOrderDivisionProcessService {
 
         if(payOrder == null){
             log.error("{}，订单不存在", logPrefix);
-            throw new BizException("订单不存在");
+            throw new BizException("訂單不存在");
         }
 
         // 分账状态不正确
         if(payOrder.getDivisionState() != PayOrder.DIVISION_STATE_WAIT_TASK && payOrder.getDivisionState() != PayOrder.DIVISION_STATE_UNHAPPEN){
             log.error("{}, 分账状态不正确", logPrefix);
-            throw new BizException("分账状态不正确");
+            throw new BizException("分帳狀態不正確");
         }
 
         //更新订单为： 分账任务处理中
@@ -103,7 +103,7 @@ public class PayOrderDivisionProcessService {
                 .eq(PayOrder::getDivisionState, payOrder.getDivisionState()));
         if(!updPayOrder){
             log.error("{}, 更新支付订单为分账处理中异常！", logPrefix);
-            throw new BizException("更新支付订单为分账处理中异常");
+            throw new BizException("更新支付訂單為分帳處理中異常");
         }
 
 
@@ -159,7 +159,7 @@ public class PayOrderDivisionProcessService {
             //调用渠道侧分账接口
             IDivisionService divisionService = SpringBeansUtil.getBean(payOrder.getIfCode() + "DivisionService", IDivisionService.class);
             if(divisionService == null){
-                throw new BizException("通道无此分账接口");
+                throw new BizException("通道無此分帳接口");
             }
 
             channelRetMsg = divisionService.singleDivision(payOrder, recordList, configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId()));
@@ -188,7 +188,7 @@ public class PayOrderDivisionProcessService {
 
             log.error("{}, 调用分账接口异常", logPrefix, e);
             payOrderDivisionRecordService.updateRecordSuccessOrFail(recordList, PayOrderDivisionRecord.STATE_FAIL,
-                    null, "系统异常：" + e.getMessage());
+                    null, "系統異常：" + e.getMessage());
 
             channelRetMsg = ChannelRetMsg.confirmFail(null, null, e.getMessage());
         }

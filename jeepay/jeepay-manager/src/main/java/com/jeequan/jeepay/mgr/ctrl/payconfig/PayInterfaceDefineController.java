@@ -193,13 +193,13 @@ public class PayInterfaceDefineController extends CommonCtrl {
     })
     @PreAuthorize("hasAuthority('ENT_PC_IF_DEFINE_DEL')")
     @DeleteMapping("/{ifCode}")
-    @MethodLog(remark = "删除支付接口")
+    @MethodLog(remark = "刪除支付接口")
     public ApiRes delete(@PathVariable("ifCode") String ifCode) {
 
         // 校验该支付方式是否有服务商或商户配置参数或者已有订单
         if (payInterfaceConfigService.count(PayInterfaceConfig.gw().eq(PayInterfaceConfig::getIfCode, ifCode)) > 0
                 || payOrderService.count(PayOrder.gw().eq(PayOrder::getIfCode, ifCode)) > 0) {
-            throw new BizException("该支付接口已有服务商或商户配置参数或已发生交易，无法删除！");
+            throw new BizException("該支付接口已有服務商或商戶配置參數或已發生交易，無法刪除！");
         }
 
         boolean result = payInterfaceDefineService.removeById(ifCode);

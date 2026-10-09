@@ -10,6 +10,22 @@
 > - cert renewal 現以 V2 腳本 `/opt/jee8pay-v2-dev/scripts/sync-edge-certificate.sh` 為 renew/deploy hook（取代 `/opt/payment/.../sync-sandbox-edge-certificate.sh`）。
 > - 完整 gap 與驗證見下文「V1 retirement（2026-08-23 盤點）」。
 
+## 2026-10-09 改名、簡轉繁與 ADR-0012 第一階段（release `b93be3d-channel-p1`）
+
+來源：分支 `test-env-overhaul` 的 `b93be3d` 加上尚未 commit 的工作目錄。正式環境未變更。2026-10-09 20:2x（台北時間）已部署：`current` 指向 `releases/b93be3d-channel-p1`；payment、manager、merchant 皆 healthy，manager 登入驗證碼 API 回 200，公開回呼 ryo／jay／chi／jhd 在 payment 重建後皆回 400（未 reload `callback-ingress`，TD-018 的修正首次以實際重建驗證）。渠道帳號 `CAHOUSERYO01`、`CAHOUSECHI01`、`CAHOUSEJAY01` 已建立並派發給 `A_HOUSE`，兩個既有商戶已歸到 `A_HOUSE`。回滾：把 `current` 指回 `releases/b93be3d-no-referrer` 後 `up -d --no-deps payment manager merchant manager-ui`，並依三個 SQL 檔尾的回滾段落還原。
+
+| 項目 | 內容 |
+| --- | --- |
+| 更新服務 | payment、manager、merchant、manager-ui；DB、Redis、MQ、merchant-ui、callback-ingress 不動 |
+| 改名 | 超級管理員 → 上帝、高級代理 → 團長、一般代理 → 隊長；費用層顯示為團長費、隊長費。代碼（`SR_AGENT`、`AGENT`、`agent_level`、角色 ID）不變 |
+| 簡轉繁 | 後端回應訊息、操作日誌名稱與 `init.sql` 種子顯示名稱改為繁體；種子名稱以測試環境資料庫的人工翻譯為準。未轉：程式註解、Swagger 註記、log、`ChannelNoticeController`、`PayOrderProcessService`、`AbstractPayOrderController`（RED）與 `MchDivisionReceiverBindController` |
+| ADR-0012 第一階段 | 新增 `t_channel_account`、`t_channel_account_agent`、`t_agent_info.is_house`；金鑰存 `t_pay_interface_config`（`info_type=4`）。既有商戶歸到 `A_HOUSE`（平台直屬），既有商戶應用金鑰複製成渠道帳號。下單仍依商戶應用取金鑰 |
+| 選單 | 「代理管理」改為「團長管理／團長列表」，新增隱藏路由 `/agents/detail`（商戶、渠道、隊長）；「商戶管理」兩個選單改為隱藏路由（`MO`）；「服務商管理」停用；團長後台新增「渠道列表」 |
+| 資源 | manager、merchant 的 `mem_limit` 由 384m 調為 512m（manager 於 2026-10-09 18:17 被 cgroup OOM 砍掉重啟一次） |
+| DB | 依序執行 `20261009-rename-roles.sql`、`20261009-zh-tw-display-names.sql`、`20261009-channel-accounts.sql` |
+| 驗證 | 後端 `mvn package` 全部測試通過；隔離環境（全新資料庫）`scripts/smoke-channel-accounts.py` 41/41 PASS，涵蓋金鑰遮罩、派發與共用規則、團長／隊長越權、搬遷腳本可重複執行。畫面未做瀏覽器逐頁驗證 |
+| 已知限制 | 金鑰在第二階段切換前有兩份明文（商戶應用與渠道帳號），加重 TD-001 |
+
 ## 2026-09-29 test-env-overhaul 部署
 
 來源：分支 `test-env-overhaul`（`a3594721af26`；後端 JAR 建於 `e3cda9c`，其後僅前端與 SQL 變更）。正式環境未變更。
@@ -62,6 +78,7 @@ sudo env SANDBOX_EDGE_RECONCILE_APPROVED=YES $BIN/reconcile-sandbox-edge && sudo
 | `96b04e94998e-agent-portal-menus`（2026-10-03） | 代理後台由單頁分頁改為五個左側選單（錢包與提現、分潤、旗下商戶、下級代理、費率），代理帳號登入後直接顯示在第一層；平台帳號（含超管）不再顯示「代理後台」 | manager-ui | `20261003-agent-portal-menus.sql`（備份於 `state/agent-portal-menus-*/pre-entitlement.sql`） |
 | `96b04e94998e-family-tree-p1`（2026-10-03） | 家族樹權限第一階段：代理後台新增「訂單」（只含自己與下級代理直屬商戶）、「操作紀錄」（下級代理帳號的操作）；高級代理可新增下級代理、代理可新增商戶（隨機一次性密碼）；一般代理改用獨立角色 `ROLE_AGENT_PORTAL_L2`。範圍一律由登入者的代理路徑推導。部署前於隔離環境 `jee8pay-smoke`（全新資料庫，含 merchant 服務，驗完已銷毀）端到端 31 項 PASS，含越權測試 | manager、manager-ui | `20261003-agent-family-tree.sql`（備份於 `state/family-tree-p1-*/pre-rbac.sql`） |
 | `96b04e94998e-family-tree-p2`（2026-10-03） | 家族樹權限第二階段：超管代理列表新增家族樹卡片；代理後台新增旗下錢包（含凍結／解凍）、提現審核（同意註記／駁回，撥款仍由平台）、統計報表、通道路由、黑名單、品牌設定（白標）、登入紀錄；費率頁可設高代費、代理費、推薦佣金與商戶覆寫並套用範本；商戶可更換歸屬與重設密碼；「下級代理」改名「旗下代理」。新增欄位 `t_agent_info.brand_*`、`t_withdraw_order.agent_approve_*`。部署前於隔離環境端到端 95 項 PASS（第一階段回歸 31＋第二階段 64，含越權測試） | manager、manager-ui | `20261003-agent-family-tree-p2.sql`（備份於 `state/family-tree-p2-*/pre-p2.sql`） |
+| `b93be3d-no-referrer`（2026-10-03） | 移除推薦佣金：費率回到四層（平臺、渠道、高代、代理），拿掉推薦人綁定、REFERRER 費率層、結算拆帳的推薦人份額與相關畫面；三個後端服務同版重建。部署前於隔離環境端到端 99 項 PASS（含四層結算入帳），部署後 `run-d01-blackbox.py`（RYO_IBON）PASS、訂單數不變、`validate-sandbox-edge` PASS、公開四條回呼路由回 400 | payment、manager、merchant、manager-ui | `20261003-remove-referrer-commission.sql`（三個服務上線後才執行；移除 `referrer_agent_no`、`referrer_fee` 欄位；備份於 `state/no-referrer-*/pre-no-referrer.sql`） |
 
 - 每次部署前都在隔離環境 `jee8pay-smoke`（驗完即銷毀）做開機與端到端冒煙：第一階段 17 項、第二～四階段 33 項、頭像 6 項、權限與快照全面回歸 42 項，都通過（權限回歸只有一項是腳本在 log 輸出前就檢查的時序誤判）；部署後 10/10 healthy。`d280fd030ffc` 部署後，`run-d01-blackbox.py`（M_D01_EXTERNAL_UAT、RYO_IBON）23/23 PASS，訂單數不變。
 - 權限相關資料表部署前的備份放在 `state/overhaul-20260929/pre-*.sql`。

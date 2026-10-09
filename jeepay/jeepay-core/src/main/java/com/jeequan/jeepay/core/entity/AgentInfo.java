@@ -14,7 +14,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 代理資訊（ADR-0009）：獨立於服務商（ISV）的代理實體，高級代理 → 一般代理 兩層。
+ * 代理資訊（ADR-0009）：獨立於服務商（ISV）的代理實體，團長 → 隊長 兩層。
  * agentPath 為物化路徑（如 /A001/A002/），查詢轄區用前綴比對，不需遞迴。
  */
 @Schema(description = "代理資訊表")
@@ -30,9 +30,9 @@ public class AgentInfo extends BaseModel implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /** 高級代理 */
+    /** 團長 */
     public static final byte LEVEL_SENIOR = 1;
-    /** 一般代理 */
+    /** 隊長 */
     public static final byte LEVEL_AGENT = 2;
 
     @Schema(title = "agentNo", description = "代理號")
@@ -42,10 +42,10 @@ public class AgentInfo extends BaseModel implements Serializable {
     @Schema(title = "agentName", description = "代理名稱")
     private String agentName;
 
-    @Schema(title = "agentLevel", description = "代理層級: 1-高級代理, 2-一般代理")
+    @Schema(title = "agentLevel", description = "代理層級: 1-團長, 2-隊長")
     private Byte agentLevel;
 
-    @Schema(title = "parentAgentNo", description = "上級代理號（高級代理為空）")
+    @Schema(title = "parentAgentNo", description = "上級代理號（團長為空）")
     private String parentAgentNo;
 
     @Schema(title = "agentPath", description = "物化路徑")
@@ -78,7 +78,7 @@ public class AgentInfo extends BaseModel implements Serializable {
     @Schema(title = "updatedAt", description = "更新時間")
     private Date updatedAt;
 
-    @Schema(title = "brandEnabled", description = "白標是否啟用: 0-否, 1-是（僅高級代理）")
+    @Schema(title = "brandEnabled", description = "白標是否啟用: 0-否, 1-是（僅團長）")
     private Byte brandEnabled;
 
     @Schema(title = "brandTitle", description = "白標站台名稱")
@@ -86,4 +86,7 @@ public class AgentInfo extends BaseModel implements Serializable {
 
     @Schema(title = "brandLogo", description = "白標 Logo 圖片位址")
     private String brandLogo;
+
+    @Schema(title = "isHouse", description = "是否平台直屬: 0-否, 1-是（ADR-0012）")
+    private Byte isHouse;
 }

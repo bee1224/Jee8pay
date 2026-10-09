@@ -18,8 +18,8 @@
           <a-form-item label="代理層級" name="agentLevel">
             <!-- 層級與上級建立後不可變更（物化路徑一致性） -->
             <a-radio-group v-model:value="vdata.saveObject.agentLevel" :disabled="!vdata.isAdd">
-              <a-radio :value="1">高級代理</a-radio>
-              <a-radio :value="2">一般代理</a-radio>
+              <a-radio :value="1">團長</a-radio>
+              <a-radio :value="2">隊長</a-radio>
             </a-radio-group>
           </a-form-item>
         </a-col>
@@ -27,10 +27,10 @@
 
       <a-row v-if="vdata.saveObject.agentLevel === 2" justify="space-between" type="flex">
         <a-col :span="22">
-          <a-form-item label="上級高級代理" name="parentAgentNo">
+          <a-form-item label="上級團長" name="parentAgentNo">
             <a-select
               v-model:value="vdata.saveObject.parentAgentNo"
-              placeholder="請選擇上級高級代理"
+              placeholder="請選擇上級團長"
               :disabled="!vdata.isAdd"
               show-search
               option-filter-prop="label"
@@ -110,7 +110,7 @@ const vdata: any = reactive({
   rules: {
     agentName: [{ required: true, message: '請輸入代理名稱', trigger: 'blur' }],
     agentLevel: [{ required: true, message: '請選擇代理層級', trigger: 'change' }],
-    parentAgentNo: [{ required: true, message: '請選擇上級高級代理', trigger: 'change' }],
+    parentAgentNo: [{ required: true, message: '請選擇上級團長', trigger: 'change' }],
     loginUsername: [{ required: true, pattern: /^[A-Za-z0-9_]{4,32}$/, message: '請輸入 4～32 碼英文、數字或底線', trigger: 'blur' }],
     // 新增時必填：登入帳號需要綁定手機號
     contactTel: [{ required: true, pattern: /^09\d{8}$/, message: '請輸入正確的手機號（09 開頭 10 碼）', trigger: 'blur' }],

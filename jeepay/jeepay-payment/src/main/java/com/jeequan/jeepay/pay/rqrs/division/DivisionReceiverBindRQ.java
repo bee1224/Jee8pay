@@ -33,19 +33,19 @@ import jakarta.validation.constraints.NotNull;
 public class DivisionReceiverBindRQ extends AbstractMchAppRQ {
 
     /** 支付介面代码   **/
-    @NotBlank(message="支付介面代码不能為空")
+    @NotBlank(message="支付介面代碼不能為空")
     private String ifCode;
 
     /** 接收者帳號别名 **/
     private String receiverAlias;
 
     /** 组ID  **/
-    @NotNull(message="组ID不能為空， 若不存在請先登录商戶平台进行创建操作")
+    @NotNull(message="組ID不能為空， 若不存在請先登入商戶平台進行建立操作")
     private Long receiverGroupId;
 
     /** 分帳接收帳號类型: 0-个人(对私) 1-商戶(对公) **/
-    @NotNull(message="分帳接收帳號类型不能為空")
-    @Range(min = 0, max = 1, message = "分帳接收帳號类型设置有误")
+    @NotNull(message="分帳接收帳號類型不能為空")
+    @Range(min = 0, max = 1, message = "分帳接收帳號類型設置有誤")
     private Byte accType;
 
     /** 分帳接收帳號 **/
@@ -56,7 +56,7 @@ public class DivisionReceiverBindRQ extends AbstractMchAppRQ {
     private String accName;
 
     /** 分帳关系类型（参考微信）， 如： SERVICE_PROVIDER 服務商等 **/
-    @NotBlank(message="分帳关系类型不能為空")
+    @NotBlank(message="分帳關係類型不能為空")
     private String relationType;
 
     /** 当选择自定义时，需要录入该字段。 否则为对应的名称 **/

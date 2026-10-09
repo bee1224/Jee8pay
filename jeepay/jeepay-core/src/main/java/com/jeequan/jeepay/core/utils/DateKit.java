@@ -71,7 +71,7 @@ public class DateKit {
 		//根据 | 分割
 		String[] valArray = queryParamVal.split("\\|");
 		if(valArray.length != 2){ //参数有误
-			throw new BizException("查询时间参数有误");
+			throw new BizException("查詢時間參數有誤");
 		}
 		String dateType = valArray[0];  //时间类型
 		String dateVal = valArray[1];  //搜索时间值
@@ -105,7 +105,7 @@ public class DateKit {
 
 			String[] timeArray = dateVal.split(","); //以逗号分割
 			if(timeArray.length != 2) {
-                throw new BizException("查询自定义时间参数有误");
+                throw new BizException("查詢自定義時間參數有誤");
             }
 
 			String timeStr1 = "N".equalsIgnoreCase(timeArray[0]) ? null : timeArray[0] ;  //开始时间，
@@ -123,7 +123,7 @@ public class DateKit {
 			return new Date[]{time1, time2};
 
 		}else{
-			throw new BizException("查询时间参数有误");
+			throw new BizException("查詢時間參數有誤");
 		}
 	}
 

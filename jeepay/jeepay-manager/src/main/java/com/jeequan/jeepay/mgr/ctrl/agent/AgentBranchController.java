@@ -88,13 +88,13 @@ public class AgentBranchController extends AgentBaseCtrl {
 
     // ---------------- 商戶歸屬與帳號 ----------------
 
-    @Operation(summary = "更換旗下商戶的直屬代理與推薦人")
+    @Operation(summary = "更換旗下商戶的直屬代理")
     @PreAuthorize("hasAuthority('ENT_AGENT_PORTAL_MCH_EDIT')")
     @MethodLog(remark = "代理更換商戶歸屬")
     @RequestMapping(value = "/merchants/{mchNo}/binding", method = RequestMethod.PUT)
     public ApiRes rebind(@PathVariable("mchNo") String mchNo) {
         requireAuthority("ENT_AGENT_PORTAL_MCH_EDIT");
-        branch.rebind(me(), mchNo, getValStringRequired("agentNo"), getValString("referrerAgentNo"), uid(), realname());
+        branch.rebind(me(), mchNo, getValStringRequired("agentNo"), uid(), realname());
         return ApiRes.ok();
     }
 
@@ -156,7 +156,7 @@ public class AgentBranchController extends AgentBaseCtrl {
         return ApiRes.ok(branch.feeRules(me()));
     }
 
-    @Operation(summary = "高級代理設定高代費、代理費、推薦佣金或商戶覆寫")
+    @Operation(summary = "團長設定團長費、隊長費或商戶覆寫")
     @PreAuthorize("hasAuthority('ENT_AGENT_PORTAL_FEE_EDIT')")
     @MethodLog(remark = "代理設定費率")
     @RequestMapping(value = "/feeRules", method = RequestMethod.POST)
@@ -254,7 +254,7 @@ public class AgentBranchController extends AgentBaseCtrl {
         return ApiRes.ok(branch.effectiveBrand(me()));
     }
 
-    @Operation(summary = "高級代理設定品牌（站台名稱與 Logo）")
+    @Operation(summary = "團長設定品牌（站台名稱與 Logo）")
     @PreAuthorize("hasAuthority('ENT_AGENT_PORTAL_BRAND')")
     @MethodLog(remark = "代理設定品牌")
     @RequestMapping(value = "/brand", method = RequestMethod.PUT)

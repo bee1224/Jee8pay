@@ -57,48 +57,6 @@
         </a-col>
       </a-row>
       <a-row justify="space-between" type="flex">
-        <a-col :span="10" style="position: relative">
-          <a-form-item label="商戶類型" name="type">
-            <!-- 商户类型 气泡弹窗 -->
-            <a-radio-group
-              v-model:value="vdata.saveObject.type"
-              :disabled="vdata.isAdd ? false : true"
-            >
-              <a-radio :value="1">普通商戶</a-radio>
-              <a-radio :value="2">特約商戶</a-radio>
-            </a-radio-group>
-          </a-form-item>
-          <div id="components-popover-demo-placement">
-            <div class="typePopover">
-              <!-- title可省略，就不显示 -->
-              <a-popover placement="top">
-                <template #content>
-                  <p>普通商戶是指商戶自行申請入駐微信或支付寶，無服務商協助，單獨調介面。</p>
-                  <p>
-                    特約商戶是指由微信或支付寶的服務商協助商戶完成入駐，商戶下單走的是服務商介面。
-                  </p>
-                </template>
-                <template #title>
-                  <span>商戶類型</span>
-                </template>
-                <a-icon type="question-circle" />
-              </a-popover>
-            </div>
-          </div>
-        </a-col>
-        <a-col v-if="vdata.saveObject.type == 2" :span="10">
-          <a-form-item label="服務商號" name="isvNo">
-            <a-select
-              v-model:value="vdata.saveObject.isvNo"
-              placeholder="請選擇服務商"
-              :disabled="!vdata.isAdd"
-            >
-              <a-select-option v-for="d in vdata.isvList" :key="d.isvNo" :value="d.isvNo">
-                {{ d.isvName + ' [ ID: ' + d.isvNo + ' ]' }}
-              </a-select-option>
-            </a-select>
-          </a-form-item>
-        </a-col>
         <a-col :span="10">
           <a-form-item label="狀態" name="state">
             <a-radio-group v-model:value="vdata.saveObject.state">
@@ -179,7 +137,7 @@
 </template>
 
 <script setup lang="ts">
-import { API_URL_MCH_LIST, API_URL_ISV_LIST, req } from '@/api/manage'
+import { API_URL_MCH_LIST, req } from '@/api/manage'
 import { Base64 } from 'js-base64'
 import { reactive, ref, getCurrentInstance } from 'vue'
 const { $infoBox, $access, $hasAgentEnt, $SYS_NAME_MAP } =
@@ -204,16 +162,8 @@ const vdata: any = reactive({
   saveObject: {}, // 数据对象
   recordId: null, // 更新对象ID
   open: false, // 是否显示弹层/抽屉
-  isvList: null, // 服务商下拉列表
 })
 
-const checkIsvNo = (rule, value) => {
-  // 校验类型为特约商户是否选择了服务商
-  if (vdata.saveObject.type === 2 && !value) {
-    return Promise.reject('請選擇服務商')
-  }
-  return Promise.resolve()
-}
 
 const rules: any = reactive({
   mchName: [{ required: true, message: '請輸入商戶名稱', trigger: 'blur' }],
@@ -227,7 +177,6 @@ const rules: any = reactive({
   ],
   mchShortName: [{ required: true, message: '請輸入商戶簡稱', trigger: 'blur' }],
   contactName: [{ required: true, message: '請輸入聯絡人姓名', trigger: 'blur' }],
-  isvNo: [{ validator: checkIsvNo, trigger: 'blur' }],
   contactEmail: [
     {
       required: false,
@@ -278,10 +227,6 @@ function show(recordId) {
   if (infoFormModel.value) {
     infoFormModel.value.resetFields()
   }
-  req.list(API_URL_ISV_LIST, { pageSize: -1, state: 1 }).then((res) => {
-    // 服务商下拉选择列表
-    vdata.isvList = res.records
-  })
   if (!vdata.isAdd) {
     // 修改信息 延迟展示弹层
     vdata.resetIsShow = true // 展示重置密码板块
@@ -316,7 +261,6 @@ function handleOkFunc() {
           })
       } else {
         vdata.sysPassword.confirmPwd = Base64.encode(vdata.sysPassword.confirmPwd)
-        console.log(vdata.sysPassword.confirmPwd)
         Object.assign(vdata.saveObject, vdata.sysPassword) // 拼接对象
 
         req
@@ -370,10 +314,3 @@ function resetPassEmpty() {
 
 defineExpose({ show })
 </script>
-<style lang="less" scoped>
-.typePopover {
-  position: absolute;
-  top: 0;
-  left: 62px;
-}
-</style>

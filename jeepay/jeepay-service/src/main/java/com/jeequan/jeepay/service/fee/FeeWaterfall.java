@@ -19,7 +19,7 @@ public final class FeeWaterfall {
 
     /** 計算順序即顯示順序 */
     public static final List<String> LAYERS = Collections.unmodifiableList(List.of(
-            FeeRule.LAYER_PLATFORM, FeeRule.LAYER_CHANNEL, FeeRule.LAYER_SR_AGENT, FeeRule.LAYER_AGENT, FeeRule.LAYER_REFERRER));
+            FeeRule.LAYER_PLATFORM, FeeRule.LAYER_CHANNEL, FeeRule.LAYER_SR_AGENT, FeeRule.LAYER_AGENT));
 
     private FeeWaterfall() {
     }
@@ -84,24 +84,17 @@ public final class FeeWaterfall {
      * 解析某商戶在某支付方式下的四層費率。
      *
      * @param mchNo       商戶號
-     * @param directAgent 商戶的直屬代理（可為 null：未綁定代理則高代費／代理費為 0）
-     * @param seniorAgent 直屬代理所屬的高級代理；直屬代理本身即高級代理時與 directAgent 相同
+     * @param directAgent 商戶的直屬代理（可為 null：未綁定代理則團長費／隊長費為 0）
+     * @param seniorAgent 直屬代理所屬的團長；直屬代理本身即團長時與 directAgent 相同
      * @param rules       該支付方式下已啟用的規則（DEFAULT、相關代理、該商戶的 MCH 覆寫）
      */
     public static List<LayerRule> resolve(String mchNo, AgentInfo directAgent, AgentInfo seniorAgent, List<FeeRule> rules) {
-        return resolve(mchNo, directAgent, seniorAgent, null, rules);
-    }
-
-    /** 含推薦人的解析：推薦佣金取推薦人代理的 REFERRER 規則（或商戶覆寫）。 */
-    public static List<LayerRule> resolve(String mchNo, AgentInfo directAgent, AgentInfo seniorAgent, AgentInfo referrer, List<FeeRule> rules) {
         List<LayerRule> result = new ArrayList<>(LAYERS.size());
         boolean hasSenior = seniorAgent != null;
         boolean hasLevel2Agent = directAgent != null && Objects.equals(directAgent.getAgentLevel(), AgentInfo.LEVEL_AGENT);
-        boolean hasReferrer = referrer != null;
         for (String layer : LAYERS) {
             // 代理層沒有對應的收款代理時一律為 0，即使商戶有覆寫也不收（避免收了無人可分的費用）
-            if ((FeeRule.LAYER_SR_AGENT.equals(layer) && !hasSenior) || (FeeRule.LAYER_AGENT.equals(layer) && !hasLevel2Agent)
-                    || (FeeRule.LAYER_REFERRER.equals(layer) && !hasReferrer)) {
+            if ((FeeRule.LAYER_SR_AGENT.equals(layer) && !hasSenior) || (FeeRule.LAYER_AGENT.equals(layer) && !hasLevel2Agent)) {
                 result.add(new LayerRule(layer, BigDecimal.ZERO, 0L, "NONE"));
                 continue;
             }
@@ -121,9 +114,6 @@ public final class FeeWaterfall {
             } else if (FeeRule.LAYER_AGENT.equals(layer)) {
                 base = find(rules, FeeRule.TARGET_AGENT, directAgent.getAgentNo(), layer);
                 source = FeeRule.TARGET_AGENT + ":" + directAgent.getAgentNo();
-            } else if (FeeRule.LAYER_REFERRER.equals(layer)) {
-                base = find(rules, FeeRule.TARGET_AGENT, referrer.getAgentNo(), layer);
-                source = FeeRule.TARGET_AGENT + ":" + referrer.getAgentNo();
             }
             result.add(base == null ? new LayerRule(layer, BigDecimal.ZERO, 0L, "NONE") : toLayerRule(base, source));
         }
@@ -146,7 +136,7 @@ public final class FeeWaterfall {
 
     /**
      * 規則本身的合法性檢查（不含對象是否存在）。
-     * 平臺費／渠道費只允許 DEFAULT 或 MCH；高代費／代理費只允許 AGENT 或 MCH。
+     * 平臺費／渠道費只允許 DEFAULT 或 MCH；團長費／隊長費只允許 AGENT 或 MCH。
      */
     public static void validateRule(FeeRule rule) {
         if (rule == null || isBlank(rule.getWayCode()) || isBlank(rule.getTargetType()) || isBlank(rule.getLayer())) {
@@ -167,7 +157,7 @@ public final class FeeWaterfall {
                 break;
             case FeeRule.TARGET_AGENT:
                 if (platformLayer) {
-                    throw new BizException("代理只能設定高代費、代理費或推薦佣金");
+                    throw new BizException("代理只能設定團長費或隊長費");
                 }
                 if (isBlank(rule.getTargetId())) {
                     throw new BizException("請指定代理");
@@ -193,17 +183,14 @@ public final class FeeWaterfall {
         }
     }
 
-    /** 代理類規則須對應層級：高代費 ↔ 高級代理、代理費 ↔ 一般代理；推薦佣金不限層級。 */
+    /** 代理類規則須對應層級：團長費 ↔ 團長、隊長費 ↔ 隊長。 */
     public static void validateAgentLayer(String layer, AgentInfo agent) {
         if (agent == null) {
             throw new BizException("代理不存在");
         }
-        if (FeeRule.LAYER_REFERRER.equals(layer)) {
-            return; // 任何層級的代理都可以當推薦人
-        }
         byte expected = FeeRule.LAYER_SR_AGENT.equals(layer) ? AgentInfo.LEVEL_SENIOR : AgentInfo.LEVEL_AGENT;
         if (!Objects.equals(agent.getAgentLevel(), expected)) {
-            throw new BizException(FeeRule.LAYER_SR_AGENT.equals(layer) ? "高代費只能設定在高級代理上" : "代理費只能設定在一般代理上");
+            throw new BizException(FeeRule.LAYER_SR_AGENT.equals(layer) ? "團長費只能設定在團長上" : "隊長費只能設定在隊長上");
         }
     }
 

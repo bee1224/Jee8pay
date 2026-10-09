@@ -58,29 +58,29 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
 
         // 判断数据来源
         if( StringUtils.isEmpty(sysUser.getLoginUsername()) ) {
-            throw new BizException("登录用户名不能为空！");
+            throw new BizException("登入用戶名不能為空！");
         }
         if( StringUtils.isEmpty(sysUser.getRealname()) ) {
-            throw new BizException("姓名不能为空！");
+            throw new BizException("姓名不能為空！");
         }
         if( StringUtils.isEmpty(sysUser.getTelphone()) ) {
-            throw new BizException("手机号不能为空！");
+            throw new BizException("手機號不能為空！");
         }
         if(sysUser.getSex() == null ) {
-            throw new BizException("性别不能为空！");
+            throw new BizException("性別不能為空！");
         }
 
         //登录用户名不可重复
         if( count(SysUser.gw().eq(SysUser::getSysType, sysType).eq(SysUser::getLoginUsername, sysUser.getLoginUsername())) > 0 ){
-            throw new BizException("登录用户名已存在！");
+            throw new BizException("登入用戶名已存在！");
         }
         //手机号不可重复
         if( count(SysUser.gw().eq(SysUser::getSysType, sysType).eq(SysUser::getTelphone, sysUser.getTelphone())) > 0 ){
-            throw new BizException("手机号已存在！");
+            throw new BizException("手機號已存在！");
         }
         //员工号不可重复
         if( count(SysUser.gw().eq(SysUser::getSysType, sysType).eq(SysUser::getUserNo, sysUser.getUserNo())) > 0 ){
-            throw new BizException("员工号已存在！");
+            throw new BizException("員工號已存在！");
         }
 
         //女  默认头像；使用營運平台與商戶平台各自 public/imgs 下的本地圖片，不依賴上游的北京 OSS
@@ -114,14 +114,14 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
         SysUser dbRecord = getById(sysUserId);
 
         if (dbRecord == null) {
-            throw new BizException("该用户不存在");
+            throw new BizException("該用戶不存在");
         }
 
         //修改了手机号， 需要修改auth表信息
         if(!dbRecord.getTelphone().equals(sysUser.getTelphone())){
 
             if(count(SysUser.gw().eq(SysUser::getSysType, dbRecord.getSysType()).eq(SysUser::getTelphone, sysUser.getTelphone())) > 0){
-                throw new BizException("该手机号已关联其他用户！");
+                throw new BizException("該手機號已關聯其他用戶！");
             }
 
             sysUserAuthService.resetAuthInfo(sysUserId, null, sysUser.getTelphone(), null, dbRecord.getSysType());
@@ -131,7 +131,7 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
         if(!dbRecord.getLoginUsername().equals(sysUser.getLoginUsername())){
 
             if(count(SysUser.gw().eq(SysUser::getSysType, dbRecord.getSysType()).eq(SysUser::getLoginUsername, sysUser.getLoginUsername())) > 0){
-                throw new BizException("该登录用户名已关联其他用户！");
+                throw new BizException("該登入用戶名已關聯其他用戶！");
             }
 
             sysUserAuthService.resetAuthInfo(sysUserId, sysUser.getLoginUsername(), null, null, dbRecord.getSysType());
@@ -140,7 +140,7 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
         //修改了编号
         if(StringUtils.isNotEmpty(sysUser.getUserNo()) && dbRecord.getUserNo() != null && !dbRecord.getUserNo().equals(sysUser.getUserNo())){
             if(count(SysUser.gw().eq(SysUser::getSysType, dbRecord.getSysType()).eq(SysUser::getUserNo, sysUser.getUserNo())) > 0){
-                throw new BizException("该员工编号已关联其他用户！");
+                throw new BizException("該員工編號已關聯其他用戶！");
             }
         }
 

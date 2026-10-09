@@ -47,7 +47,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
- * 家族樹權限（爺爺＝平台、爸爸＝高級代理、兒子＝一般代理）：代理對自己這一支後代的管理操作。
+ * 家族樹權限（爺爺＝平台、爸爸＝團長、兒子＝隊長）：代理對自己這一支後代的管理操作。
  *
  * 每個方法都先由登入者的代理路徑推導出範圍（{@link Scope}），再檢查操作對象是否在範圍內；
  * 前端傳入的代理號、商戶號只能在範圍內選擇，不能擴大範圍。平臺費與渠道費一律不在這裡開放。
@@ -56,7 +56,7 @@ import java.util.stream.Collectors;
 public class AgentBranchService {
 
     private static final int REPORT_MAX_DAYS = 93;
-    private static final Set<String> AGENT_LAYERS = Set.of(FeeRule.LAYER_SR_AGENT, FeeRule.LAYER_AGENT, FeeRule.LAYER_REFERRER);
+    private static final Set<String> AGENT_LAYERS = Set.of(FeeRule.LAYER_SR_AGENT, FeeRule.LAYER_AGENT);
 
     @Autowired private AgentPortalService agentPortalService;
     @Autowired private AgentInfoMapper agentInfoMapper;
@@ -113,7 +113,7 @@ public class AgentBranchService {
 
     private static void requireSenior(AgentInfo me, String what) {
         if (!Objects.equals(me.getAgentLevel(), AgentInfo.LEVEL_SENIOR)) {
-            throw new BizException("只有高級代理可以" + what);
+            throw new BizException("只有團長可以" + what);
         }
     }
 
@@ -229,19 +229,18 @@ public class AgentBranchService {
 
     // ---------------- 商戶歸屬與帳號 ----------------
 
-    /** 高級代理更換轄下商戶的直屬代理與推薦人；新的直屬代理與推薦人都必須在自己這一支裡。 */
+    /** 團長更換轄下商戶的直屬代理；新的直屬代理必須在自己這一支裡。 */
     @Transactional
-    public void rebind(AgentInfo me, String mchNo, String agentNo, String referrerAgentNo, Long uid, String name) {
-        requireSenior(me, "更換商戶的直屬代理與推薦人");
+    public void rebind(AgentInfo me, String mchNo, String agentNo, Long uid, String name) {
+        requireSenior(me, "更換商戶的直屬代理");
         Scope scope = scope(me);
         if (!scope.mchNos.contains(mchNo)) {
             throw new BizException("只能調整自己旗下的商戶");
         }
-        String referrer = StringUtils.trimToNull(referrerAgentNo);
-        if (!scope.agentNos.contains(agentNo) || (referrer != null && !scope.agentNos.contains(referrer))) {
-            throw new BizException("直屬代理與推薦人都必須是自己或自己的旗下代理");
+        if (!scope.agentNos.contains(agentNo)) {
+            throw new BizException("直屬代理必須是自己或自己的旗下代理");
         }
-        agentMchRelaService.bind(mchNo, agentNo, referrer, uid, operator(me, name));
+        agentMchRelaService.bind(mchNo, agentNo, uid, operator(me, name));
     }
 
     /** 重設轄下商戶登入帳號的密碼為新的隨機 8 碼，只在回應出現一次。 */
@@ -333,7 +332,7 @@ public class AgentBranchService {
         }
     }
 
-    // ---------------- 黑名單（以高級代理為範圍，旗下共用） ----------------
+    // ---------------- 黑名單（以團長為範圍，旗下共用） ----------------
 
     public List<RiskBlacklist> blacklist(AgentInfo me) {
         requireSenior(me, "管理黑名單");
@@ -356,7 +355,7 @@ public class AgentBranchService {
         riskBlacklistService.removeById(id);
     }
 
-    // ---------------- 費率（高代費、代理費、推薦佣金；不含平臺費與渠道費） ----------------
+    // ---------------- 費率（團長費、隊長費；不含平臺費與渠道費） ----------------
 
     /** 自己這一支的代理費率，加上對轄下商戶的覆寫。 */
     public List<FeeRule> feeRules(AgentInfo me) {
@@ -370,7 +369,7 @@ public class AgentBranchService {
     }
 
     /**
-     * 高級代理設定：自己的高代費、旗下代理的代理費、任一代理的推薦佣金，或對轄下商戶逐一覆寫這三層。
+     * 團長設定：自己的團長費、旗下代理的隊長費，或對轄下商戶逐一覆寫這兩層。
      * 儲存後以 1000 元試算轄下所有商戶；任何商戶各層合計超過其商戶費率就整筆回滾。
      */
     @Transactional
@@ -379,7 +378,7 @@ public class AgentBranchService {
         Scope scope = scope(me);
         String layer = input.getLayer();
         if (!AGENT_LAYERS.contains(layer)) {
-            throw new BizException("代理只能設定高代費、代理費與推薦佣金");
+            throw new BizException("代理只能設定團長費與隊長費");
         }
         String targetId = StringUtils.trimToEmpty(input.getTargetId());
         if (FeeRule.TARGET_AGENT.equals(input.getTargetType())) {
@@ -516,7 +515,7 @@ public class AgentBranchService {
         withdrawService.reject(withdrawId, uid, StringUtils.abbreviate(operator(me, name), 64), remark.trim());
     }
 
-    // ---------------- 白標（高級代理設定，自己與旗下代理登入後套用） ----------------
+    // ---------------- 白標（團長設定，自己與旗下代理登入後套用） ----------------
 
     public void saveBrand(AgentInfo me, Byte enabled, String title, String logo) {
         requireSenior(me, "設定品牌");
@@ -533,7 +532,7 @@ public class AgentBranchService {
                 .set(AgentInfo::getBrandTitle, t).set(AgentInfo::getBrandLogo, l));
     }
 
-    /** 登入者適用的品牌：取自己這一支的高級代理；未啟用時回傳 null。 */
+    /** 登入者適用的品牌：取自己這一支的團長；未啟用時回傳 null。 */
     public JSONObject effectiveBrand(AgentInfo me) {
         AgentInfo senior = Objects.equals(me.getAgentLevel(), AgentInfo.LEVEL_SENIOR) ? me
                 : (me.getParentAgentNo() == null ? null : agentInfoMapper.selectById(me.getParentAgentNo()));
@@ -551,7 +550,7 @@ public class AgentBranchService {
     /** 自己最近 5 次登入的時間與 IP。 */
     public List<SysLog> recentLogins(Long userId) {
         return sysLogService.list(SysLog.gw().select(SysLog::getSysLogId, SysLog::getUserIp, SysLog::getCreatedAt)
-                .eq(SysLog::getSysType, CS.SYS_TYPE.MGR).eq(SysLog::getUserId, userId).eq(SysLog::getMethodRemark, "登录认证")
+                .eq(SysLog::getSysType, CS.SYS_TYPE.MGR).eq(SysLog::getUserId, userId).eq(SysLog::getMethodRemark, "登入認證")
                 .orderByDesc(SysLog::getSysLogId).last("LIMIT 5"));
     }
 }

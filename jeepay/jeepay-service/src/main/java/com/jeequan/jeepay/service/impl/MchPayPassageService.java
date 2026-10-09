@@ -96,7 +96,7 @@ public class MchPayPassageService extends ServiceImpl<MchPayPassageMapper, MchPa
                 payPassage.setRate(payPassage.getRate().divide(new BigDecimal("100"), 6, BigDecimal.ROUND_HALF_UP));
             }
             if (!saveOrUpdate(payPassage)) {
-                throw new BizException("操作失败");
+                throw new BizException("操作失敗");
             }
         }
     }

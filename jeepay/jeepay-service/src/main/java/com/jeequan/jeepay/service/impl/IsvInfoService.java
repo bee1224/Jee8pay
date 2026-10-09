@@ -48,13 +48,13 @@ public class IsvInfoService extends ServiceImpl<IsvInfoMapper, IsvInfo> {
         // 0.当前服务商是否存在
         IsvInfo isvInfo = isvInfoService.getById(isvNo);
         if (isvInfo == null) {
-            throw new BizException("该服务商不存在");
+            throw new BizException("該服務商不存在");
         }
 
         // 1.查询当前服务商下是否存在商户
         long mchCount = mchInfoService.count(MchInfo.gw().eq(MchInfo::getIsvNo, isvNo).eq(MchInfo::getType, CS.MCH_TYPE_ISVSUB));
         if (mchCount > 0) {
-            throw new BizException("该服务商下存在商户，不可删除");
+            throw new BizException("該服務商下存在商戶，不可刪除");
         }
 
         // 2.删除当前服务商支付接口配置参数
@@ -66,7 +66,7 @@ public class IsvInfoService extends ServiceImpl<IsvInfoMapper, IsvInfo> {
         // 3.删除该服务商
         boolean remove = isvInfoService.removeById(isvNo);
         if (!remove) {
-            throw new BizException("删除服务商失败");
+            throw new BizException("刪除服務商失敗");
         }
     }
 }

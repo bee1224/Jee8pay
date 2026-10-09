@@ -75,6 +75,8 @@ export const API_URL_USER_ROLE_RELA_LIST = '/api/sysUserRoleRelas'
 export const API_URL_ISV_LIST = '/api/isvInfo'
 /** 代理管理（ADR-0009） **/
 export const API_URL_AGENT_INFO = '/api/agentInfo'
+/** 渠道帳號（ADR-0012） **/
+export const API_URL_CHANNEL_ACCOUNT = '/api/channelAccounts'
 /** 商戶代理綁定 **/
 export const API_URL_AGENT_MCH_RELA = '/api/agentMchRela'
 /** 四層費率規則 **/

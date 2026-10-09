@@ -15,10 +15,10 @@ import java.util.Objects;
  *
  * 訂單金額全數分配到各帳戶，合計恆等於訂單金額：
  *   商戶 = 金額 - 商戶手續費
- *   高級代理 = 高代費、直屬一般代理 = 代理費、推薦人 = 推薦佣金
+ *   團長 = 團長費、直屬隊長 = 隊長費
  *   上游渠道 = 渠道費（渠道成本，記在 CHANNEL:ifCode 帳戶以便對帳）
- *   平台 = 商戶手續費 - 渠道費 - 各代理分潤（含平臺費與未分配的差額；四層超過商戶手續費時為負，由平台吸收並已在快照標記）
- * 同一帳戶出現多次（例如推薦人同時是高級代理）時合併為一筆，避免同一訂單對同一帳戶重複記帳。
+ *   平台 = 商戶手續費 - 渠道費 - 團長費 - 隊長費（含平臺費與未分配的差額；四層超過商戶手續費時為負，由平台吸收並已在快照標記）
+ * 同一帳戶出現多次時合併為一筆，避免同一訂單對同一帳戶重複記帳。
  */
 public final class SettlementSplit {
 
@@ -47,15 +47,13 @@ public final class SettlementSplit {
         long channel = nz(fee.getChannelFee());
         long sr = StringUtils.isBlank(fee.getSrAgentNo()) ? 0 : nz(fee.getSrAgentFee());
         long ag = StringUtils.isBlank(fee.getAgentNo()) ? 0 : nz(fee.getAgentFee());
-        long ref = StringUtils.isBlank(fee.getReferrerAgentNo()) ? 0 : nz(fee.getReferrerFee());
 
         Map<String, long[]> merged = new LinkedHashMap<>();
         add(merged, WalletAccount.OWNER_MCH, fee.getMchNo(), amount - mchFee);
         add(merged, WalletAccount.OWNER_AGENT, fee.getSrAgentNo(), sr);
         add(merged, WalletAccount.OWNER_AGENT, fee.getAgentNo(), ag);
-        add(merged, WalletAccount.OWNER_AGENT, fee.getReferrerAgentNo(), ref);
         add(merged, WalletAccount.OWNER_CHANNEL, StringUtils.defaultIfBlank(ifCode, "UNKNOWN"), channel);
-        add(merged, WalletAccount.OWNER_PLATFORM, WalletAccount.PLATFORM_ID, mchFee - channel - sr - ag - ref);
+        add(merged, WalletAccount.OWNER_PLATFORM, WalletAccount.PLATFORM_ID, mchFee - channel - sr - ag);
 
         List<Share> shares = new ArrayList<>();
         for (Map.Entry<String, long[]> e : merged.entrySet()) {

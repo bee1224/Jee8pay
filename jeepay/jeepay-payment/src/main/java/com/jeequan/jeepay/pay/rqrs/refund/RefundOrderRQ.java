@@ -48,7 +48,7 @@ public class RefundOrderRQ extends AbstractMchAppRQ {
     private Long refundAmount;
 
     /** 货币代码 **/
-    @NotBlank(message="货币代码不能為空")
+    @NotBlank(message="貨幣代碼不能為空")
     private String currency;
 
     /** 退款原因 **/

@@ -138,7 +138,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
     })
     @PreAuthorize("hasAuthority('ENT_MCH_PAY_CONFIG_ADD')")
     @PostMapping
-    @MethodLog(remark = "更新商户支付参数")
+    @MethodLog(remark = "更新商戶支付參數")
     public ApiRes saveOrUpdate() {
 
         String ifCode = getValStringRequired("ifCode");
@@ -174,7 +174,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
 
         boolean result = payInterfaceConfigService.saveOrUpdate(payInterfaceConfig);
         if (!result) {
-            throw new BizException("配置失败");
+            throw new BizException("配置失敗");
         }
         mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_APP, null, getCurrentMchNo(), infoId));
 

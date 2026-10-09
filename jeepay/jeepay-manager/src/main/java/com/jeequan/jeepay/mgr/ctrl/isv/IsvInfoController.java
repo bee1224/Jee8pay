@@ -107,7 +107,7 @@ public class IsvInfoController extends CommonCtrl {
             @Parameter(name = "state", description = "状态: 0-停用, 1-正常")
     })
     @PreAuthorize("hasAuthority('ENT_ISV_INFO_ADD')")
-    @MethodLog(remark = "新增服务商")
+    @MethodLog(remark = "新增服務商")
     @RequestMapping(value="", method = RequestMethod.POST)
     public ApiRes add() {
         IsvInfo isvInfo = getObject(IsvInfo.class);
@@ -133,7 +133,7 @@ public class IsvInfoController extends CommonCtrl {
             @Parameter(name = "isvNo", description = "服务商号", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_ISV_INFO_DEL')")
-    @MethodLog(remark = "删除服务商")
+    @MethodLog(remark = "刪除服務商")
     @RequestMapping(value="/{isvNo}", method = RequestMethod.DELETE)
     public ApiRes delete(@PathVariable("isvNo") String isvNo) {
         isvInfoService.removeByIsvNo(isvNo);
@@ -161,7 +161,7 @@ public class IsvInfoController extends CommonCtrl {
             @Parameter(name = "state", description = "状态: 0-停用, 1-正常")
     })
     @PreAuthorize("hasAuthority('ENT_ISV_INFO_EDIT')")
-    @MethodLog(remark = "更新服务商信息")
+    @MethodLog(remark = "更新服務商信息")
     @RequestMapping(value="/{isvNo}", method = RequestMethod.PUT)
     public ApiRes update(@PathVariable("isvNo") String isvNo) {
         IsvInfo isvInfo = getObject(IsvInfo.class);

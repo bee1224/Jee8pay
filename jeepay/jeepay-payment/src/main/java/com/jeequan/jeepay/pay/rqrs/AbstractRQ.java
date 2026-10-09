@@ -35,7 +35,7 @@ public abstract class AbstractRQ implements Serializable {
     protected String version;
 
     /** 簽名类型 **/
-    @NotBlank(message="簽名类型不能為空")
+    @NotBlank(message="簽名類型不能為空")
     protected String signType;
 
     /** 簽名值 **/
