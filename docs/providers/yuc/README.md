@@ -1,9 +1,9 @@
-# YUC / 黑貓 PAY ibon（統一客樂得上游六）
+# YUC / 黑貓 PAY ibon（統一客樂得上游六：榆澄有限公司）
 
 ## Status
 
 ```text
-Provider: YUC / 黑貓 PAY
+Provider: YUC / 黑貓 PAY（榆澄有限公司）
 Status: Implementation
 ifCode: yuc
 wayCode: YUC_IBON
@@ -18,7 +18,7 @@ Live Payment / APN E2E: NOT STARTED
 
 ## Overview
 
-YUC 是黑貓 PAY 平台（`www.ccat.com.tw`）上的第六個契約會員上游，與 RYO / JAY / CHI / JHD / FYZ 使用完全相同的平台契約（Token / Collect / Query / APN / checksum）。JeePay 端以獨立 `ifCode=yuc`、`wayCode=YUC_IBON` 提供 passage，使同一商户可依上游分別路由。
+YUC（榆澄有限公司）是黑貓 PAY 平台（`www.ccat.com.tw`）上的第六個契約會員上游，與 RYO / JAY / CHI / JHD / FYZ 使用完全相同的平台契約（Token / Collect / Query / APN / checksum）。JeePay 端以獨立 `ifCode=yuc`、`wayCode=YUC_IBON` 提供 passage，使同一商户可依上游分別路由。
 
 - 平台契約證據（六家共用）：[`../ryo/contract-evidence.md`](../ryo/contract-evidence.md)
 - Adapter 設計（與 FYZ 逐字複製，僅換 ifCode/wayCode/params）：[`../ryo/provider-design.md`](../ryo/provider-design.md)
@@ -82,4 +82,4 @@ Refund、Transfer、Division、Channel User、Close、COCS 與其他黑貓 PAY p
 | CHI | `chi` | `CHI_IBON` | [`../chi/README.md`](../chi/README.md)（上游三） |
 | JHD | `jhd` | `JHD_IBON` | [`../jhd/README.md`](../jhd/README.md)（上游四；金匯達有限公司） |
 | FYZ | `fyz` | `FYZ_IBON` | [`../fyz/README.md`](../fyz/README.md)（上游五；豐盈利） |
-| YUC | `yuc` | `YUC_IBON` | 本文件（上游六） |
+| YUC | `yuc` | `YUC_IBON` | 本文件（上游六；榆澄有限公司） |

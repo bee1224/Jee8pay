@@ -56,7 +56,7 @@ JeePay remains the authoritative platform core.
 
 ### RYO / JAY / CHI / JHD / FYZ / YUC（黑貓 PAY ibon）
 
-Phase 1 active Providers：黑貓 PAY 平台上的六個統一客樂得上游（原 `CCAT` 已改名 `RYO`；`JHD` 為金匯達有限公司；`FYZ` 為豐盈利）：
+Phase 1 active Providers：黑貓 PAY 平台上的六個統一客樂得上游（原 `CCAT` 已改名 `RYO`；`JHD` 為金匯達有限公司；`FYZ` 為豐盈利；`YUC` 為榆澄有限公司）：
 
 ```text
 RYO_IBON  (ifCode=ryo)

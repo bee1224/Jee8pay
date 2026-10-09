@@ -378,7 +378,7 @@ VALUES ('fyz', 'FYZ（黑猫 PAY）', 1, 0, 1,
         '[{"wayCode":"FYZ_IBON"}]',
         '', '#222222', 1, '黑猫 PAY ibon 通道（上游五）');
 
--- 6) 新增 YUC 定义（与 RYO/JAY/CHI/JHD/FYZ 同一黑猫 PAY 平台契约，仅契约会员帐号不同）
+-- 6) 新增 YUC 定义（榆澄有限公司；与 RYO/JAY/CHI/JHD/FYZ 同一黑猫 PAY 平台契约，仅契约会员帐号不同）
 DELETE FROM t_pay_way WHERE way_code IN ('YUC_IBON');
 INSERT INTO t_pay_way (way_code, way_name) VALUES ('YUC_IBON', 'YUC ibon 缴款');
 DELETE FROM t_pay_interface_define WHERE if_code IN ('yuc');

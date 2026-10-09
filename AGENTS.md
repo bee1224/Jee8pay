@@ -11,7 +11,7 @@ Taiwan payment companies are Providers.
 
 ```text
 Platform: 黑貓 PAY（www.ccat.com.tw）
-Active providers（統一客樂得上游，同一平台）：RYO（原 CCAT 改名）、JAY、CHI、JHD（金匯達有限公司）、FYZ（豐盈利）、YUC
+Active providers（統一客樂得上游，同一平台）：RYO（原 CCAT 改名）、JAY、CHI、JHD（金匯達有限公司）、FYZ（豐盈利）、YUC（榆澄有限公司）
 Current product: ibon CVS payment
 Current capabilities:
 - Create Payment
