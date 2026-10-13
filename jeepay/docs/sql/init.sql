@@ -934,6 +934,9 @@ insert into t_sys_entitlement values('ENT_WALLET_WITHDRAW_REVIEW', '按鈕：審
 insert into t_sys_entitlement values('ENT_RISK_BLACKLIST', '風控黑名單', 'stop', '/risk/blacklist', 'RiskBlacklistPage', 'ML', 0, 1,  'ENT_WALLET', '30', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_RISK_BLACKLIST_EDIT', '按鈕：新增／刪除黑名單', 'no-icon', '', '', 'PB', 0, 1,  'ENT_RISK_BLACKLIST', '0', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_FEE_EDIT', '按鈕：設定下級代理費率（限團長）', 'no-icon', '', '', 'PB', 0, 1,  'ENT_AGENT_PORTAL_HOME', '0', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_DASH', '統計看板', 'dashboard', '/agentPortal/dashboard', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '5', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_STAFF', '我的子帳號', 'solution', '/agentPortal/staff', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '41', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_CHANNEL_TEST', '按鈕：渠道測試', 'no-icon', '', '', 'PB', 0, 1,  'ENT_AGENT_PORTAL_MCH', '0', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_MCH_WALLET_WITHDRAW', '按鈕：申請／取消提現', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_WALLET', '0', 'MCH', now(), now());
 insert into t_sys_entitlement values('ENT_MCH_WALLET_PAYOUT_EDIT', '按鈕：設定收款帳戶', 'no-icon', '', '', 'PB', 0, 1,  'ENT_MCH_WALLET', '0', 'MCH', now(), now());
 
@@ -1119,7 +1122,8 @@ insert into t_sys_role_ent_rela values ('ROLE_AGENT_PORTAL', 'ENT_COMMONS'), ('R
     ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_REPORT'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_BRANCH_WALLET'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_FREEZE'),
     ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_WITHDRAW_AUDIT'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_ROUTE'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_BLACKLIST'),
     ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_BRAND'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_MCH_EDIT'),
-    ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_CHANNEL');
+    ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_CHANNEL'),
+    ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_DASH'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_STAFF'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_CHANNEL_TEST');
 
 -- 平台直屬團長（ADR-0012）：上帝自己經營的一支，既有商戶與渠道帳號歸在它底下
 insert into t_agent_info (agent_no, agent_name, agent_level, parent_agent_no, agent_path, state, remark, created_by, is_house)
@@ -1130,7 +1134,8 @@ insert into t_sys_role_ent_rela values ('ROLE_AGENT_PORTAL_L2', 'ENT_COMMONS'), 
     ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL'), ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_HOME'), ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_VIEW'),
     ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_PROFIT'), ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_MCH'), ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_MCH_ADD'),
     ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_ORDER'), ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_FEE'),
-    ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_REPORT'), ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_BRANCH_WALLET'), ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_MCH_EDIT');
+    ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_REPORT'), ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_BRANCH_WALLET'), ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_MCH_EDIT'),
+    ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_DASH'), ('ROLE_AGENT_PORTAL_L2', 'ENT_AGENT_PORTAL_CHANNEL_TEST');
 -- 角色权限关联， [超管]用户 拥有所有权限
 -- insert into t_sys_role_ent_rela select '801', ent_id from t_sys_entitlement;
 

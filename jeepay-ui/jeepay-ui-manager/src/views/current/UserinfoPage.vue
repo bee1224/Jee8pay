@@ -168,6 +168,8 @@ function setavatar(url) {
 function detail() {
   // 获取基本信息
   getUserInfo().then((res) => {
+    // 沒填手機號的子帳號，後端存的是「-」開頭的佔位值，畫面顯示為空白
+    if (res && String(res.telphone || '').startsWith('-')) res.telphone = ''
     vdata.saveObject = res
     console.log(res)
   })

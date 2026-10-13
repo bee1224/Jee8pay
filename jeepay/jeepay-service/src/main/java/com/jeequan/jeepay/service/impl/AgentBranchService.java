@@ -308,6 +308,43 @@ public class AgentBranchService {
         return result;
     }
 
+    /**
+     * 統計看板（比照競品首頁卡片）：轄下商戶今日／昨日／本月／上月的成功金額，與今日成功、失敗筆數。
+     * 失敗筆數計入「支付失敗」與「訂單關閉」（逾期未繳）；金額單位為分。
+     */
+    public JSONObject dashboard(AgentInfo me) {
+        Date today = DateUtil.beginOfDay(new Date());
+        Date tomorrow = DateUtil.offsetDay(today, 1);
+        Date yesterday = DateUtil.offsetDay(today, -1);
+        Date monthStart = DateUtil.beginOfMonth(today);
+        Date lastMonthStart = DateUtil.offsetMonth(monthStart, -1);
+        JSONObject result = new JSONObject(true);
+        for (String key : new String[]{"todayAmount", "yesterdayAmount", "monthAmount", "lastMonthAmount", "todayPaid", "todayFailed", "todayFee"}) {
+            result.put(key, 0L);
+        }
+        Scope scope = scope(me);
+        result.put("mchCount", scope.mchNos.size());
+        if (scope.mchNos.isEmpty()) {
+            return result;
+        }
+        String t = "'" + DateUtil.formatDateTime(today) + "'";
+        String y = "'" + DateUtil.formatDateTime(yesterday) + "'";
+        String m = "'" + DateUtil.formatDateTime(monthStart) + "'";
+        List<Map<String, Object>> rows = payOrderService.listMaps(new QueryWrapper<PayOrder>()
+                .select("SUM(CASE WHEN state = 2 AND created_at >= " + t + " THEN amount ELSE 0 END) AS todayAmount",
+                        "SUM(CASE WHEN state = 2 AND created_at >= " + y + " AND created_at < " + t + " THEN amount ELSE 0 END) AS yesterdayAmount",
+                        "SUM(CASE WHEN state = 2 AND created_at >= " + m + " THEN amount ELSE 0 END) AS monthAmount",
+                        "SUM(CASE WHEN state = 2 AND created_at < " + m + " THEN amount ELSE 0 END) AS lastMonthAmount",
+                        "SUM(CASE WHEN state = 2 AND created_at >= " + t + " THEN 1 ELSE 0 END) AS todayPaid",
+                        "SUM(CASE WHEN state IN (3, 6) AND created_at >= " + t + " THEN 1 ELSE 0 END) AS todayFailed",
+                        "SUM(CASE WHEN state = 2 AND created_at >= " + t + " THEN mch_fee_amount ELSE 0 END) AS todayFee")
+                .in("mch_no", scope.mchNos).ge("created_at", lastMonthStart).lt("created_at", tomorrow));
+        if (!rows.isEmpty() && rows.get(0) != null) {
+            rows.get(0).forEach((k, v) -> result.put(k, v == null ? 0L : new java.math.BigDecimal(String.valueOf(v)).longValue()));
+        }
+        return result;
+    }
+
     private static JSONObject bucket() {
         JSONObject b = new JSONObject(true);
         b.put("total", 0L);

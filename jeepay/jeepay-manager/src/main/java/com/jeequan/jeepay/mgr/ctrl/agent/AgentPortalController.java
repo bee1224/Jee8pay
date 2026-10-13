@@ -146,6 +146,8 @@ public class AgentPortalController extends AgentBaseCtrl {
     @RequestMapping(value = "/wallet/withdraws", method = RequestMethod.POST)
     public ApiRes<WithdrawOrder> applyWithdraw() {
         requireAuthority("ENT_AGENT_PORTAL_VIEW");
+        // 子帳號只有被授予「錢包與提現」選單時才能動錢包（VIEW 是所有子帳號都有的讀取權限）
+        requireAuthority("ENT_AGENT_PORTAL_HOME");
         long fen = Money.yuanToFen(getValString("amount"));
         return ApiRes.ok(withdrawService.apply(WalletAccount.OWNER_AGENT, me().getAgentNo(), fen, getValStringRequired("reqNo"),
                 getCurrentUser().getSysUser().getSysUserId(), getCurrentUser().getSysUser().getRealname()));
@@ -157,6 +159,8 @@ public class AgentPortalController extends AgentBaseCtrl {
     @RequestMapping(value = "/wallet/withdraws/{withdrawId}/cancel", method = RequestMethod.POST)
     public ApiRes cancelWithdraw(@PathVariable("withdrawId") String withdrawId) {
         requireAuthority("ENT_AGENT_PORTAL_VIEW");
+        // 子帳號只有被授予「錢包與提現」選單時才能動錢包（VIEW 是所有子帳號都有的讀取權限）
+        requireAuthority("ENT_AGENT_PORTAL_HOME");
         withdrawService.cancel(WalletAccount.OWNER_AGENT, me().getAgentNo(), withdrawId,
                 getCurrentUser().getSysUser().getSysUserId(), getCurrentUser().getSysUser().getRealname());
         return ApiRes.ok();
@@ -168,6 +172,8 @@ public class AgentPortalController extends AgentBaseCtrl {
     @RequestMapping(value = "/wallet/payoutAccount", method = RequestMethod.PUT)
     public ApiRes<WalletAccount> payoutAccount() {
         requireAuthority("ENT_AGENT_PORTAL_VIEW");
+        // 子帳號只有被授予「錢包與提現」選單時才能動錢包（VIEW 是所有子帳號都有的讀取權限）
+        requireAuthority("ENT_AGENT_PORTAL_HOME");
         return ApiRes.ok(withdrawService.updatePayoutAccount(WalletAccount.OWNER_AGENT, me().getAgentNo(), getObject(WalletAccount.class)));
     }
 

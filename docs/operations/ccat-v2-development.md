@@ -30,6 +30,10 @@
 
 只重建 manager-ui，執行 `20261009-channel-menu.sql`。上帝新增「渠道管理 → 渠道列表」（`/channels`），列出全部團長的渠道帳號，可在此新增並指定所屬團長；後端沿用第一階段的 `/api/channelAccounts`。部署後 11 個容器皆 healthy。回滾：`current` 指回 `releases/b93be3d-channel-p1` 後重建 manager-ui，並刪除 SQL 檔尾所列兩筆選單。
 
+### 2026-10-13 追加：代理後台統計看板、我的子帳號、渠道測試（release `60dfa7a-agent-staff`）
+
+比照競品高級代理後台補三個流程。重建 manager、manager-ui，執行 `20261013-agent-dashboard-staff-channel-test.sql`（只新增選單與權限，沒有新資料表）。新增 `GET /api/agentPortal/branch/dashboard`、`/api/agentPortal/staff/**`、`/api/agentPortal/branch/merchants/{mchNo}/testWays` 與 `channelTest`。子帳號與主帳號同屬一個代理，差別在角色：每個子帳號一個專屬角色 `ROLE_AGSUB_{sysUserId}`，權限只能從主帳號的權限裡挑，子帳號管理本身不可下放；代理錢包的三個異動端點加驗 `ENT_AGENT_PORTAL_HOME`。渠道測試以商戶身分走正式的統一下單，訂單標題為「管理員測試單」。隔離環境 `scripts/smoke-agent-staff.py` 59/59 PASS（渠道測試只驗到送出前，隔離環境沒有 payment）；部署後 11 個容器皆 healthy、manifest 驗證通過。同日追加 release `60dfa7a-agent-staff-r2`（`current` 指向此處，只重建 manager、manager-ui）：子帳號手機號改為非必填；因 `t_sys_user.telphone` 不可為空且同系統內不可重複，沒填時存入「`-` + 隨機字串」佔位值、不建立手機號登入方式，列表與個人中心顯示為空白，隔離測試 63/63 PASS。尚未以瀏覽器驗收畫面，也尚未在測試站實際開出測試單。回滾：`current` 指回 `releases/91dcb24-channel-scope` 後重建 manager、manager-ui；選單與子帳號清除方式見 SQL 檔尾。
+
 ### 2026-10-09 追加：大渠道選單與渠道使用範圍（release `91dcb24-channel-scope`）
 
 重建 manager、manager-ui，執行 `20261009-channel-scope.sql`；另以 `20261009-channel-menu.sql` 末段把「支付介面」搬到「渠道管理」底下並改名「大渠道」（只改資料庫）。新增 `t_channel_account_scope` 與 `PUT /api/channelAccounts/{id}/scope`。隔離環境 `scripts/smoke-channel-accounts.py` 49/49 PASS；部署後 11 個容器皆 healthy。使用範圍在第二階段前只記錄與顯示，不影響下單。回滾：`current` 指回 `releases/91dcb24-channel-menu` 後重建 manager、manager-ui，並 `DROP TABLE t_channel_account_scope`。

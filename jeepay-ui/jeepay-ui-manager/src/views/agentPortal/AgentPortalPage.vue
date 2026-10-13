@@ -35,6 +35,7 @@
                     <a-button v-if="vdata.me.agentLevel === 1" type="link" @click="openBind(record)">更換歸屬</a-button>
                     <a-button type="link" @click="resetMchPwd(record)">重設密碼</a-button>
                   </template>
+                  <a-button v-if="$access('ENT_AGENT_PORTAL_CHANNEL_TEST')" type="link" @click="channelTestModal.show(record)">渠道測試</a-button>
                 </template>
               </template>
               <template #emptyText>尚無商戶</template>
@@ -122,6 +123,8 @@
             <template #emptyText>平台尚未派發渠道給你</template>
           </a-table>
         </template>
+        <BranchDashboard v-else-if="section === 'dashboard'" :me="vdata.me" :logins="vdata.logins" />
+        <BranchStaff v-else-if="section === 'staff'" :me="vdata.me" />
         <BranchWallets v-else-if="section === 'branchWallets'" :me="vdata.me" />
         <WithdrawAudit v-else-if="section === 'withdrawAudit'" :me="vdata.me" />
         <BranchReport v-else-if="section === 'report'" :me="vdata.me" />
@@ -184,6 +187,7 @@
     </a-modal>
 
     <AgentCredentialModal ref="credentialModal" />
+    <ChannelTestModal ref="channelTestModal" />
   </page-header-wrapper>
 </template>
 
@@ -198,6 +202,9 @@ import BranchReport from './sections/BranchReport.vue'
 import BranchRoutes from './sections/BranchRoutes.vue'
 import BranchBlacklist from './sections/BranchBlacklist.vue'
 import BranchBrand from './sections/BranchBrand.vue'
+import BranchDashboard from './sections/BranchDashboard.vue'
+import BranchStaff from './sections/BranchStaff.vue'
+import ChannelTestModal from './sections/ChannelTestModal.vue'
 import { computed, reactive, ref, watch, getCurrentInstance } from 'vue'
 import { useRoute } from 'vue-router'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
@@ -214,7 +221,7 @@ const mchColumns = [
   { title: '商戶名稱', dataIndex: 'mchName' },
   { title: '直屬代理', dataIndex: 'agentNo' },
   { key: 'relation', title: '關係' },
-  { key: 'op', title: '操作', width: 190 },
+  { key: 'op', title: '操作', width: 270 },
 ]
 const subColumns = [
   { title: '代理號', dataIndex: 'agentNo' },
@@ -261,6 +268,8 @@ const SECTIONS = {
   ENT_AGENT_PORTAL_ROUTE: 'routes',
   ENT_AGENT_PORTAL_BLACKLIST: 'blacklist',
   ENT_AGENT_PORTAL_BRAND: 'brand',
+  ENT_AGENT_PORTAL_DASH: 'dashboard',
+  ENT_AGENT_PORTAL_STAFF: 'staff',
 }
 const route = useRoute()
 const section = computed(() => SECTIONS[route.name as string] || 'wallet')
@@ -291,6 +300,7 @@ const logColumns = [
   { title: 'IP', dataIndex: 'userIp' },
 ]
 const credentialModal = ref()
+const channelTestModal = ref()
 const ownerOptions = computed(() =>
   vdata.me
     ? [{ value: vdata.me.agentNo, label: `自己（${vdata.me.agentName}）` }].concat(
