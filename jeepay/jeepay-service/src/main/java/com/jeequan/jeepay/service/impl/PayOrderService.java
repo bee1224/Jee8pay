@@ -21,12 +21,14 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.IsvInfo;
 import com.jeequan.jeepay.core.entity.MchInfo;
+import com.jeequan.jeepay.core.entity.MchNotifyRecord;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayWay;
 import com.jeequan.jeepay.service.mapper.*;
@@ -53,6 +55,14 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
     @Autowired private IsvInfoMapper isvInfoMapper;
     @Autowired private PayWayMapper payWayMapper;
     @Autowired private PayOrderDivisionRecordMapper payOrderDivisionRecordMapper;
+    @Autowired private MchNotifyRecordMapper mchNotifyRecordMapper;
+
+    /**
+     * 「已通知商戶」以商戶回覆成功為準（通知紀錄 state=2）。
+     * 注意：t_pay_order.notify_state=1 只代表送出過一次，商戶可能回覆失敗，不能當作已通知。
+     */
+    private static final String NOTIFY_OK_EXISTS = "SELECT 1 FROM t_mch_notify_record r WHERE r.order_id = t_pay_order.pay_order_id"
+            + " AND r.order_type = " + MchNotifyRecord.TYPE_PAY_ORDER + " AND r.state = " + MchNotifyRecord.STATE_SUCCESS;
 
     /** 更新订单状态  【订单生成】 --》 【支付中】 **/
     public boolean updateInit2Ing(String payOrderId, PayOrder payOrder){
@@ -467,5 +477,68 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         wrapper.orderByDesc(PayOrder::getCreatedAt);
 
         return page(iPage, wrapper);
+    }
+
+    /**
+     * 手機版訂單頁頂部摘要：期間內各狀態筆數與金額、已付款但尚未通知商戶的筆數。
+     * @param mchNos 商戶範圍；null 為全站，空清單直接回傳全 0
+     */
+    public Map<String, Object> summary(List<String> mchNos, String createdStart, String createdEnd) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        Map<String, Long> counts = new LinkedHashMap<>();
+        Map<String, Long> amounts = new LinkedHashMap<>();
+        long unnotified = 0;
+        if (mchNos == null || !mchNos.isEmpty()) {
+            QueryWrapper<PayOrder> qw = new QueryWrapper<>();
+            qw.select("state", "COUNT(*) AS cnt", "IFNULL(SUM(amount), 0) AS amt");
+            if (mchNos != null) {
+                qw.in("mch_no", mchNos);
+            }
+            qw.ge(StringUtils.isNotEmpty(createdStart), "created_at", createdStart)
+                    .le(StringUtils.isNotEmpty(createdEnd), "created_at", createdEnd)
+                    .groupBy("state");
+            for (Map<String, Object> row : listMaps(qw)) {
+                String state = String.valueOf(row.get("state"));
+                counts.put(state, ((Number) row.get("cnt")).longValue());
+                amounts.put(state, ((Number) row.get("amt")).longValue());
+            }
+            LambdaQueryWrapper<PayOrder> nw = notNotifiedOk(PayOrder.gw())
+                    .ge(StringUtils.isNotEmpty(createdStart), PayOrder::getCreatedAt, createdStart)
+                    .le(StringUtils.isNotEmpty(createdEnd), PayOrder::getCreatedAt, createdEnd);
+            if (mchNos != null) {
+                nw.in(PayOrder::getMchNo, mchNos);
+            }
+            unnotified = count(nw);
+        }
+        result.put("total", counts.values().stream().mapToLong(Long::longValue).sum());
+        result.put("counts", counts);
+        result.put("amounts", amounts);
+        result.put("unnotified", unnotified);
+        return result;
+    }
+
+    /** 篩選「已收款但商戶尚未回覆成功」的訂單（包含還沒送出、通知中、通知失敗） */
+    public LambdaQueryWrapper<PayOrder> notNotifiedOk(LambdaQueryWrapper<PayOrder> wrapper) {
+        return wrapper.eq(PayOrder::getState, PayOrder.STATE_SUCCESS).notExists(NOTIFY_OK_EXISTS);
+    }
+
+    /** 列表用：已收款訂單附上商戶通知結果 notifyResult（1 通知中、2 商戶回覆成功、3 通知失敗；沒有紀錄則不帶） */
+    public void fillNotifyResult(List<PayOrder> orders) {
+        List<String> ids = orders.stream().filter(o -> PayOrder.STATE_SUCCESS == o.getState())
+                .map(PayOrder::getPayOrderId).toList();
+        if (ids.isEmpty()) {
+            return;
+        }
+        Map<String, Byte> states = new HashMap<>();
+        mchNotifyRecordMapper.selectList(MchNotifyRecord.gw()
+                        .select(MchNotifyRecord::getOrderId, MchNotifyRecord::getState)
+                        .eq(MchNotifyRecord::getOrderType, MchNotifyRecord.TYPE_PAY_ORDER)
+                        .in(MchNotifyRecord::getOrderId, ids))
+                .forEach(r -> states.put(r.getOrderId(), r.getState()));
+        for (PayOrder o : orders) {
+            if (states.containsKey(o.getPayOrderId())) {
+                o.addExt("notifyResult", states.get(o.getPayOrderId()));
+            }
+        }
     }
 }

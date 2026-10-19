@@ -1,6 +1,7 @@
 package com.jeequan.jeepay.mgr.ctrl.agent;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.entity.AgentInfo;
 import com.jeequan.jeepay.core.entity.FeeRule;
@@ -204,7 +205,21 @@ public class AgentPortalController extends AgentBaseCtrl {
         }
         // 商戶範圍由後端強制；前端傳入的 mchNo 只能在範圍內再縮小
         LambdaQueryWrapper<PayOrder> wrapper = PayOrder.gw().in(PayOrder::getMchNo, mchNos);
-        return ApiPageRes.pages(payOrderService.listByPage(getIPage(), getObject(PayOrder.class), getReqParamJSON(), wrapper));
+        JSONObject params = getReqParamJSON();
+        if ("0".equals(params.getString("notifyOk"))) {
+            payOrderService.notNotifiedOk(wrapper);
+        }
+        IPage<PayOrder> pages = payOrderService.listByPage(getIPage(), getObject(PayOrder.class), params, wrapper);
+        payOrderService.fillNotifyResult(pages.getRecords());
+        return ApiPageRes.pages(pages);
+    }
+
+    @Operation(summary = "轄區商戶的代收訂單摘要：各狀態筆數、金額與尚未通知商戶的筆數")
+    @PreAuthorize("hasAuthority('ENT_AGENT_PORTAL_ORDER')")
+    @RequestMapping(value = "/orders/summary", method = RequestMethod.GET)
+    public ApiRes ordersSummary() {
+        requireAuthority("ENT_AGENT_PORTAL_ORDER");
+        return ApiRes.ok(payOrderService.summary(agentPortalService.directMchNos(me()), getValString("createdStart"), getValString("createdEnd")));
     }
 
     @Operation(summary = "轄區商戶的代付訂單（範圍與代收訂單相同；目前上游未提供代付，通常為空）")

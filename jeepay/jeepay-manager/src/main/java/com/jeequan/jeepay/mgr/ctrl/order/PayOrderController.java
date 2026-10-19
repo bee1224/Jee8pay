@@ -99,6 +99,7 @@ public class PayOrderController extends CommonCtrl {
             @Parameter(name = "wayCode", description = "支付方式代码"),
             @Parameter(name = "state", description = "支付状态: 0-订单生成, 1-支付中, 2-支付成功, 3-支付失败, 4-已撤销, 5-已退款, 6-订单关闭"),
             @Parameter(name = "notifyState", description = "向下游回调状态, 0-未发送,  1-已发送"),
+            @Parameter(name = "notifyOk", description = "0-只看已收款但商戶尚未回覆成功的訂單"),
             @Parameter(name = "divisionState", description = "0-未发生分账, 1-等待分账任务处理, 2-分账处理中, 3-分账任务已结束(不体现状态)")
     })
     @PreAuthorize("hasAuthority('ENT_ORDER_LIST')")
@@ -116,8 +117,13 @@ public class PayOrderController extends CommonCtrl {
             }
             wrapper.in(PayOrder::getMchNo, scope);
         }
+        // 手機版「未通知商戶」：已收款但商戶尚未回覆成功
+        if ("0".equals(paramJSON.getString("notifyOk"))) {
+            payOrderService.notNotifiedOk(wrapper);
+        }
 
         IPage<PayOrder> pages = payOrderService.listByPage(getIPage(), payOrder, paramJSON, wrapper);
+        payOrderService.fillNotifyResult(pages.getRecords());
         // 得到所有支付方式
         Map<String, String> payWayNameMap = new HashMap<>();
         List<PayWay> payWayList = payWayService.list();
@@ -133,6 +139,14 @@ public class PayOrderController extends CommonCtrl {
             }
         }
         return ApiPageRes.pages(pages);
+    }
+
+    @Operation(summary = "訂單摘要：期間內各狀態筆數、金額與尚未通知商戶的筆數（手機版訂單頁頂部）")
+    @PreAuthorize("hasAuthority('ENT_ORDER_LIST')")
+    @RequestMapping(value="/summary", method = RequestMethod.GET)
+    public ApiRes summary() {
+        List<String> scope = agentScope();
+        return ApiRes.ok(payOrderService.summary(scope, getValString("createdStart"), getValString("createdEnd")));
     }
 
     /**
