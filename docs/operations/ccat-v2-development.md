@@ -30,6 +30,10 @@
 
 只重建 manager-ui，執行 `20261009-channel-menu.sql`。上帝新增「渠道管理 → 渠道列表」（`/channels`），列出全部團長的渠道帳號，可在此新增並指定所屬團長；後端沿用第一階段的 `/api/channelAccounts`。部署後 11 個容器皆 healthy。回滾：`current` 指回 `releases/b93be3d-channel-p1` 後重建 manager-ui，並刪除 SQL 檔尾所列兩筆選單。
 
+### 2026-10-14 追加：團長選單分類、拿掉品牌、刪團長修正（release `b2ffeaa-agent-menu`）
+
+依使用者實際操作回饋調整，重建 manager、manager-ui，執行 `20261014-agent-brand-off.sql`（可重複執行）。內容：團長／隊長／子帳號的手機號改選填（沒填存「`-` + 隨機字串」佔位值，不建手機號登入方式，畫面顯示空白），登入帳號可用 2～32 碼中文、英文、數字或底線；代理帳號左側選單依「用戶管理、訂單與報表、帳務管理、渠道設定、系統設定」分類（只改前端選單顯示，權限與路由不變），不顯示任何品牌名稱與標誌；「品牌設定」停用（`ENT_AGENT_PORTAL_BRAND` state 0、不授予任何角色、`brand_enabled` 全部歸 0）；代理帳號不能自己修改個人資料（`PUT /api/current/user` 拒絕），只能由上帝改；帳密視窗的「登入位置」改為可複製的登入網址（營運平台用目前網址，商戶平台用系統配置 `mchSiteUrl`，仍是 127.0.0.1 時顯示尚未設定）。修正：從商戶管理刪商戶時沒有一併刪除 `t_agent_mch_rela`，使團長被看不到的商戶擋住而無法刪除（庹宗康即此情形，搬遷腳本已清除該筆）；刪團長時改為連帶刪除其登入帳號與子帳號角色並清除登入狀態，不必先去操作員頁面刪帳號。隔離環境 `scripts/smoke-agent-staff.py` 92/92 PASS。回滾：`current` 指回 `releases/60dfa7a-agent-staff-r2` 後重建 manager、manager-ui；品牌設定恢復方式見 SQL 檔尾。
+
 ### 2026-10-13 追加：代理後台統計看板、我的子帳號、渠道測試（release `60dfa7a-agent-staff`）
 
 比照競品高級代理後台補三個流程。重建 manager、manager-ui，執行 `20261013-agent-dashboard-staff-channel-test.sql`（只新增選單與權限，沒有新資料表）。新增 `GET /api/agentPortal/branch/dashboard`、`/api/agentPortal/staff/**`、`/api/agentPortal/branch/merchants/{mchNo}/testWays` 與 `channelTest`。子帳號與主帳號同屬一個代理，差別在角色：每個子帳號一個專屬角色 `ROLE_AGSUB_{sysUserId}`，權限只能從主帳號的權限裡挑，子帳號管理本身不可下放；代理錢包的三個異動端點加驗 `ENT_AGENT_PORTAL_HOME`。渠道測試以商戶身分走正式的統一下單，訂單標題為「管理員測試單」。隔離環境 `scripts/smoke-agent-staff.py` 59/59 PASS（渠道測試只驗到送出前，隔離環境沒有 payment）；部署後 11 個容器皆 healthy、manifest 驗證通過。同日追加 release `60dfa7a-agent-staff-r2`（`current` 指向此處，只重建 manager、manager-ui）：子帳號手機號改為非必填；因 `t_sys_user.telphone` 不可為空且同系統內不可重複，沒填時存入「`-` + 隨機字串」佔位值、不建立手機號登入方式，列表與個人中心顯示為空白，隔離測試 63/63 PASS。尚未以瀏覽器驗收畫面，也尚未在測試站實際開出測試單。回滾：`current` 指回 `releases/91dcb24-channel-scope` 後重建 manager、manager-ui；選單與子帳號清除方式見 SQL 檔尾。

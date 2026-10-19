@@ -118,7 +118,7 @@ public class PayOrderDivisionExecController extends ApiController {
             bizRS.setErrCode(channelRetMsg.getChannelErrCode());
             bizRS.setErrMsg(channelRetMsg.getChannelErrMsg());
 
-            return ApiRes.okWithSign(bizRS, mchAppConfigContext.getMchApp().getAppSecret());
+            return ApiRes.okWithSign(bizRS, signKeyStore.platformPrivateKey());
 
         }  catch (BizException e) {
             return ApiRes.customFail(e.getMessage());

@@ -18,6 +18,9 @@ package com.jeequan.jeepay.core.cache;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.model.security.JeeUserDetails;
 
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+
 /*
 * token service
 *
@@ -36,21 +39,33 @@ public class ITokenService {
 
         userDetail.setCacheKey(cacheKey);  //设置cacheKey
 
-        //当前用户的所有登录token 集合
-//        if(!PropKit.isAllowMultiUser()){ //不允许多用户登录
-//
-//            List<String> allTokenList = new ArrayList<>();
-//            for (String token : allTokenList) {
-//                if(!cacheKey.equalsIgnoreCase(token)){
-//                    RedisUtil.del(token);
-//                }
-//            }
-//        }
+        // 同一帳號同時只能在一部裝置登入（手機、平板、電腦皆同）：後登入擠掉前登入。
+        // 被擠掉的憑證留一個 1 天的標記，讓那台裝置收到「已在其他裝置登入」而不是「會話逾時」
+        Long sysUserId = userDetail.getSysUser().getSysUserId();
+        Collection<String> others = RedisUtil.keys(CS.getCacheKeyToken(sysUserId, "*"));
+        if (others != null) {
+            for (String token : others) {
+                if (!cacheKey.equals(token)) {
+                    RedisUtil.del(token);
+                    RedisUtil.setString(kickedMarkerKey(token), "1", 1, TimeUnit.DAYS);
+                }
+            }
+        }
 
         //保存token
         RedisUtil.set(cacheKey, userDetail, CS.TOKEN_TIME);  //缓存时间2小时, 保存具体信息而只是uid, 因为很多场景需要得到信息， 例如验证接口权限， 每次请求都需要获取。 将信息封装在一起减少磁盘请求次数， 如果放置多个key会增加非顺序读取。
     }
 
+
+    /** 被後登入擠掉的憑證標記 key */
+    public static String kickedMarkerKey(String cacheKey) {
+        return "KICKED_" + cacheKey;
+    }
+
+    /** 這個憑證是否因為同帳號在其他裝置登入而失效 */
+    public static boolean isKicked(String cacheKey) {
+        return RedisUtil.hasKey(kickedMarkerKey(cacheKey));
+    }
 
     /** 退出时，清除token信息 */
     public static void removeIToken(String iToken, Long currentUID){

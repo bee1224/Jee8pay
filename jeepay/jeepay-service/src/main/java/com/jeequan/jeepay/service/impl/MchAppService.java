@@ -10,6 +10,7 @@ import com.jeequan.jeepay.core.entity.MchPayPassage;
 import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
+import com.jeequan.jeepay.core.utils.MlDsaKit;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.service.mapper.MchAppMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -61,8 +62,6 @@ public class MchAppService extends ServiceImpl<MchAppMapper, MchApp> {
         if (mchApp == null) {
             return null;
         }
-        mchApp.setAppSecret(StringKit.str2Star(mchApp.getAppSecret(), 6, 6, 6));
-
         return mchApp;
     }
 
@@ -85,9 +84,19 @@ public class MchAppService extends ServiceImpl<MchAppMapper, MchApp> {
 
         IPage<MchApp> pages = this.page(iPage, wrapper);
 
-        pages.getRecords().stream().forEach(item -> item.setAppSecret(StringKit.str2Star(item.getAppSecret(), 6, 6, 6)));
-
         return pages;
+    }
+
+    /**
+     * 新增、修改應用時整理商戶公鑰（ADR-0013）：有填就驗證必須是 ML-DSA-65 公鑰並轉成標準 PEM；
+     * 沒填則設為 null，updateById 不會覆蓋原值。
+     */
+    public void normalizePublicKey(MchApp mchApp) {
+        if (StringUtils.isBlank(mchApp.getMchPublicKey())) {
+            mchApp.setMchPublicKey(null);
+            return;
+        }
+        mchApp.setMchPublicKey(MlDsaKit.toPem(MlDsaKit.parsePublicKey(mchApp.getMchPublicKey())));
     }
 
     public MchApp getOneByMch(String mchNo, String appId){

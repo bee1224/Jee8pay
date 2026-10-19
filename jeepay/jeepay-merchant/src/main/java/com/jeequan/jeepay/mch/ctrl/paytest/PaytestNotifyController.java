@@ -20,7 +20,8 @@ import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.mch.websocket.server.WsPayOrderServer;
 import com.jeequan.jeepay.service.impl.MchAppService;
-import com.jeequan.jeepay.util.JeepayKit;
+import com.jeequan.jeepay.service.sign.SignKeyStore;
+import com.jeequan.jeepay.core.utils.MlDsaKit;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -44,6 +45,7 @@ import java.io.IOException;
 public class PaytestNotifyController extends CommonCtrl {
 
     @Autowired private MchAppService mchAppService;
+    @Autowired private SignKeyStore signKeyStore;
 
     @Operation(summary = "支付回调信息")
     @Parameters({
@@ -66,8 +68,8 @@ public class PaytestNotifyController extends CommonCtrl {
             return;
         }
 
-        params.remove("sign");
-        if(!JeepayKit.getSign(params, mchApp.getAppSecret()).equalsIgnoreCase(sign)){
+        // 通知由平台簽名私鑰簽，這裡以平台公鑰驗證（ADR-0013）
+        if(!MlDsaKit.SIGN_TYPE.equals(params.getString("signType")) || !MlDsaKit.verify(params, sign, signKeyStore.platformPublicKey())){
             response.getWriter().print("sign fail");
             return;
         }

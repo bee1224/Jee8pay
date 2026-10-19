@@ -22,12 +22,13 @@ import com.jeequan.jeepay.core.entity.MchNotifyRecord;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.RefundOrder;
 import com.jeequan.jeepay.core.entity.TransferOrder;
-import com.jeequan.jeepay.core.utils.JeepayKit;
+import com.jeequan.jeepay.core.utils.MlDsaKit;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.pay.rqrs.payorder.QueryPayOrderRS;
 import com.jeequan.jeepay.pay.rqrs.refund.QueryRefundOrderRS;
 import com.jeequan.jeepay.pay.rqrs.transfer.QueryTransferOrderRS;
 import com.jeequan.jeepay.service.impl.MchNotifyRecordService;
+import com.jeequan.jeepay.service.sign.SignKeyStore;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,7 @@ public class PayMchNotifyService {
     @Autowired private MchNotifyRecordService mchNotifyRecordService;
     @Autowired private ConfigContextQueryService configContextQueryService;
     @Autowired private IMQSender mqSender;
+    @Autowired private SignKeyStore signKeyStore;
 
 
     /** 商户通知信息， 只有订单是终态，才会发送通知， 如明确成功和明确失败 **/
@@ -67,11 +69,8 @@ public class PayMchNotifyService {
                 return ;
             }
 
-            //商户app私钥
-            String appSecret = configContextQueryService.queryMchApp(dbPayOrder.getMchNo(), dbPayOrder.getAppId()).getAppSecret();
-
             // 封装通知url
-            String notifyUrl = createNotifyUrl(dbPayOrder, appSecret);
+            String notifyUrl = createNotifyUrl(dbPayOrder);
             mchNotifyRecord = new MchNotifyRecord();
             mchNotifyRecord.setOrderId(dbPayOrder.getPayOrderId());
             mchNotifyRecord.setOrderType(MchNotifyRecord.TYPE_PAY_ORDER);
@@ -118,11 +117,8 @@ public class PayMchNotifyService {
                 return ;
             }
 
-            //商户app私钥
-            String appSecret = configContextQueryService.queryMchApp(dbRefundOrder.getMchNo(), dbRefundOrder.getAppId()).getAppSecret();
-
             // 封装通知url
-            String notifyUrl = createNotifyUrl(dbRefundOrder, appSecret);
+            String notifyUrl = createNotifyUrl(dbRefundOrder);
             mchNotifyRecord = new MchNotifyRecord();
             mchNotifyRecord.setOrderId(dbRefundOrder.getRefundOrderId());
             mchNotifyRecord.setOrderType(MchNotifyRecord.TYPE_REFUND_ORDER);
@@ -169,11 +165,8 @@ public class PayMchNotifyService {
                 return ;
             }
 
-            //商户app私钥
-            String appSecret = configContextQueryService.queryMchApp(dbTransferOrder.getMchNo(), dbTransferOrder.getAppId()).getAppSecret();
-
             // 封装通知url
-            String notifyUrl = createNotifyUrl(dbTransferOrder, appSecret);
+            String notifyUrl = createNotifyUrl(dbTransferOrder);
             mchNotifyRecord = new MchNotifyRecord();
             mchNotifyRecord.setOrderId(dbTransferOrder.getTransferId());
             mchNotifyRecord.setOrderType(MchNotifyRecord.TYPE_TRANSFER_ORDER);
@@ -206,14 +199,15 @@ public class PayMchNotifyService {
     /**
      * 创建响应URL
      */
-    public String createNotifyUrl(PayOrder payOrder, String appSecret) {
+    public String createNotifyUrl(PayOrder payOrder) {
 
         QueryPayOrderRS queryPayOrderRS = QueryPayOrderRS.buildByPayOrder(payOrder);
         JSONObject jsonObject = (JSONObject)JSONObject.toJSON(queryPayOrderRS);
         jsonObject.put("reqTime", System.currentTimeMillis()); //添加请求时间
 
-        // 报文签名
-        jsonObject.put("sign", JeepayKit.getSign(jsonObject, appSecret));
+        // 报文签名（平台簽名私鑰，ML-DSA-65，ADR-0013）
+        jsonObject.put("signType", MlDsaKit.SIGN_TYPE);
+        jsonObject.put("sign", MlDsaKit.sign(jsonObject, signKeyStore.platformPrivateKey()));
 
         // 生成通知
         return StringKit.appendUrlQuery(payOrder.getNotifyUrl(), jsonObject);
@@ -223,14 +217,15 @@ public class PayMchNotifyService {
     /**
      * 创建响应URL
      */
-    public String createNotifyUrl(RefundOrder refundOrder, String appSecret) {
+    public String createNotifyUrl(RefundOrder refundOrder) {
 
         QueryRefundOrderRS queryRefundOrderRS = QueryRefundOrderRS.buildByRefundOrder(refundOrder);
         JSONObject jsonObject = (JSONObject)JSONObject.toJSON(queryRefundOrderRS);
         jsonObject.put("reqTime", System.currentTimeMillis()); //添加请求时间
 
-        // 报文签名
-        jsonObject.put("sign", JeepayKit.getSign(jsonObject, appSecret));
+        // 报文签名（平台簽名私鑰，ML-DSA-65，ADR-0013）
+        jsonObject.put("signType", MlDsaKit.SIGN_TYPE);
+        jsonObject.put("sign", MlDsaKit.sign(jsonObject, signKeyStore.platformPrivateKey()));
 
         // 生成通知
         return StringKit.appendUrlQuery(refundOrder.getNotifyUrl(), jsonObject);
@@ -240,14 +235,15 @@ public class PayMchNotifyService {
     /**
      * 创建响应URL
      */
-    public String createNotifyUrl(TransferOrder transferOrder, String appSecret) {
+    public String createNotifyUrl(TransferOrder transferOrder) {
 
         QueryTransferOrderRS rs = QueryTransferOrderRS.buildByRecord(transferOrder);
         JSONObject jsonObject = (JSONObject)JSONObject.toJSON(rs);
         jsonObject.put("reqTime", System.currentTimeMillis()); //添加请求时间
 
-        // 报文签名
-        jsonObject.put("sign", JeepayKit.getSign(jsonObject, appSecret));
+        // 报文签名（平台簽名私鑰，ML-DSA-65，ADR-0013）
+        jsonObject.put("signType", MlDsaKit.SIGN_TYPE);
+        jsonObject.put("sign", MlDsaKit.sign(jsonObject, signKeyStore.platformPrivateKey()));
 
         // 生成通知
         return StringKit.appendUrlQuery(transferOrder.getNotifyUrl(), jsonObject);
@@ -257,7 +253,7 @@ public class PayMchNotifyService {
     /**
      * 创建响应URL
      */
-    public String createReturnUrl(PayOrder payOrder, String appSecret) {
+    public String createReturnUrl(PayOrder payOrder) {
 
         if(StringUtils.isEmpty(payOrder.getReturnUrl())){
             return "";
@@ -267,8 +263,9 @@ public class PayMchNotifyService {
         JSONObject jsonObject = (JSONObject)JSONObject.toJSON(queryPayOrderRS);
         jsonObject.put("reqTime", System.currentTimeMillis()); //添加请求时间
 
-        // 报文签名
-        jsonObject.put("sign", JeepayKit.getSign(jsonObject, appSecret));   // 签名
+        // 报文签名（平台簽名私鑰，ML-DSA-65，ADR-0013）
+        jsonObject.put("signType", MlDsaKit.SIGN_TYPE);
+        jsonObject.put("sign", MlDsaKit.sign(jsonObject, signKeyStore.platformPrivateKey()));   // 签名
 
         // 生成跳转地址
         return StringKit.appendUrlQuery(payOrder.getReturnUrl(), jsonObject);

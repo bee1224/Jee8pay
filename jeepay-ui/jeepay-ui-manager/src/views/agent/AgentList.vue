@@ -70,7 +70,7 @@
           <template v-if="column.key === 'op'">
             <JeepayTableColumns>
               <a-button type="link" v-if="$access('ENT_AGENT_INFO_EDIT')" @click="editFunc(record.agentNo)">修改</a-button>
-              <a-button type="link" @click="showMchList(record)">旗下商戶</a-button>
+              <a-button type="link" @click="showMchList(record)">我的商戶</a-button>
               <a-button type="link" v-if="$access('ENT_AGENT_PROFIT')" @click="showProfit(record)">分潤</a-button>
               <a-button type="link" v-if="$access('ENT_AGENT_ACCOUNT')" @click="showAccounts(record)">登入帳號</a-button>
               <a-button type="link" v-if="$access('ENT_AGENT_INFO_DEL')" style="color: red" @click="delFunc(record.agentNo)">
@@ -85,7 +85,7 @@
 
     <AgentAddOrEdit ref="infoAddOrEdit" :callbackFunc="searchFunc" />
 
-    <a-modal v-model:open="vdata.mchModal.open" :title="'旗下商戶：' + vdata.mchModal.agentName" :footer="null" width="640px">
+    <a-modal v-model:open="vdata.mchModal.open" :title="'我的商戶：' + vdata.mchModal.agentName" :footer="null" width="640px">
       <a-table :columns="mchColumns" :data-source="vdata.mchModal.records" :pagination="false" size="small" row-key="mchNo">
         <template #emptyText>尚未綁定商戶</template>
       </a-table>
@@ -111,7 +111,7 @@
       <a-form layout="inline">
         <a-form-item label="登入帳號"><a-input v-model:value="vdata.account.form.loginUsername" style="width: 140px" /></a-form-item>
         <a-form-item label="姓名"><a-input v-model:value="vdata.account.form.realname" style="width: 120px" /></a-form-item>
-        <a-form-item label="手機"><a-input v-model:value="vdata.account.form.telphone" placeholder="09 開頭 10 碼" style="width: 140px" /></a-form-item>
+        <a-form-item label="手機（選填）"><a-input v-model:value="vdata.account.form.telphone" placeholder="09 開頭 10 碼" style="width: 140px" /></a-form-item>
         <a-form-item><a-button type="primary" @click="createAccount">開通</a-button></a-form-item>
       </a-form>
     </a-modal>
@@ -221,8 +221,12 @@ function showAccounts(record) {
 }
 function createAccount() {
   const f = vdata.account.form
-  if (!f.loginUsername || !f.realname || !/^09\d{8}$/.test(f.telphone || '')) {
-    $infoBox.message.warning('請填寫登入帳號、姓名與正確的手機號（09 開頭 10 碼）')
+  if (!/^[A-Za-z0-9_一-鿿]{2,32}$/.test(f.loginUsername || '') || !f.realname) {
+    $infoBox.message.warning('請填寫2～32 碼中文、英文、數字或底線的登入帳號與姓名')
+    return
+  }
+  if (f.telphone && !/^09\d{8}$/.test(f.telphone)) {
+    $infoBox.message.warning('手機號格式不正確（09 開頭 10 碼），不填也可以')
     return
   }
   req.add(`${API_URL_AGENT_INFO}/${vdata.account.agentNo}/accounts`, f).then((res) => {

@@ -3,6 +3,7 @@ package com.jeequan.jeepay.pay.channel.ryo;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import com.jeequan.jeepay.core.utils.ChannelHttpTrace;
 import com.jeequan.jeepay.core.model.params.ryo.RyoNormalMchParams;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +90,7 @@ public class RyoClient {
 
         TransportResponse response;
         try {
-            response = transport.post(baseUrl + "api/Collect", headers, payload.toJSONString(), REQUEST_TIMEOUT);
+            response = tracedPost(baseUrl + "api/Collect", headers, payload.toJSONString(), REQUEST_TIMEOUT);
         } catch (IOException e) {
             throw new RyoException(ErrorType.AMBIGUOUS, "RYO Collect transport failure", e,
                     null, elapsedMillis(startedAt), null);
@@ -144,7 +145,7 @@ public class RyoClient {
 
             TransportResponse response;
             try {
-                response = transport.post(baseUrl + "Token", headers, form, REQUEST_TIMEOUT);
+                response = tracedPost(baseUrl + "Token", headers, form, REQUEST_TIMEOUT);
             } catch (IOException e) {
                 throw new RyoException(ErrorType.AUTHENTICATION, "RYO Token transport failure", e);
             } catch (InterruptedException e) {
@@ -174,6 +175,23 @@ public class RyoClient {
             }
             tokenCache.put(cacheKey, new CachedToken(accessToken, usableUntil));
             return accessToken;
+        }
+    }
+
+    /** 送出上游請求；管理後台「API 測試」啟用追蹤時一併記錄（ChannelHttpTrace 會遮蔽密碼與 token） */
+    private TransportResponse tracedPost(String url, Map<String, String> headers, String body, Duration timeout)
+            throws IOException, InterruptedException {
+        long startedAt = System.nanoTime();
+        try {
+            TransportResponse response = transport.post(url, headers, body, timeout);
+            ChannelHttpTrace.record("RYO", "POST", url, headers, body, response.statusCode, response.body,
+                    elapsedMillis(startedAt), null);
+            return response;
+        } catch (IOException | RuntimeException e) {
+            ChannelHttpTrace.record("RYO", "POST", url, headers, body, null, null,
+                    elapsedMillis(startedAt), e.getClass().getSimpleName()
+                            + (e.getMessage() == null ? "（無法連線或逾時）" : ": " + e.getMessage()));
+            throw e;
         }
     }
 

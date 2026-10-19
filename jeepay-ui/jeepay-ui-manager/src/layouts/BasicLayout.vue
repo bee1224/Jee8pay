@@ -1,5 +1,22 @@
 <template>
+  <!-- 手機版（768 以下）：頂部標題列＋底部分頁列；按「主選單」（Home）一律回到主選單畫面，沒有重新整理按鈕 -->
+  <MobileShell
+    v-if="isMobile"
+    :title="mobile.launcher ? '主選單' : mobileTitle"
+    :show-back="!mobile.launcher"
+    :tabs="mobileTabs"
+    :active-tab="mobileActiveTab"
+    :page-key="mobile.launcher ? '_launcher' : route.fullPath"
+    @back="mobile.launcher = true"
+    @tab="onMobileTab"
+  >
+    <MobileLauncher v-if="mobile.launcher" :menu-data="vdata.menuData" :is-agent-user="vdata.isAgentUser" @open="openFromLauncher" />
+    <component :is="mobileView" v-else-if="mobileView" :key="route.fullPath" />
+    <div v-else class="m-desktop-page"><router-view /></div>
+  </MobileShell>
+
   <jeepayLayout
+    v-else
     v-model:openKeys="vdata.openKeys"
     v-model:selectedKeys="vdata.selectedKeys"
     v-model:collapsed="proLayoutObject.collapsed"
@@ -18,11 +35,8 @@
     <!-- 菜单头部渲染插槽 -->
     <template #menuHeaderRender>
       <router-link :to="{ path: '/' }" style="display: flex; align-items: center">
-        <!-- 白標：團長啟用品牌後，自己與旗下代理看到的是他的站名與 Logo -->
-        <div v-if="vdata.brand" style="display: flex; align-items: center; overflow: hidden">
-          <img v-if="vdata.brand.logo" :src="vdata.brand.logo" alt="logo" style="height: 32px; max-width: 150px" />
-          <span v-if="!proLayoutObject.collapsed && (!vdata.brand.logo || vdata.brand.title)" class="brand-title">{{ vdata.brand.title }}</span>
-        </div>
+        <!-- 代理帳號（團長、隊長、子帳號）的左側選單不顯示任何品牌名稱與標誌 -->
+        <div v-if="vdata.isAgentUser"></div>
         <div v-else-if="!proLayoutObject.collapsed">
           <img src="@/assets/logo-icon.png" alt="logo" style="height: 32px" />
           <img
@@ -63,7 +77,7 @@
           <!-- 回到首页 -->
           <homeOutlined
             key="layout-main"
-            :style="{ color: route.name === 'ENT_C_MAIN' ? '#409eff' : '#36454d' }"
+            :style="{ color: route.name === 'ENT_C_MAIN' ? 'var(--jp-primary)' : 'var(--jp-text-2)' }"
             class="icon-style icon-main"
             @click="toMain"
           />
@@ -103,11 +117,16 @@
 </template>
 <script lang="ts" setup>
 import { useRouter, useRoute, createRouterMatcher } from 'vue-router'
-import { reactive, computed, watchEffect, nextTick, getCurrentInstance } from 'vue'
+import { reactive, computed, watch, watchEffect, nextTick, getCurrentInstance } from 'vue'
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons-vue'
 import { generatorDynamicRouter } from '@/router/generator-routers'
-import { API_URL_AGENT_PORTAL, req } from '@/api/manage'
 import { useUserStore } from '@/store/modules/user'
+import { isMobile } from '@/views/mobile/mobileKit'
+import MobileShell from '@/views/mobile/MobileShell.vue'
+import MobileLauncher from '@/views/mobile/MobileLauncher.vue'
+import MobileMe from '@/views/mobile/MobileMe.vue'
+import { HomeOutlined, ProfileOutlined, WalletOutlined, UserOutlined } from '@ant-design/icons-vue'
+import { defineAsyncComponent } from 'vue'
 
 const { $infoBox, $access, $hasAgentEnt } = getCurrentInstance()!.appContext.config.globalProperties
 
@@ -133,7 +152,7 @@ const vdata: any = reactive({
   layout: 'side',
   theme: 'light',
   menuData: [],
-  brand: null,
+  isAgentUser: false,
   //刷新
   isRouterAlive: true,
   isSpin: false,
@@ -167,6 +186,26 @@ const matchHandle = (currentMatch) => {
   }
 }
 
+// 代理後台的選單分類（比照競品側邊欄）；分類只影響選單顯示，頁面路由不變。
+// 沒列到的選單排在最後；一個分類只有一項時直接放在第一層，不另開資料夾。
+const AGENT_MENU_GROUPS = [
+  { key: 'users', title: '用戶管理', icon: 'team-outlined', items: ['ENT_AGENT_PORTAL_MCH', 'ENT_AGENT_PORTAL_SUB', 'ENT_AGENT_PORTAL_STAFF'] },
+  { key: 'orders', title: '訂單與報表', icon: 'account-book-outlined', items: ['ENT_AGENT_PORTAL_ORDER', 'ENT_AGENT_PORTAL_REPORT'] },
+  { key: 'money', title: '帳務管理', icon: 'wallet-outlined', items: ['ENT_AGENT_PORTAL_HOME', 'ENT_AGENT_PORTAL_PROFIT', 'ENT_AGENT_PORTAL_BRANCH_WALLET', 'ENT_AGENT_PORTAL_WITHDRAW_AUDIT'] },
+  { key: 'channels', title: '渠道設定', icon: 'branches-outlined', items: ['ENT_AGENT_PORTAL_CHANNEL', 'ENT_AGENT_PORTAL_FEE', 'ENT_AGENT_PORTAL_ROUTE'] },
+  { key: 'system', title: '系統設定', icon: 'setting-outlined', items: ['ENT_AGENT_PORTAL_BLACKLIST', 'ENT_AGENT_PORTAL_OPLOG'] },
+]
+function groupAgentMenus(items) {
+  const used = new Set(AGENT_MENU_GROUPS.flatMap((g) => g.items))
+  const result = items.filter((i) => i.name === 'ENT_AGENT_PORTAL_DASH')
+  AGENT_MENU_GROUPS.forEach((g) => {
+    const children = g.items.map((name) => items.find((i) => i.name === name)).filter(Boolean)
+    if (children.length === 1) result.push(children[0])
+    else if (children.length > 1) result.push({ path: '/agentGroup/' + g.key, name: 'AGENT_GROUP_' + g.key, meta: { title: g.title, icon: g.icon }, children })
+  })
+  return result.concat(items.filter((i) => i.name !== 'ENT_AGENT_PORTAL_DASH' && !used.has(i.name)))
+}
+
 // menu对象信息
 generatorDynamicRouter().then((resRouter: any) => {
   // 过滤掉系统通用菜单
@@ -176,21 +215,11 @@ generatorDynamicRouter().then((resRouter: any) => {
   // 「代理後台」只給代理帳號：平台帳號（含超管）不顯示；代理帳號則把底下的選單攤平到第一層
   const belong = userStore.userInfo['belongInfoId']
   const isAgentUser = !!belong && belong !== '0'
+  vdata.isAgentUser = isAgentUser
   vdata.menuData = menus.flatMap((item) => {
     if (item.name !== 'ENT_AGENT_PORTAL') return [item]
-    return isAgentUser ? item.children || [] : []
+    return isAgentUser ? groupAgentMenus(item.children || []) : []
   })
-  if (isAgentUser) {
-    req
-      .list(API_URL_AGENT_PORTAL + '/branch/brand', {})
-      .then((brand) => {
-        if (brand && (brand.title || brand.logo)) {
-          vdata.brand = brand
-          if (brand.title) document.title = brand.title
-        }
-      })
-      .catch(() => {})
-  }
 
   vdata.routerMatch = createRouterMatcher(vdata.menuData, {})
 })
@@ -214,6 +243,112 @@ watchEffect(() => {
   }
   vdata.routeName = route.meta.title
 })
+
+// ---------------- 手機版 ----------------
+// 有手機版畫面的頁面（route name = 權限 ID）；其餘頁面在手機上直接顯示電腦版元件
+const M = (name) => defineAsyncComponent(() => import(`../views/mobile/agent/${name}.vue`))
+const MOBILE_VIEWS = {
+  ENT_AGENT_PORTAL_DASH: M('MDashboard'),
+  ENT_AGENT_PORTAL_MCH: M('MMerchants'),
+  ENT_AGENT_PORTAL_SUB: M('MSubAgents'),
+  ENT_AGENT_PORTAL_STAFF: M('MStaff'),
+  ENT_AGENT_PORTAL_ORDER: M('MOrders'),
+  ENT_PAY_ORDER: M('MOrders'),
+  ENT_AGENT_PORTAL_REPORT: M('MReport'),
+  ENT_AGENT_PORTAL_HOME: M('MWallet'),
+  ENT_AGENT_PORTAL_PROFIT: M('MProfit'),
+  ENT_AGENT_PORTAL_BRANCH_WALLET: M('MBranchWallets'),
+  ENT_AGENT_PORTAL_WITHDRAW_AUDIT: M('MWithdrawAudit'),
+  ENT_AGENT_PORTAL_CHANNEL: M('MChannels'),
+  ENT_AGENT_PORTAL_FEE: M('MFee'),
+  ENT_AGENT_PORTAL_ROUTE: M('MRoutes'),
+  ENT_AGENT_PORTAL_BLACKLIST: M('MBlacklist'),
+  ENT_AGENT_PORTAL_OPLOG: M('MOpLog'),
+  ENT_C_USERINFO: MobileMe,
+  // 上帝
+  ENT_AGENT_INFO: defineAsyncComponent(() => import('../views/mobile/god/MAgents.vue')),
+  ENT_AGENT_DETAIL: defineAsyncComponent(() => import('../views/mobile/god/MAgentDetail.vue')),
+  ENT_PC_IF_DEFINE: defineAsyncComponent(() => import('../views/mobile/god/MIfDefines.vue')),
+  ENT_C_MAIN: defineAsyncComponent(() => import('../views/mobile/god/MGodHome.vue')),
+  ENT_UR_ROLE_ENT: defineAsyncComponent(() => import('../views/mobile/god/MEnts.vue')),
+  ENT_SYS_CONFIG_INFO: defineAsyncComponent(() => import('../views/mobile/god/MSysConfig.vue')),
+  ENT_FEE_RULE: defineAsyncComponent(() => import('../views/mobile/god/MFeeRules.vue')),
+  ENT_CHANNEL_ACCOUNT: defineAsyncComponent(() => import('../views/agent/ChannelAccountPanel.vue')),
+  ENT_HISTORY_PAY: M('MOrders'),
+  ENT_HISTORY_PAYOUT: M('MOrders'),
+  ENT_UR_USER: defineAsyncComponent(() => import('../views/mobile/god/MGodPage.vue')),
+  ENT_UR_ROLE: defineAsyncComponent(() => import('../views/mobile/god/MGodPage.vue')),
+  ENT_FEE_TEMPLATE: defineAsyncComponent(() => import('../views/mobile/god/MGodPage.vue')),
+  ENT_REFUND_ORDER: defineAsyncComponent(() => import('../views/mobile/god/MGodPage.vue')),
+  ENT_TRANSFER_ORDER: defineAsyncComponent(() => import('../views/mobile/god/MGodPage.vue')),
+  ENT_MCH_NOTIFY: defineAsyncComponent(() => import('../views/mobile/god/MGodPage.vue')),
+  ENT_WALLET_ACCOUNT: defineAsyncComponent(() => import('../views/mobile/god/MGodPage.vue')),
+  ENT_WALLET_LEDGER: defineAsyncComponent(() => import('../views/mobile/god/MGodPage.vue')),
+  ENT_WALLET_WITHDRAW: defineAsyncComponent(() => import('../views/mobile/god/MGodPage.vue')),
+  ENT_RISK_BLACKLIST: defineAsyncComponent(() => import('../views/mobile/god/MGodPage.vue')),
+  ENT_PC_WAY: defineAsyncComponent(() => import('../views/mobile/god/MGodPage.vue')),
+  ENT_WAY_ROUTE: defineAsyncComponent(() => import('../views/mobile/god/MGodPage.vue')),
+  ENT_SYS_LOG: defineAsyncComponent(() => import('../views/mobile/god/MGodPage.vue')),
+  ENT_UAT_EDGE_ALLOWLIST: defineAsyncComponent(() => import('../views/mobile/god/MGodPage.vue')),
+  ENT_SYS_MONITOR: defineAsyncComponent(() => import('../views/monitor/MonitorPage.vue')),
+  ENT_TELEGRAM_BOT: defineAsyncComponent(() => import('../views/telegram/TelegramBotPage.vue')),
+  ENT_API_TEST: defineAsyncComponent(() => import('../views/apitest/ApiTestPage.vue')),
+  ENT_LOGIN_DEVICE: defineAsyncComponent(() => import('../views/loginDevice/LoginDevicePage.vue')),
+}
+// 手機一打開先顯示主選單
+const mobile = reactive({ launcher: true })
+const mobileView = computed(() => MOBILE_VIEWS[route.name as string] || null)
+const mobileTitle = computed(() =>
+  route.name === 'ENT_C_USERINFO' ? '我的' : route.query.mode === 'query' ? '查詢訂單' : (route.meta.title as string) || ''
+)
+
+function findMenu(names: string[]) {
+  const walk = (list) => {
+    for (const r of list || []) {
+      if (names.includes(r.name)) return r
+      const hit = walk(r.children)
+      if (hit) return hit
+    }
+    return null
+  }
+  return walk(vdata.menuData)
+}
+// 底部分頁：代理帳號用代理後台的訂單與錢包，平台帳號用平台的訂單管理與錢包帳戶；沒有權限的分頁不顯示
+const ORDER_NAMES = ['ENT_AGENT_PORTAL_ORDER', 'ENT_PAY_ORDER']
+const WALLET_NAMES = ['ENT_AGENT_PORTAL_HOME', 'ENT_WALLET_ACCOUNT']
+const mobileTabs = computed(() => {
+  const tabs: any[] = [{ key: 'home', label: '主選單', icon: HomeOutlined }]
+  const order = findMenu(ORDER_NAMES)
+  if (order) tabs.push({ key: 'order', label: '訂單', icon: ProfileOutlined, path: order.path })
+  const wallet = findMenu(WALLET_NAMES)
+  if (wallet) tabs.push({ key: 'wallet', label: '錢包', icon: WalletOutlined, path: wallet.path })
+  tabs.push({ key: 'me', label: '我的', icon: UserOutlined, path: '/current/userinfo' })
+  return tabs
+})
+const mobileActiveTab = computed(() => {
+  if (mobile.launcher) return 'home'
+  const n = route.name as string
+  if (ORDER_NAMES.includes(n)) return 'order'
+  if (WALLET_NAMES.includes(n)) return 'wallet'
+  if (n === 'ENT_C_USERINFO') return 'me'
+  return ''
+})
+function onMobileTab(t) {
+  if (t.key === 'home') {
+    mobile.launcher = true
+    return
+  }
+  openFromLauncher(t.path)
+}
+// path 可能帶查詢字串（例如 ?mode=query），用字串交給 router 解析
+function openFromLauncher(path) {
+  mobile.launcher = false
+  if (path !== route.fullPath) router.push(path)
+}
+watch(
+  () => route.fullPath,
+  () => (mobile.launcher = false)
+)
 
 // 回主页
 function toMain() {
@@ -250,7 +385,7 @@ const clickRefsh = () => {
   margin-left: 8px;
   font-size: 16px;
   font-weight: 600;
-  color: rgba(0, 0, 0, 0.85);
+  color: var(--jp-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -282,21 +417,21 @@ const clickRefsh = () => {
     display: inline-block;
     height: 100%;
     font-size: 16px;
-    color: rgba(0, 0, 0, 0.65);
+    color: var(--jp-text-2);
     padding: 0 20px;
 
     &:hover {
-      color: #000 !important;
+      color: var(--jp-text) !important;
     }
   }
 
   .icon-main {
-    border-right: 1px solid #eee;
-    border-left: 1px solid #eee;
+    border-right: 1px solid var(--jp-border);
+    border-left: 1px solid var(--jp-border);
   }
 }
 .customhead {
-  background-color: #fff;
+  background-color: var(--jp-surface);
   z-index: 9;
 
   position: fixed;
@@ -306,7 +441,7 @@ const clickRefsh = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--jp-border);
   height: 56px;
 
   // 页签， 撑满剩余部分
@@ -326,7 +461,7 @@ const clickRefsh = () => {
 
   height: 56px;
   padding: 0 20px;
-  border-left: 1px solid #eee;
+  border-left: 1px solid var(--jp-border);
 
   &:hover {
     cursor: pointer;
@@ -373,13 +508,13 @@ const clickRefsh = () => {
 
 .ant-layout-sider-children {
   //导航整体的右侧新增一条border
-  border-right: 1px solid #08174212;
+  border-right: 1px solid var(--jp-border);
   background: transparent;
   padding-bottom: 30px;
 }
 .ant-layout-sider-light {
   //亮色模式下整体的背景色
-  background: @background-color;
+  background: var(--jp-sider);
 }
 
 .ant-menu-inline-collapsed {
@@ -411,7 +546,7 @@ const clickRefsh = () => {
 }
 .ant-menu-sub.ant-menu-inline {
   //亮色模式下，子菜单背景颜色调整
-  background-color: @background-color;
+  background-color: var(--jp-sider);
 }
 
 .ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected {
@@ -560,7 +695,7 @@ aside::before {
 }
 
 .ant-layout:first-child .ant-layout {
-  background-color: #fff;
+  background-color: var(--jp-surface);
   overflow-y: scroll;
   overflow-x: hidden;
 }

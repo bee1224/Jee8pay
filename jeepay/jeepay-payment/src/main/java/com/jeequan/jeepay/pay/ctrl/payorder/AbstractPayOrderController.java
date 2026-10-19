@@ -372,7 +372,7 @@ public abstract class AbstractPayOrderController extends ApiController {
             bizRS.setErrMsg(bizRS.getChannelRetMsg() != null ? bizRS.getChannelRetMsg().getChannelErrMsg() : null);
         }
 
-        return ApiRes.okWithSign(bizRS, configContextQueryService.queryMchApp(bizRQ.getMchNo(), bizRQ.getAppId()).getAppSecret());
+        return ApiRes.okWithSign(bizRS, signKeyStore.platformPrivateKey());
     }
 
 

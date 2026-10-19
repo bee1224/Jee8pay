@@ -63,6 +63,6 @@ public class QueryRefundOrderController extends ApiController {
         }
 
         QueryRefundOrderRS bizRes = QueryRefundOrderRS.buildByRefundOrder(refundOrder);
-        return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchApp(rq.getMchNo(), rq.getAppId()).getAppSecret());
+        return ApiRes.okWithSign(bizRes, signKeyStore.platformPrivateKey());
     }
 }

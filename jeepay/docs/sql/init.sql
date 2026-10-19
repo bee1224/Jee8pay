@@ -144,7 +144,7 @@ CREATE TABLE `t_mch_app` (
          `app_name` varchar(64) NOT NULL DEFAULT '' COMMENT '应用名称',
          `mch_no` VARCHAR(64) NOT NULL COMMENT '商户号',
          `state` TINYINT(6) NOT NULL DEFAULT 1 COMMENT '应用状态: 0-停用, 1-正常',
-         `app_secret` VARCHAR(128) NOT NULL COMMENT '应用私钥',
+         `mch_public_key` TEXT DEFAULT NULL COMMENT '商戶 ML-DSA-65 公鑰（PEM），驗證商戶請求簽名（ADR-0013）',
          `remark` varchar(128) DEFAULT NULL COMMENT '备注',
          `created_uid` BIGINT(20) COMMENT '创建者用户ID',
          `created_by` VARCHAR(64) COMMENT '创建者姓名',
@@ -909,8 +909,8 @@ insert into t_sys_entitlement values('ENT_AGENT_PORTAL_CHANNEL', '渠道列表',
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL', '代理後台', 'team', '', 'RouteView', 'ML', 0, 1,  'ROOT', '46', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_HOME', '錢包與提現', 'wallet', '/agentPortal/wallet', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '10', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_PROFIT', '分潤', 'pie-chart', '/agentPortal/profit', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '20', 'MGR', now(), now());
-insert into t_sys_entitlement values('ENT_AGENT_PORTAL_MCH', '商戶列表', 'shop', '/agentPortal/merchants', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '30', 'MGR', now(), now());
-insert into t_sys_entitlement values('ENT_AGENT_PORTAL_SUB', '旗下代理', 'team', '/agentPortal/subAgents', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '40', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_MCH', '我的商戶', 'shop', '/agentPortal/merchants', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '30', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_SUB', '我的代理', 'team', '/agentPortal/subAgents', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '40', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_FEE', '費率', 'percentage', '/agentPortal/fee', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '50', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_ORDER', '訂單', 'account-book', '/agentPortal/orders', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '25', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_OPLOG', '操作紀錄', 'file-text', '/agentPortal/opLogs', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '60', 'MGR', now(), now());
@@ -920,10 +920,11 @@ insert into t_sys_entitlement values('ENT_AGENT_PORTAL_FREEZE', '按鈕：凍結
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_WITHDRAW_AUDIT', '提現審核', 'audit', '/agentPortal/withdrawAudit', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '44', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_ROUTE', '通道路由', 'branches', '/agentPortal/routes', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '52', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_BLACKLIST', '黑名單', 'stop', '/agentPortal/blacklist', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '54', 'MGR', now(), now());
-insert into t_sys_entitlement values('ENT_AGENT_PORTAL_BRAND', '品牌設定', 'skin', '/agentPortal/brand', 'AgentPortalPage', 'ML', 0, 1,  'ENT_AGENT_PORTAL', '70', 'MGR', now(), now());
+-- 品牌設定（白標）已停用（2026-10-14，上帝決定團長不可自訂品牌）；保留紀錄但不授予任何角色
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_BRAND', '品牌設定', 'skin', '/agentPortal/brand', 'AgentPortalPage', 'ML', 0, 0,  'ENT_AGENT_PORTAL', '70', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_MCH_EDIT', '按鈕：商戶歸屬與重設密碼', 'no-icon', '', '', 'PB', 0, 1,  'ENT_AGENT_PORTAL_MCH', '0', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_MCH_ADD', '按鈕：新增商戶', 'no-icon', '', '', 'PB', 0, 1,  'ENT_AGENT_PORTAL_MCH', '0', 'MGR', now(), now());
-insert into t_sys_entitlement values('ENT_AGENT_PORTAL_SUB_ADD', '按鈕：新增旗下代理（限團長）', 'no-icon', '', '', 'PB', 0, 1,  'ENT_AGENT_PORTAL_SUB', '0', 'MGR', now(), now());
+insert into t_sys_entitlement values('ENT_AGENT_PORTAL_SUB_ADD', '按鈕：新增代理（限團長）', 'no-icon', '', '', 'PB', 0, 1,  'ENT_AGENT_PORTAL_SUB', '0', 'MGR', now(), now());
 insert into t_sys_entitlement values('ENT_AGENT_PORTAL_VIEW', '頁面：代理後台資料', 'no-icon', '', '', 'PB', 0, 1,  'ENT_AGENT_PORTAL_HOME', '0', 'MGR', now(), now());
 
 insert into t_sys_entitlement values('ENT_WALLET_ACCOUNT', '錢包帳戶', 'wallet', '/wallet/accounts', 'WalletAccountPage', 'ML', 0, 1,  'ENT_WALLET', '5', 'MGR', now(), now());
@@ -1121,7 +1122,7 @@ insert into t_sys_role_ent_rela values ('ROLE_AGENT_PORTAL', 'ENT_COMMONS'), ('R
     ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_MCH_ADD'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_SUB_ADD'),
     ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_REPORT'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_BRANCH_WALLET'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_FREEZE'),
     ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_WITHDRAW_AUDIT'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_ROUTE'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_BLACKLIST'),
-    ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_BRAND'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_MCH_EDIT'),
+    ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_MCH_EDIT'),
     ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_CHANNEL'),
     ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_DASH'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_STAFF'), ('ROLE_AGENT_PORTAL', 'ENT_AGENT_PORTAL_CHANNEL_TEST');
 
@@ -1196,3 +1197,64 @@ VALUES ('jhd', 'JHD（黑貓 PAY）', 1, 0, 1,
         '[{"name":"environment","desc":"Provider 環境","type":"radio","verify":"required","values":"TEST,PRODUCTION","titles":"測試環境,正式環境"},{"name":"custId","desc":"契客代號","type":"text","verify":"required"},{"name":"apiPassword","desc":"API 密碼","type":"text","verify":"required","star":"1"}]',
         '[{"wayCode":"JHD_IBON"}]',
         '', '#222222', 1, '黑貓 PAY ibon 通道（上游四）');
+
+-- 登入裝置紀錄：登入成功後前端回報；IP、User-Agent 由後端取得。裝置識別碼為瀏覽器端隨機 ID（網頁無法讀取 IMEI）
+DROP TABLE IF EXISTS t_sys_login_device;
+CREATE TABLE `t_sys_login_device` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `sys_user_id` BIGINT NOT NULL COMMENT '登入的用戶ID',
+  `sys_type` VARCHAR(8) NOT NULL COMMENT 'MGR／MCH',
+  `belong_info_id` VARCHAR(64) DEFAULT NULL COMMENT '所屬代理號（平台帳號為 0）',
+  `user_name` VARCHAR(64) DEFAULT NULL COMMENT '用戶姓名',
+  `user_ip` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '登入 IP',
+  `user_agent` VARCHAR(512) DEFAULT NULL COMMENT 'User-Agent',
+  `device_id` VARCHAR(64) DEFAULT NULL COMMENT '裝置識別碼（瀏覽器端隨機產生）',
+  `device_model` VARCHAR(128) DEFAULT NULL COMMENT '裝置型號',
+  `device_os` VARCHAR(64) DEFAULT NULL COMMENT '作業系統',
+  `latitude` DECIMAL(10,7) DEFAULT NULL COMMENT '緯度',
+  `longitude` DECIMAL(10,7) DEFAULT NULL COMMENT '經度',
+  `accuracy` INT DEFAULT NULL COMMENT '定位精確度（公尺）',
+  `geo_state` VARCHAR(16) NOT NULL DEFAULT 'UNSUPPORTED' COMMENT '定位狀態',
+  `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '登入時間',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_time` (`sys_user_id`, `created_at`),
+  KEY `idx_belong` (`belong_info_id`, `id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='登入裝置紀錄';
+
+-- ---------------- 2026-10-19：上帝的流量監控與 Telegram 機器人整理 ----------------
+-- Telegram 機器人整理（上帝）：token 明文存放屬已知資安債 TD-001，API 只回遮罩值
+CREATE TABLE IF NOT EXISTS `t_telegram_bot` (
+  `bot_id` BIGINT NOT NULL AUTO_INCREMENT,
+  `bot_name` VARCHAR(64) NOT NULL COMMENT '名稱',
+  `bot_username` VARCHAR(64) DEFAULT NULL COMMENT 'Telegram @username（測試連線時帶入）',
+  `api_token` VARCHAR(128) NOT NULL COMMENT 'Bot API token',
+  `chat_id` VARCHAR(64) DEFAULT NULL COMMENT '通知對象 chat_id',
+  `purpose` VARCHAR(256) NOT NULL COMMENT '用途',
+  `state` TINYINT NOT NULL DEFAULT 1 COMMENT '0-停用, 1-啟用',
+  `remark` VARCHAR(256) DEFAULT NULL COMMENT '備註',
+  `last_check_at` TIMESTAMP(3) NULL DEFAULT NULL COMMENT '最近測試時間',
+  `last_check_result` VARCHAR(256) DEFAULT NULL COMMENT '最近測試結果',
+  `created_by` VARCHAR(64) DEFAULT NULL,
+  `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`bot_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Telegram 機器人';
+
+-- 流量監控的容量上限（0 = 不設上限；只用於提醒，不擋單）
+INSERT IGNORE INTO t_sys_config (config_key, config_name, config_desc, group_key, group_name, config_val, type, sort_num) VALUES
+ ('monitorMaxOrdersPerMinute', '每分鐘建單上限', '流量監控：每分鐘建單數上限，0 為不設', 'monitorCapacity', '容量上限', '0', 'text', 1),
+ ('monitorMaxDailyOrders', '每日建單上限', '流量監控：每日建單數上限，0 為不設', 'monitorCapacity', '容量上限', '0', 'text', 2),
+ ('monitorMaxDailyAmount', '每日成交金額上限（分）', '流量監控：每日成功金額上限（分），0 為不設', 'monitorCapacity', '容量上限', '0', 'text', 3),
+ ('monitorWarnPercent', '警示門檻（%）', '流量監控：使用率超過此百分比顯示警示', 'monitorCapacity', '容量上限', '80', 'text', 4);
+
+-- 選單：系統管理 → 流量監控、Telegram 機器人（上帝帳號自動擁有全部權限）
+INSERT IGNORE INTO t_sys_entitlement VALUES ('ENT_SYS_MONITOR', '流量監控', 'dashboard', '/monitor', 'MonitorPage', 'ML', 0, 1, 'ENT_SYS_CONFIG', '5', 'MGR', now(), now());
+INSERT IGNORE INTO t_sys_entitlement VALUES ('ENT_SYS_MONITOR_EDIT', '按鈕：修改容量上限', 'no-icon', '', '', 'PB', 0, 1, 'ENT_SYS_MONITOR', '0', 'MGR', now(), now());
+-- Telegram 機器人獨立一欄（不放在系統管理底下）
+INSERT IGNORE INTO t_sys_entitlement VALUES ('ENT_TELEGRAM', 'Telegram', 'robot', '', 'RouteView', 'ML', 0, 1, 'ROOT', '190', 'MGR', now(), now());
+INSERT IGNORE INTO t_sys_entitlement VALUES ('ENT_TELEGRAM_BOT', 'Telegram 機器人', 'robot', '/telegramBots', 'TelegramBotPage', 'ML', 0, 1, 'ENT_TELEGRAM', '10', 'MGR', now(), now());
+INSERT IGNORE INTO t_sys_entitlement VALUES ('ENT_TELEGRAM_BOT_EDIT', '按鈕：新增／修改／測試', 'no-icon', '', '', 'PB', 0, 1, 'ENT_TELEGRAM_BOT', '0', 'MGR', now(), now());
+-- 技術工具 → API 測試（印出完整請求與回應）；系統管理 → 登入裝置（上帝看自己與所有團長、隊長）
+INSERT IGNORE INTO t_sys_entitlement VALUES ('ENT_DEV_TOOLS', '技術工具', 'code', '', 'RouteView', 'ML', 0, 1, 'ROOT', '180', 'MGR', now(), now());
+INSERT IGNORE INTO t_sys_entitlement VALUES ('ENT_API_TEST', 'API 測試', 'api', '/apiTest', 'ApiTestPage', 'ML', 0, 1, 'ENT_DEV_TOOLS', '10', 'MGR', now(), now());
+INSERT IGNORE INTO t_sys_entitlement VALUES ('ENT_LOGIN_DEVICE', '登入裝置', 'mobile', '/loginDevices', 'LoginDevicePage', 'ML', 0, 1, 'ENT_SYS_CONFIG', '6', 'MGR', now(), now());

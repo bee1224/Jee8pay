@@ -7,7 +7,6 @@ import com.jeequan.jeepay.core.entity.SysEntitlement;
 import com.jeequan.jeepay.core.entity.SysRole;
 import com.jeequan.jeepay.core.entity.SysRoleEntRela;
 import com.jeequan.jeepay.core.entity.SysUser;
-import com.jeequan.jeepay.core.entity.SysUserAuth;
 import com.jeequan.jeepay.core.entity.SysUserRoleRela;
 import com.jeequan.jeepay.core.exception.BizException;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +19,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -38,11 +36,6 @@ public class AgentStaffService {
     /** 子帳號管理本身的權限，不可下放 */
     private static final String STAFF_ENT_PREFIX = "ENT_AGENT_PORTAL_STAFF";
     /** 任何子帳號都需要的基礎權限：個人中心、代理後台根選單與資料讀取（前端不列出，儲存時自動補上） */
-    /**
-     * 沒填手機號時存入的佔位值前綴。t_sys_user.telphone 不可為空且同系統內不可重複，
-     * 所以用「前綴 + 隨機字串」佔位；對外一律顯示為空白，也不建立手機號登入方式。
-     */
-    public static final String NO_TEL_PREFIX = "-";
     public static final List<String> BASE_ENTS = List.of("ENT_COMMONS", "ENT_C_USERINFO", "ENT_AGENT_PORTAL", "ENT_AGENT_PORTAL_VIEW");
 
     @Autowired private SysUserService sysUserService;
@@ -51,6 +44,7 @@ public class AgentStaffService {
     @Autowired private SysRoleService sysRoleService;
     @Autowired private SysRoleEntRelaService sysRoleEntRelaService;
     @Autowired private SysEntitlementService sysEntitlementService;
+    @Autowired private AgentPortalService agentPortalService;
 
     private static String roleIdOf(Long sysUserId) {
         return STAFF_ROLE_PREFIX + sysUserId;
@@ -85,7 +79,7 @@ public class AgentStaffService {
                         .in(SysUser::getSysUserId, ids).orderByDesc(SysUser::getCreatedAt))
                 .forEach(u -> {
                     JSONObject row = (JSONObject) JSONObject.toJSON(u);
-                    if (StringUtils.startsWith(u.getTelphone(), NO_TEL_PREFIX)) {
+                    if (AgentPortalService.isPlaceholderTel(u.getTelphone())) {
                         row.put("telphone", "");
                     }
                     row.put("entCount", entCounts.getOrDefault(roleIdOf(u.getSysUserId()), 0L));
@@ -97,8 +91,8 @@ public class AgentStaffService {
     /** 建立子帳號：密碼為隨機 8 碼，只在這次回應出現；建立當下沒有任何權限，需另行設定。 */
     @Transactional
     public JSONObject create(AgentInfo me, String loginUsername, String realname, String telphone) {
-        if (StringUtils.isBlank(loginUsername) || !loginUsername.matches("^[A-Za-z0-9_]{4,32}$")) {
-            throw new BizException("登入帳號須為 4～32 碼英文、數字或底線");
+        if (StringUtils.isBlank(loginUsername) || !loginUsername.matches(AgentPortalService.AGENT_LOGIN_PATTERN)) {
+            throw new BizException(AgentPortalService.AGENT_LOGIN_HINT);
         }
         if (StringUtils.isBlank(realname)) {
             throw new BizException("請填寫名稱");
@@ -110,17 +104,13 @@ public class AgentStaffService {
         SysUser user = new SysUser();
         user.setLoginUsername(loginUsername);
         user.setRealname(realname);
-        user.setTelphone(hasTel ? telphone : NO_TEL_PREFIX + UUID.randomUUID().toString().replace("-", "").substring(0, 20));
+        user.setTelphone(AgentPortalService.telOrPlaceholder(hasTel ? telphone : null));
         user.setSex(CS.SEX_UNKNOWN);
         user.setIsAdmin(CS.NO);
         user.setState(CS.YES);
         user.setBelongInfoId(me.getAgentNo());
         sysUserService.addSysUser(user, CS.SYS_TYPE.MGR);
-        if (!hasTel) {
-            // 佔位值不是手機號，不留手機號登入方式
-            sysUserAuthService.remove(SysUserAuth.gw().eq(SysUserAuth::getUserId, user.getSysUserId())
-                    .eq(SysUserAuth::getSysType, CS.SYS_TYPE.MGR).eq(SysUserAuth::getIdentityType, CS.AUTH_TYPE.TELPHONE));
-        }
+        agentPortalService.dropPlaceholderTelLogin(user, CS.SYS_TYPE.MGR);
 
         SysRole role = new SysRole();
         role.setRoleId(roleIdOf(user.getSysUserId()));

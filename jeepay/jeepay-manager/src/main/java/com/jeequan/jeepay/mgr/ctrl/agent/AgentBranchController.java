@@ -48,7 +48,7 @@ public class AgentBranchController extends AgentBaseCtrl {
 
     // ---------------- 旗下錢包 ----------------
 
-    @Operation(summary = "旗下代理與商戶的錢包餘額")
+    @Operation(summary = "我的代理與商戶的錢包餘額")
     @PreAuthorize("hasAuthority('ENT_AGENT_PORTAL_BRANCH_WALLET')")
     @RequestMapping(value = "/wallets", method = RequestMethod.GET)
     public ApiRes wallets() {
@@ -88,7 +88,7 @@ public class AgentBranchController extends AgentBaseCtrl {
 
     // ---------------- 商戶歸屬與帳號 ----------------
 
-    @Operation(summary = "更換旗下商戶的直屬代理")
+    @Operation(summary = "更換我的商戶的直屬代理")
     @PreAuthorize("hasAuthority('ENT_AGENT_PORTAL_MCH_EDIT')")
     @MethodLog(remark = "代理更換商戶歸屬")
     @RequestMapping(value = "/merchants/{mchNo}/binding", method = RequestMethod.PUT)
@@ -98,7 +98,7 @@ public class AgentBranchController extends AgentBaseCtrl {
         return ApiRes.ok();
     }
 
-    @Operation(summary = "重設旗下商戶的登入密碼（隨機，只在回應出現一次）")
+    @Operation(summary = "重設我的商戶的登入密碼（隨機，只在回應出現一次）")
     @PreAuthorize("hasAuthority('ENT_AGENT_PORTAL_MCH_EDIT')")
     @MethodLog(remark = "代理重設商戶密碼")
     @RequestMapping(value = "/merchants/{mchNo}/resetPassword", method = RequestMethod.POST)
@@ -173,7 +173,7 @@ public class AgentBranchController extends AgentBaseCtrl {
         return ApiRes.ok(branch.feeTemplates());
     }
 
-    @Operation(summary = "套用費率範本到旗下代理或商戶")
+    @Operation(summary = "套用費率範本到我的代理或商戶")
     @PreAuthorize("hasAuthority('ENT_AGENT_PORTAL_FEE_EDIT')")
     @MethodLog(remark = "代理套用費率範本")
     @RequestMapping(value = "/feeTemplates/{templateId}/apply", method = RequestMethod.POST)
@@ -187,7 +187,7 @@ public class AgentBranchController extends AgentBaseCtrl {
 
     // ---------------- 通道路由 ----------------
 
-    @Operation(summary = "旗下商戶的通道路由規則")
+    @Operation(summary = "我的商戶的通道路由規則")
     @PreAuthorize("hasAuthority('ENT_AGENT_PORTAL_ROUTE')")
     @RequestMapping(value = "/wayRoutes", method = RequestMethod.GET)
     public ApiRes routes() {
@@ -216,12 +216,12 @@ public class AgentBranchController extends AgentBaseCtrl {
 
     // ---------------- 提現審核 ----------------
 
-    @Operation(summary = "旗下代理與商戶的提現單")
+    @Operation(summary = "我的代理與商戶的提現單")
     @PreAuthorize("hasAuthority('ENT_AGENT_PORTAL_WITHDRAW_AUDIT')")
     @RequestMapping(value = "/withdraws", method = RequestMethod.GET)
     public ApiPageRes<WithdrawOrder> withdraws() {
         requireAuthority("ENT_AGENT_PORTAL_WITHDRAW_AUDIT");
-        return ApiPageRes.pages(branch.withdraws(me(), getIPage(), getValByte("state")));
+        return ApiPageRes.pages(branch.withdraws(me(), getIPage(), getValByte("state"), startDate(), endDate()));
     }
 
     @Operation(summary = "同意旗下提現（註記，撥款由平台執行）")

@@ -143,7 +143,7 @@ public class MethodLogAop {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 
         //请求参数
-        sysLog.setOptReqParam( requestKitBean.getReqParamJSON().toJSONString() );
+        sysLog.setOptReqParam( maskSensitive(requestKitBean.getReqParamJSON()).toJSONString() );
 
         //注解备注
         sysLog.setMethodRemark(getAnnotationRemark(joinPoint));
@@ -166,4 +166,21 @@ public class MethodLogAop {
         }
     }
 
+
+    /**
+     * 操作紀錄不得保存密碼、金鑰、token：登入（ip = Base64 密碼）、修改密碼、渠道金鑰（ifParams）、Telegram token 等一律遮罩。
+     * 遮罩只影響寫入 t_sys_log 的副本，不影響業務處理。
+     */
+    private static final java.util.Set<String> SENSITIVE_KEYS = java.util.Set.of(
+            "ip", "vc", "password", "pwd", "loginPwd", "originalPwd", "newPwd", "confirmPwd",
+            "ifParams", "apiToken", "botToken", "token", "iToken", "secret", "appSecret", "privateKey", "apiPassword");
+
+    private static com.alibaba.fastjson.JSONObject maskSensitive(com.alibaba.fastjson.JSONObject src) {
+        if (src == null) {
+            return new com.alibaba.fastjson.JSONObject();
+        }
+        com.alibaba.fastjson.JSONObject copy = new com.alibaba.fastjson.JSONObject(true);
+        src.forEach((k, v) -> copy.put(k, v != null && SENSITIVE_KEYS.contains(k) ? "******" : v));
+        return copy;
+    }
 }

@@ -2,6 +2,8 @@
 
 Execution date: `2026-08-13`
 
+> 2026-10-19：本文件是當時的執行紀錄。其中的 MD5 Create／Notify 向量與 `verify_vectors.py` 已隨 ADR-0013（改用 ML-DSA-65）移除，簽名規則以 [README](README.md) §C 為準。
+
 ```text
 EC01R1 = PASS
 NC_01 = CLOSED

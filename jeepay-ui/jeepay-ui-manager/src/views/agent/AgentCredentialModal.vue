@@ -8,16 +8,26 @@
     />
     <a-descriptions :column="1" bordered size="small">
       <a-descriptions-item :label="vdata.subjectLabel">{{ vdata.agentName }}</a-descriptions-item>
-      <a-descriptions-item label="登入位置">{{ vdata.loginAt }}</a-descriptions-item>
-      <a-descriptions-item label="帳號">{{ vdata.loginUsername }}</a-descriptions-item>
+      <a-descriptions-item label="登入網址">
+        <a-typography-text v-if="vdata.loginUrl" :copyable="{ text: vdata.loginUrl, tooltips: ['複製', '已複製'] }">
+          <a :href="vdata.loginUrl" target="_blank" rel="noopener noreferrer">{{ vdata.loginUrl }}</a>
+        </a-typography-text>
+        <span v-else style="color: #999">商戶平台尚未設定對外網址（系統配置「商戶平台網址」）</span>
+        <div v-if="vdata.note" style="color: #fa8c16; font-size: 12px">{{ vdata.note }}</div>
+      </a-descriptions-item>
+      <a-descriptions-item label="帳號">
+        <a-typography-text :copyable="{ text: vdata.loginUsername, tooltips: ['複製', '已複製'] }">{{ vdata.loginUsername }}</a-typography-text>
+      </a-descriptions-item>
       <a-descriptions-item label="密碼">
-        <span style="font-family: monospace; font-size: 15px; letter-spacing: 1px">{{ vdata.initPassword }}</span>
+        <a-typography-text :copyable="{ text: vdata.initPassword, tooltips: ['複製', '已複製'] }">
+          <span style="font-family: monospace; font-size: 15px; letter-spacing: 1px">{{ vdata.initPassword }}</span>
+        </a-typography-text>
       </a-descriptions-item>
     </a-descriptions>
     <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center">
       <a-button size="small" @click="copy">
         <template #icon><copy-outlined /></template>
-        複製帳號密碼
+        複製網址與帳號密碼
       </a-button>
       <a-button type="primary" @click="vdata.open = false">我已記下</a-button>
     </div>
@@ -29,19 +39,22 @@
 import { reactive, getCurrentInstance } from 'vue'
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
 
-const vdata: any = reactive({ open: false, subjectLabel: '代理', loginAt: '營運平台', agentName: '', loginUsername: '', initPassword: '' })
+const vdata: any = reactive({ open: false, subjectLabel: '代理', loginUrl: '', note: '', agentName: '', loginUsername: '', initPassword: '' })
 
 function show(info) {
   vdata.agentName = info.agentName || ''
   vdata.subjectLabel = info.subjectLabel || '代理'
-  vdata.loginAt = info.loginAt || '營運平台'
+  // 登入網址：商戶帳號用後端回傳的商戶平台網址；營運平台帳號（團長、隊長、子帳號）就是目前這個網站
+  const loginAt = info.loginAt || '營運平台'
+  vdata.loginUrl = loginAt.startsWith('商戶') ? info.loginUrl || '' : window.location.origin + '/login'
+  vdata.note = loginAt.includes('（') ? loginAt.slice(loginAt.indexOf('（') + 1, loginAt.lastIndexOf('）')) : ''
   vdata.loginUsername = info.loginUsername
   vdata.initPassword = info.initPassword
   vdata.open = true
 }
 
 function copy() {
-  const text = `帳號：${vdata.loginUsername}\n密碼：${vdata.initPassword}`
+  const text = `${vdata.loginUrl ? `登入網址：${vdata.loginUrl}\n` : ''}帳號：${vdata.loginUsername}\n密碼：${vdata.initPassword}`
   const fallback = () => {
     const el = document.createElement('textarea')
     el.value = text

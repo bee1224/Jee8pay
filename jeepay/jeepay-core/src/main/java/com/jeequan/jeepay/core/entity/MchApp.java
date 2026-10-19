@@ -61,10 +61,10 @@ public class MchApp extends BaseModel {
     private Byte state;
 
     /**
-     * 应用私钥
+     * 商戶 ML-DSA-65 公鑰（PEM），平台以此驗證商戶請求的簽名（ADR-0013）
      */
-    @Schema(title = "appSecret", description = "应用私钥")
-    private String appSecret;
+    @Schema(title = "mchPublicKey", description = "商戶 ML-DSA-65 公鑰（PEM）")
+    private String mchPublicKey;
 
     /**
      * 备注

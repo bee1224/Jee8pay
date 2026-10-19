@@ -18,7 +18,6 @@ package com.jeequan.jeepay.mgr.ctrl.order;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.jeequan.jeepay.JeepayClient;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.entity.MchApp;
@@ -28,12 +27,12 @@ import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.utils.SeqKit;
-import com.jeequan.jeepay.exception.JeepayException;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.model.RefundOrderCreateReqModel;
-import com.jeequan.jeepay.request.RefundOrderCreateRequest;
-import com.jeequan.jeepay.response.RefundOrderCreateResponse;
+import com.jeequan.jeepay.core.entity.AgentInfo;
+import com.jeequan.jeepay.service.impl.AgentInfoService;
+import com.jeequan.jeepay.service.impl.AgentPortalService;
 import com.jeequan.jeepay.service.impl.MchAppService;
+import com.jeequan.jeepay.service.sign.PayApiClient;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.jeepay.service.impl.PayWayService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
@@ -67,6 +66,19 @@ public class PayOrderController extends CommonCtrl {
     @Autowired private PayWayService payWayService;
     @Autowired private SysConfigService sysConfigService;
     @Autowired private MchAppService mchAppService;
+    @Autowired private PayApiClient payApiClient;
+    @Autowired private AgentInfoService agentInfoService;
+    @Autowired private AgentPortalService agentPortalService;
+
+    /** 有帶 agentNo 時回傳該團長轄區的商戶號（可能為空清單）；沒帶回傳 null */
+    private List<String> agentScope() {
+        String agentNo = getValString("agentNo");
+        if (StringUtils.isBlank(agentNo)) {
+            return null;
+        }
+        AgentInfo agent = agentInfoService.getById(agentNo);
+        return agent == null ? List.of() : agentPortalService.directMchNos(agent);
+    }
 
     /**
      * @author: pangxiaoyu
@@ -96,6 +108,14 @@ public class PayOrderController extends CommonCtrl {
         PayOrder payOrder = getObject(PayOrder.class);
         JSONObject paramJSON = getReqParamJSON();
         LambdaQueryWrapper<PayOrder> wrapper = PayOrder.gw();
+        // 上帝看某位團長的訂單：範圍為這位團長這一支（含隊長）的全部商戶
+        List<String> scope = agentScope();
+        if (scope != null) {
+            if (scope.isEmpty()) {
+                return ApiPageRes.pages(getIPage());
+            }
+            wrapper.in(PayOrder::getMchNo, scope);
+        }
 
         IPage<PayOrder> pages = payOrderService.listByPage(getIPage(), payOrder, paramJSON, wrapper);
         // 得到所有支付方式
@@ -171,31 +191,16 @@ public class PayOrderController extends CommonCtrl {
         }
 
 
-        RefundOrderCreateRequest request = new RefundOrderCreateRequest();
-        RefundOrderCreateReqModel model = new RefundOrderCreateReqModel();
-        request.setBizModel(model);
-
-        model.setMchNo(payOrder.getMchNo());     // 商户号
-        model.setAppId(payOrder.getAppId());
-        model.setPayOrderId(payOrderId);
-        model.setMchRefundNo(SeqKit.genMhoOrderId());
-        model.setRefundAmount(refundAmount);
-        model.setRefundReason(refundReason);
-        model.setCurrency(payOrder.getCurrency());
-
-        MchApp mchApp = mchAppService.getById(payOrder.getAppId());
-
-        JeepayClient jeepayClient = new JeepayClient(sysConfigService.getDBApplicationConfig().getPaySiteUrl(), mchApp.getAppSecret());
-
-        try {
-            RefundOrderCreateResponse response = jeepayClient.execute(request);
-            if(response.getCode() != 0){
-                throw new BizException(response.getMsg());
-            }
-            return ApiRes.ok(response.get());
-        } catch (JeepayException e) {
-            throw new BizException(e.getMessage());
-        }
+        // 平台不持有商戶私鑰，以平台內部金鑰代商戶發起退款（ADR-0013）
+        Map<String, Object> req = new HashMap<>();
+        req.put("mchNo", payOrder.getMchNo());
+        req.put("appId", payOrder.getAppId());
+        req.put("payOrderId", payOrderId);
+        req.put("mchRefundNo", SeqKit.genMhoOrderId());
+        req.put("refundAmount", refundAmount);
+        req.put("refundReason", refundReason);
+        req.put("currency", payOrder.getCurrency());
+        return ApiRes.ok(payApiClient.call("/api/refund/refundOrder", req));
     }
 
 }

@@ -1,8 +1,8 @@
 <template>
-  <!-- 黑名單：以團長為範圍，自己與旗下代理、商戶的提現都會比對 -->
+  <!-- 黑名單：以團長為範圍，自己與我的代理、商戶的提現都會比對 -->
   <div>
     <a-alert type="info" show-icon style="margin-bottom: 12px"
-      message="這份名單只對你這一支生效：你、旗下代理與旗下商戶申請提現時，收款帳號或戶名命中就會被直接拒絕。平台另有一份全站名單。" />
+      message="這份名單只對你這一支生效：你、我的代理與我的商戶申請提現時，收款帳號或戶名命中就會被直接拒絕。平台另有一份全站名單。" />
     <a-form layout="inline" style="margin-bottom: 12px">
       <a-form-item>
         <a-select v-model:value="vdata.form.listType" style="width: 130px">

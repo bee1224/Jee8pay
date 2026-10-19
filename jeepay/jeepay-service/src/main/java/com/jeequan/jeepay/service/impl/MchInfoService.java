@@ -60,6 +60,8 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
 
     @Autowired private com.jeequan.jeepay.service.mapper.WalletAccountMapper walletAccountMapper;
 
+    @Autowired private com.jeequan.jeepay.service.mapper.AgentMchRelaMapper agentMchRelaMapper;
+
     @Transactional(rollbackFor = Exception.class)
     public void addMch(MchInfo mchInfo, String loginUserName) {
 
@@ -95,7 +97,6 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
         mchApp.setAppId(IdUtil.objectId());
         mchApp.setMchNo(mchInfo.getMchNo());
         mchApp.setAppName("預設應用");
-        mchApp.setAppSecret(RandomUtil.randomString(128));
         mchApp.setState(CS.YES);
         mchApp.setCreatedBy(sysUser.getRealname());
         mchApp.setCreatedUid(sysUser.getSysUserId());
@@ -137,6 +138,9 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
             if (wallet != null && (wallet.getBalance() != 0 || wallet.getFrozen() != 0)) {
                 throw new BizException("該商戶錢包仍有餘額或提現處理中，不可刪除");
             }
+
+            // 刪除商戶與代理的綁定，否則代理會被看不到的商戶擋住而無法刪除
+            agentMchRelaMapper.delete(AgentMchRela.gw().eq(AgentMchRela::getMchNo, mchNo));
 
             // 2.删除当前商户配置的支付通道
             mchPayPassageService.remove(MchPayPassage.gw().eq(MchPayPassage::getMchNo, mchNo));

@@ -23,12 +23,14 @@ import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.cache.ITokenService;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.SysEntitlement;
+import com.jeequan.jeepay.core.entity.SysLoginDevice;
 import com.jeequan.jeepay.core.entity.SysUser;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.model.security.JeeUserDetails;
 import com.jeequan.jeepay.core.utils.TreeDataBuilder;
 import com.jeequan.jeepay.service.impl.SysEntitlementService;
+import com.jeequan.jeepay.service.impl.SysLoginDeviceService;
 import com.jeequan.jeepay.service.impl.SysUserAuthService;
 import com.jeequan.jeepay.service.impl.SysUserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,6 +63,7 @@ public class CurrentUserController extends CommonCtrl{
 	@Autowired private SysEntitlementService sysEntitlementService;
 	@Autowired private SysUserService sysUserService;
 	@Autowired private SysUserAuthService sysUserAuthService;
+	@Autowired private SysLoginDeviceService sysLoginDeviceService;
 
 	@Operation(summary = "查询当前登录者的用户信息")
 	@Parameters({
@@ -112,6 +115,12 @@ public class CurrentUserController extends CommonCtrl{
 	@RequestMapping(value="/user", method = RequestMethod.PUT)
 	@MethodLog(remark = "修改信息")
 	public ApiRes modifyCurrentUserInfo() {
+
+		// 代理帳號（團長、隊長、子帳號）的個人資料只能由上帝修改
+		String belong = getCurrentUser().getSysUser().getBelongInfoId();
+		if (StringUtils.isNotEmpty(belong) && !"0".equals(belong)) {
+			throw new BizException("代理帳號的個人資料只能由平台修改");
+		}
 
 		//修改头像
 		String avatarUrl = getValString("avatarUrl");
@@ -181,4 +190,40 @@ public class CurrentUserController extends CommonCtrl{
 
 
 
+
+	// ---------------- 登入裝置紀錄 ----------------
+
+	@Operation(summary = "回報本次登入的裝置資訊（登入成功後由前端呼叫一次）")
+	@RequestMapping(value="/loginDevice", method = RequestMethod.POST)
+	public ApiRes reportLoginDevice() {
+		SysUser user = getCurrentUser().getSysUser();
+		JSONObject p = getReqParamJSON();
+		SysLoginDevice d = new SysLoginDevice()
+				.setSysUserId(user.getSysUserId()).setSysType(CS.SYS_TYPE.MGR).setBelongInfoId(user.getBelongInfoId())
+				.setUserName(user.getRealname()).setUserIp(getClientIp()).setUserAgent(request.getHeader("User-Agent"))
+				.setDeviceId(p.getString("deviceId")).setDeviceModel(p.getString("deviceModel")).setDeviceOs(p.getString("deviceOs"))
+				.setGeoState(p.getString("geoState")).setLatitude(p.getBigDecimal("latitude")).setLongitude(p.getBigDecimal("longitude"))
+				.setAccuracy(p.getInteger("accuracy"));
+		sysLoginDeviceService.record(d);
+		return ApiRes.ok();
+	}
+
+	@Operation(summary = "自己最近的登入：代理帳號只回時間與完整 IP；裝置只給平台帳號（上帝）看")
+	@RequestMapping(value="/loginDevices", method = RequestMethod.GET)
+	public ApiRes loginDevices() {
+		SysUser user = getCurrentUser().getSysUser();
+		boolean platform = StringUtils.isBlank(user.getBelongInfoId()) || "0".equals(user.getBelongInfoId());
+		List<JSONObject> list = new ArrayList<>();
+		sysLoginDeviceService.recentByUser(user.getSysUserId(), 5).forEach(d -> {
+			JSONObject o = new JSONObject();
+			o.put("createdAt", d.getCreatedAt());
+			o.put("userIp", d.getUserIp());
+			if (platform) {
+				o.put("deviceModel", d.getDeviceModel());
+				o.put("deviceOs", d.getDeviceOs());
+			}
+			list.add(o);
+		});
+		return ApiRes.ok(list);
+	}
 }

@@ -1,8 +1,8 @@
 <template>
-  <!-- 品牌設定（白標）：團長的站台名稱與 Logo，自己與旗下代理登入後套用 -->
+  <!-- 品牌設定（白標）：團長的站台名稱與 Logo，自己與我的代理登入後套用 -->
   <div style="max-width: 560px">
     <a-alert type="info" show-icon style="margin-bottom: 16px"
-      message="啟用後，你和旗下代理登入營運平台時，左上角與分頁標題會換成這裡設定的名稱與 Logo。商戶平台不受影響。" />
+      message="啟用後，你和我的代理登入營運平台時，左上角與分頁標題會換成這裡設定的名稱與 Logo。商戶平台不受影響。" />
     <a-form layout="vertical">
       <a-form-item label="啟用品牌"><a-switch v-model:checked="vdata.enabled" /></a-form-item>
       <a-form-item label="站台名稱（最多 32 字）"><a-input v-model:value="vdata.title" :maxlength="32" placeholder="例如：某某金流" /></a-form-item>

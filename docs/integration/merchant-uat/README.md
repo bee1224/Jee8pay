@@ -16,37 +16,56 @@
 
 UAT ingress 只允許 `34.92.245.74`、`34.92.52.162`（Talend 測試機，系統保留）與授權的內部測試 IP（由營運平台「系統管理 → UAT Edge 白名單」自助管理，儲存後約 1 分鐘自動套用；見 `docs/operations/platform-access.md`）。`35.220.239.87` 只記錄為未來 Production allowlist，本 UAT 未啟用。
 
-## B. Credential delivery
+## B. Keys
 
-Merchant API credential 是 App Secret。真實值不在 Git，請由我方透過 secure handoff 交付；收到後應放在 secret manager 或受限環境變數，不可寫入 source、log、ticket 或群組訊息。
+2026-10-19 起，商戶 API 改用 **ML-DSA-65**（FIPS 204 抗量子數位簽名）簽名，原本的 MD5 共用密鑰（App Secret）已移除（ADR-0013）。每個應用有三把相關金鑰：
+
+| 金鑰 | 誰產生、誰保管 | 用途 |
+| --- | --- | --- |
+| 商戶私鑰 | 商戶自行產生並保管，**不交給任何人** | 簽每一個 Create／Query request |
+| 商戶公鑰 | 商戶交給我方，或自己在商戶後台「應用設定」貼上 | 平台驗證商戶 request |
+| 平台公鑰 | 商戶從商戶後台「應用設定」複製 | 商戶驗證平台 response 與 Merchant Notify |
+
+產生金鑰對（需要 JDK 24 以上，或 OpenSSL 3.5 以上）：
+
+```bash
+java deploy/jee8pay-v2-dev/scripts/GenMlDsaKeys.java ./keys merchant
+# 或：openssl genpkey -algorithm ML-DSA-65 -out merchant-private-key.pem
+#     openssl pkey -in merchant-private-key.pem -pubout -out merchant-public-key.pem
+```
+
+公鑰為 PEM 格式（`-----BEGIN PUBLIC KEY-----`，X.509 SubjectPublicKeyInfo），平台只接受 ML-DSA-65；ML-DSA-44／87、RSA、EC 公鑰都會被拒絕。私鑰應放在 secret manager 或受限檔案，不可寫入 source、log、ticket 或群組訊息。
 
 ```text
 Merchant ID = M_D01_EXTERNAL_UAT
 App ID      = APP_D01_EXTERNAL_UAT
-App Secret  = 【敏感：請從 secure handoff 取得】
 ```
 
-Merchant ID／App ID／App Secret 是「外部 Merchant → JeePay」的 downstream credential。黑貓 PAY 的 custId、API password、Token 等 upstream credential 不會也不應提供給外部系統商。
+Merchant ID／App ID／商戶金鑰是「外部 Merchant → JeePay」的 downstream credential。黑貓 PAY 的 custId、API password、Token 等 upstream credential 不會也不應提供給外部系統商。
 
 ## C. Authentication and signing
 
-所有 Create／Query request 都以同一個 App Secret 驗簽：
+所有 Create／Query request 都以商戶私鑰簽名：
 
-1. request 必須包含 `version=1.0`、`signType=MD5`、`reqTime`、`mchNo`、`appId` 與 `sign`。
+1. request 必須包含 `version=1.0`、`signType=ML-DSA-65`、`reqTime`、`mchNo`、`appId` 與 `sign`。其他 `signType` 一律拒絕。
 2. 移除 `sign`；排除值為 `null` 或空字串 `""` 的欄位，數字 `0` 仍參與。
-3. 依欄位名稱做 case-insensitive 升冪排序。
-4. 每個欄位串為 `key=value&`，最後直接附加 `key=<AppSecret>`。
-5. 對完整 UTF-8 bytes 計算 MD5，輸出 32 字元 uppercase hexadecimal。
+3. 依欄位名稱的字元順序（區分大小寫的 ASCII）升冪排序。
+4. 組成 `k1=v1&k2=v2&...`，**最後沒有 `&`**，值使用原始文字、不做 URL 編碼。
+5. 以 UTF-8 編碼後用 ML-DSA-65（pure 模式、空 context）簽名，`sign` 為標準 Base64（約 4,412 字元）。
 
-`channelExtra` 是 JSON **字串**，其字元、空白與欄位順序會直接影響簽名；建議先產生 compact JSON 字串，再組 request 與簽名。簽名值可用大小寫任一形式送出，但範例固定 uppercase。
+ML-DSA 簽名每次產生的結果都不同，這是正常的；平台只驗證簽名是否成立，不比對字串。
 
-`reqTime` 是必填且參與簽名的字串，值為目前 Unix epoch milliseconds。Runtime 對 reqTime 有 **5 分鐘 freshness 窗口**：與系統時間偏差超過 5 分鐘會回「請求時間戳已過期」（`ApiController` 的 `REQTIME_FRESHNESS_MS`）；非數字 reqTime 不檢查 freshness，但仍參與簽名。不存在 nonce 欄位。MD5 shared-secret signature 是既有 native contract，不是新設計；所有呼叫必須使用 HTTPS，且不可記錄含 App Secret 的 canonical string。
+`channelExtra` 是 JSON **字串**，其字元、空白與欄位順序會直接影響簽名；建議先產生 compact JSON 字串，再組 request 與簽名。
 
-`RYO_IBON` Synthetic Create vector：[`examples/create-vector.json`](examples/create-vector.json)。執行：
+`reqTime` 必填且參與簽名，值為目前 Unix epoch milliseconds。與平台系統時間相差超過 **5 分鐘**，或不是純數字，都會回「請求時間戳已過期」。不存在 nonce 欄位。所有呼叫必須使用 HTTPS。
 
-```bash
-python3 docs/integration/merchant-uat/examples/verify_vectors.py
+待簽字串範例（Create，欄位已排序；`channelExtra` 內容省略）：
+
+```text
+amount=4000&appId=APP_SYNTHETIC_UAT&body=Synthetic test vector&channelExtra={"payerName":"王小明",...}&currency=TWD&expiredTime=604800&mchNo=M_SYNTHETIC_UAT&mchOrderNo=UAT-SYNTH-0001&notifyUrl=https://merchant.example.test/callback/jeepay&reqTime=1786581000000&signType=ML-DSA-65&subject=RYO ibon UAT&version=1.0&wayCode=RYO_IBON
 ```
+
+完整的參考實作見 [`examples/MerchantApiExample.java`](examples/MerchantApiExample.java)（只用 JDK 標準函式庫）；平台端的同一規則由 `MerchantUatContractTest` 鎖定。
 
 ## D. Create order
 
@@ -59,8 +78,8 @@ CONTENT-TYPE = application/json; charset=UTF-8
 | 欄位 | 型別 | UAT 規則 |
 | --- | --- | --- |
 | `version` | string | 必填，`1.0` |
-| `signType` | string | 必填，`MD5` |
-| `reqTime` | string | 必填，建議 current epoch milliseconds |
+| `signType` | string | 必填，`ML-DSA-65` |
+| `reqTime` | string | 必填，current epoch milliseconds（5 分鐘內） |
 | `mchNo` | string | 必填，secure handoff 的 Merchant ID |
 | `appId` | string | 必填，secure handoff 的 App ID |
 | `mchOrderNo` | string | 必填；同一 Merchant 必須唯一，重複會回「商戶訂單已存在」 |
@@ -90,19 +109,19 @@ CONTENT-TYPE = application/json; charset=UTF-8
 | `payerMobile` | 必填 |
 | `payerEmail` | 必填 |
 
-完整 synthetic request 已在 Create vector；換入 secure handoff 的三個 downstream 值、目前 `reqTime`、唯一 `mchOrderNo`、真實 callback URL 後重新簽名即可送出。
-
-Talend 貼上產生器（每次自動產生新 `reqTime`、唯一 `mchOrderNo` 並簽名，直接輸出 Header + Body 兩段可複製內容）：
+參考實作可直接建單、查單，並驗證平台回應的簽名：
 
 ```bash
+export UAT_BASE_URL=https://api-v2-dev.nnviopp.com
 export UAT_MERCHANT_ID=M_D01_EXTERNAL_UAT
 export UAT_APP_ID=APP_D01_EXTERNAL_UAT
-export UAT_APP_SECRET=<secure handoff 取得的 App Secret>
-export UAT_NOTIFY_URL=https://<你的接收端>/callback   # full UAT 必填；產生器 fail closed
-python3 examples/talend-request-gen.py --way-code RYO_IBON  # 可換 JAY_IBON／CHI_IBON／JHD_IBON；建單 + 查單
+export UAT_PRIVATE_KEY_FILE=./keys/merchant-private-key.pem
+export UAT_PLATFORM_PUBLIC_KEY_FILE=./keys/platform-public-key.pem   # 從商戶後台複製
+export UAT_NOTIFY_URL=https://<你的接收端>/callback
+java docs/integration/merchant-uat/examples/MerchantApiExample.java create RYO_IBON   # 可換 JAY_IBON／CHI_IBON／JHD_IBON
+java docs/integration/merchant-uat/examples/MerchantApiExample.java query <mchOrderNo>
+java docs/integration/merchant-uat/examples/MerchantApiExample.java print-create     # 只印已簽名的 JSON，可貼到 Talend（5 分鐘內有效）
 ```
-
-> `notifyUrl` 對 full UAT（含 Merchant Notify 驗收）是必填；產生器缺 `UAT_NOTIFY_URL` 會直接失敗，避免做出無法驗收 Notify 的訂單。純 Create/Query smoke 不需要本產生器。
 
 ### Create response
 
@@ -125,9 +144,9 @@ python3 examples/talend-request-gen.py --way-code RYO_IBON  # 可換 JAY_IBON／
 
 `payData` 是 JSON 字串，需再 parse 一次；不得把它當作 nested JSON object。第一次 parse 取得 UnifiedOrder response，第二次 parse `data.payData` 才取得付款指示。欄位均由 actual runtime response model 產生：`ibonShopId`、`ibonCode`、組合後的 `paymentCode`、`expireDate`、whole-TWD `billAmount`、可選 `shortUrl`。`payDataType` 依通道為 `ryoIbon`／`jayIbon`／`chiIbon`。RYO 真實 TWD 40 acceptance response 同步回傳付款資訊與非空 `shortUrl`，所以問卷分類為 `3 = 兩者皆同步返回`；程式仍應容許 provider 未回 `shortUrl` 時只使用付款碼。
 
-可 machine-read 的 synthetic response 見 [`examples/unified-order-success.json`](examples/unified-order-success.json)。該 fixture 刻意省略可選的 `shortUrl`，但仍包含可實際使用的付款碼、到期日與金額，並由 `verify_vectors.py` 驗證 outer parse、`payData` string type、第二次 JSON parse 與付款指示欄位。
+可 machine-read 的 synthetic response 見 [`examples/unified-order-success.json`](examples/unified-order-success.json)。該 fixture 刻意省略可選的 `shortUrl`，但仍包含可實際使用的付款碼、到期日與金額。
 
-response envelope 的 `sign` 是只針對 `data` object、用同一 App Secret 與同一 canonicalization 計算，不包含 `code`／`msg`。
+response envelope 的 `sign` 是平台以**平台私鑰**對 `data` object 簽的 ML-DSA-65 簽名，待簽字串規則與 request 相同，不包含 `code`／`msg`；商戶以平台公鑰驗證。
 
 ### WAITING is not paid
 
@@ -150,12 +169,12 @@ Auth 欄位與 Create 相同。另傳 `payOrderId` 或 `mchOrderNo` 至少一個
 ```json
 {
   "version": "1.0",
-  "signType": "MD5",
+  "signType": "ML-DSA-65",
   "reqTime": "<current epoch milliseconds>",
   "mchNo": "M_D01_EXTERNAL_UAT",
   "appId": "APP_D01_EXTERNAL_UAT",
   "mchOrderNo": "UAT-20260813-0001",
-  "sign": "<依完整 request 重算>"
+  "sign": "<以商戶私鑰對完整 request 簽名>"
 }
 ```
 
@@ -178,7 +197,7 @@ WAITING synthetic example（RYO_IBON）：
     "currency": "TWD",
     "state": 1
   },
-  "sign": "<依 data 與 App Secret 計算>"
+  "sign": "<平台私鑰對 data 的簽名>"
 }
 ```
 
@@ -201,7 +220,7 @@ WAITING synthetic example（RYO_IBON）：
     "channelOrderNo": "SYNTHETIC_PROVIDER_REFERENCE",
     "successTime": 1786581600000
   },
-  "sign": "<依 data 與 App Secret 計算>"
+  "sign": "<平台私鑰對 data 的簽名>"
 }
 ```
 
@@ -216,7 +235,7 @@ SOURCE IP    = 159.198.40.128
 ACK BODY     = SUCCESS
 ```
 
-Create 的 `notifyUrl` 可使用 HTTP 或 HTTPS 語法；D01 對外 UAT 要求使用 HTTPS。JeePay 將 Query response 的非 null 訂單欄位，加上 `reqTime` 與 `sign`，以 form fields POST 到該 URL。驗簽時移除 `sign`，再套用與 request 完全相同的 App Secret canonicalization。Synthetic Notify vector 與 exact ACK 在 [`examples/notify-vector.json`](examples/notify-vector.json)。
+Create 的 `notifyUrl` 可使用 HTTP 或 HTTPS 語法；D01 對外 UAT 要求使用 HTTPS。JeePay 將 Query response 的非 null 訂單欄位，加上 `reqTime`、`signType=ML-DSA-65` 與 `sign`，以 form fields POST 到該 URL。驗簽時先確認 `signType=ML-DSA-65`，再以與 request 相同的待簽字串規則（`signType` 也參與），用**平台公鑰**驗證 `sign`；驗證失敗的通知一律不得上分。參考實作：`java examples/MerchantApiExample.java verify-notify <form body 檔>`。
 
 只有 terminal state 會建立通知。三個 `*_IBON` 通道上分都只接受 `state=2`；入帳金額欄位是 `amount`，單位仍為 minor units。`billAmount` 是付款指示中的 whole-TWD payer amount，不是 Merchant 上分欄位。
 
@@ -237,15 +256,15 @@ UAT Merchant Notify outbound IP 已從 actual `jee8pay-v2-dev-payment` container
 
 ## H. UAT flow
 
-1. 由 secure handoff 取得 Merchant ID、App ID、App Secret。
+1. 由 secure handoff 取得 Merchant ID、App ID；自行產生 ML-DSA-65 金鑰對，上傳商戶公鑰並複製平台公鑰。
 2. 提供 UAT HTTPS Merchant Notify callback URL。
-3. 依 canonicalization 簽 Create request。
+3. 依待簽字串規則，以商戶私鑰簽 Create request。
 4. 呼叫 public UAT Base URL；JeePay 建立 native PayOrder。
 5. JeePay 依 `RYO_IBON`／`JAY_IBON`／`CHI_IBON`／`JHD_IBON` 路由並同步回傳 ibon 付款資訊。
 6. 測試者依已授權金額完成真實付款。
 7. 黑貓 PAY 通知 JeePay；JeePay 將 native PayOrder 轉為 SUCCESS。
 8. JeePay 對 Merchant callback URL 發送 Merchant Notify。
-9. Merchant 驗簽、確認 `state=2`／`amount`／order identity、冪等上分，回純文字 `SUCCESS`。
+9. Merchant 以平台公鑰驗簽、確認 `state=2`／`amount`／order identity、冪等上分，回純文字 `SUCCESS`。
 10. Merchant 呼叫 Query，確認同一 order 為 `state=2`。
 
 外部系統商負責保存 Merchant credential、Create、Query、callback URL、Notify 驗簽／ACK、冪等與配合付款。我方負責 JeePay V2、Provider credential/APN、reconciliation、Merchant config/credential、Notify/retry、DNS/TLS、infrastructure 與 logs。
@@ -264,7 +283,7 @@ UAT Merchant Notify outbound IP 已從 actual `jee8pay-v2-dev-payment` container
 
 ## J. Security boundary
 
-本 package 與 examples 只有 synthetic secret。它們不包含 upstream Provider credential、真實 UAT App Secret、DB/VPS/Cloudflare credential。外部串接不需要 upstream secret。
+本 package 與 examples 不含任何私鑰；範例與測試的金鑰都在執行時產生。它們不包含 upstream Provider credential、DB/VPS/Cloudflare credential。外部串接不需要 upstream secret。
 
 ## K. External Consumer clarity closure
 
@@ -276,7 +295,7 @@ JEE-EC01 的 NC-01／NC-02／NC-03 closure 與 fresh execution evidence 見 [`JE
 | --- | --- |
 | [`UAT-START-NOTICE.md`](UAT-START-NOTICE.md) | **外部 UAT 啟動前必讀**：精確錯誤訊息表、notifyUrl 陷阱、真人付款安排、freeze 規則、到期行為（CLOSED(6)）與 paid-APN recovery |
 | [`JEE-EC01R1-external-consumer-closure.md`](JEE-EC01R1-external-consumer-closure.md) | External consumer NC-01/02/03 closure 與執行證據 |
-| [`examples/`](examples/) | synthetic 簽名向量（`create-vector.json`、`notify-vector.json`、`unified-order-success.json`、`verify_vectors.py`、`run-d01-blackbox.py`）；Talend 貼上產生器 `talend-request-gen.py`（見 §D 下方說明） |
+| [`examples/`](examples/) | `MerchantApiExample.java`（ML-DSA-65 建單、查單、通知驗簽參考實作，見 §D）；`unified-order-success.json`（Create response 範例） |
 | [`../../operations/merchant-uat-frontend-operator-map.md`](../../operations/merchant-uat-frontend-operator-map.md) | Manager/Merchant/Cashier 頁面對應（operator 操作指引） |
 | [`../../providers/ryo/README.md`](../../providers/ryo/README.md) | 黑貓 PAY 三個 Provider 共用平台契約與 RYO 文件入口 |
 | `deploy/jee8pay-v2-dev/scripts/monitor-uat.sh` | UAT 期間唯讀監控快照（在 nnviopp-sandbox 上以 sudo 執行） |

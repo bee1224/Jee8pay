@@ -131,7 +131,7 @@ public class MchDivisionReceiverBindController extends ApiController {
                 bizRes.setErrMsg(retMsg.getChannelErrMsg());
             }
 
-            return ApiRes.okWithSign(bizRes, mchAppConfigContext.getMchApp().getAppSecret());
+            return ApiRes.okWithSign(bizRes, signKeyStore.platformPrivateKey());
 
         }  catch (BizException e) {
             return ApiRes.customFail(e.getMessage());

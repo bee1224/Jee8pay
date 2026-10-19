@@ -1,5 +1,5 @@
 <template>
-  <div style="background: #fff; border-radius: 10px; padding: 0 20px 20px">
+  <div style="background: var(--jp-surface); border-radius: 10px; padding: 0 20px 20px">
     <a-tabs @change="selectTabs">
       <a-tab-pane key="1" tab="基本資訊">
         <div class="account-settings-info-view">
@@ -16,19 +16,20 @@
                   <a-input v-model:value="vdata.saveObject.loginUsername" disabled />
                 </a-form-item>
                 <a-form-item label="用戶姓名：" name="realname">
-                  <a-input v-model:value="vdata.saveObject.realname" />
+                  <a-input v-model:value="vdata.saveObject.realname" :disabled="isAgentUser" />
                 </a-form-item>
                 <a-form-item label="手機號：" name="telphone">
                   <a-input v-model:value="vdata.saveObject.telphone" disabled />
                 </a-form-item>
                 <a-form-item label="請選擇性別：">
-                  <a-radio-group v-model:value="vdata.saveObject.sex">
+                  <a-radio-group v-model:value="vdata.saveObject.sex" :disabled="isAgentUser">
                     <a-radio :value="1">男</a-radio>
                     <a-radio :value="2">女</a-radio>
                   </a-radio-group>
                 </a-form-item>
               </a-form>
-              <div style="display: flex; justify-content: center">
+              <div v-if="isAgentUser" style="text-align: center; color: #888">個人資料只能由平台修改；如需更改請聯絡平台。</div>
+              <div v-else style="display: flex; justify-content: center">
                 <a-button type="primary" @click="changeInfo" :loading="vdata.btnLoading">
                   更新基本資訊
                 </a-button>
@@ -47,6 +48,7 @@
                   style="border: 1px solid rgba(0, 0, 0, 0.08)"
                 />
                 <JeepayUpload
+                  v-if="!isAgentUser"
                   style="margin-top: 10px"
                   :action="vdata.action"
                   accept=".jpg, .jpeg, .png"
@@ -120,6 +122,8 @@ import { reactive, ref, getCurrentInstance } from 'vue'
 const { $infoBox, $access, $hasAgentEnt } = getCurrentInstance()!.appContext.config.globalProperties
 
 const store = useUserStore()
+// 代理帳號（團長、隊長、子帳號）的個人資料只能由上帝修改，這裡只顯示不編輯
+const isAgentUser = !!store.userInfo['belongInfoId'] && store.userInfo['belongInfoId'] !== '0'
 const vdata: any = reactive({
   action: upload.avatar, // 上传图标地址
   btnLoading: false,

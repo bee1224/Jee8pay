@@ -5,7 +5,12 @@ import com.jeequan.jeepay.core.entity.AgentInfo;
 import com.jeequan.jeepay.core.entity.AgentMchRela;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.FeeRule;
+import com.jeequan.jeepay.core.entity.MchInfo;
+import com.jeequan.jeepay.core.entity.SysRole;
+import com.jeequan.jeepay.core.entity.SysRoleEntRela;
 import com.jeequan.jeepay.core.entity.SysUser;
+import com.jeequan.jeepay.core.entity.SysUserAuth;
+import com.jeequan.jeepay.core.entity.SysUserRoleRela;
 import com.jeequan.jeepay.core.entity.WalletAccount;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.service.mapper.AgentInfoMapper;
@@ -19,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.Objects;
 
 /** 代理資訊服務（ADR-0009）：團長 → 隊長 兩層，上級建立後不可更改以保持物化路徑一致。 */
@@ -28,6 +34,11 @@ public class AgentInfoService extends ServiceImpl<AgentInfoMapper, AgentInfo> {
     @Autowired private AgentMchRelaService agentMchRelaService;
     @Autowired private FeeRuleService feeRuleService;
     @Autowired private SysUserService sysUserService;
+    @Autowired private SysRoleService sysRoleService;
+    @Autowired private SysUserAuthService sysUserAuthService;
+    @Autowired private SysUserRoleRelaService sysUserRoleRelaService;
+    @Autowired private SysRoleEntRelaService sysRoleEntRelaService;
+    @Autowired private com.jeequan.jeepay.service.mapper.MchInfoMapper mchInfoMapper;
     @Autowired private WalletAccountMapper walletAccountMapper;
     @Autowired private com.jeequan.jeepay.service.mapper.ChannelAccountAgentMapper channelAccountAgentMapper;
     @Autowired private com.jeequan.jeepay.service.mapper.ChannelAccountScopeMapper channelAccountScopeMapper;
@@ -85,8 +96,12 @@ public class AgentInfoService extends ServiceImpl<AgentInfoMapper, AgentInfo> {
         }
     }
 
+    /**
+     * 刪除代理。商戶、隊長、渠道、錢包餘額任一還在就拒絕；登入帳號（主帳號與子帳號）隨代理一起刪除。
+     * 回傳被刪除的登入帳號 ID，由呼叫端清掉這些帳號的登入狀態。
+     */
     @Transactional
-    public void removeAgent(String agentNo, Long operatorUid, String operatorName) {
+    public List<Long> removeAgent(String agentNo, Long operatorUid, String operatorName) {
         AgentInfo agent = getById(agentNo);
         if (agent == null) {
             throw new BizException("代理不存在");
@@ -106,7 +121,14 @@ public class AgentInfoService extends ServiceImpl<AgentInfoMapper, AgentInfo> {
         if (count(AgentInfo.gw().eq(AgentInfo::getParentAgentNo, agentNo)) > 0) {
             throw new BizException("該代理下仍有隊長，不可刪除");
         }
-        if (agentMchRelaService.count(AgentMchRela.gw().eq(AgentMchRela::getAgentNo, agentNo)) > 0) {
+        // 先清掉指向已刪除商戶的綁定（舊版刪商戶時沒有一併清除）
+        List<String> boundMchNos = agentMchRelaService.list(AgentMchRela.gw().eq(AgentMchRela::getAgentNo, agentNo))
+                .stream().map(AgentMchRela::getMchNo).collect(Collectors.toList());
+        List<String> ghostMchNos = boundMchNos.stream().filter(no -> mchInfoMapper.selectById(no) == null).collect(Collectors.toList());
+        if (!ghostMchNos.isEmpty()) {
+            agentMchRelaService.remove(AgentMchRela.gw().eq(AgentMchRela::getAgentNo, agentNo).in(AgentMchRela::getMchNo, ghostMchNos));
+        }
+        if (boundMchNos.size() > ghostMchNos.size()) {
             throw new BizException("該代理仍有綁定的商戶，不可刪除");
         }
         // 錢包仍有餘額或提現處理中時不可刪除，否則款項會變成無主帳戶
@@ -115,9 +137,23 @@ public class AgentInfoService extends ServiceImpl<AgentInfoMapper, AgentInfo> {
         if (wallet != null && (wallet.getBalance() != 0 || wallet.getFrozen() != 0)) {
             throw new BizException("該代理錢包仍有餘額或提現處理中，請先結清再刪除");
         }
-        // 代理登入帳號的 belong_info_id 指向代理號，先刪帳號避免留下無主帳號
-        if (sysUserService.count(SysUser.gw().eq(SysUser::getSysType, CS.SYS_TYPE.MGR).eq(SysUser::getBelongInfoId, agentNo)) > 0) {
-            throw new BizException("該代理仍有登入帳號，請先至「系統管理 → 操作員」刪除");
+        // 代理登入帳號的 belong_info_id 指向代理號，隨代理一起刪除，避免留下無主帳號
+        List<SysUser> users = sysUserService.list(SysUser.gw().eq(SysUser::getSysType, CS.SYS_TYPE.MGR).eq(SysUser::getBelongInfoId, agentNo));
+        if (!users.isEmpty()) {
+            // 不用 SysUserService.removeUser：它以 removeById 刪使用者角色，而 t_sys_user_role_rela 沒有單一主鍵
+            List<Long> userIds = users.stream().map(SysUser::getSysUserId).collect(Collectors.toList());
+            sysUserAuthService.remove(SysUserAuth.gw().eq(SysUserAuth::getSysType, CS.SYS_TYPE.MGR).in(SysUserAuth::getUserId, userIds));
+            sysUserRoleRelaService.remove(SysUserRoleRela.gw().in(SysUserRoleRela::getUserId, userIds));
+            sysUserService.removeByIds(userIds);
+        }
+        // 子帳號的專屬角色（ROLE_AGSUB_*）只屬於這個代理，一併刪除
+        List<String> staffRoleIds = sysRoleService.list(SysRole.gw().select(SysRole::getRoleId)
+                        .eq(SysRole::getSysType, CS.SYS_TYPE.MGR).eq(SysRole::getBelongInfoId, agentNo)
+                        .likeRight(SysRole::getRoleId, AgentStaffService.STAFF_ROLE_PREFIX))
+                .stream().map(SysRole::getRoleId).collect(Collectors.toList());
+        if (!staffRoleIds.isEmpty()) {
+            sysRoleEntRelaService.remove(SysRoleEntRela.gw().in(SysRoleEntRela::getRoleId, staffRoleIds));
+            sysRoleService.removeByIds(staffRoleIds);
         }
         List<FeeRule> rules = feeRuleService.list(FeeRule.gw()
                 .eq(FeeRule::getTargetType, FeeRule.TARGET_AGENT).eq(FeeRule::getTargetId, agentNo));
@@ -127,6 +163,7 @@ public class AgentInfoService extends ServiceImpl<AgentInfoMapper, AgentInfo> {
         if (!removeById(agentNo)) {
             throw new BizException("刪除代理失敗");
         }
+        return users.stream().map(SysUser::getSysUserId).collect(Collectors.toList());
     }
 
     /** 回傳商戶直屬代理所屬的團長（直屬代理本身即團長時回傳自己）。 */

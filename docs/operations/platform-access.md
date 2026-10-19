@@ -30,7 +30,7 @@ V1 edge 的 compose 屬 V1 legacy infra（不在本 repo），但 admin-v2 路�
 - 登入帳號：`jeepay`（Manager 超管，is_admin=1，兩個環境皆同）
 - **密碼：不分大小寫**（系統以 toUpperCase 正規化）；實際值不寫入本 repo，以授權交付文件/營運密碼表為準
 - 密碼驗證改動：`UpperCasePasswordEncoder`（`jeepay-service/.../service/utils/`），manager/merchant 登入共用；
-  Merchant API 的 App Secret（MD5 簽名）**維持大小寫敏感**，不受影響
+  與商戶 API 簽名無關（2026-10-19 起商戶 API 改用 ML-DSA-65 金鑰，見 ADR-0013）
 
 ## 前端
 

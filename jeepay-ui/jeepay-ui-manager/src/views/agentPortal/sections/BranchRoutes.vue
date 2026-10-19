@@ -2,7 +2,7 @@
   <!-- 通道路由：只能設定指定給轄下商戶的規則 -->
   <div>
     <a-alert type="info" show-icon style="margin-bottom: 12px"
-      message="商戶用「別名代碼」下單時，系統依金額區間、時段與權重，從符合的規則裡挑一個實際支付方式。這裡只能設定指定給自己旗下商戶的規則。" />
+      message="商戶用「別名代碼」下單時，系統依金額區間、時段與權重，從符合的規則裡挑一個實際支付方式。這裡只能設定指定給自己我的商戶的規則。" />
     <a-button v-if="canEdit" type="primary" style="margin-bottom: 12px" @click="openForm(null)">新增規則</a-button>
     <a-table :columns="columns" :data-source="vdata.records" size="small" row-key="routeId" :pagination="false">
       <template #bodyCell="{ column, record }">

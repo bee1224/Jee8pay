@@ -1,5 +1,6 @@
 # 代理後台三個流程（統計看板、我的子帳號、渠道測試）隔離測試：在測試伺服器的 jee8pay-smoke（全新資料庫、manager 發布於 127.0.0.1:29217）上實際呼叫 API。
-# 用法：ssh nnviopp-sandbox python3 - < smoke-agent-staff.py；會讀取 ~/stage-20261013/ 的搬遷腳本。不可對 jee8pay-v2-dev 執行。
+# 用法：ssh nnviopp-sandbox python3 - < smoke-agent-staff.py；會讀取 ~/stage-20261013/ 的搬遷腳本（含 20261014）。不可對 jee8pay-v2-dev 執行。
+# 2026-10-14 追加：團長手機號選填、中文登入帳號、代理不能改自己的個人資料、品牌設定停用、刪商戶清綁定、刪團長連帶刪登入帳號。
 import base64, json, subprocess, sys, urllib.request, urllib.error, urllib.parse
 BASE = 'http://127.0.0.1:29217'
 ok = fail = 0
@@ -146,7 +147,7 @@ r = call('POST', P + '/branch/merchants/%s/channelTest' % M, a_tok, body=body)
 check('應用不存在被拒', r.get('code') != 0 and '應用' in str(r.get('msg')), r)
 app = sql("select app_id from t_mch_app where mch_no='%s' limit 1" % M)
 if not app:
-    sql("insert into t_mch_app (app_id, app_name, mch_no, state, app_secret, created_at, updated_at) values ('app_smoke_1','預設應用','%s',1,'secret',now(),now())" % M); app = 'app_smoke_1'
+    sql("insert into t_mch_app (app_id, app_name, mch_no, state, created_at, updated_at) values ('app_smoke_1','預設應用','%s',1,now(),now())" % M); app = 'app_smoke_1'
 body['appId'] = app
 r = call('POST', P + '/branch/merchants/%s/channelTest' % M, a_tok, body=body)
 check('未開通支付方式被拒', r.get('code') != 0 and '開通' in str(r.get('msg')), r)
@@ -169,6 +170,62 @@ n1 = sql("select count(*) from t_sys_role_ent_rela where role_id like 'ROLE_AGEN
 sql(mig); sql(mig)
 n2 = sql("select count(*) from t_sys_role_ent_rela where role_id like 'ROLE_AGENT_PORTAL%' and ent_id in ('ENT_AGENT_PORTAL_DASH','ENT_AGENT_PORTAL_STAFF','ENT_AGENT_PORTAL_CHANNEL_TEST')")
 check('搬遷腳本與種子檔結果一致且可重複執行', n1 == '5' and n2 == '5', (n1, n2))
+
+# ---- 2026-10-14：團長手機號選填、中文登入帳號 ----
+r = call('POST', '/api/agentInfo', god, body={'agentName': '丁團長', 'agentLevel': 1, 'loginUsername': '丁團長'})
+check('不填手機號、用中文帳號新增團長', r.get('code') == 0, r); D = r['data']['agentNo']; d_pwd = r['data']['initPassword']
+r2 = call('POST', '/api/agentInfo', god, body={'agentName': '戊團長', 'agentLevel': 1, 'loginUsername': 'leaderE', 'contactTel': ''})
+check('再新增一個不填手機號的團長（佔位值不重複）', r2.get('code') == 0, r2); E = r2['data']['agentNo']
+check('中文帳號可以登入', try_login('丁團長', d_pwd) is not None)
+d_tok = login('丁團長', d_pwd)
+acc = call('GET', '/api/agentInfo/%s/accounts' % D, god).get('data') or []
+check('登入帳號列表的手機號顯示空白', len(acc) == 1 and acc[0]['telphone'] == '', acc)
+check('不填手機號的團長沒有手機號登入方式', sql("select count(*) from t_sys_user_auth where user_id=%s and identity_type=2" % acc[0]['sysUserId']) == '0')
+check('手機號格式錯仍被拒', call('POST', '/api/agentInfo', god, body={'agentName': 'x', 'agentLevel': 1, 'loginUsername': 'leaderX', 'contactTel': '123'}).get('code') != 0)
+check('帳號含空白或符號被拒', call('POST', '/api/agentInfo', god, body={'agentName': 'x', 'agentLevel': 1, 'loginUsername': '丁 團'}).get('code') != 0)
+r = call('POST', P + '/subAgents', d_tok, body={'agentName': '丁隊長', 'loginUsername': '丁隊長'})
+check('團長新增隊長可不填手機號、可用中文帳號', r.get('code') == 0, r); DC = r['data']['agentNo']
+
+# ---- 品牌設定停用 ----
+dmenu = json.dumps(call('GET', '/api/current/user', d_tok), ensure_ascii=False)
+check('團長選單沒有品牌設定', 'ENT_AGENT_PORTAL_BRAND' not in dmenu and 'ENT_AGENT_PORTAL_DASH' in dmenu, dmenu[:200])
+check('團長不能設定品牌', call('PUT', P + '/branch/brand', d_tok, body={'brandEnabled': 1, 'brandTitle': 'x'}).get('code') != 0)
+
+# ---- 代理不能改自己的個人資料 ----
+check('團長不能改自己的名稱', call('PUT', '/api/current/user', d_tok, body={'realname': '改名'}).get('code') != 0)
+check('名稱沒有被改', sql("select realname from t_sys_user where sys_user_id=%s" % acc[0]['sysUserId']) != '改名')
+check('上帝仍可改自己的個人資料', call('PUT', '/api/current/user', god, body={'realname': '上帝'}).get('code') == 0)
+
+# ---- 商戶平台登入網址 ----
+r = call('POST', P + '/merchants', d_tok, body={'mchName': '丁商戶', 'mchShortName': '丁商', 'contactName': '林', 'contactTel': '0922000099', 'loginUsername': 'mchd01'})
+check('新增商戶回傳登入網址欄位（商戶平台網址仍是 127.0.0.1 時為空）', r.get('code') == 0 and r['data'].get('loginUrl') == '', r); DM = r['data']['mchNo']
+
+# ---- 刪商戶清綁定、刪團長連帶刪登入帳號 ----
+check('上帝刪除商戶', call('DELETE', '/api/mchInfo/%s' % DM, god).get('code') == 0)
+check('刪商戶後團長與商戶的綁定一併刪除', sql("select count(*) from t_agent_mch_rela where mch_no='%s'" % DM) == '0')
+check('團長下仍有隊長時不可刪除', '隊長' in str(call('DELETE', '/api/agentInfo/%s' % D, god).get('msg')))
+check('刪除隊長（連帶刪除隊長的登入帳號）', call('DELETE', '/api/agentInfo/%s' % DC, god).get('code') == 0 and sql("select count(*) from t_sys_user where belong_info_id='%s'" % DC) == '0')
+sql("insert into t_agent_mch_rela (mch_no, agent_no, created_at, updated_at) values ('M_GHOST','%s',now(),now())" % D)
+r = call('POST', '/api/agentInfo/%s/accounts' % D, god, body={'loginUsername': 'dstaff2', 'realname': '丁二號'})
+check('上帝替團長再開一個登入帳號（不填手機號）', r.get('code') == 0, r)
+r = call('POST', P + '/staff', d_tok, body={'loginUsername': '丁的員工', 'realname': '員工'})
+check('團長建立子帳號（中文帳號）', r.get('code') == 0, r); dsid = r['data']['sysUserId']
+r = call('DELETE', '/api/agentInfo/%s' % D, god)
+check('團長名下只剩已刪除商戶的綁定時可以刪除', r.get('code') == 0, r)
+check('團長的三個登入帳號都已刪除', sql("select count(*) from t_sys_user where belong_info_id='%s'" % D) == '0')
+check('登入方式與角色關聯一併刪除', sql("select count(*) from t_sys_user_auth where user_id=%s" % dsid) == '0' and sql("select count(*) from t_sys_user_role_rela where user_id=%s" % dsid) == '0')
+check('子帳號專屬角色一併刪除', sql("select count(*) from t_sys_role where role_id='ROLE_AGSUB_%s'" % dsid) == '0')
+check('被刪團長的舊登入狀態立即失效', call('GET', '/api/current/user', d_tok).get('code') != 0)
+check('被刪團長無法再登入', try_login('丁團長', d_pwd) is None)
+r = call('DELETE', '/api/agentInfo/%s' % A, god)
+check('有隊長與真實商戶的團長仍不可刪除，帳號保留', r.get('code') != 0 and sql("select count(*) from t_sys_user where belong_info_id='%s'" % A) != '0', r)
+
+# ---- 20261014 搬遷腳本可重複執行 ----
+sql("update t_sys_entitlement set state=1 where ent_id='ENT_AGENT_PORTAL_BRAND'; insert ignore into t_sys_role_ent_rela values ('ROLE_AGENT_PORTAL','ENT_AGENT_PORTAL_BRAND'); insert into t_agent_mch_rela (mch_no, agent_no, created_at, updated_at) values ('M_GHOST2','%s',now(),now());" % E)
+mig2 = open('/home/incident/stage-20261013/20261014-agent-brand-off.sql').read()
+sql(mig2); sql(mig2)
+check('搬遷後品牌設定停用且不授予任何角色', sql("select state from t_sys_entitlement where ent_id='ENT_AGENT_PORTAL_BRAND'") == '0' and sql("select count(*) from t_sys_role_ent_rela where ent_id='ENT_AGENT_PORTAL_BRAND'") == '0')
+check('搬遷後指向已刪除商戶的綁定清除', sql("select count(*) from t_agent_mch_rela r left join t_mch_info m on m.mch_no=r.mch_no where m.mch_no is null") == '0')
 
 print('\nRESULT ok=%d fail=%d' % (ok, fail))
 sys.exit(1 if fail else 0)

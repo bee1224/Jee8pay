@@ -18,7 +18,6 @@ package com.jeequan.jeepay.mch.ctrl.order;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.jeequan.jeepay.JeepayClient;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.entity.MchApp;
@@ -28,12 +27,9 @@ import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.utils.SeqKit;
-import com.jeequan.jeepay.exception.JeepayException;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
-import com.jeequan.jeepay.model.RefundOrderCreateReqModel;
-import com.jeequan.jeepay.request.RefundOrderCreateRequest;
-import com.jeequan.jeepay.response.RefundOrderCreateResponse;
 import com.jeequan.jeepay.service.impl.MchAppService;
+import com.jeequan.jeepay.service.sign.PayApiClient;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.jeepay.service.impl.PayWayService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
@@ -67,6 +63,7 @@ public class PayOrderController extends CommonCtrl {
     @Autowired private PayOrderService payOrderService;
     @Autowired private PayWayService payWayService;
     @Autowired private MchAppService mchAppService;
+    @Autowired private PayApiClient payApiClient;
     @Autowired private SysConfigService sysConfigService;
 
     /**
@@ -179,31 +176,16 @@ public class PayOrderController extends CommonCtrl {
         }
 
 
-        RefundOrderCreateRequest request = new RefundOrderCreateRequest();
-        RefundOrderCreateReqModel model = new RefundOrderCreateReqModel();
-        request.setBizModel(model);
-
-        model.setMchNo(payOrder.getMchNo());     // 商户号
-        model.setAppId(payOrder.getAppId());
-        model.setPayOrderId(payOrderId);
-        model.setMchRefundNo(SeqKit.genMhoOrderId());
-        model.setRefundAmount(refundAmount);
-        model.setRefundReason(refundReason);
-        model.setCurrency(payOrder.getCurrency());
-
-        MchApp mchApp = mchAppService.getById(payOrder.getAppId());
-
-        JeepayClient jeepayClient = new JeepayClient(sysConfigService.getDBApplicationConfig().getPaySiteUrl(), mchApp.getAppSecret());
-
-        try {
-            RefundOrderCreateResponse response = jeepayClient.execute(request);
-            if(response.getCode() != 0){
-                throw new BizException(response.getMsg());
-            }
-            return ApiRes.ok(response.get());
-        } catch (JeepayException e) {
-            throw new BizException(e.getMessage());
-        }
+        // 平台不持有商戶私鑰，以平台內部金鑰代商戶發起退款（ADR-0013）
+        Map<String, Object> req = new HashMap<>();
+        req.put("mchNo", payOrder.getMchNo());
+        req.put("appId", payOrder.getAppId());
+        req.put("payOrderId", payOrderId);
+        req.put("mchRefundNo", SeqKit.genMhoOrderId());
+        req.put("refundAmount", refundAmount);
+        req.put("refundReason", refundReason);
+        req.put("currency", payOrder.getCurrency());
+        return ApiRes.ok(payApiClient.call("/api/refund/refundOrder", req));
     }
 
 }

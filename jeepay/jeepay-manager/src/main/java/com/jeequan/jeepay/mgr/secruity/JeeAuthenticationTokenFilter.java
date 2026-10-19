@@ -16,6 +16,7 @@
 package com.jeequan.jeepay.mgr.secruity;
 
 import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.core.cache.ITokenService;
 import com.jeequan.jeepay.core.cache.RedisUtil;
 import com.jeequan.jeepay.core.jwt.JWTPayload;
 import com.jeequan.jeepay.core.jwt.JWTUtils;
@@ -45,6 +46,10 @@ import java.io.IOException;
  * <p>
  */
 public class JeeAuthenticationTokenFilter extends OncePerRequestFilter {
+
+    /** request 屬性：這個憑證因同帳號在其他裝置登入而失效 */
+    public static final String KICKED_ATTR = "jeepaySessionKicked";
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
@@ -84,6 +89,10 @@ public class JeeAuthenticationTokenFilter extends OncePerRequestFilter {
         //根据用户名查找数据库
         JeeUserDetails jwtBaseUser = RedisUtil.getObject(jwtPayload.getCacheKey(), JeeUserDetails.class);
         if(jwtBaseUser == null){
+            // 同帳號已在其他裝置登入：交給 EntryPoint 回傳專屬提示
+            if(ITokenService.isKicked(jwtPayload.getCacheKey())){
+                request.setAttribute(KICKED_ATTR, Boolean.TRUE);
+            }
             RedisUtil.del(jwtPayload.getCacheKey());
             return null; //数据库查询失败，删除redis
         }

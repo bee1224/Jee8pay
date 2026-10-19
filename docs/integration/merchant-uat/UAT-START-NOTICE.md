@@ -50,7 +50,7 @@
 2. **保存 Create response**：ibon 繳費碼（`paymentCode` = `ibonShopId+ibonCode`）只在 Create 回傳中提供，**Query 不會再回傳 payData**。弄丟只能靠黑貓 PAY 端依 `cust_order_no` 找回。
 3. **Create 逾時/不明回應 → 用「同一個 mchOrderNo」Query-first**，不要用新 mchOrderNo 重試（會產生第二張真實帳單）。我方 adapter 對 ambiguous Create 只做一次 Query 恢復、絕不自動二次 Append。
 4. **真人付款是 UAT 完成付款迴圈的必經步驟**：訂單成功後需在 `expireDate` 前到 7-11 ibon 付款，付款後黑貓 PAY 會發 APN、我方驗證後轉 SUCCESS 並發 Merchant Notify。請事先安排「誰付款、何時付款、付幾筆」。
-5. **Merchant Notify 驗簽**：與 Create/Query 相同演算法（App Secret MD5）；收到後回純文字 `SUCCESS`（大小寫不拘）；我方最多 6 次、間隔 0/30/60/90/120/150 秒。
+5. **Merchant Notify 驗簽**：ML-DSA-65，用**平台公鑰**驗證（2026-10-19 起取代 MD5，見 README §B／§C、ADR-0013）；收到後回純文字 `SUCCESS`（大小寫不拘）；我方最多 6 次、間隔 0/30/60/90/120/150 秒。
 6. **不要對 `state=1`（WAITING）訂單上分**；只在 Notify 或 Query 確認 `state=2` 後入帳。
 7. **receiver 需能處理 terminal notification**：Provider-confirmed failure 可能通知 `state=3`；本地到期只轉 `CLOSED(6)`，不會因到期本身發 Merchant Notify。
 8. **reqTime**：必填且參與簽名；**系統有 freshness 檢查（5 分鐘視窗）**，超出窗口回 `9999 請求時間戳已過期`。請確保系統時鐘已 NTP 同步。

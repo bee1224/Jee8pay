@@ -131,7 +131,7 @@
     </a-drawer>
 
     <!-- 右侧内容展示区 -->
-    <a-layout :style="{ padding: 0, position: 'relative', 'background-color': '#f0f2f5' }">
+    <a-layout :style="{ padding: 0, position: 'relative', 'background-color': 'var(--jp-bg)' }">
       <!-- 顶部功能区 -->
       <a-layout-header :style="{ padding: 0 }">
         <!-- 顶部功能区插槽 放刷新按钮， 页签栏， 个人中心栏等... -->
@@ -198,7 +198,7 @@ type vdataType = {
 
 const vdata: vdataType = reactive({
   broken: false, // 是否处于小屏状态 true小屏   false大屏
-  collapsed: false, // 折叠状态  true折叠   false未折叠
+  collapsed: props.collapsed, // 折叠状态  true折叠   false未折叠（手機版預設收起，不自動彈出抽屜）
   open: false, // 抽屉开关
 })
 
@@ -246,7 +246,7 @@ onUnmounted(() => window.removeEventListener('resize', handleResize))
 
 <style scoped lang="less">
 :deep(.ant-layout-sider-light) {
-  background: #f7f8fa;
+  background: var(--jp-sider);
 }
 
 .sider-header {

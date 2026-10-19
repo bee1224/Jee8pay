@@ -1,5 +1,5 @@
 <template>
-  <div style="background: #fff; padding: 0 20px">
+  <div style="background: var(--jp-surface); padding: 0 20px">
     <a-tabs @change="selectTabs">
       <a-tab-pane v-for="tab in TABS" :key="tab.key" :tab="tab.name">
         <div class="account-settings-info-view">

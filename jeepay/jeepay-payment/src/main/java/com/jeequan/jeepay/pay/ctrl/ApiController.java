@@ -20,14 +20,18 @@ import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.ctrls.AbstractCtrl;
 import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.exception.BizException;
-import com.jeequan.jeepay.core.utils.JeepayKit;
+import com.jeequan.jeepay.core.utils.MlDsaKit;
+import com.jeequan.jeepay.pay.config.ChannelTraceFilter;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractMchAppRQ;
 import com.jeequan.jeepay.pay.rqrs.AbstractRQ;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.service.ValidateService;
+import com.jeequan.jeepay.service.sign.SignKeyStore;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.security.PublicKey;
 
 /*
 * api 抽象介面， 公共函数
@@ -40,6 +44,7 @@ public abstract class ApiController extends AbstractCtrl {
 
     @Autowired private ValidateService validateService;
     @Autowired private ConfigContextQueryService configContextQueryService;
+    @Autowired protected SignKeyStore signKeyStore;
 
 
     /** 獲取請求參數并转换为对象，通用验证  **/
@@ -90,24 +95,33 @@ public abstract class ApiController extends AbstractCtrl {
             throw new BizException("參數 appId 與商戶號不匹配");
         }
 
-        // 簽章驗證
-        String appSecret = mchApp.getAppSecret();
-
-        // 转换为 JSON
-        JSONObject bizReqJSON = (JSONObject)JSONObject.toJSON(bizRQ);
-        bizReqJSON.remove("sign");
-        if(!sign.equalsIgnoreCase(JeepayKit.getSign(bizReqJSON, appSecret))){
-             throw new BizException("簽章驗證失敗");
+        // reqTime 必須是毫秒時間戳，與系統時間偏差超過 5 分鐘即拒絕（防 replay；ADR-0013）
+        String reqTimeStr = bizRQ.getReqTime();
+        if(!StringUtils.isNumeric(reqTimeStr)
+                || Math.abs(System.currentTimeMillis() - Long.parseLong(reqTimeStr)) > REQTIME_FRESHNESS_MS){
+            throw new BizException("請求時間戳已過期");
         }
 
-        // reqTime freshness（防 replay；窗口為 5 分鐘，與系統時間偏差超過即拒絕）
-        String reqTimeStr = bizRQ.getReqTime();
-        if(StringUtils.isNotEmpty(reqTimeStr) && StringUtils.isNumeric(reqTimeStr)){
-            long reqTime = Long.parseLong(reqTimeStr);
-            long diff = Math.abs(System.currentTimeMillis() - reqTime);
-            if(diff > REQTIME_FRESHNESS_MS){
-                throw new BizException("請求時間戳已過期");
+        // 簽章驗證（ML-DSA-65，ADR-0013）：商戶以自己的私鑰簽；平台後台代商戶呼叫時以平台內部金鑰簽
+        PublicKey verifyKey;
+        if(MlDsaKit.SIGN_TYPE.equals(bizRQ.getSignType())){
+            if(StringUtils.isBlank(mchApp.getMchPublicKey())){
+                throw new BizException("商戶應用尚未設定公鑰");
             }
+            verifyKey = MlDsaKit.parsePublicKey(mchApp.getMchPublicKey());
+        }else if(MlDsaKit.SIGN_TYPE_PLATFORM.equals(bizRQ.getSignType())){
+            verifyKey = signKeyStore.internalPublicKey();
+        }else{
+            throw new BizException("不支援的簽名類型，signType 必須是 " + MlDsaKit.SIGN_TYPE);
+        }
+
+        JSONObject bizReqJSON = (JSONObject)JSONObject.toJSON(bizRQ);
+        if(!MlDsaKit.verify(bizReqJSON, sign, verifyKey)){
+             throw new BizException("簽章驗證失敗");
+        }
+        if(MlDsaKit.SIGN_TYPE_PLATFORM.equals(bizRQ.getSignType())){
+            // 管理後台 API 測試：只有平台內部簽名的請求才帶回上游渠道追蹤
+            request.setAttribute(ChannelTraceFilter.INTERNAL_SIGNED_ATTR, true);
         }
 
         return bizRQ;

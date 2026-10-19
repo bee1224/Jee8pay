@@ -42,15 +42,15 @@
             </a-table>
         </template>
         <template v-else-if="section === 'sub'">
-            <a-alert v-if="vdata.me.agentLevel !== 1" type="info" show-icon message="只有團長才有旗下代理。" />
-            <a-button v-if="vdata.me.agentLevel === 1 && $access('ENT_AGENT_PORTAL_SUB_ADD')" type="primary" style="margin-bottom: 12px" @click="openSubForm">新增旗下代理</a-button>
+            <a-alert v-if="vdata.me.agentLevel !== 1" type="info" show-icon message="只有團長可以建立代理。" />
+            <a-button v-if="vdata.me.agentLevel === 1 && $access('ENT_AGENT_PORTAL_SUB_ADD')" type="primary" style="margin-bottom: 12px" @click="openSubForm">新增代理</a-button>
             <a-table v-else :columns="subColumns" :data-source="vdata.me.subAgents || []" size="small" row-key="agentNo">
               <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'state'">
                   <a-badge :status="record.state === 0 ? 'error' : 'processing'" :text="record.state === 0 ? '停用' : '啟用'" />
                 </template>
               </template>
-              <template #emptyText>尚無旗下代理</template>
+              <template #emptyText>尚無我的代理</template>
             </a-table>
         </template>
         <template v-else-if="section === 'orders'">
@@ -71,14 +71,14 @@
                 <template v-if="column.key === 'amount'">{{ (record.amount / 100).toFixed(2) }}</template>
                 <template v-if="column.key === 'state'"><a-tag :color="(ORDER_STATES[record.state] || {}).color">{{ (ORDER_STATES[record.state] || {}).text || record.state }}</a-tag></template>
               </template>
-              <template #emptyText>這段期間沒有訂單（只顯示自己與旗下代理直屬商戶的訂單）</template>
+              <template #emptyText>這段期間沒有訂單（只顯示自己與我的代理直屬商戶的訂單）</template>
             </a-table>
         </template>
         <template v-else-if="section === 'oplog'">
-            <a-alert type="info" show-icon style="margin-bottom: 12px" message="這裡列出旗下代理帳號做過的操作（新增商戶、申請提現、設定收款帳戶等）。" />
+            <a-alert type="info" show-icon style="margin-bottom: 12px" message="這裡列出我的代理帳號做過的操作（新增商戶、申請提現、設定收款帳戶等）。" />
             <a-table :columns="logColumns" :data-source="vdata.log.records" size="small" row-key="sysLogId"
               :pagination="{ current: vdata.log.page, pageSize: 20, total: vdata.log.total, showTotal: (t) => `共${t}筆`, onChange: (p) => { vdata.log.page = p; loadLogs() } }">
-              <template #emptyText>旗下代理還沒有任何操作紀錄</template>
+              <template #emptyText>我的代理還沒有任何操作紀錄</template>
             </a-table>
         </template>
         <template v-else-if="section === 'fee'">
@@ -94,7 +94,7 @@
                 <a-form-item><a-button type="primary" @click="saveSubRule">儲存</a-button></a-form-item>
                 <a-form-item><a-button @click="openTemplate">套用範本</a-button></a-form-item>
               </a-form>
-              <div style="margin-top: 6px; color: #888; font-size: 12px">可設定自己的團長費、旗下代理的隊長費，或對單一商戶覆寫。平臺費與渠道費由平台設定。儲存後若任何旗下商戶的手續費合計超過其商戶費率，系統會拒絕並提示。</div>
+              <div style="margin-top: 6px; color: #888; font-size: 12px">可設定自己的團長費、我的代理的隊長費，或對單一商戶覆寫。平臺費與渠道費由平台設定。儲存後若任何我的商戶的手續費合計超過其商戶費率，系統會拒絕並提示。</div>
             </a-card>
             <a-table :columns="feeColumns" :data-source="vdata.rules" size="small" row-key="ruleId">
               <template #bodyCell="{ column, record }">
@@ -150,13 +150,13 @@
       <div style="color: #888; font-size: 12px">商戶建立後還需要平台設定支付通道與費率，才能開始收款。</div>
     </a-modal>
 
-    <a-modal v-model:open="vdata.subForm.open" title="新增旗下代理" :confirm-loading="vdata.subForm.saving" ok-text="儲存" cancel-text="取消" @ok="saveSub">
+    <a-modal v-model:open="vdata.subForm.open" title="新增代理" :confirm-loading="vdata.subForm.saving" ok-text="儲存" cancel-text="取消" @ok="saveSub">
       <a-form layout="vertical">
         <a-form-item label="代理名稱" required><a-input v-model:value="vdata.subForm.data.agentName" /></a-form-item>
         <a-form-item label="聯絡人姓名"><a-input v-model:value="vdata.subForm.data.contactName" /></a-form-item>
-        <a-form-item label="聯絡人手機號" required><a-input v-model:value="vdata.subForm.data.contactTel" placeholder="09 開頭 10 碼" /></a-form-item>
-        <a-form-item label="登入帳號" required extra="旗下代理登入營運平台用；儲存後系統產生 8 碼隨機密碼並顯示一次。">
-          <a-input v-model:value="vdata.subForm.data.loginUsername" placeholder="4～32 碼英文、數字或底線" autocomplete="off" />
+        <a-form-item label="聯絡人手機號（選填）"><a-input v-model:value="vdata.subForm.data.contactTel" placeholder="09 開頭 10 碼" /></a-form-item>
+        <a-form-item label="登入帳號" required extra="我的代理登入營運平台用；儲存後系統產生 8 碼隨機密碼並顯示一次。">
+          <a-input v-model:value="vdata.subForm.data.loginUsername" placeholder="2～32 碼中文、英文、數字或底線" autocomplete="off" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -267,7 +267,6 @@ const SECTIONS = {
   ENT_AGENT_PORTAL_REPORT: 'report',
   ENT_AGENT_PORTAL_ROUTE: 'routes',
   ENT_AGENT_PORTAL_BLACKLIST: 'blacklist',
-  ENT_AGENT_PORTAL_BRAND: 'brand',
   ENT_AGENT_PORTAL_DASH: 'dashboard',
   ENT_AGENT_PORTAL_STAFF: 'staff',
 }
@@ -304,7 +303,7 @@ const channelTestModal = ref()
 const ownerOptions = computed(() =>
   vdata.me
     ? [{ value: vdata.me.agentNo, label: `自己（${vdata.me.agentName}）` }].concat(
-        (vdata.me.subAgents || []).map((a) => ({ value: a.agentNo, label: `旗下代理：${a.agentName}` }))
+        (vdata.me.subAgents || []).map((a) => ({ value: a.agentNo, label: `我的代理：${a.agentName}` }))
       )
     : []
 )
@@ -377,8 +376,12 @@ function openSubForm() {
 }
 function saveSub() {
   const f = vdata.subForm.data
-  if (!f.agentName || !/^09\d{8}$/.test(f.contactTel || '') || !/^[A-Za-z0-9_]{4,32}$/.test(f.loginUsername || '')) {
-    $infoBox.message.warning('請填寫代理名稱、正確的手機號，以及 4～32 碼的登入帳號')
+  if (!f.agentName || !/^[A-Za-z0-9_一-鿿]{2,32}$/.test(f.loginUsername || '')) {
+    $infoBox.message.warning('請填寫代理名稱，以及2～32 碼中文、英文、數字或底線的登入帳號')
+    return
+  }
+  if (f.contactTel && !/^09\d{8}$/.test(f.contactTel)) {
+    $infoBox.message.warning('手機號格式不正確（09 開頭 10 碼），不填也可以')
     return
   }
   vdata.subForm.saving = true
@@ -387,7 +390,7 @@ function saveSub() {
     .then((res) => {
       vdata.subForm.open = false
       loadMe()
-      credentialModal.value.show({ ...res, subjectLabel: '旗下代理', loginAt: '營運平台' })
+      credentialModal.value.show({ ...res, subjectLabel: '我的代理', loginAt: '營運平台' })
     })
     .finally(() => (vdata.subForm.saving = false))
 }
@@ -396,11 +399,11 @@ function loadRules() {
   req.list(API_URL_AGENT_PORTAL + '/branch/feeRules', {}).then((r) => (vdata.rules = r || []))
 }
 
-// 設定對象：自己（團長費）、旗下代理（隊長費）、商戶（逐一覆寫）
+// 設定對象：自己（團長費）、我的代理（隊長費）、商戶（逐一覆寫）
 const agentTargetOptions = computed(() =>
   vdata.me
     ? [{ value: vdata.me.agentNo, label: `自己（${vdata.me.agentName}）` }].concat(
-        (vdata.me.subAgents || []).map((a) => ({ value: a.agentNo, label: `旗下代理：${a.agentName}` }))
+        (vdata.me.subAgents || []).map((a) => ({ value: a.agentNo, label: `我的代理：${a.agentName}` }))
       )
     : []
 )

@@ -16,10 +16,11 @@
 package com.jeequan.jeepay.core.utils;
 
 import cn.hutool.core.net.url.UrlBuilder;
-import cn.hutool.core.util.URLUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 
@@ -62,7 +63,8 @@ public class StringKit {
 				}else{
 					isHasCondition = true; //变更为： 已存在query条件
 				}
-				sb.append(k).append("=").append(URLUtil.encodeQuery(map.get(k).toString()));
+				// 完整百分比編碼（空白為 %20）：值裡的 &、=、+、空白（例如 Base64 簽名、商品名稱）才能被 HttpUtil.decodeParamMap 原樣還原，否則商戶驗簽會失敗（ADR-0013）
+				sb.append(k).append("=").append(URLEncoder.encode(map.get(k).toString(), StandardCharsets.UTF_8).replace("+", "%20"));
 			}
 		}
 		return sb.toString();

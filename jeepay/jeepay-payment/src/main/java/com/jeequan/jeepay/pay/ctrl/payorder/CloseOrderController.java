@@ -77,7 +77,7 @@ public class CloseOrderController extends ApiController {
         if (payOrder.getState() == PayOrder.STATE_INIT) {
             payOrderService.updateInit2Close(payOrder.getPayOrderId());
             bizRes.setChannelRetMsg(ChannelRetMsg.confirmSuccess(null));
-            return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchApp(rq.getMchNo(), rq.getAppId()).getAppSecret());
+            return ApiRes.okWithSign(bizRes, signKeyStore.platformPrivateKey());
         }
 
         try {
@@ -117,7 +117,7 @@ public class CloseOrderController extends ApiController {
             return null;
         }
 
-        return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchApp(rq.getMchNo(), rq.getAppId()).getAppSecret());
+        return ApiRes.okWithSign(bizRes, signKeyStore.platformPrivateKey());
     }
 
 }

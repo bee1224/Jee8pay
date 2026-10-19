@@ -149,7 +149,7 @@ public class RefundOrderController extends ApiController {
             this.processChannelMsg(channelRetMsg, refundOrder);
 
             RefundOrderRS bizRes = RefundOrderRS.buildByRefundOrder(refundOrder);
-            return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchApp(rq.getMchNo(), rq.getAppId()).getAppSecret());
+            return ApiRes.okWithSign(bizRes, signKeyStore.platformPrivateKey());
 
 
         } catch (BizException e) {
@@ -165,7 +165,7 @@ public class RefundOrderController extends ApiController {
             }
 
             RefundOrderRS bizRes = RefundOrderRS.buildByRefundOrder(refundOrder);
-            return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchApp(rq.getMchNo(), rq.getAppId()).getAppSecret());
+            return ApiRes.okWithSign(bizRes, signKeyStore.platformPrivateKey());
 
 
         } catch (Exception e) {

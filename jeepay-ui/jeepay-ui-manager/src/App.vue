@@ -1,5 +1,5 @@
 <template>
-  <a-config-provider :locale="zhTW">
+  <a-config-provider :locale="zhTW" :theme="antTheme()">
     <a-spin :spinning="userStore.globalLoading">
       <div id="app" style="height: 100vh">
         <router-view />
@@ -13,6 +13,7 @@ import zhTW from 'ant-design-vue/es/locale/zh_TW'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-tw'
 import { useUserStore } from '@/store/modules/user'
+import { antTheme } from '@/utils/colorScheme'
 const userStore = useUserStore()
 
 dayjs.locale('zh-tw')

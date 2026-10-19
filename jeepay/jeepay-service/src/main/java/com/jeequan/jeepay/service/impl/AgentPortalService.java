@@ -9,6 +9,7 @@ import com.jeequan.jeepay.core.entity.FeeRule;
 import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.SysLog;
 import com.jeequan.jeepay.core.entity.SysUser;
+import com.jeequan.jeepay.core.entity.SysUserAuth;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.service.mapper.AgentInfoMapper;
 import com.jeequan.jeepay.service.mapper.AgentMchRelaMapper;
@@ -25,6 +26,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -38,7 +40,7 @@ public class AgentPortalService {
 
     /** 代理帳號固定角色（由 SQL seed，僅含代理後台權限） */
     public static final String ROLE_AGENT_PORTAL = "ROLE_AGENT_PORTAL";
-    /** 隊長（第三代）帳號固定角色：沒有旗下代理與操作紀錄選單 */
+    /** 隊長（第三代）帳號固定角色：沒有我的代理與操作紀錄選單 */
     public static final String ROLE_AGENT_PORTAL_L2 = "ROLE_AGENT_PORTAL_L2";
 
     public static String roleOf(AgentInfo agent) {
@@ -55,6 +57,7 @@ public class AgentPortalService {
     @Autowired private AgentInfoService agentInfoService;
     @Autowired private AgentMchRelaService agentMchRelaService;
     @Autowired private SysLogService sysLogService;
+    @Autowired private SysConfigService sysConfigService;
 
     /** 由登入者歸屬取得代理；非代理帳號或代理已停用一律拒絕。 */
     public AgentInfo requireAgent(SysUser currentUser) {
@@ -80,7 +83,7 @@ public class AgentPortalService {
                 .orderByAsc(AgentInfo::getAgentPath));
     }
 
-    /** 轄區內直屬商戶；relation 標示是自己直屬還是旗下代理的。 */
+    /** 轄區內直屬商戶；relation 標示是自己直屬還是我的代理的。 */
     public List<JSONObject> merchants(AgentInfo me) {
         List<String> agentNos = jurisdiction(me).stream().map(AgentInfo::getAgentNo).collect(Collectors.toList());
         List<AgentMchRela> relas = agentMchRelaMapper.selectList(AgentMchRela.gw()
@@ -98,13 +101,13 @@ public class AgentPortalService {
             row.put("mchName", mch == null ? null : mch.getMchShortName());
             row.put("mchState", mch == null ? null : mch.getState());
             row.put("agentNo", rela.getAgentNo());
-            row.put("relation", me.getAgentNo().equals(rela.getAgentNo()) ? "直屬" : "旗下代理");
+            row.put("relation", me.getAgentNo().equals(rela.getAgentNo()) ? "直屬" : "我的代理");
             result.add(row);
         }
         return result;
     }
 
-    /** 轄區內代理的費率（唯讀）：自己的團長費／隊長費與旗下代理的隊長費。 */
+    /** 轄區內代理的費率（唯讀）：自己的團長費／隊長費與我的代理的隊長費。 */
     public List<FeeRule> rules(AgentInfo me) {
         List<String> agentNos = jurisdiction(me).stream().map(AgentInfo::getAgentNo).collect(Collectors.toList());
         return feeRuleService.list(FeeRule.gw().eq(FeeRule::getTargetType, FeeRule.TARGET_AGENT)
@@ -113,17 +116,17 @@ public class AgentPortalService {
     }
 
     /**
-     * 團長設定旗下代理的隊長費。
+     * 團長設定我的代理的隊長費。
      * 防呆：設定後，受影響商戶以 1000 元試算的各層合計不得超過其支付通道手續費，否則整筆回滾。
      */
     @Transactional
     public FeeRule saveSubAgentRule(AgentInfo me, FeeRule input, Long uid, String name) {
         if (!Objects.equals(me.getAgentLevel(), AgentInfo.LEVEL_SENIOR)) {
-            throw new BizException("只有團長可以設定旗下代理的費率");
+            throw new BizException("只有團長可以設定我的代理的費率");
         }
         AgentInfo target = agentInfoMapper.selectById(input.getTargetId());
         if (target == null || !me.getAgentNo().equals(target.getParentAgentNo())) {
-            throw new BizException("只能設定自己的旗下代理");
+            throw new BizException("只能設定自己的代理");
         }
         if (!FeeRule.LAYER_AGENT.equals(input.getLayer())) {
             throw new BizException("代理後台只能設定隊長費");
@@ -174,6 +177,42 @@ public class AgentPortalService {
     }
 
     /**
+     * 沒填手機號時存入的佔位值前綴。t_sys_user.telphone 不可為空且同系統內不可重複，
+     * 所以用「前綴 + 隨機字串」佔位；對外一律顯示為空白，也不建立手機號登入方式。
+     */
+    public static final String NO_TEL_PREFIX = "-";
+
+    /** 有填就用手機號，沒填就產生不重複的佔位值。 */
+    public static String telOrPlaceholder(String telphone) {
+        return StringUtils.isNotBlank(telphone) ? telphone : NO_TEL_PREFIX + UUID.randomUUID().toString().replace("-", "").substring(0, 20);
+    }
+
+    public static boolean isPlaceholderTel(String telphone) {
+        return StringUtils.startsWith(telphone, NO_TEL_PREFIX);
+    }
+
+    /** 佔位值不是手機號，刪掉 addSysUser 順帶建立的手機號登入方式。 */
+    public void dropPlaceholderTelLogin(SysUser user, String sysType) {
+        if (isPlaceholderTel(user.getTelphone())) {
+            sysUserAuthService.remove(SysUserAuth.gw().eq(SysUserAuth::getUserId, user.getSysUserId())
+                    .eq(SysUserAuth::getSysType, sysType).eq(SysUserAuth::getIdentityType, CS.AUTH_TYPE.TELPHONE));
+        }
+    }
+
+    /** 商戶平台登入網址（系統配置「商戶平台網址」）；尚未設定成對外網址時回傳空字串，由畫面提示。 */
+    public String mchLoginUrl() {
+        String site = StringUtils.removeEnd(StringUtils.trimToEmpty(sysConfigService.getDBApplicationConfig().getMchSiteUrl()), "/");
+        if (site.isEmpty() || site.contains("127.0.0.1") || site.contains("localhost")) {
+            return "";
+        }
+        return site + "/login";
+    }
+
+    /** 代理登入帳號（團長、隊長、子帳號）：2～32 碼中文、英文、數字或底線。 */
+    public static final String AGENT_LOGIN_PATTERN = "^[A-Za-z0-9_\\u4e00-\\u9fff]{2,32}$";
+    public static final String AGENT_LOGIN_HINT = "登入帳號須為 2～32 碼中文、英文、數字或底線";
+
+    /**
      * 開通代理登入帳號，密碼為隨機 8 碼。回傳 sysUserId、loginUsername 與 initPassword；
      * initPassword 只在這次回應出現，系統不保存明文。
      */
@@ -183,22 +222,23 @@ public class AgentPortalService {
         if (agent == null) {
             throw new BizException("代理不存在");
         }
-        if (StringUtils.isBlank(input.getLoginUsername()) || !input.getLoginUsername().matches("^[A-Za-z0-9_]{4,32}$")) {
-            throw new BizException("登入帳號須為 4～32 碼英文、數字或底線");
+        if (StringUtils.isBlank(input.getLoginUsername()) || !input.getLoginUsername().matches(AGENT_LOGIN_PATTERN)) {
+            throw new BizException(AGENT_LOGIN_HINT);
         }
-        if (StringUtils.isBlank(input.getTelphone()) || !input.getTelphone().matches("^09\\d{8}$")) {
-            throw new BizException("請填寫正確的手機號（09 開頭 10 碼）");
+        if (StringUtils.isNotBlank(input.getTelphone()) && !input.getTelphone().matches("^09\\d{8}$")) {
+            throw new BizException("手機號格式不正確（09 開頭 10 碼），不填也可以");
         }
         SysUser user = new SysUser();
         user.setLoginUsername(input.getLoginUsername());
         user.setRealname(input.getRealname());
-        user.setTelphone(input.getTelphone());
+        user.setTelphone(telOrPlaceholder(input.getTelphone()));
         user.setSex(input.getSex() == null ? CS.SEX_UNKNOWN : input.getSex());
         user.setUserNo(StringUtils.defaultIfBlank(input.getUserNo(), null));
         user.setIsAdmin(CS.NO);
         user.setState(CS.YES);
         user.setBelongInfoId(agentNo);
         sysUserService.addSysUser(user, CS.SYS_TYPE.MGR);
+        dropPlaceholderTelLogin(user, CS.SYS_TYPE.MGR);
         sysUserService.saveUserRole(user.getSysUserId(), List.of(roleOf(agent)));
         // addSysUser 會先寫入系統預設密碼，這裡立即換成隨機密碼
         String password = randomPassword();
@@ -238,7 +278,7 @@ public class AgentPortalService {
     @Transactional
     public JSONObject createSubAgent(AgentInfo me, AgentInfo input, String loginUsername, Long uid, String name) {
         if (!Objects.equals(me.getAgentLevel(), AgentInfo.LEVEL_SENIOR)) {
-            throw new BizException("只有團長可以新增旗下代理");
+            throw new BizException("只有團長可以新增我的代理");
         }
         AgentInfo agent = new AgentInfo();
         agent.setAgentName(input.getAgentName());
@@ -253,14 +293,14 @@ public class AgentPortalService {
     }
 
     /**
-     * 代理新增商戶：商戶直屬於自己，或（團長）指定給自己的旗下代理。
+     * 代理新增商戶：商戶直屬於自己，或（團長）指定給自己的代理。
      * 商戶登入帳號的密碼同樣改為隨機 8 碼，只在回應出現一次。支付通道與費率仍由平台設定。
      */
     @Transactional
     public JSONObject createMerchant(AgentInfo me, MchInfo input, String loginUsername, String targetAgentNo, Long uid, String name) {
         String ownerNo = StringUtils.defaultIfBlank(targetAgentNo, me.getAgentNo());
         if (jurisdiction(me).stream().noneMatch(a -> a.getAgentNo().equals(ownerNo))) {
-            throw new BizException("只能把商戶建在自己或自己的旗下代理底下");
+            throw new BizException("只能把商戶建在自己或自己的代理底下");
         }
         if (StringUtils.isAnyBlank(input.getMchName(), input.getMchShortName(), input.getContactName())) {
             throw new BizException("請填寫商戶名稱、商戶簡稱與聯絡人姓名");
@@ -292,11 +332,13 @@ public class AgentPortalService {
         result.put("agentName", mch.getMchName());
         result.put("loginUsername", loginUsername);
         result.put("initPassword", password);
+        result.put("loginUrl", mchLoginUrl());
         return result;
     }
 
     /** 後代代理帳號的操作紀錄（不含自己）；只回傳時間、操作人、動作與 IP，不含請求與回應內容。 */
-    public IPage<SysLog> descendantLogs(AgentInfo me, IPage<SysLog> page) {
+    /** start、end 可為 null（不限）；end 為開區間 */
+    public IPage<SysLog> descendantLogs(AgentInfo me, IPage<SysLog> page, Date start, Date end) {
         List<String> agentNos = jurisdiction(me).stream().map(AgentInfo::getAgentNo)
                 .filter(no -> !no.equals(me.getAgentNo())).collect(Collectors.toList());
         List<Long> userIds = agentNos.isEmpty() ? Collections.emptyList() : sysUserService.list(SysUser.gw()
@@ -310,13 +352,16 @@ public class AgentPortalService {
                 .select(SysLog::getSysLogId, SysLog::getUserId, SysLog::getUserName, SysLog::getUserIp,
                         SysLog::getMethodRemark, SysLog::getCreatedAt)
                 .eq(SysLog::getSysType, CS.SYS_TYPE.MGR).in(SysLog::getUserId, userIds)
+                .ge(start != null, SysLog::getCreatedAt, start).lt(end != null, SysLog::getCreatedAt, end)
                 .orderByDesc(SysLog::getSysLogId));
     }
 
     public List<SysUser> accounts(String agentNo) {
-        return sysUserService.list(SysUser.gw()
+        List<SysUser> list = sysUserService.list(SysUser.gw()
                 .select(SysUser::getSysUserId, SysUser::getLoginUsername, SysUser::getRealname, SysUser::getTelphone,
                         SysUser::getState, SysUser::getCreatedAt)
                 .eq(SysUser::getSysType, CS.SYS_TYPE.MGR).eq(SysUser::getBelongInfoId, agentNo));
+        list.stream().filter(u -> isPlaceholderTel(u.getTelphone())).forEach(u -> u.setTelphone(""));
+        return list;
     }
 }

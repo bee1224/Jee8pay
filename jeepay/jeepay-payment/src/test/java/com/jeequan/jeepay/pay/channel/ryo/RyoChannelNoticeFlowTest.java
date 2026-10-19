@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.components.mq.model.PayOrderMchNotifyMQ;
 import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.MchNotifyRecord;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.model.params.ryo.RyoNormalMchParams;
@@ -14,6 +13,7 @@ import com.jeequan.jeepay.pay.ctrl.payorder.ChannelNoticeController;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.service.PayMchNotifyService;
+import com.jeequan.jeepay.service.sign.SignKeyStore;
 import com.jeequan.jeepay.pay.service.PayOrderProcessService;
 import com.jeequan.jeepay.service.impl.MchNotifyRecordService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
@@ -33,6 +33,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import java.security.KeyPairGenerator;
 
 class RyoChannelNoticeFlowTest {
 
@@ -83,6 +84,10 @@ class RyoChannelNoticeFlowTest {
         ReflectionTestUtils.setField(payMchNotifyService, "mchNotifyRecordService", notifyRecordService);
         ReflectionTestUtils.setField(payMchNotifyService, "configContextQueryService", configContextQueryService);
         ReflectionTestUtils.setField(payMchNotifyService, "mqSender", mqSender);
+        SignKeyStore signKeyStore = new SignKeyStore();
+        ReflectionTestUtils.setField(signKeyStore, "platformPrivateKey",
+                KeyPairGenerator.getInstance("ML-DSA-65").generateKeyPair().getPrivate());
+        ReflectionTestUtils.setField(payMchNotifyService, "signKeyStore", signKeyStore);
 
         PayOrderProcessService payOrderProcessService = new PayOrderProcessService();
         ReflectionTestUtils.setField(payOrderProcessService, "payOrderService", payOrderService);
@@ -121,8 +126,6 @@ class RyoChannelNoticeFlowTest {
         when(payOrderService.updateIng2Success(payOrder.getPayOrderId(), "TX-E06-SUCCESS", null)).thenReturn(true);
         when(client.query(params, payOrder.getPayOrderId())).thenReturn(queryResponse("7"));
         when(notifyRecordService.findByPayOrder(payOrder.getPayOrderId())).thenReturn(null);
-        when(configContextQueryService.queryMchApp("M-TEST", "APP-TEST"))
-                .thenReturn(new MchApp().setMchNo("M-TEST").setAppId("APP-TEST").setAppSecret("TEST_ONLY_SECRET"));
         when(notifyRecordService.save(any(MchNotifyRecord.class))).thenAnswer(invocation -> {
             invocation.<MchNotifyRecord>getArgument(0).setNotifyId(1001L);
             return true;
@@ -148,8 +151,6 @@ class RyoChannelNoticeFlowTest {
                 .thenReturn(true);
         when(client.query(params, payOrder.getPayOrderId())).thenReturn(queryResponse("7"));
         when(notifyRecordService.findByPayOrder(payOrder.getPayOrderId())).thenReturn(null);
-        when(configContextQueryService.queryMchApp("M-TEST", "APP-TEST"))
-                .thenReturn(new MchApp().setMchNo("M-TEST").setAppId("APP-TEST").setAppSecret("TEST_ONLY_SECRET"));
         when(notifyRecordService.save(any(MchNotifyRecord.class))).thenAnswer(invocation -> {
             invocation.<MchNotifyRecord>getArgument(0).setNotifyId(2001L);
             return true;

@@ -41,6 +41,10 @@ public class JeeAuthenticationEntryPoint implements AuthenticationEntryPoint, Se
         // This is invoked when user tries to access a secured REST resource without supplying any credentials
         // We should just send a 401 Unauthorized response because there is no 'login page' to redirect to
 
+        // 被後登入擠掉：加上標頭讓前端顯示「已在其他裝置登入」
+        if (Boolean.TRUE.equals(request.getAttribute(JeeAuthenticationTokenFilter.KICKED_ATTR))) {
+            response.setHeader("X-Jeepay-Session", "kicked");
+        }
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
 
         //返回json形式的错误信息

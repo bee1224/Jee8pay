@@ -58,6 +58,7 @@ declare module 'vue' {
     ATextarea: typeof import('ant-design-vue/es')['Textarea']
     ATooltip: typeof import('ant-design-vue/es')['Tooltip']
     ATree: typeof import('ant-design-vue/es')['Tree']
+    ATypographyText: typeof import('ant-design-vue/es')['TypographyText']
     AUpload: typeof import('ant-design-vue/es')['Upload']
     AvatarDropdown: typeof import('./src/components/GlobalHeader/AvatarDropdown.vue')['default']
     ExportJobsDrawer: typeof import('./src/components/ExportJobs/ExportJobsDrawer.vue')['default']

@@ -142,7 +142,7 @@ public class ChannelNoticeController extends AbstractCtrl {
             //包含通知地址时
             if(hasReturnUrl){
                 // 重定向
-                response.sendRedirect(payMchNotifyService.createReturnUrl(payOrder, mchAppConfigContext.getMchApp().getAppSecret()));
+                response.sendRedirect(payMchNotifyService.createReturnUrl(payOrder));
                 return null;
             }else{
 
@@ -307,7 +307,7 @@ public class ChannelNoticeController extends AbstractCtrl {
             if (StringUtils.isBlank(payOrder.getReturnUrl())) {
                 this.toReturnPage(null);
             }
-            response.sendRedirect(payMchNotifyService.createReturnUrl(payOrder, mchAppConfigContext.getMchApp().getAppSecret()));
+            response.sendRedirect(payMchNotifyService.createReturnUrl(payOrder));
         }
     }
 

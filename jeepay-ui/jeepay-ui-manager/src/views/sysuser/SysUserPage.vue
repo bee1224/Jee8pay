@@ -116,7 +116,7 @@ const tableColumns = [
   },
   { title: '頭像', key: 'avatarUrl', scopedSlots: { customRender: 'avatarSlot' } },
   { title: '編號', dataIndex: 'userNo' },
-  { title: '手機號', dataIndex: 'telphone' },
+  { title: '手機號', dataIndex: 'telphone', customRender: ({ text }) => (String(text || '').startsWith('-') ? '' : text) },
   {
     title: '上帝',
     dataIndex: 'isAdmin',

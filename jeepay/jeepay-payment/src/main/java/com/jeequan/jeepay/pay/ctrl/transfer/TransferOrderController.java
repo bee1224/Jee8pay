@@ -133,7 +133,7 @@ public class TransferOrderController extends ApiController {
             }
 
             TransferOrderRS bizRes = TransferOrderRS.buildByRecord(transferOrder);
-            return ApiRes.okWithSign(bizRes, mchApp.getAppSecret());
+            return ApiRes.okWithSign(bizRes, signKeyStore.platformPrivateKey());
 
         }  catch (BizException e) {
             return ApiRes.customFail(e.getMessage());
@@ -148,7 +148,7 @@ public class TransferOrderController extends ApiController {
             }
 
             TransferOrderRS bizRes = TransferOrderRS.buildByRecord(transferOrder);
-            return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchApp(bizRQ.getMchNo(), bizRQ.getAppId()).getAppSecret());
+            return ApiRes.okWithSign(bizRes, signKeyStore.platformPrivateKey());
 
         } catch (Exception e) {
             log.error("系統異常：{}", e);

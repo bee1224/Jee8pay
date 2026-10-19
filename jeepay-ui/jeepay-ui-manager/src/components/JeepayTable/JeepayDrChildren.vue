@@ -35,7 +35,7 @@
           left: -110%;
           padding: 10px;
           transform: translateY(-40%);
-          background-color: #fff;
+          background-color: var(--jp-surface);
           box-shadow: 1px 0px 5px 1px rgba(0, 0, 0, 0.1);
           border-radius: 5px;
           cursor: pointer;

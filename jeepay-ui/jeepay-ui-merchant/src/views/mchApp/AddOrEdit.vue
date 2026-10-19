@@ -31,14 +31,29 @@
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item label="私鑰 AppSecret" prop="appSecret">
+          <a-form-item label="商戶公鑰（ML-DSA-65）" name="mchPublicKey">
             <a-textarea
-              v-model:value="vdata.saveObject.appSecret"
-              :placeholder="vdata.saveObject.appSecret_ph"
+              v-model:value="vdata.saveObject.mchPublicKey"
+              :auto-size="{ minRows: 4, maxRows: 10 }"
+              style="font-family: monospace; font-size: 12px"
+              placeholder="-----BEGIN PUBLIC KEY-----&#10;商戶自行產生 ML-DSA-65 金鑰對後，只貼公鑰；私鑰留在商戶系統，不要交給任何人&#10;-----END PUBLIC KEY-----"
             />
-            <a-button type="primary" ghost @click="randomKey(false, 128, 0)">
-              <a-icon type="file-sync" />
-              隨機生成私鑰
+            <div style="color: rgba(0, 0, 0, 0.45); margin-top: 4px">
+              商戶 API 一律以 ML-DSA-65 簽名（signType=ML-DSA-65）。沒有公鑰的應用無法呼叫 API；修改時留空表示不變更。
+            </div>
+          </a-form-item>
+        </a-col>
+        <a-col :span="24">
+          <a-form-item label="平台公鑰（交給商戶，用來驗證平台回應與通知）">
+            <a-textarea
+              :value="vdata.platformPublicKey"
+              readonly
+              :auto-size="{ minRows: 4, maxRows: 10 }"
+              style="font-family: monospace; font-size: 12px"
+              placeholder="系統尚未設定平台簽名公鑰"
+            />
+            <a-button style="margin-top: 10px" :disabled="!vdata.platformPublicKey" @click="copyPlatformKey">
+              複製平台公鑰
             </a-button>
           </a-form-item>
         </a-col>
@@ -85,33 +100,23 @@ function show(appId) {
   // 数据清空
   vdata.saveObject = {
     state: 1,
-    appSecret: '',
-    appSecret_ph: '請輸入',
+    mchPublicKey: '',
   }
 
   if (infoFormModel.value) {
     infoFormModel.value.resetFields()
   }
 
-  vdata.rules.appSecret = []
+  loadPlatformKey()
   if (!vdata.isAdd) {
     // 修改信息 延迟展示弹层
     vdata.appId = appId
     // 拉取详情
     req.getById(API_URL_MCH_APP, appId).then((res) => {
       vdata.saveObject = res
-      vdata.saveObject.appSecret_ph = res.appSecret
-      vdata.saveObject.appSecret = ''
     })
     vdata.open = true
   } else {
-    // 新增时，appSecret必填
-    vdata.rules.appSecret.push({
-      required: true,
-      message: '請輸入私鑰或點擊隨機生成私鑰',
-      trigger: 'blur',
-    })
-
     vdata.open = true // 展示弹层信息
   }
 }
@@ -120,7 +125,6 @@ function onSubmit() {
   infoFormModel.value.validate().then((valid) => {
     if (valid) {
       // 验证通过
-      delete vdata.saveObject.appSecret_ph
       // 请求接口
       if (vdata.isAdd) {
         req.add(API_URL_MCH_APP, vdata.saveObject).then((res) => {
@@ -129,8 +133,8 @@ function onSubmit() {
           props.callbackFunc() // 刷新列表
         })
       } else {
-        if (vdata.saveObject.appSecret === '') {
-          delete vdata.saveObject.appSecret
+        if (!vdata.saveObject.mchPublicKey) {
+          delete vdata.saveObject.mchPublicKey
         }
         req.updateById(API_URL_MCH_APP, vdata.appId, vdata.saveObject).then((res) => {
           $infoBox.message.success('修改成功')
@@ -141,83 +145,18 @@ function onSubmit() {
     }
   })
 }
-function randomKey(randomFlag, min, max) {
-  // 生成随机128位私钥
-  let str = ''
-  let range = min
-  const arr = [
-    '0',
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    'a',
-    'b',
-    'c',
-    'd',
-    'e',
-    'f',
-    'g',
-    'h',
-    'i',
-    'j',
-    'k',
-    'l',
-    'm',
-    'n',
-    'o',
-    'p',
-    'q',
-    'r',
-    's',
-    't',
-    'u',
-    'v',
-    'w',
-    'x',
-    'y',
-    'z',
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-    'G',
-    'H',
-    'I',
-    'J',
-    'K',
-    'L',
-    'M',
-    'N',
-    'O',
-    'P',
-    'Q',
-    'R',
-    'S',
-    'T',
-    'U',
-    'V',
-    'W',
-    'X',
-    'Y',
-    'Z',
-  ]
-  // 随机产生
-  if (randomFlag) {
-    range = Math.round(Math.random() * (max - min)) + min
-  }
-  for (var i = 0; i < range; i++) {
-    var pos = Math.round(Math.random() * (arr.length - 1))
-    str += arr[pos]
-  }
-  vdata.saveObject.appSecret = str
+// 平台公鑰（唯讀，交給商戶驗證平台回應與通知；ADR-0013）
+function loadPlatformKey() {
+  vdata.platformPublicKey = ''
+  req.getById(API_URL_MCH_APP, 'platformPublicKey').then((res) => {
+    vdata.platformPublicKey = res.platformPublicKey
+  })
+}
+function copyPlatformKey() {
+  navigator.clipboard
+    .writeText(vdata.platformPublicKey)
+    .then(() => $infoBox.message.success('已複製平台公鑰'))
+    .catch(() => $infoBox.message.warning('無法自動複製，請手動選取文字複製'))
 }
 function onClose() {
   vdata.open = false

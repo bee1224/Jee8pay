@@ -19,7 +19,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
-import com.jeequan.jeepay.core.utils.JeepayKit;
+import com.jeequan.jeepay.core.utils.MlDsaKit;
 import com.jeequan.jeepay.core.utils.JsonKit;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -27,6 +27,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.security.PrivateKey;
 
 /*
 * 接口返回对象
@@ -72,15 +73,15 @@ public class ApiRes<M> implements Serializable {
         return new ApiRes(ApiCodeEnum.SUCCESS.getCode(), ApiCodeEnum.SUCCESS.getMsg(), data, null);
     }
 
-    /** 业务处理成功, 自动签名 **/
-    public static ApiRes okWithSign(Object data, String mchKey){
+    /** 业务处理成功, 以平台簽名私鑰對 data 簽名（ML-DSA-65，ADR-0013） **/
+    public static ApiRes okWithSign(Object data, PrivateKey platformKey){
 
         if(data == null){
             return new ApiRes(ApiCodeEnum.SUCCESS.getCode(), ApiCodeEnum.SUCCESS.getMsg(), null, null);
         }
 
         JSONObject jsonObject = (JSONObject)JSONObject.toJSON(data);
-        String sign = JeepayKit.getSign(jsonObject, mchKey);
+        String sign = MlDsaKit.sign(jsonObject, platformKey);
         return new ApiRes(ApiCodeEnum.SUCCESS.getCode(), ApiCodeEnum.SUCCESS.getMsg(), data, sign);
     }
 

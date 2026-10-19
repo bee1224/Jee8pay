@@ -2,7 +2,6 @@ package com.jeequan.jeepay.mgr.ctrl.agent;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.jeequan.jeepay.JeepayClient;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.AgentInfo;
@@ -12,15 +11,12 @@ import com.jeequan.jeepay.core.entity.PayWay;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.model.DBApplicationConfig;
-import com.jeequan.jeepay.exception.JeepayException;
 import com.jeequan.jeepay.mgr.service.AuthService;
-import com.jeequan.jeepay.model.PayOrderCreateReqModel;
-import com.jeequan.jeepay.request.PayOrderCreateRequest;
-import com.jeequan.jeepay.response.PayOrderCreateResponse;
 import com.jeequan.jeepay.service.impl.AgentBranchService;
 import com.jeequan.jeepay.service.impl.AgentPortalService;
 import com.jeequan.jeepay.service.impl.AgentStaffService;
 import com.jeequan.jeepay.service.impl.MchAppService;
+import com.jeequan.jeepay.service.sign.PayApiClient;
 import com.jeequan.jeepay.service.impl.MchPayPassageService;
 import com.jeequan.jeepay.service.impl.PayWayService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
@@ -36,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -59,6 +56,7 @@ public class AgentStaffController extends AgentBaseCtrl {
     @Autowired private AgentStaffService staff;
     @Autowired private AuthService authService;
     @Autowired private MchAppService mchAppService;
+    @Autowired private PayApiClient payApiClient;
     @Autowired private MchPayPassageService mchPayPassageService;
     @Autowired private PayWayService payWayService;
     @Autowired private SysConfigService sysConfigService;
@@ -227,28 +225,19 @@ public class AgentStaffController extends AgentBaseCtrl {
         }
 
         DBApplicationConfig config = sysConfigService.getDBApplicationConfig();
-        PayOrderCreateReqModel model = new PayOrderCreateReqModel();
-        model.setMchNo(mchNo);
-        model.setAppId(appId);
-        model.setMchOrderNo("TEST" + System.currentTimeMillis() + RandomStringUtils.randomNumeric(4));
-        model.setWayCode(wayCode);
-        model.setAmount(amount);
-        model.setCurrency("TWD");
-        model.setClientIp(getClientIp());
-        model.setSubject("管理員測試單");
-        model.setBody("管理員測試單[" + mchNo + "]");
-        model.setNotifyUrl(config.getMchSiteUrl() + "/api/anon/paytestNotify/payOrder");
-        model.setChannelExtra(extra.toString());
-        PayOrderCreateRequest request = new PayOrderCreateRequest();
-        request.setBizModel(model);
-        try {
-            PayOrderCreateResponse response = new JeepayClient(config.getPaySiteUrl(), mchApp.getAppSecret()).execute(request);
-            if (response.getCode() != 0) {
-                throw new BizException(response.getMsg());
-            }
-            return ApiRes.ok(response.get());
-        } catch (JeepayException e) {
-            throw new BizException(e.getMessage());
-        }
+        // 平台不持有商戶私鑰，以平台內部金鑰代商戶下單（ADR-0013）
+        Map<String, Object> req = new HashMap<>();
+        req.put("mchNo", mchNo);
+        req.put("appId", appId);
+        req.put("mchOrderNo", "TEST" + System.currentTimeMillis() + RandomStringUtils.randomNumeric(4));
+        req.put("wayCode", wayCode);
+        req.put("amount", amount);
+        req.put("currency", "TWD");
+        req.put("clientIp", getClientIp());
+        req.put("subject", "管理員測試單");
+        req.put("body", "管理員測試單[" + mchNo + "]");
+        req.put("notifyUrl", config.getMchSiteUrl() + "/api/anon/paytestNotify/payOrder");
+        req.put("channelExtra", extra.toString());
+        return ApiRes.ok(payApiClient.call("/api/pay/unifiedOrder", req));
     }
 }

@@ -89,7 +89,7 @@
           width: '100%',
           borderTop: '1px solid #e9e9e9',
           padding: '10px 16px',
-          background: '#fff',
+          background: 'var(--jp-surface)',
           textAlign: 'center',
           boxSizing: 'border-box',
           zIndex: 1,

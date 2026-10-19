@@ -96,6 +96,7 @@
 </template>
 <script setup lang="ts">
 import { timeFix } from '@/utils/util'
+import { reportLoginDevice } from '@/utils/loginDevice'
 import { vercode } from '@/api/login'
 import router from '@/router'
 import { login } from '@/api/login'
@@ -141,6 +142,8 @@ function handleSubmit(e) {
   login(loginParams)
     .then((bizData) => {
       userStore.putToken(bizData['iToken'])
+      // 登入裝置紀錄（時間、IP、裝置、定位）；不阻擋登入
+      reportLoginDevice()
       router.push({ path: '/' })
       // 延迟 1 秒显示欢迎信息
       setTimeout(() => {
@@ -233,7 +236,7 @@ function refVercode() {
 
           .title {
             font-size: 33px;
-            color: rgba(0, 0, 0, 0.85);
+            color: var(--jp-text);
             font-family: Avenir, 'Helvetica Neue', Arial, Helvetica, sans-serif;
             font-weight: 600;
             position: relative;
@@ -242,7 +245,7 @@ function refVercode() {
         }
         .desc {
           font-size: 14px;
-          color: rgba(0, 0, 0, 0.45);
+          color: var(--jp-text-3);
           margin-bottom: 40px;
           font-size: 20px;
           font-family:
@@ -281,7 +284,7 @@ function refVercode() {
           margin-bottom: 8px;
           font-size: 14px;
           a {
-            color: rgba(0, 0, 0, 0.45);
+            color: var(--jp-text-3);
             transition: all 0.3s;
             &:not(:last-child) {
               margin-right: 40px;
@@ -289,7 +292,7 @@ function refVercode() {
           }
         }
         .copyright {
-          color: rgba(0, 0, 0, 0.45);
+          color: var(--jp-text-3);
           font-size: 14px;
         }
       }
@@ -327,7 +330,7 @@ function refVercode() {
 
     .item-icon {
       font-size: 24px;
-      color: rgba(0, 0, 0, 0.2);
+      color: var(--jp-text-3);
       margin-left: 16px;
       vertical-align: middle;
       cursor: pointer;

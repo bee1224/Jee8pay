@@ -10,7 +10,7 @@
         <div v-if="autoRefTableConfig">
           <span style="margin-right: 10px; color: #a9b3b1">
             自動重新整理：
-            <span style="margin-right: 5px; color: #000">{{ autoRefTableSubTime }}s</span>
+            <span style="margin-right: 5px; color: var(--jp-text)">{{ autoRefTableSubTime }}s</span>
           </span>
           <div>
             <a-switch

@@ -5,7 +5,7 @@
     :title="vdata.isAdd ? '新增代理' : '修改代理'"
     @close="onClose"
     :body-style="{ paddingBottom: '80px' }"
-    width="40%"
+    :width="isMobile ? '100%' : '40%'"
   >
     <a-form ref="infoFormModel" :model="vdata.saveObject" layout="vertical" :rules="vdata.rules">
       <a-row justify="space-between" type="flex">
@@ -43,7 +43,7 @@
       <a-row v-if="vdata.isAdd" justify="space-between" type="flex">
         <a-col :span="22">
           <a-form-item label="登入帳號" name="loginUsername" extra="代理登入營運平台用的帳號；儲存後系統產生 8 碼隨機密碼並顯示一次。">
-            <a-input placeholder="4～32 碼英文、數字或底線" v-model:value="vdata.saveObject.loginUsername" autocomplete="off" />
+            <a-input placeholder="2～32 碼中文、英文、數字或底線" v-model:value="vdata.saveObject.loginUsername" autocomplete="off" />
           </a-form-item>
         </a-col>
       </a-row>
@@ -55,7 +55,7 @@
           </a-form-item>
         </a-col>
         <a-col :span="10">
-          <a-form-item label="聯絡人手機號" name="contactTel">
+          <a-form-item label="聯絡人手機號（選填）" name="contactTel">
             <a-input placeholder="09 開頭 10 碼" v-model:value="vdata.saveObject.contactTel" />
           </a-form-item>
         </a-col>
@@ -89,6 +89,7 @@
 
 <script setup lang="ts">
 import { API_URL_AGENT_INFO, req } from '@/api/manage'
+import { isMobile } from '@/views/mobile/mobileKit'
 import { reactive, ref, getCurrentInstance } from 'vue'
 import AgentCredentialModal from './AgentCredentialModal.vue'
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
@@ -111,9 +112,9 @@ const vdata: any = reactive({
     agentName: [{ required: true, message: '請輸入代理名稱', trigger: 'blur' }],
     agentLevel: [{ required: true, message: '請選擇代理層級', trigger: 'change' }],
     parentAgentNo: [{ required: true, message: '請選擇上級團長', trigger: 'change' }],
-    loginUsername: [{ required: true, pattern: /^[A-Za-z0-9_]{4,32}$/, message: '請輸入 4～32 碼英文、數字或底線', trigger: 'blur' }],
-    // 新增時必填：登入帳號需要綁定手機號
-    contactTel: [{ required: true, pattern: /^09\d{8}$/, message: '請輸入正確的手機號（09 開頭 10 碼）', trigger: 'blur' }],
+    loginUsername: [{ required: true, pattern: /^[A-Za-z0-9_一-鿿]{2,32}$/, message: '請輸入 2～32 碼中文、英文、數字或底線', trigger: 'blur' }],
+    // 選填；有填才檢查格式
+    contactTel: [{ required: false, pattern: /^09\d{8}$/, message: '請輸入正確的手機號（09 開頭 10 碼），不填也可以', trigger: 'blur' }],
     contactEmail: [
       { required: false, pattern: /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/, message: '請輸入正確的信箱', trigger: 'blur' },
     ],
@@ -132,7 +133,6 @@ function loadSeniorOptions() {
 
 function show(recordId) {
   vdata.isAdd = !recordId
-  vdata.rules.contactTel[0].required = vdata.isAdd
   vdata.saveObject = { state: 1, agentLevel: 1 }
   if (infoFormModel.value) {
     infoFormModel.value.resetFields()

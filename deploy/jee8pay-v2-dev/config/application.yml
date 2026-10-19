@@ -32,11 +32,12 @@ logging:
     root: info
     com.jeequan.jeepay: info
     com.jeequan.jeepay.core.utils.JeepayKit: warn
-    com.jeequan.jeepay.util.JeepayKit: warn
   path: /jeepayhomes/service/logs
 
 isys:
   allow-cors: true
+  # 後台代商戶呼叫支付服務時走容器網路直連（ADR-0013）
+  pay-internal-url: http://payment:9216
   cache-config: false
   oss:
     file-root-path: /jeepayhomes/service/uploads

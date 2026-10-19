@@ -238,7 +238,7 @@ public class AgentBranchService {
             throw new BizException("只能調整自己旗下的商戶");
         }
         if (!scope.agentNos.contains(agentNo)) {
-            throw new BizException("直屬代理必須是自己或自己的旗下代理");
+            throw new BizException("直屬代理必須是自己或自己的代理");
         }
         agentMchRelaService.bind(mchNo, agentNo, uid, operator(me, name));
     }
@@ -260,6 +260,7 @@ public class AgentBranchService {
         result.put("agentName", mch.getMchName());
         result.put("loginUsername", user.getLoginUsername());
         result.put("initPassword", password);
+        result.put("loginUrl", agentPortalService.mchLoginUrl());
         return result;
     }
 
@@ -406,7 +407,7 @@ public class AgentBranchService {
     }
 
     /**
-     * 團長設定：自己的團長費、旗下代理的隊長費，或對轄下商戶逐一覆寫這兩層。
+     * 團長設定：自己的團長費、我的代理的隊長費，或對轄下商戶逐一覆寫這兩層。
      * 儲存後以 1000 元試算轄下所有商戶；任何商戶各層合計超過其商戶費率就整筆回滾。
      */
     @Transactional
@@ -420,11 +421,11 @@ public class AgentBranchService {
         String targetId = StringUtils.trimToEmpty(input.getTargetId());
         if (FeeRule.TARGET_AGENT.equals(input.getTargetType())) {
             if (!scope.agentNos.contains(targetId)) {
-                throw new BizException("只能設定自己或自己的旗下代理");
+                throw new BizException("只能設定自己或自己的代理");
             }
         } else if (FeeRule.TARGET_MCH.equals(input.getTargetType())) {
             if (!scope.mchNos.contains(targetId)) {
-                throw new BizException("只能覆寫自己旗下商戶的費率");
+                throw new BizException("只能覆寫自己我的商戶的費率");
             }
         } else {
             throw new BizException("設定對象只能是代理或商戶");
@@ -504,13 +505,15 @@ public class AgentBranchService {
 
     // ---------------- 提現審核（代理可同意或駁回；撥款仍由平台執行） ----------------
 
-    public IPage<WithdrawOrder> withdraws(AgentInfo me, IPage<WithdrawOrder> page, Byte state) {
+    /** start、end 可為 null（不限）；end 為開區間 */
+    public IPage<WithdrawOrder> withdraws(AgentInfo me, IPage<WithdrawOrder> page, Byte state, Date start, Date end) {
         Scope scope = scope(me);
         Set<String> agentNos = scope.descendantAgentNos();
         if (scope.mchNos.isEmpty() && agentNos.isEmpty()) {
             return page;
         }
-        return withdrawService.page(page, WithdrawOrder.gw().eq(state != null, WithdrawOrder::getState, state).and(w -> {
+        return withdrawService.page(page, WithdrawOrder.gw().eq(state != null, WithdrawOrder::getState, state)
+                .ge(start != null, WithdrawOrder::getCreatedAt, start).lt(end != null, WithdrawOrder::getCreatedAt, end).and(w -> {
             if (!scope.mchNos.isEmpty()) {
                 w.or(x -> x.eq(WithdrawOrder::getOwnerType, WalletAccount.OWNER_MCH).in(WithdrawOrder::getOwnerId, scope.mchNos));
             }
@@ -552,7 +555,7 @@ public class AgentBranchService {
         withdrawService.reject(withdrawId, uid, StringUtils.abbreviate(operator(me, name), 64), remark.trim());
     }
 
-    // ---------------- 白標（團長設定，自己與旗下代理登入後套用） ----------------
+    // ---------------- 白標（團長設定，自己與我的代理登入後套用） ----------------
 
     public void saveBrand(AgentInfo me, Byte enabled, String title, String logo) {
         requireSenior(me, "設定品牌");

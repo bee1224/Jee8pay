@@ -8,7 +8,7 @@ import java.util.Locale;
  * 密碼不分大小寫的 BCrypt encoder：一律以 toUpperCase(Locale.ROOT) 正規化後再 encode / matches。
  *
  * 既有 credential 必須是「大寫密碼」的 bcrypt hash（新增／重置／登入驗證皆走同一正規化）。
- * 僅影響登入密碼；Merchant API 的 App Secret（MD5 簽名）不受影響、維持大小寫敏感。
+ * 僅影響登入密碼；與商戶 API 簽名（ML-DSA-65，ADR-0013）無關。
  */
 public class UpperCasePasswordEncoder extends BCryptPasswordEncoder {
 

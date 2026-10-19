@@ -114,6 +114,6 @@ defineExpose({ refCardList })
 .jeepay-card-add-text {
   padding-top: 5px;
   font-size: 13px;
-  color: rgba(0, 0, 0, 0.35);
+  color: var(--jp-text-3);
 }
 </style>

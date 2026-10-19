@@ -85,7 +85,9 @@ class HttpRequest {
 
           useUserStore().logout()
 
-          $infoBox.confirmDanger('會話逾時，請重新登入', '3s後將自動登出...', () => {}, {
+          // 同一帳號只能在一部裝置登入：被其他裝置的登入擠掉時，提示原因
+          const kicked = error.response.headers && error.response.headers['x-jeepay-session'] === 'kicked'
+          $infoBox.confirmDanger(kicked ? '你的帳號已在其他裝置登入' : '會話逾時，請重新登入', kicked ? '這台裝置已被登出；如果不是你本人操作，請立即修改密碼。' : '3s後將自動登出...', () => {}, {
             okText: '重新登入',
             cancelText: '關閉對話',
           })

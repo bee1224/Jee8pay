@@ -74,7 +74,7 @@ public class UnifiedOrderController extends AbstractPayOrderController {
             res.setPayData(bizRes.buildPayData());
         }
 
-        return ApiRes.okWithSign(res, configContextQueryService.queryMchApp(rq.getMchNo(), rq.getAppId()).getAppSecret());
+        return ApiRes.okWithSign(res, signKeyStore.platformPrivateKey());
     }
 
 

@@ -29,7 +29,7 @@ Status vocabulary：`Open`、`In Progress`、`Resolved`、`Accepted`。
 
 | ID | 債 | 修復 |
 | --- | --- | --- |
-| TD-009 | 簽名 preimage 含 secret log | `JeepayKit.getSign` 只記錄不含 key 的參數 |
+| TD-009 | 簽名 preimage 含 secret log | `JeepayKit.getSign` 只記錄不含 key 的參數；2026-10-19 起 MD5 簽名整個移除（ADR-0013），ML-DSA 待簽字串不含任何密鑰 |
 | TD-011 | CCAT cache-disabled config | 已於 E02 解決（既有） |
 | TD-010 | edge 非 restart-durable | 已於 N01 解決（既有） |
 | C1 | 後端 API 訊息簡體 | 外層 API 訊息繁中化（payment/ccat/core RQ），同步更新黑箱與 UAT notice |
@@ -51,3 +51,5 @@ Status vocabulary：`Open`、`In Progress`、`Resolved`、`Accepted`。
 | A2 | 文件落後 runtime | 測試數已更新；I07R2-P05 驗收報告未補（runtime/ gitignored） |
 | D1-D4 | 營運：MQ memory / reboot 未測 / prod 空資料（V1 退休已於 2026-08-23 完成：production 與 dev 均完整退役） | 營運項 |
 | 商戶自助 / 代付人工流程 / 結算模型 | 業務功能 | 需設計 + ADR + 實作任務 |
+| TD-019 | 正式環境仍是 JDK 17 + MD5 商戶簽名（ADR-0013 只在測試環境） | 合併 main 前必須一起處理：`deploy/jee8pay-v2-production/Dockerfile.backend` 改 `eclipse-temurin:25-jre`、產生正式環境兩組 ML-DSA 金鑰並掛進 compose secrets、執行 `t_mch_app` 遷移（刪 `app_secret`），以及所有正式商戶改用 ML-DSA-65 的切換時程與通知；否則 JDK 25 編譯的 jar 無法在 17 執行 |
+| TD-020 | 操作紀錄 `t_sys_log.opt_req_param` 保存了登入密碼（Base64）、修改密碼與渠道金鑰 | 2026-10-19 測試環境修正：`MethodLogAop`（manager、merchant）寫入前遮罩，`20261019-sys-log-mask.sql` 遮罩既有資料（測試站實測 109 筆登入紀錄含密碼）。正式環境同樣有此問題且尚未處理：合併前必須一起上線並執行遮罩 SQL；曾登入正式環境的帳號建議更換密碼 |

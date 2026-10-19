@@ -834,7 +834,7 @@ function exportFunc() {
 <style lang="less" scoped>
 .today-hint {
   margin-bottom: 12px;
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--jp-text-3);
   font-size: 13px;
 }
 /* 建立時間區間選取器：放寬以完整顯示起訖時間 */

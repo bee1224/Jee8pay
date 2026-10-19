@@ -1,0 +1,877 @@
+// 手機版共用樣式（顏色一律取自 global.less 的 --jp-* 亮／暗色變數）
+.m-app {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--jp-bg);
+  color: var(--jp-text);
+  font-size: 15px;
+  z-index: 10;
+
+  svg.m-i {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex: none;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.86em;
+  }
+  // :where 讓重設樣式的權重為 0，不會蓋掉 .m-row、.m-tile 等自己的留白
+  // 不套用到 Ant Design 的按鈕（.ant-btn），否則會蓋掉它的樣式
+  :where(button:not(.ant-btn)) {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+}
+
+.m-topbar {
+  flex: none;
+  height: 52px;
+  padding-top: env(safe-area-inset-top, 0px);
+  box-sizing: content-box;
+  display: grid;
+  grid-template-columns: 52px 1fr 52px;
+  align-items: center;
+  background: var(--jp-surface);
+  border-bottom: 1px solid var(--jp-border);
+  h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--jp-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .m-back {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    margin-left: 4px;
+    color: var(--jp-primary);
+  }
+}
+
+.m-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  // 直排 flex 的子元素不可被壓扁，否則清單被裁切、無法捲動
+  > * {
+    flex-shrink: 0;
+  }
+}
+// 沒有手機版畫面的頁面直接放電腦版元件：表格維持原欄寬、在表格內左右滑動，不擠壓截字
+.m-desktop-page {
+  overflow-x: auto;
+  margin: -16px -16px 0;
+  .ant-table-content,
+  .ant-table-body {
+    overflow-x: auto !important;
+  }
+  .ant-table table {
+    min-width: max-content;
+  }
+  .ant-table-cell {
+    white-space: nowrap;
+  }
+}
+
+.m-tabbar {
+  flex: none;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  background: var(--jp-surface);
+  border-top: 1px solid var(--jp-border);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  button {
+    height: 56px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    font-size: 11px;
+    color: var(--jp-text-3);
+    &.active {
+      color: var(--jp-primary);
+      font-weight: 500;
+    }
+  }
+}
+
+// 主選單
+.m-hello {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  b {
+    display: block;
+    font-size: 17px;
+  }
+  span {
+    font-size: 13px;
+    color: var(--jp-text-3);
+  }
+}
+.m-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--jp-primary-soft);
+  color: var(--jp-primary);
+  font-weight: 700;
+  flex: none;
+  overflow: hidden;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+.m-role {
+  font-size: 12px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--jp-primary-soft);
+  color: var(--jp-primary);
+  margin-left: 6px;
+  font-weight: 500;
+  vertical-align: 2px;
+}
+.m-glance {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--jp-surface);
+  border-radius: 14px;
+  border: 1px solid var(--jp-border);
+  text-align: left;
+  width: 100%;
+  > div {
+    padding: 12px 10px;
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+  > div + div {
+    border-left: 1px solid var(--jp-border);
+  }
+  small {
+    color: var(--jp-text-3);
+    font-size: 12px;
+  }
+  strong {
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+.m-group h3 {
+  margin: 0 0 8px 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--jp-text-3);
+  letter-spacing: 0.06em;
+}
+.m-tiles {
+  display: grid;
+  // 依寬度自動排：小手機 4 格、大手機／平板直式 5～8 格
+  grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+  gap: 4px;
+  background: var(--jp-surface);
+  border-radius: 14px;
+  border: 1px solid var(--jp-border);
+  padding: 10px 6px;
+}
+.m-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 2px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  color: var(--jp-text-2);
+  text-align: center;
+  position: relative;
+  &:active {
+    background: var(--jp-surface-2);
+  }
+  .m-ic {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: var(--jp-primary-soft);
+    color: var(--jp-primary);
+    font-size: 20px;
+  }
+}
+.m-badge {
+  position: absolute;
+  top: 4px;
+  right: calc(50% - 30px);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--jp-bad);
+  color: #fff;
+  font-size: 11px;
+  line-height: 18px;
+  font-weight: 700;
+  box-sizing: border-box;
+}
+
+// 通用元件
+.m-card {
+  background: var(--jp-surface);
+  border: 1px solid var(--jp-border);
+  border-radius: 14px;
+  padding: 16px;
+}
+.m-list {
+  background: var(--jp-surface);
+  border: 1px solid var(--jp-border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.m-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  width: 100%;
+  text-align: left;
+  box-sizing: border-box;
+  & + .m-row {
+    border-top: 1px solid var(--jp-border);
+  }
+  &.tap:active {
+    background: var(--jp-surface-2);
+  }
+  .main {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+    b {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    small {
+      color: var(--jp-text-3);
+      font-size: 12.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+  .end {
+    text-align: right;
+    display: grid;
+    gap: 3px;
+    justify-items: end;
+    flex: none;
+  }
+}
+.m-pill {
+  display: inline-block;
+  font-size: 12px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-weight: 500;
+  white-space: nowrap;
+  &.ok {
+    background: var(--jp-ok-soft);
+    color: var(--jp-ok);
+  }
+  &.warn {
+    background: var(--jp-warn-soft);
+    color: var(--jp-warn);
+  }
+  &.bad {
+    background: var(--jp-bad-soft);
+    color: var(--jp-bad);
+  }
+  &.mute {
+    background: var(--jp-surface-2);
+    color: var(--jp-text-3);
+  }
+}
+.m-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--jp-surface);
+  border: 1px solid var(--jp-border);
+  border-radius: 12px;
+  padding: 0 12px;
+  color: var(--jp-text-3);
+  input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: none;
+    height: 42px;
+    font: inherit;
+    font-size: 16px;
+    color: var(--jp-text);
+    outline: none;
+  }
+}
+.m-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  button {
+    flex: none;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: var(--jp-surface);
+    border: 1px solid var(--jp-border);
+    font-size: 13px;
+    color: var(--jp-text-2);
+    &.on {
+      background: var(--jp-primary);
+      border-color: var(--jp-primary);
+      color: #fff;
+    }
+  }
+}
+.m-seg {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  background: var(--jp-surface-2);
+  border: 1px solid var(--jp-border);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+  button {
+    padding: 7px 12px;
+    border-radius: 7px;
+    font-size: 14px;
+    color: var(--jp-text-2);
+    &.on {
+      background: var(--jp-surface);
+      color: var(--jp-text);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+      font-weight: 500;
+    }
+  }
+}
+.m-btn {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  height: 46px;
+  border-radius: 12px;
+  background: var(--jp-primary) !important;
+  color: #fff !important;
+  font-weight: 500;
+  width: 100%;
+  &.ghost {
+    background: var(--jp-surface-2) !important;
+    color: var(--jp-text) !important;
+  }
+  &.danger {
+    background: var(--jp-bad-soft) !important;
+    color: var(--jp-bad) !important;
+  }
+  &.sm {
+    height: 34px;
+    width: auto;
+    padding: 0 14px !important;
+    font-size: 13px;
+    border-radius: 9px;
+  }
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+.m-kv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 16px;
+  font-size: 14px;
+  margin: 0;
+  dt {
+    color: var(--jp-text-3);
+  }
+  dd {
+    margin: 0;
+    text-align: right;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+.m-big {
+  font-size: 28px;
+  font-weight: 700;
+}
+.m-muted {
+  color: var(--jp-text-3);
+  font-size: 13px;
+  margin: 0 4px;
+}
+.m-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+.m-stat {
+  background: var(--jp-surface);
+  border: 1px solid var(--jp-border);
+  border-radius: 14px;
+  padding: 14px;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  small {
+    color: var(--jp-text-3);
+    font-size: 12.5px;
+  }
+  strong {
+    font-size: 18px;
+    overflow-wrap: anywhere;
+  }
+}
+.m-section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 4px 4px -6px;
+  h3 {
+    margin: 0;
+    font-size: 15px;
+    color: var(--jp-text);
+  }
+}
+.m-table-wrap {
+  overflow-x: auto;
+  padding: 0;
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 13.5px;
+  }
+  th,
+  td {
+    padding: 10px 12px;
+    text-align: right;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--jp-border);
+  }
+  th:first-child,
+  td:first-child {
+    text-align: left;
+  }
+  th {
+    color: var(--jp-text-3);
+    font-weight: 500;
+    font-size: 12.5px;
+  }
+  tr:last-child td {
+    border-bottom: 0;
+  }
+}
+.m-empty {
+  text-align: center;
+  color: var(--jp-text-3);
+  padding: 32px 16px;
+}
+.m-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+// 底部面板與獨立頁面（流量監控、Telegram）不在 .m-app 裡，同樣需要按鈕重設
+// 外層也包 :where，權重為 0，否則會蓋掉後面 .m-row 的留白（這段寫在 .m-row 之後）
+:where(.m-sheet, .m-page) {
+  :where(button:not(.ant-btn)) {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+}
+
+// 底部彈出面板（a-drawer placement=bottom）
+.m-sheet {
+  .ant-drawer-content {
+    border-radius: 18px 18px 0 0;
+  }
+  .ant-drawer-body {
+    padding: 8px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+    display: grid;
+    gap: 14px;
+    align-content: start;
+  }
+  .m-grab {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--jp-border);
+    margin: 0 auto;
+  }
+  h3 {
+    margin: 0;
+    font-size: 17px;
+    text-align: center;
+  }
+}
+
+// ---------------- RWD ----------------
+// 很窄的手機（例如 320～359）：縮小字級與留白，避免截字
+@media (max-width: 359px) {
+  .m-app {
+    font-size: 14px;
+  }
+  .m-content {
+    padding-left: max(12px, env(safe-area-inset-left, 0px));
+    padding-right: max(12px, env(safe-area-inset-right, 0px));
+  }
+  .m-tiles {
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  }
+  .m-tile .m-ic {
+    width: 40px;
+    height: 40px;
+  }
+  .m-big {
+    font-size: 24px;
+  }
+}
+// 大手機橫式／平板直式：內容置中、限制閱讀寬度，底部分頁列跟著置中
+@media (min-width: 600px) {
+  .m-content {
+    padding-left: max(24px, calc((100% - 720px) / 2));
+    padding-right: max(24px, calc((100% - 720px) / 2));
+  }
+  .m-tabbar {
+    padding-left: calc((100% - 720px) / 2);
+    padding-right: calc((100% - 720px) / 2);
+  }
+  // 底部面板整片滑出，內容限寬置中（不動 drawer 本身的位移動畫）
+  .m-sheet .ant-drawer-body {
+    grid-template-columns: minmax(0, 720px);
+    justify-content: center;
+  }
+}
+// 手機橫放（高度很矮）：標題列與分頁列變薄，留給內容
+@media (max-height: 480px) and (orientation: landscape) {
+  .m-topbar {
+    height: 44px;
+  }
+  .m-tabbar button {
+    height: 46px;
+    flex-direction: row;
+    gap: 6px;
+    font-size: 12px;
+  }
+}
+
+// ───────── 質感層 ─────────
+// 統一規則：表面一律「淡漸層 + 頂部 1px 高光 + 分層柔和陰影」；強調色一律品牌漸層（藍 → 靛 → 紫）。
+// 只有主選單圖示用六色漸層區分功能，形狀、角度、光澤都一致，不會花。顏色全取自 global.less 的變數，亮／暗色各自定義。
+.m-app {
+  background: var(--jp-app-bg);
+  background-attachment: fixed;
+}
+.m-topbar,
+.m-tabbar {
+  background: var(--jp-glass);
+  -webkit-backdrop-filter: saturate(180%) blur(18px);
+  backdrop-filter: saturate(180%) blur(18px);
+  border-color: var(--jp-card-edge);
+}
+.m-topbar {
+  box-shadow: 0 1px 0 var(--jp-card-edge), 0 6px 20px rgba(15, 23, 42, 0.04);
+  position: relative;
+  z-index: 2;
+}
+.m-tabbar button.active {
+  color: #2563eb;
+  .anticon {
+    filter: drop-shadow(0 3px 6px rgba(37, 99, 235, 0.35));
+  }
+  > span:last-child {
+    background-image: var(--jp-brand-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 600;
+  }
+}
+html[data-theme='dark'] .m-tabbar button.active {
+  color: #60a5fa;
+}
+
+.m-card,
+.m-list,
+.m-tiles,
+.m-glance,
+.m-stat,
+.m-search,
+.m-empty {
+  background: var(--jp-card-bg);
+  border: 1px solid var(--jp-card-edge);
+  box-shadow: var(--jp-card-gloss), var(--jp-shadow-1);
+}
+.m-card,
+.m-list,
+.m-tiles,
+.m-stat,
+.m-empty {
+  border-radius: 16px;
+}
+.m-row.tap:active,
+.m-tile:active {
+  background: var(--jp-primary-soft);
+}
+
+// 主選單圖示：六色漸層循環 + 上半部光澤 + 同色系投影
+.m-tile .m-ic {
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  background: var(--jp-ic-1);
+  box-shadow: 0 6px 14px -4px rgba(37, 99, 235, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 50% 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0));
+    pointer-events: none;
+  }
+}
+.m-tile:nth-child(6n + 2) .m-ic { background: var(--jp-ic-2); box-shadow: 0 6px 14px -4px rgba(37, 99, 235, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+.m-tile:nth-child(6n + 3) .m-ic { background: var(--jp-ic-3); box-shadow: 0 6px 14px -4px rgba(37, 99, 235, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+.m-tile:nth-child(6n + 4) .m-ic { background: var(--jp-ic-4); box-shadow: 0 6px 14px -4px rgba(37, 99, 235, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+.m-tile:nth-child(6n + 5) .m-ic { background: var(--jp-ic-5); box-shadow: 0 6px 14px -4px rgba(37, 99, 235, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+.m-tile:nth-child(6n + 6) .m-ic { background: var(--jp-ic-6); box-shadow: 0 6px 14px -4px rgba(37, 99, 235, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+
+// 統計卡：第一張當主角，用品牌漸層與光暈；其餘維持淡漸層
+.m-stats > .m-stat:first-child {
+  position: relative;
+  overflow: hidden;
+  background: var(--jp-brand-grad);
+  border-color: transparent;
+  box-shadow: var(--jp-brand-glow), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  color: #fff;
+  small {
+    color: rgba(255, 255, 255, 0.78);
+  }
+  &::after {
+    content: '';
+    position: absolute;
+    width: 160px;
+    height: 160px;
+    right: -60px;
+    top: -80px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+  }
+}
+
+// 強調元件：品牌漸層 + 光澤 + 光暈
+.m-btn:not(.ghost):not(.danger) {
+  background: var(--jp-brand-grad) !important;
+  box-shadow: var(--jp-brand-glow), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.12);
+}
+.m-btn.ghost {
+  box-shadow: inset 0 0 0 1px var(--jp-card-edge), var(--jp-card-gloss);
+}
+.m-chips button {
+  background: var(--jp-card-bg);
+  border-color: var(--jp-card-edge);
+  box-shadow: var(--jp-card-gloss), 0 1px 3px rgba(15, 23, 42, 0.05);
+  &.on {
+    background: var(--jp-brand-grad);
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  }
+}
+.m-seg button.on {
+  background: var(--jp-card-bg);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.08), var(--jp-card-gloss);
+}
+.m-avatar {
+  background: var(--jp-brand-grad);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.m-role {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.14), rgba(14, 165, 233, 0.14));
+  color: #2563eb;
+}
+html[data-theme='dark'] .m-role {
+  color: #93c5fd;
+}
+.m-pill {
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.03);
+}
+.m-section-title h3 {
+  letter-spacing: 0.02em;
+}
+// 篩選列留出陰影空間，避免被橫向捲動裁切
+.m-chips {
+  padding: 4px 4px 8px;
+  margin: -4px -4px -8px;
+  button.on {
+    box-shadow: 0 3px 8px rgba(37, 99, 235, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  }
+}
+// 開關與品牌色一致
+.m-app,
+.m-sheet,
+.m-page {
+  .ant-switch.ant-switch-checked {
+    background: var(--jp-brand-grad);
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+  }
+}
+
+// ───────── 字形層次 ─────────
+// 標題收緊字距、數字用等寬數字並加重，次要文字降一階；單號改用一般字形（等寬字太生硬），程式碼區塊才用等寬字
+.m-app,
+.m-sheet,
+.m-page {
+  .mono {
+    font-family: inherit;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.03em;
+    font-size: 0.92em;
+    color: var(--jp-text-2);
+  }
+  pre.mono,
+  pre {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0;
+  }
+  .num,
+  .m-big,
+  .m-stat strong {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+}
+.m-topbar h2 {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.m-section-title h3 {
+  font-weight: 650;
+}
+.m-stat {
+  strong {
+    font-size: 21px;
+    font-weight: 700;
+  }
+  small {
+    font-weight: 500;
+  }
+}
+.m-row .main b {
+  font-weight: 600;
+}
+.m-row .main small {
+  font-size: 12.5px;
+}
+.m-tile {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.m-group h3 {
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  font-size: 12.5px;
+}
+.m-hello b {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+// ───────── 背景透出：卡片半透明毛玻璃 ─────────
+.m-card,
+.m-list,
+.m-tiles,
+.m-stat,
+.m-search,
+.m-glance,
+.m-empty,
+.m-chips button:not(.on),
+.m-seg {
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+.m-row + .m-row {
+  border-top-color: var(--jp-card-line);
+}
+
+// ───────── 底部列：浮動毛玻璃底座 ─────────
+// 圓角、漸層玻璃、分層陰影與頂部高光；目前分頁有藍色漸層膠囊與圖示光暈
+.m-tabbar {
+  margin: 0 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  padding: 6px;
+  gap: 4px;
+  border-radius: 24px;
+  border: 1px solid var(--jp-card-edge);
+  background: linear-gradient(180deg, var(--jp-glass) 0%, var(--jp-glass-2) 100%);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  backdrop-filter: saturate(180%) blur(22px);
+  box-shadow: var(--jp-shadow-2), var(--jp-card-gloss), inset 0 -1px 0 rgba(15, 23, 42, 0.04);
+  button {
+    height: 52px;
+    border-radius: 18px;
+    transition: background 0.2s ease, transform 0.15s ease;
+    &:active {
+      transform: scale(0.96);
+    }
+    &.active {
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.16) 0%, rgba(37, 99, 235, 0.14) 100%);
+      box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+  }
+}
+html[data-theme='dark'] .m-tabbar button.active {
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.18) 0%, rgba(37, 99, 235, 0.22) 100%);
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}

@@ -26,6 +26,7 @@ import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchAppService;
+import com.jeequan.jeepay.service.sign.SignKeyStore;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -50,6 +51,7 @@ public class MchAppController extends CommonCtrl {
 
     @Autowired private MchInfoService mchInfoService;
     @Autowired private MchAppService mchAppService;
+    @Autowired private SignKeyStore signKeyStore;
     @Autowired private IMQSender mqSender;
 
     /**
@@ -85,7 +87,7 @@ public class MchAppController extends CommonCtrl {
     @Parameters({
             @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
             @Parameter(name = "appName", description = "应用名称", required = true),
-            @Parameter(name = "appSecret", description = "应用私钥", required = true),
+            @Parameter(name = "mchPublicKey", description = "商戶 ML-DSA-65 公鑰（PEM）"),
             @Parameter(name = "mchNo", description = "商户号", required = true),
             @Parameter(name = "remark", description = "备注"),
             @Parameter(name = "state", description = "状态: 0-停用, 1-启用")
@@ -96,6 +98,7 @@ public class MchAppController extends CommonCtrl {
     public ApiRes add() {
         MchApp mchApp = getObject(MchApp.class);
         mchApp.setAppId(IdUtil.objectId());
+        mchAppService.normalizePublicKey(mchApp);
 
         if(mchInfoService.getById(mchApp.getMchNo()) == null) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
@@ -106,6 +109,13 @@ public class MchAppController extends CommonCtrl {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_CREATE);
         }
         return ApiRes.ok();
+    }
+
+    @Operation(summary = "平台簽名公鑰", description = "商戶用來驗證平台回應與通知的 ML-DSA-65 公鑰（ADR-0013）")
+    @PreAuthorize("hasAnyAuthority('ENT_MCH_APP_LIST', 'ENT_MCH_APP_VIEW', 'ENT_MCH_APP_EDIT')")
+    @GetMapping("/platformPublicKey")
+    public ApiRes platformPublicKey() {
+        return ApiRes.ok4newJson("platformPublicKey", signKeyStore.platformPublicKeyPem());
     }
 
     /**
@@ -139,7 +149,7 @@ public class MchAppController extends CommonCtrl {
             @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
             @Parameter(name = "appId", description = "应用ID", required = true),
             @Parameter(name = "appName", description = "应用名称", required = true),
-            @Parameter(name = "appSecret", description = "应用私钥", required = true),
+            @Parameter(name = "mchPublicKey", description = "商戶 ML-DSA-65 公鑰（PEM）"),
             @Parameter(name = "mchNo", description = "商户号", required = true),
             @Parameter(name = "remark", description = "备注"),
             @Parameter(name = "state", description = "状态: 0-停用, 1-启用")
@@ -150,6 +160,7 @@ public class MchAppController extends CommonCtrl {
     public ApiRes update(@PathVariable("appId") String appId) {
         MchApp mchApp = getObject(MchApp.class);
         mchApp.setAppId(appId);
+        mchAppService.normalizePublicKey(mchApp);
         boolean result = mchAppService.updateById(mchApp);
         if (!result) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_UPDATE);

@@ -8,6 +8,7 @@ import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayWay;
 import com.jeequan.jeepay.core.entity.SysLog;
+import com.jeequan.jeepay.core.entity.TransferOrder;
 import com.jeequan.jeepay.core.entity.WalletAccount;
 import com.jeequan.jeepay.core.entity.WalletLedger;
 import com.jeequan.jeepay.core.entity.WithdrawOrder;
@@ -17,6 +18,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.jeequan.jeepay.service.impl.AgentPortalService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.jeepay.service.impl.PayWayService;
+import com.jeequan.jeepay.service.impl.TransferOrderService;
 import com.jeequan.jeepay.service.mapper.WalletLedgerMapper;
 import com.jeequan.jeepay.service.wallet.Money;
 import com.jeequan.jeepay.service.wallet.WalletService;
@@ -51,6 +53,7 @@ public class AgentPortalController extends AgentBaseCtrl {
     @Autowired private WalletLedgerMapper walletLedgerMapper;
     @Autowired private WithdrawService withdrawService;
     @Autowired private PayOrderService payOrderService;
+    @Autowired private TransferOrderService transferOrderService;
 
     private AgentInfo me() {
         return agentPortalService.requireAgent(getCurrentUser().getSysUser());
@@ -127,6 +130,7 @@ public class AgentPortalController extends AgentBaseCtrl {
         requireAuthority("ENT_AGENT_PORTAL_VIEW");
         return ApiPageRes.pages(walletLedgerMapper.selectPage(getIPage(), WalletLedger.gw()
                 .eq(WalletLedger::getOwnerType, WalletAccount.OWNER_AGENT).eq(WalletLedger::getOwnerId, me().getAgentNo())
+                .ge(startDate() != null, WalletLedger::getCreatedAt, startDate()).lt(endDate() != null, WalletLedger::getCreatedAt, endDate())
                 .orderByDesc(WalletLedger::getLedgerId)));
     }
 
@@ -177,7 +181,7 @@ public class AgentPortalController extends AgentBaseCtrl {
         return ApiRes.ok(withdrawService.updatePayoutAccount(WalletAccount.OWNER_AGENT, me().getAgentNo(), getObject(WalletAccount.class)));
     }
 
-    @Operation(summary = "團長設定旗下代理的隊長費")
+    @Operation(summary = "團長設定我的代理的隊長費")
     @PreAuthorize("hasAuthority('ENT_AGENT_PORTAL_FEE_EDIT')")
     @MethodLog(remark = "代理設定下級費率")
     @RequestMapping(value = "/subAgentRules", method = RequestMethod.POST)
@@ -201,6 +205,19 @@ public class AgentPortalController extends AgentBaseCtrl {
         // 商戶範圍由後端強制；前端傳入的 mchNo 只能在範圍內再縮小
         LambdaQueryWrapper<PayOrder> wrapper = PayOrder.gw().in(PayOrder::getMchNo, mchNos);
         return ApiPageRes.pages(payOrderService.listByPage(getIPage(), getObject(PayOrder.class), getReqParamJSON(), wrapper));
+    }
+
+    @Operation(summary = "轄區商戶的代付訂單（範圍與代收訂單相同；目前上游未提供代付，通常為空）")
+    @PreAuthorize("hasAuthority('ENT_AGENT_PORTAL_ORDER')")
+    @RequestMapping(value = "/transferOrders", method = RequestMethod.GET)
+    public ApiPageRes<TransferOrder> transferOrders() {
+        requireAuthority("ENT_AGENT_PORTAL_ORDER");
+        List<String> mchNos = agentPortalService.directMchNos(me());
+        if (mchNos.isEmpty()) {
+            return ApiPageRes.pages(getIPage());
+        }
+        LambdaQueryWrapper<TransferOrder> wrapper = TransferOrder.gw().in(TransferOrder::getMchNo, mchNos).orderByDesc(TransferOrder::getCreatedAt);
+        return ApiPageRes.pages(transferOrderService.pageList(getIPage(), wrapper, getObject(TransferOrder.class), getReqParamJSON()));
     }
 
     @Operation(summary = "團長新增下級代理並開通登入帳號")
@@ -228,6 +245,6 @@ public class AgentPortalController extends AgentBaseCtrl {
     @RequestMapping(value = "/opLogs", method = RequestMethod.GET)
     public ApiPageRes<SysLog> opLogs() {
         requireAuthority("ENT_AGENT_PORTAL_OPLOG");
-        return ApiPageRes.pages(agentPortalService.descendantLogs(me(), getIPage()));
+        return ApiPageRes.pages(agentPortalService.descendantLogs(me(), getIPage(), startDate(), endDate()));
     }
 }

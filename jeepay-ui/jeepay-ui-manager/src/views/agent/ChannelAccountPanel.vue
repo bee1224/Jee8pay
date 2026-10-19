@@ -9,7 +9,36 @@
       description="目前下單仍使用商戶應用上的金鑰；改為依渠道帳號下單是下一階段。"
     />
     <a-button v-if="$access('ENT_CHANNEL_ACCOUNT_EDIT')" type="primary" style="margin-bottom: 12px" @click="openForm()">新增渠道帳號</a-button>
-    <a-table :columns="columns" :data-source="vdata.records" :loading="vdata.loading" :pagination="false" size="small" row-key="accountId">
+    <!-- 手機：卡片排列，操作與電腦版相同（共用下方的視窗） -->
+    <div v-if="isMobile" class="m-list">
+      <div v-for="record in vdata.records" :key="record.accountId" class="m-row" style="flex-direction: column; align-items: stretch; gap: 6px">
+        <div style="display: flex; justify-content: space-between; gap: 8px">
+          <b>{{ record.accountName }}</b>
+          <span :class="['m-pill', record.state === 0 ? 'mute' : 'ok']">{{ record.state === 0 ? '停用' : '啟用' }}</span>
+        </div>
+        <small class="m-muted" style="margin: 0">
+          {{ record.ifName || record.ifCode }}・
+          <template v-if="!srAgentNo">所屬 {{ record.ownerName || record.ownerSrAgentNo }}</template>
+          <template v-else-if="record.ownerSrAgentNo === srAgentNo">自己的</template>
+          <template v-else>由 {{ record.ownerName || record.ownerSrAgentNo }} 共用</template>
+        </small>
+        <small class="m-muted" style="margin: 0">
+          範圍：{{ scopeOf(record).length ? '只限 ' + scopeOf(record).map((s) => s.agentName || s.agentNo).join('、') : '這一支全部可用' }}
+          ・共用：{{ !record.shareable ? '不共用' : sharedNames(record) || '已開啟，尚未加派' }}
+        </small>
+        <div v-if="$access('ENT_CHANNEL_ACCOUNT_EDIT')" style="display: flex; flex-wrap: wrap; gap: 6px">
+          <template v-if="!srAgentNo || record.ownerSrAgentNo === srAgentNo">
+            <button class="m-btn sm ghost" @click="openForm(record)">修改</button>
+            <button class="m-btn sm ghost" @click="openScope(record)">使用範圍</button>
+            <button class="m-btn sm ghost" @click="openShare(record)">派發／共用</button>
+            <button class="m-btn sm danger" @click="removeAccount(record)">刪除</button>
+          </template>
+          <button v-else class="m-btn sm ghost" @click="openScope(record)">使用範圍</button>
+        </div>
+      </div>
+      <div v-if="!vdata.records.length" class="m-empty">{{ vdata.loading ? '載入中…' : srAgentNo ? '這位團長還沒有渠道帳號' : '還沒有任何渠道帳號' }}</div>
+    </div>
+    <a-table v-else :columns="columns" :data-source="vdata.records" :loading="vdata.loading" :pagination="false" size="small" row-key="accountId">
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'ifCode'">{{ record.ifName || record.ifCode }}</template>
         <template v-if="column.key === 'owner'">
@@ -127,6 +156,7 @@
 <script setup lang="ts">
 import { API_URL_AGENT_INFO, API_URL_CHANNEL_ACCOUNT, API_URL_IFDEFINES_LIST, req } from '@/api/manage'
 import { computed, reactive, watch, getCurrentInstance } from 'vue'
+import { isMobile } from '@/views/mobile/mobileKit'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 const props = defineProps({

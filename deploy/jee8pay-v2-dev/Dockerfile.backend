@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=eclipse-temurin:17-jre-jammy
+ARG BASE_IMAGE=eclipse-temurin:25-jre-noble
 FROM ${BASE_IMAGE}
 
 ARG SERVICE_JAR

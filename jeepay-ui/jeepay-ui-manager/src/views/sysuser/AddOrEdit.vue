@@ -161,7 +161,11 @@ const infoFormModel = ref()
 const rules: any = reactive({
   realname: [{ required: true, message: '請輸入用戶姓名', trigger: 'blur' }],
   telphone: [
-    { required: true, pattern: /^09\d{8}$/, message: '請輸入正確的手機號碼（09 開頭 10 碼）', trigger: 'blur' },
+    {
+      validator: (rule, value) =>
+        (!value && vdata.placeholderTel) || /^09\d{8}$/.test(value || '') ? Promise.resolve() : Promise.reject('請輸入正確的手機號碼（09 開頭 10 碼）'),
+      trigger: 'blur',
+    },
   ],
   userNo: [{ required: true, message: '請輸入編號', trigger: 'blur' }],
   loginUsername: [],
@@ -203,6 +207,7 @@ function show(recordId) {
   }
 
   vdata.isAdd = !recordId
+  vdata.placeholderTel = null
   // 数据恢复为默认数据
   vdata.saveObject = {
     isAdmin: 1,
@@ -226,6 +231,9 @@ function show(recordId) {
     vdata.resetIsShow = true // 展示重置密码板块
     vdata.recordId = recordId
     req.getById(API_URL_SYS_USER_LIST, recordId).then((res) => {
+      // 代理帳號沒填手機號時，後端存的是「-」開頭的佔位值：畫面顯示空白，留空儲存時送回原值
+      vdata.placeholderTel = String(res.telphone || '').startsWith('-') ? res.telphone : null
+      if (vdata.placeholderTel) res.telphone = ''
       vdata.saveObject = res
     })
     vdata.isShow = true
@@ -256,6 +264,7 @@ function handleOkFunc() {
       } else {
         vdata.sysPassword.confirmPwd = Base64.encode(vdata.sysPassword.confirmPwd)
         Object.assign(vdata.saveObject, vdata.sysPassword) // 拼接对象
+        if (!vdata.saveObject.telphone && vdata.placeholderTel) vdata.saveObject.telphone = vdata.placeholderTel
         req
           .updateById(API_URL_SYS_USER_LIST, vdata.recordId, vdata.saveObject)
           .then((res) => {

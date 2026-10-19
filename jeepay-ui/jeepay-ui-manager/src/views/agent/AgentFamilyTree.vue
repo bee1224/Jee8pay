@@ -1,5 +1,5 @@
 <template>
-  <!-- 家族樹：每張卡片是一位團長（第二代），裡面依序是他的直屬商戶、旗下代理（第三代）與各自的商戶 -->
+  <!-- 家族樹：每張卡片是一位團長（第二代），裡面依序是他的直屬商戶、我的代理（第三代）與各自的商戶 -->
   <div>
     <div class="tree-summary">
       <span>團長 <b>{{ seniors.length }}</b></span>
@@ -60,7 +60,7 @@
             <span v-if="!mchOf(son.agentNo).length" class="none">沒有商戶</span>
           </div>
         </div>
-        <div v-if="!sonsOf(senior.agentNo).length" class="none" style="margin-top: 10px">還沒有旗下代理</div>
+        <div v-if="!sonsOf(senior.agentNo).length" class="none" style="margin-top: 10px">還沒有我的代理</div>
       </a-card>
 
       <a-card v-if="orphans.length" class="family-card" size="small" title="未歸屬任何代理的商戶">
@@ -123,7 +123,7 @@ defineExpose({ load })
   gap: 8px 24px;
   align-items: center;
   margin-bottom: 16px;
-  color: rgba(0, 0, 0, 0.65);
+  color: var(--jp-text-2);
 }
 .tree-grid {
   display: grid;
@@ -143,12 +143,12 @@ defineExpose({ load })
 .no {
   margin-left: 6px;
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--jp-text-3);
   font-weight: 400;
 }
 .branch-label {
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--jp-text-3);
   margin-bottom: 6px;
 }
 .chips {
@@ -158,7 +158,7 @@ defineExpose({ load })
 }
 .none {
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.35);
+  color: var(--jp-text-3);
 }
 .son {
   margin-top: 12px;

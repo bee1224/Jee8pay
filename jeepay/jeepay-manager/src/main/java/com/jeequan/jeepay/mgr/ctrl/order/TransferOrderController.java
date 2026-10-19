@@ -23,6 +23,11 @@ import com.jeequan.jeepay.core.entity.TransferOrder;
 import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
+import com.jeequan.jeepay.core.entity.AgentInfo;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import com.jeequan.jeepay.service.impl.AgentInfoService;
+import com.jeequan.jeepay.service.impl.AgentPortalService;
 import com.jeequan.jeepay.service.impl.TransferOrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -50,6 +55,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class TransferOrderController extends CommonCtrl {
 
     @Autowired private TransferOrderService transferOrderService;
+    @Autowired private AgentInfoService agentInfoService;
+    @Autowired private AgentPortalService agentPortalService;
 
     /** list **/
     @Operation(summary = "转账订单信息列表")
@@ -71,6 +78,16 @@ public class TransferOrderController extends CommonCtrl {
         TransferOrder transferOrder = getObject(TransferOrder.class);
         JSONObject paramJSON = getReqParamJSON();
         LambdaQueryWrapper<TransferOrder> wrapper = TransferOrder.gw();
+        // 上帝看某位團長的代付訂單：範圍為這位團長這一支（含隊長）的全部商戶
+        String agentNo = getValString("agentNo");
+        if (StringUtils.isNotBlank(agentNo)) {
+            AgentInfo agent = agentInfoService.getById(agentNo);
+            List<String> scope = agent == null ? List.of() : agentPortalService.directMchNos(agent);
+            if (scope.isEmpty()) {
+                return ApiPageRes.pages(getIPage());
+            }
+            wrapper.in(TransferOrder::getMchNo, scope);
+        }
         IPage<TransferOrder> pages = transferOrderService.pageList(getIPage(), wrapper, transferOrder, paramJSON);
 
         return ApiPageRes.pages(pages);

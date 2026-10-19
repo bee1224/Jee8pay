@@ -70,7 +70,7 @@
   input:active,
   input:valid + label {
     text-indent: 0;
-    background: #fff;
+    background: var(--jp-surface);
   }
   input:focus + label,
   input:active + label,

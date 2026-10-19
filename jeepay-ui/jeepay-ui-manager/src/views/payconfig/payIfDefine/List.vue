@@ -1,6 +1,6 @@
 <template>
   <page-header-wrapper>
-    <div style="background-color: #f0f2f5; padding: 20px; border-radius: 10px">
+    <div style="background-color: var(--jp-bg); padding: 20px; border-radius: 10px">
       <JeepayCard
         ref="infoCard"
         :reqCardListFunc="reqCardListFunc"

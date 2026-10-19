@@ -24,7 +24,7 @@
     <a-modal v-model:open="vdata.form.open" title="建立子帳號" :confirm-loading="vdata.form.saving" ok-text="確定" cancel-text="取消" @ok="save">
       <a-form layout="vertical">
         <a-form-item label="帳號" required extra="儲存後系統產生 8 碼隨機密碼並顯示一次。">
-          <a-input v-model:value="vdata.form.data.loginUsername" placeholder="4～32 碼英文、數字或底線" autocomplete="off" />
+          <a-input v-model:value="vdata.form.data.loginUsername" placeholder="2～32 碼中文、英文、數字或底線" autocomplete="off" />
         </a-form-item>
         <a-form-item label="名稱" required><a-input v-model:value="vdata.form.data.realname" /></a-form-item>
         <a-form-item label="手機號（選填）"><a-input v-model:value="vdata.form.data.telphone" placeholder="09 開頭 10 碼，可不填" /></a-form-item>
@@ -89,8 +89,8 @@ function openForm() {
 }
 function save() {
   const f = vdata.form.data
-  if (!/^[A-Za-z0-9_]{4,32}$/.test(f.loginUsername || '') || !f.realname) {
-    $infoBox.message.warning('請填寫 4～32 碼的帳號與名稱')
+  if (!/^[A-Za-z0-9_一-鿿]{2,32}$/.test(f.loginUsername || '') || !f.realname) {
+    $infoBox.message.warning('請填寫2～32 碼中文、英文、數字或底線的帳號與名稱')
     return
   }
   if (f.telphone && !/^09\d{8}$/.test(f.telphone)) {

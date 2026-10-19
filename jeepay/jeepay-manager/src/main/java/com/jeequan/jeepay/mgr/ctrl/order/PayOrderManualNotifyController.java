@@ -22,12 +22,13 @@ import com.jeequan.jeepay.core.entity.MchNotifyRecord;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
-import com.jeequan.jeepay.core.utils.JeepayKit;
+import com.jeequan.jeepay.core.utils.MlDsaKit;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchNotifyRecordService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
+import com.jeequan.jeepay.service.sign.SignKeyStore;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
@@ -56,6 +57,7 @@ public class PayOrderManualNotifyController extends CommonCtrl {
     @Autowired private MchAppService mchAppService;
     @Autowired private MchNotifyRecordService mchNotifyRecordService;
     @Autowired private IMQSender mqSender;
+    @Autowired private SignKeyStore signKeyStore;
 
     @Operation(summary = "人工手動回調訂單通知（繞過支付）")
     @MethodLog(remark = "人工手動回調訂單通知")
@@ -72,14 +74,15 @@ public class PayOrderManualNotifyController extends CommonCtrl {
             throw new BizException("訂單未設定異步通知地址（notifyUrl）");
         }
         MchApp mchApp = mchAppService.getById(order.getAppId());
-        if (mchApp == null || StringUtils.isEmpty(mchApp.getAppSecret())) {
-            throw new BizException("無法取得商戶 App Secret，請檢查商戶應用設定");
+        if (mchApp == null) {
+            throw new BizException("商戶應用不存在，請檢查商戶應用設定");
         }
 
         // 1. 組通知 URL（與原生 createNotifyUrl 相同：非 null 訂單欄位 + reqTime + sign）
         JSONObject params = buildNotifyParams(order);
         params.put("reqTime", System.currentTimeMillis());
-        params.put("sign", JeepayKit.getSign(params, mchApp.getAppSecret()));
+        params.put("signType", MlDsaKit.SIGN_TYPE);
+        params.put("sign", MlDsaKit.sign(params, signKeyStore.platformPrivateKey()));   // 平台簽名私鑰（ADR-0013）
         String notifyUrl = StringKit.appendUrlQuery(order.getNotifyUrl(), params);
 
         // 2. 建立或重置 MchNotifyRecord 為「通知中」

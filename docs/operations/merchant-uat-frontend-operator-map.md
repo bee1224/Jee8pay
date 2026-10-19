@@ -7,7 +7,7 @@
 | Operator task | Actual menu/page | D01 use |
 | --- | --- | --- |
 | Merchant | 商戶管理 → 商戶列表；route `/mch`，`MchListPage` | 檢查 `M_D01_EXTERNAL_UAT`、普通商戶、啟用狀態 |
-| App | 商戶管理 → 應用列表；route `/apps`，`MchAppPage` | 檢查 `APP_D01_EXTERNAL_UAT`、啟用狀態；編輯畫面以 masked placeholder 顯示 App Secret |
+| App | 商戶管理 → 應用列表；route `/apps`，`MchAppPage` | 檢查 `APP_D01_EXTERNAL_UAT`、啟用狀態；編輯畫面可貼上商戶 ML-DSA-65 公鑰、複製平台公鑰（ADR-0013） |
 | Provider config | 應用列表 → 支付配置 → 支付參數 | 檢查 App 的 `ryo` config 已啟用；敏感欄位由 params model 脫敏，不抄到文件 |
 | Passage | 應用列表 → 支付配置 → 支付通道 | 檢查 `RYO_IBON → ryo` passage（JAY／CHI 同理）、rate、state |
 | PayInterface | 支付配置 → 支付接口；route `/ifdefines` | 檢查 `ifCode=ryo` 定義與支援 wayCode |
@@ -21,12 +21,12 @@
 
 | Operator task | Actual menu/page | D01 relevance |
 | --- | --- | --- |
-| App / API credential | 商戶中心 → 應用管理；route `/apps` | 可看 App ID、編輯／rotate App Secret；detail API 只回 masked secret |
+| App / API credential | 商戶中心 → 應用管理；route `/apps` | 可看 App ID、上傳或更換商戶 ML-DSA-65 公鑰、複製平台公鑰（ADR-0013） |
 | Channel config | 應用管理 → 支付配置 | generic Provider config 與 passage 可見性取決於 entitlement；D01 credential 由我方 secure handoff 管理 |
 | PayOrder | 訂單中心 → 訂單管理；component default `/payOrder` | 可查 Merchant 自己的 PayOrder 與狀態 |
 | Notify status | 無獨立 Merchant Notify menu/page | Merchant UI 沒有 Manager 的 `/notify` list；由 Manager 或 API/logs 查 delivery |
 
-D01 沒有建立 Merchant portal login credential；外部系統串接只需要 Merchant ID、App ID、App Secret，不需要登入 Merchant UI。
+D01 沒有建立 Merchant portal login credential；外部系統串接只需要 Merchant ID、App ID 與 ML-DSA-65 金鑰（商戶私鑰自留、公鑰交我方、平台公鑰由我方提供），不需要登入 Merchant UI。
 
 ## Cashier
 

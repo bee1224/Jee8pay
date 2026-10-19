@@ -138,6 +138,10 @@ services:
     secrets:
       - source: db_app_password
         target: spring.datasource.password
+      - source: sign_platform_private_key
+        target: isys.sign.platform-private-key
+      - source: sign_internal_public_key
+        target: isys.sign.internal-public-key
     volumes:
       - ./config/application.yml:/jeepayhomes/service/app/application.yml:ro
       - payment_logs:/jeepayhomes/service/logs
@@ -190,6 +194,12 @@ services:
         target: spring.datasource.password
       - source: manager_jwt_secret
         target: isys.jwt-secret
+      - source: sign_platform_private_key
+        target: isys.sign.platform-private-key
+      - source: sign_platform_public_key
+        target: isys.sign.platform-public-key
+      - source: sign_internal_private_key
+        target: isys.sign.internal-private-key
     volumes:
       - ./config/application.yml:/jeepayhomes/service/app/application.yml:ro
       - manager_logs:/jeepayhomes/service/logs
@@ -223,6 +233,10 @@ services:
         target: spring.datasource.password
       - source: merchant_jwt_secret
         target: isys.jwt-secret
+      - source: sign_platform_public_key
+        target: isys.sign.platform-public-key
+      - source: sign_internal_private_key
+        target: isys.sign.internal-private-key
     volumes:
       - ./config/application.yml:/jeepayhomes/service/app/application.yml:ro
       - merchant_logs:/jeepayhomes/service/logs
@@ -294,6 +308,15 @@ secrets:
     file: ${V2_SECRET_DIR:-./.secrets}/manager-jwt-secret
   merchant_jwt_secret:
     file: ${V2_SECRET_DIR:-./.secrets}/merchant-jwt-secret
+  # 商戶 API ML-DSA-65 金鑰（ADR-0013）：平台簽名金鑰簽回應與通知；平台內部金鑰給後台代商戶呼叫支付服務
+  sign_platform_private_key:
+    file: ${V2_SECRET_DIR:-./.secrets}/sign-platform-private-key.pem
+  sign_platform_public_key:
+    file: ${V2_SECRET_DIR:-./.secrets}/sign-platform-public-key.pem
+  sign_internal_private_key:
+    file: ${V2_SECRET_DIR:-./.secrets}/sign-internal-private-key.pem
+  sign_internal_public_key:
+    file: ${V2_SECRET_DIR:-./.secrets}/sign-internal-public-key.pem
 
 networks:
   v2:

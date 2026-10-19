@@ -5,6 +5,8 @@
 > 正式環境（`jee8pay-v2-production` Production Candidate）的 **Production Validation 尚未完成**：
 > credential binding、正式網址 DNS/TLS、public callback 啟用與 pilot 交易皆為 Human Gate。
 > **Base URL 與 Merchant 憑證以正式啟用後正式公布的值為準**；在啟用前請以 UAT 環境先行驗證串接。
+>
+> **2026-10-19（ADR-0013）**：簽名已改為 ML-DSA-65、MD5 與 App Secret 移除。目前只部署到測試環境；正式環境 runtime 仍是舊版（MD5），部署 ADR-0013 前不得以本文件對外公布正式串接方式。
 
 ## A. Environment
 
@@ -18,25 +20,16 @@
 | Channel code (`wayCode`) | `RYO_IBON` / `JAY_IBON` / `CHI_IBON` / `JHD_IBON` 四選一（黑貓 PAY ibon 上游，契約相同） |
 | Currency | `TWD` |
 
-## B. Credential delivery
+## B. Keys
 
-- Merchant API credential 是 **App Secret**（MD5 簽名用）。真實值不經 Git／Email 明文交付，以 secure handoff 提供；收到後放入 secret manager 或受限環境變數，不可寫入 source、log、ticket 或群組訊息。
-- App Secret **大小寫敏感**（簽名以原值參與）。
+- 簽名使用 **ML-DSA-65**（FIPS 204）。商戶自行產生金鑰對：私鑰留在商戶系統、不交給任何人；公鑰交給我方或在商戶後台「應用設定」貼上。
+- 商戶另從商戶後台複製**平台公鑰**，用來驗證平台 response 與 Merchant Notify。
+- 金鑰產生方式與格式見 [UAT 串接文件 §B](../merchant-uat/README.md#b-keys)。
 - 黑貓 PAY 的 `custId`、API password、Token 等 upstream credential 屬我方，不會也不應提供給外部系統商。
 
 ## C. Authentication and signing
 
-所有 Create／Query request 都以同一個 App Secret 驗簽：
-
-1. request 必須包含 `version=1.0`、`signType=MD5`、`reqTime`、`mchNo`、`appId` 與 `sign`。
-2. 移除 `sign`；排除值為 `null` 或空字串 `""` 的欄位，數字 `0` 仍參與。
-3. 依欄位名稱做 case-insensitive 升冪排序。
-4. 每個欄位串為 `key=value&`，最後直接附加 `key=<AppSecret>`。
-5. 對完整 UTF-8 bytes 計算 MD5，輸出 32 字元 uppercase hexadecimal。
-
-`channelExtra` 是 JSON **字串**，其字元、空白與欄位順序會直接影響簽名；建議先產生 compact JSON 字串，再組 request 與簽名。簽名值可用大小寫任一形式送出，但範例固定 uppercase。
-
-`reqTime` 是必填且參與簽名的字串，值為目前 Unix epoch milliseconds。Runtime 對 reqTime 有 **5 分鐘 freshness 窗口**：與系統時間偏差超過 5 分鐘會回「請求時間戳已過期」；非數字 reqTime 不檢查 freshness，但仍參與簽名。不存在 nonce 欄位。所有呼叫必須使用 HTTPS，且不可記錄含 App Secret 的 canonical string。
+與 [UAT 串接文件 §C](../merchant-uat/README.md#c-authentication-and-signing) 完全相同：`signType=ML-DSA-65`；除 `sign` 與空值外的欄位依名稱排序組成 `k1=v1&k2=v2`（無結尾 `&`），UTF-8 後以商戶私鑰簽 ML-DSA-65，`sign` 為標準 Base64。`reqTime` 必填，與平台時間相差超過 5 分鐘即拒絕。所有呼叫必須使用 HTTPS。
 
 ## D. Create order
 
@@ -49,7 +42,7 @@ CONTENT-TYPE = application/json; charset=UTF-8
 | 欄位 | 型別 | 規則 |
 | --- | --- | --- |
 | `version` | string | 必填，`1.0` |
-| `signType` | string | 必填，`MD5` |
+| `signType` | string | 必填，`ML-DSA-65` |
 | `reqTime` | string | 必填，目前 Unix epoch milliseconds |
 | `mchNo` | string | 必填，secure handoff 的 Merchant ID |
 | `appId` | string | 必填，secure handoff 的 App ID |
@@ -101,7 +94,7 @@ CONTENT-TYPE = application/json; charset=UTF-8
 
 `payData` 是 JSON 字串，需再 parse 一次；不得把它當作 nested JSON object。第一次 parse 取得 UnifiedOrder response，第二次 parse `data.payData` 才取得付款指示。欄位：`ibonShopId`、`ibonCode`、組合後的 `paymentCode`、`expireDate`、whole-TWD `billAmount`、可選 `shortUrl`。程式應容許 provider 未回 `shortUrl` 時只使用付款碼。`payDataType` 依通道為 `ryoIbon` / `jayIbon` / `chiIbon`。
 
-response envelope 的 `sign` 是只針對 `data` object、用同一 App Secret 與同一 canonicalization 計算，不包含 `code`／`msg`。
+response envelope 的 `sign` 是平台以平台私鑰對 `data` object 簽的 ML-DSA-65 簽名，不包含 `code`／`msg`；商戶以平台公鑰驗證。
 
 ### WAITING is not paid
 
@@ -132,7 +125,7 @@ SOURCE IP    = 【正式 outbound IP，啟用後公布】
 ACK BODY     = SUCCESS
 ```
 
-Create 的 `notifyUrl` 必須是 HTTPS。JeePay 將 Query response 的非 null 訂單欄位，加上 `reqTime` 與 `sign`，以 form fields POST 到該 URL。驗簽時移除 `sign`，再套用與 request 完全相同的 App Secret canonicalization。
+Create 的 `notifyUrl` 必須是 HTTPS。JeePay 將 Query response 的非 null 訂單欄位，加上 `reqTime`、`signType=ML-DSA-65` 與 `sign`，以 form fields POST 到該 URL。商戶以平台公鑰、與 request 相同的待簽字串規則驗證；驗證失敗的通知一律不得上分。
 
 只有 terminal state 會建立通知。上分只接受 `state=2`；入帳金額欄位是 `amount`，單位仍為 minor units。`billAmount` 是付款指示中的 whole-TWD payer amount，不是 Merchant 上分欄位。
 
@@ -150,15 +143,15 @@ Merchant 應回 `HTTP 200`、`Content-Type: text/plain`、body `SUCCESS`（大�
 
 ## H. 串接流程
 
-1. 由 secure handoff 取得 Merchant ID、App ID、App Secret（正式網址啟用後）。
+1. 由 secure handoff 取得 Merchant ID、App ID（正式網址啟用後）；產生 ML-DSA-65 金鑰對，上傳商戶公鑰並複製平台公鑰。
 2. 提供正式 HTTPS Merchant Notify callback URL。
-3. 依 canonicalization 簽 Create request。
+3. 以商戶私鑰簽 Create request。
 4. 呼叫正式 Base URL；JeePay 建立 native PayOrder。
 5. JeePay 以 `RYO_IBON`／`JAY_IBON`／`CHI_IBON`／`JHD_IBON` 路由並同步回傳 ibon 付款資訊。
 6. 付款人依訂單金額完成真實付款。
 7. 黑貓 PAY 通知 JeePay；JeePay 將 native PayOrder 轉為 SUCCESS。
 8. JeePay 對 Merchant callback URL 發送 Merchant Notify。
-9. Merchant 驗簽、確認 `state=2`／`amount`／order identity、冪等上分，回純文字 `SUCCESS`。
+9. Merchant 以平台公鑰驗簽、確認 `state=2`／`amount`／order identity、冪等上分，回純文字 `SUCCESS`。
 10. Merchant 呼叫 Query，確認同一 order 為 `state=2`。
 
 外部系統商負責保存 Merchant credential、Create、Query、callback URL、Notify 驗簽／ACK、冪等與配合付款。我方負責 JeePay V2、Provider credential/APN、reconciliation、Merchant config/credential、Notify/retry、DNS/TLS、infrastructure 與 logs。
@@ -175,8 +168,6 @@ Merchant 應回 `HTTP 200`、`Content-Type: text/plain`、body `SUCCESS`（大�
 
 ## 工具
 
-- UAT 的 Talend 產生器可換成正式環境變數重複使用：
-  `docs/integration/merchant-uat/examples/talend-request-gen.py`（`--way-code RYO_IBON|JAY_IBON|CHI_IBON|JHD_IBON`）。
-- 簽名向量與驗證：`docs/integration/merchant-uat/examples/verify_vectors.py`（演算法驗證用；正式值請以正式憑證重算）。
+- 參考實作（建單、查單、通知驗簽）：`docs/integration/merchant-uat/examples/MerchantApiExample.java`，換成正式環境變數即可重複使用。
 - **正式啟用檢查清單**（operator 動作導向，含 notifyUrl 注意事項、白名單、pilot 付款、營運驗證與 deferred 決策）：
   [`production-go-live-checklist.md`](production-go-live-checklist.md)

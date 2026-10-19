@@ -53,6 +53,23 @@
               <template #emptyText>這位團長還沒有隊長（到「團長列表」按「新建代理」，層級選隊長）</template>
             </a-table>
           </a-tab-pane>
+          <!-- 登入裝置：只有平台看得到；裝置識別碼為瀏覽器端隨機 ID（網頁無法讀取 IMEI），型號與定位由用戶端提供，僅供參考 -->
+          <a-tab-pane v-if="isPlatformUser" key="device" tab="登入裝置">
+            <a-table :columns="deviceColumns" :data-source="vdata.devices" :pagination="false" size="small" row-key="id" :scroll="{ x: 900 }">
+              <template #bodyCell="{ column, record }">
+                <template v-if="column.key === 'device'">{{ [record.deviceModel, record.deviceOs].filter(Boolean).join('・') || '未知' }}</template>
+                <template v-if="column.key === 'deviceId'"><span style="font-family: monospace; font-size: 12px">{{ record.deviceId || '—' }}</span></template>
+                <template v-if="column.key === 'geo'">
+                  <a v-if="record.latitude != null" :href="`https://www.google.com/maps?q=${record.latitude},${record.longitude}`" target="_blank" rel="noopener noreferrer">
+                    {{ Number(record.latitude).toFixed(5) }}, {{ Number(record.longitude).toFixed(5) }}
+                  </a>
+                  <span v-else style="color: #999">{{ GEO_TEXT[record.geoState] || '未取得' }}</span>
+                  <div v-if="record.accuracy" style="font-size: 12px; color: #999">誤差約 {{ record.accuracy }} 公尺</div>
+                </template>
+              </template>
+              <template #emptyText>這位團長與旗下帳號還沒有登入裝置紀錄（新功能上線後登入才會記錄）</template>
+            </a-table>
+          </a-tab-pane>
         </a-tabs>
       </template>
     </a-card>
@@ -86,6 +103,7 @@ import MchAddOrEdit from '@/views/mch/AddOrEdit.vue'
 import MchAgentBind from '@/views/mch/MchAgentBind.vue'
 import { computed, reactive, ref, watch, getCurrentInstance } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useUserStore } from '@/store/modules/user'
 
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 const route = useRoute()
@@ -115,8 +133,23 @@ const vdata: any = reactive({
   agent: null,
   merchants: [],
   subAgents: [],
+  devices: [],
   mchForm: { open: false, saving: false, data: {} },
 })
+
+const isPlatformUser = (() => {
+  const belong = useUserStore().userInfo['belongInfoId']
+  return !belong || belong === '0'
+})()
+const GEO_TEXT = { DENIED: '使用者拒絕定位', TIMEOUT: '定位逾時', UNAVAILABLE: '無法定位', UNSUPPORTED: '裝置不支援定位' }
+const deviceColumns = [
+  { title: '登入時間', dataIndex: 'createdAt', width: 170 },
+  { title: '帳號', dataIndex: 'userName', width: 110 },
+  { title: 'IP', dataIndex: 'userIp', width: 130 },
+  { key: 'device', title: '裝置型號／系統' },
+  { key: 'deviceId', title: '裝置識別碼' },
+  { key: 'geo', title: 'GPS 位置', width: 200 },
+]
 
 const ownerOptions = computed(() =>
   vdata.agent
@@ -143,6 +176,7 @@ function load(agentNo) {
   vdata.agent = null
   vdata.merchants = []
   vdata.subAgents = []
+  vdata.devices = []
   if (!agentNo) {
     vdata.error = '請從「團長列表」點選一位團長'
     return
@@ -155,6 +189,7 @@ function load(agentNo) {
     vdata.agent = res
     loadMerchants()
     req.list(API_URL_AGENT_INFO, { parentAgentNo: agentNo, pageSize: -1 }).then((r) => (vdata.subAgents = r.records || []))
+    if (isPlatformUser) req.list(`${API_URL_AGENT_INFO}/${agentNo}/loginDevices`, {}).then((r) => (vdata.devices = r || []))
   })
 }
 

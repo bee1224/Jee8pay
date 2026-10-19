@@ -860,6 +860,6 @@ onMounted(() => {
 }
 
 #chart-card {
-  background-color: #f0f2f5;
+  background-color: var(--jp-bg);
 }
 </style>

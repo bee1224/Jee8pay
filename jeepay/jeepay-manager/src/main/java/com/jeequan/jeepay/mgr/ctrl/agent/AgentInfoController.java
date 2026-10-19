@@ -8,10 +8,13 @@ import com.jeequan.jeepay.core.entity.AgentInfo;
 import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.entity.SysLoginDevice;
 import com.jeequan.jeepay.core.entity.SysUser;
 import com.jeequan.jeepay.core.exception.BizException;
+import com.jeequan.jeepay.mgr.service.AuthService;
 import com.jeequan.jeepay.service.impl.AgentInfoService;
 import com.jeequan.jeepay.service.impl.AgentPortalService;
+import com.jeequan.jeepay.service.impl.SysLoginDeviceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /** 代理管理（ADR-0009）：團長 → 隊長 兩層，獨立於服務商。 */
 @Tag(name = "代理管理")
 @RestController
@@ -31,6 +36,9 @@ public class AgentInfoController extends AgentBaseCtrl {
 
     @Autowired private AgentInfoService agentInfoService;
     @Autowired private AgentPortalService agentPortalService;
+    @Autowired private AuthService authService;
+    @Autowired private SysLoginDeviceService sysLoginDeviceService;
+    @Autowired private com.jeequan.jeepay.service.impl.AgentBranchService agentBranchService;
 
     /**
      * 代理登入開關（緊急關閉用），預設開啟。前提是 WebSecurityConfig 已啟用 @EnableMethodSecurity（TD-015）；
@@ -95,6 +103,31 @@ public class AgentInfoController extends AgentBaseCtrl {
         return ApiRes.ok(agent);
     }
 
+    @Operation(summary = "團長看板（今日成交、成功／失敗、轄下商戶數、本月與上月）：上帝看單一團長")
+    @PreAuthorize("hasAnyAuthority('ENT_AGENT_INFO_VIEW', 'ENT_AGENT_INFO_EDIT')")
+    @RequestMapping(value = "/{agentNo}/dashboard", method = RequestMethod.GET)
+    public ApiRes dashboard(@PathVariable("agentNo") String agentNo) {
+        requireAuthority("ENT_AGENT_INFO_VIEW", "ENT_AGENT_INFO_EDIT");
+        AgentInfo agent = agentInfoService.getById(agentNo);
+        if (agent == null) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
+        return ApiRes.ok(agentBranchService.dashboard(agent));
+    }
+
+    @Operation(summary = "代理帳號（含子帳號）最近的登入裝置：時間、IP、裝置識別碼、型號、GPS（僅平台可看）")
+    @PreAuthorize("hasAnyAuthority('ENT_AGENT_INFO_VIEW', 'ENT_AGENT_INFO_EDIT')")
+    @RequestMapping(value = "/{agentNo}/loginDevices", method = RequestMethod.GET)
+    public ApiRes<List<SysLoginDevice>> loginDevices(@PathVariable("agentNo") String agentNo) {
+        requireAuthority("ENT_AGENT_INFO_VIEW", "ENT_AGENT_INFO_EDIT");
+        // 代理帳號本身沒有這兩個平台權限；再確認登入者是平台帳號，避免權限誤設時代理互看
+        String belong = getCurrentUser().getSysUser().getBelongInfoId();
+        if (StringUtils.isNotBlank(belong) && !"0".equals(belong)) {
+            throw new BizException("只有平台可以查看登入裝置");
+        }
+        return ApiRes.ok(sysLoginDeviceService.recentByAgent(agentNo, 20));
+    }
+
     @Operation(summary = "更新代理（僅基本資料與狀態，層級與上級不可變）")
     @PreAuthorize("hasAuthority('ENT_AGENT_INFO_EDIT')")
     @MethodLog(remark = "更新代理")
@@ -111,7 +144,9 @@ public class AgentInfoController extends AgentBaseCtrl {
     @RequestMapping(value = "/{agentNo}", method = RequestMethod.DELETE)
     public ApiRes delete(@PathVariable("agentNo") String agentNo) {
         requireAuthority("ENT_AGENT_INFO_DEL");
-        agentInfoService.removeAgent(agentNo, getCurrentUser().getSysUser().getSysUserId(), getCurrentUser().getSysUser().getRealname());
+        List<Long> removedUserIds = agentInfoService.removeAgent(agentNo, getCurrentUser().getSysUser().getSysUserId(), getCurrentUser().getSysUser().getRealname());
+        // 代理的登入帳號已一併刪除，清掉仍在線上的登入狀態
+        authService.refAuthentication(removedUserIds);
         return ApiRes.ok();
     }
 

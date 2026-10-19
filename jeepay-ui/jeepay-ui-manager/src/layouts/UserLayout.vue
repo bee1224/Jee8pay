@@ -102,7 +102,7 @@ export default {
 
           .title {
             font-size: 33px;
-            color: rgba(0, 0, 0, 0.85);
+            color: var(--jp-text);
             font-family: Avenir, 'Helvetica Neue', Arial, Helvetica, sans-serif;
             font-weight: 600;
             position: relative;
@@ -111,7 +111,7 @@ export default {
         }
         .desc {
           font-size: 14px;
-          color: rgba(0, 0, 0, 0.45);
+          color: var(--jp-text-3);
           margin-bottom: 40px;
           font-size: 20px;
           font-family:
@@ -150,7 +150,7 @@ export default {
           margin-bottom: 8px;
           font-size: 14px;
           a {
-            color: rgba(0, 0, 0, 0.45);
+            color: var(--jp-text-3);
             transition: all 0.3s;
             &:not(:last-child) {
               margin-right: 40px;
@@ -158,7 +158,7 @@ export default {
           }
         }
         .copyright {
-          color: rgba(0, 0, 0, 0.45);
+          color: var(--jp-text-3);
           font-size: 14px;
         }
       }

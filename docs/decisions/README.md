@@ -18,6 +18,7 @@
 | [ADR-0010](ADR-0010-wallet-ledger-settlement-withdrawal.md) | 錢包記帳、T+N 分潤結算、人工提現、風控黑名單、人工調帳雙人覆核；下級費率（推薦佣金層已於 2026-10-03 移除） | Accepted | Money movement / data |
 | [ADR-0011](ADR-0011-way-code-alias-routing.md) | 支付方式別名（例如 IBON）依金額／時段／權重路由到實際通道，並記錄每次決策 | Accepted | Payment routing |
 | [ADR-0012](ADR-0012-agent-owned-channels-and-platform-fee.md) | 渠道帳號屬於高級代理、金鑰由平台輸入並派發（預設專屬）；資金以高級代理為單位持有；平臺費逐位高級代理設定並記為應收 | Accepted（第一階段已實作） | Data model / payment config resolution / money movement |
+| [ADR-0013](ADR-0013-merchant-api-ml-dsa-signature.md) | 商戶 API 的請求、回應與通知改用 ML-DSA-65 簽名，移除 MD5；平台簽名金鑰與內部金鑰分開；後端升到 JDK 25 | Accepted | Security boundary / merchant integration contract / runtime |
 
 ## Qualification Rule
 
