@@ -36,6 +36,7 @@ import { API_URL_AGENT_PORTAL, req } from '@/api/manage'
 import { useUserStore } from '@/store/modules/user'
 import { agentMe, ntd, todayDateRange } from './mobileKit'
 import { t } from '@/i18n'
+import { menuGroups } from '@/utils/menuGroups'
 
 const props = defineProps({
   menuData: { type: Array as () => any[], default: () => [] },
@@ -46,28 +47,8 @@ const { $access } = getCurrentInstance()!.appContext.config.globalProperties
 const userStore = useUserStore()
 const vdata: any = reactive({ me: null, stat: null, wallet: null, pending: 0 })
 
-const visible = (r) => r && r.meta && !r.meta.hideInMenu && !r.hidden
-function leaves(r) {
-  if (!r.children || !r.children.length) return visible(r) ? withQuery(r) : []
-  return r.children.filter(visible).flatMap(leaves)
-}
-// 「訂單」（代理）／「訂單管理」（平台）後面多一格「查詢訂單」：同一頁、可選日期區間（不需另開權限）
-function withQuery(r) {
-  if (r.name !== 'ENT_AGENT_PORTAL_ORDER' && r.name !== 'ENT_PAY_ORDER') return [r]
-  return [r, { name: '_ORDER_QUERY', path: r.path + '?mode=query', meta: { title: t('查詢訂單'), icon: 'search-outlined' } }]
-}
-// 沒有子選單的直接放最上面一組；有子選單的依分組名稱各一組
-const groups = computed(() => {
-  const top = props.menuData.filter((r) => visible(r) && (!r.children || !r.children.length)).flatMap(withQuery)
-  const result: any[] = top.length ? [{ key: '_top', title: '', items: top }] : []
-  props.menuData
-    .filter((r) => visible(r) && r.children && r.children.length)
-    .forEach((r) => {
-      const items = leaves(r)
-      if (items.length) result.push({ key: r.path, title: r.meta.title, items })
-    })
-  return result
-})
+// 分類規則與電腦版首頁共用（utils/menuGroups.ts）；手機版的訂單後面多一格「查詢訂單」
+const groups = computed(() => menuGroups(props.menuData, { orderQuery: true }))
 function openByName(name) {
   const hit = groups.value.flatMap((g) => g.items).find((i) => i.name === name)
   if (hit) emit('open', hit.path)

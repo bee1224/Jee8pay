@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/no-mutating-props -->
 <template>
   <!-- 2024-09-03 由pro-layout 改为ant原本layout实现 -->
-  <a-layout style="overflow: hidden; height: 100vh">
+  <a-layout class="jp-desk" style="overflow: hidden; height: 100vh">
     <!-- 左侧路由菜单栏 , 当宽度小于992时，隐藏固定在左侧的路由，该为抽屉弹窗 -->
     <!-- :collapsed-width="vdata.broken ? 0 : props.collapsedWidth" -->
     <a-layout-sider
@@ -131,7 +131,7 @@
     </a-drawer>
 
     <!-- 右侧内容展示区 -->
-    <a-layout :style="{ padding: 0, position: 'relative', 'background-color': 'var(--jp-bg)' }">
+    <a-layout :style="{ padding: 0, position: 'relative' }">
       <!-- 顶部功能区 -->
       <a-layout-header :style="{ padding: 0 }">
         <!-- 顶部功能区插槽 放刷新按钮， 页签栏， 个人中心栏等... -->

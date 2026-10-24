@@ -2,6 +2,7 @@ import { BasicLayout, BlankLayout, PageView, RouteView } from '@/layouts'
 import { useUserStore } from '@/store/modules/user'
 import { asyncRouteDefine } from '@/config/appConfig'
 import { t } from '@/i18n'
+import { HOME_ROUTE_NAME } from '@/utils/menuGroups'
 
 // 前端路由表 = 基础定义 + 动态组件
 const constantRouterComponents = Object.assign(
@@ -24,50 +25,22 @@ const notFoundRouter = {
   component: () => import('@/views/exception/404.vue'),
 }
 
+// 主選單（首頁）：電腦版與手機版都先顯示分類，再點進各頁面；畫面由 BasicLayout 依路由名稱自己畫，這裡不需要元件內容
+const homeRouter = {
+  path: '/home',
+  name: HOME_ROUTE_NAME,
+  component: { render: () => null },
+  meta: { title: t('主選單') },
+}
+
 // 根级菜单
 const rootRouter = {
   name: 'index',
   path: '/',
   component: BasicLayout,
-  redirect: redirectFunc, // 根页面【/】默认跳转 地址
+  redirect: '/home', // 根页面【/】默认跳转到主選單
   children: [],
   meta: { title: t('主頁') },
-}
-
-// 动态跳转路径 func
-function redirectFunc() {
-  let mainPageUri = ''
-  useUserStore().userInfo.allMenuRouteTree.forEach((item) => {
-    if (item.entId === 'ENT_C_MAIN') {
-      // 当前用户是否拥有主页权限， 如果有直接跳转到该路径
-      mainPageUri = item.menuUri
-      return false
-    }
-  })
-
-  if (mainPageUri) {
-    return mainPageUri
-  }
-
-  return getOneUri(useUserStore().userInfo.allMenuRouteTree)
-}
-
-// 获取到第一个uri (递归查找)
-function getOneUri(item) {
-  let result = ''
-  for (let i = 0; i < item.length; i++) {
-    if (item[i].menuUri && item[i].entType === 'ML') {
-      return item[i].menuUri
-    }
-
-    if (item[i].children) {
-      result = getOneUri(item[i].children)
-      if (result) {
-        return result
-      }
-    }
-  }
-  return result
 }
 
 /**
@@ -78,7 +51,7 @@ function getOneUri(item) {
 export const generatorDynamicRouter = () => {
   return new Promise((resolve, reject) => {
     // 根据树状结构生成路由格式
-    rootRouter.children = generator(useUserStore().userInfo.allMenuRouteTree)
+    rootRouter.children = [homeRouter, ...generator(useUserStore().userInfo.allMenuRouteTree)]
 
     // 构建完整路由
     resolve([rootRouter, notFoundRouter])

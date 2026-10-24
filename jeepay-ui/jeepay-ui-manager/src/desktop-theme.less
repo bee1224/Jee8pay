@@ -1,0 +1,167 @@
+// 電腦版質感層：沿用手機版的視覺語言（global.less 的 --jp-* 亮／暗色變數）
+// - 背景：淡藍網格漸層＋細顆粒
+// - 卡片：半透明淡漸層、頂部 1px 高光、分層柔和陰影、大圓角
+// - 強調：品牌漸層（主要按鈕、分頁籤、首頁主卡）
+// 外框（頂部列、首頁分類）在 layouts/DesktopShell.vue；這裡只套用在 .jp-desk 之內的頁面元件，
+// 對話框、下拉選單等掛在 body 的元件另外列在最後
+
+@desk-radius: 18px;
+
+// 表頭與固定欄需要不透明的底色（半透明會讓捲動中的欄位透出來）
+:root {
+  --jp-table-head: #e9f0fd;
+  --jp-card-solid: #f8fafe;
+}
+html[data-theme='dark'] {
+  --jp-table-head: #1c2740;
+  --jp-card-solid: #181e2b;
+}
+
+.jp-desk {
+  background: var(--jp-app-bg) !important;
+  background-attachment: fixed !important;
+  color: var(--jp-text);
+
+  // 右側內容區不要再蓋一層底色
+  > .ant-layout,
+  .ant-layout {
+    background: transparent !important;
+  }
+
+  // 卡片：半透明淡漸層＋高光＋分層陰影（手機 .m-card 同一套）
+  .ant-card {
+    background: var(--jp-card-bg) !important;
+    border: 1px solid var(--jp-card-edge) !important;
+    border-radius: @desk-radius !important;
+    box-shadow: var(--jp-card-gloss), var(--jp-shadow-1);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
+    .ant-card-head {
+      border-bottom-color: var(--jp-card-line);
+      font-weight: 650;
+    }
+    // 卡片內的卡片不要再疊陰影
+    .ant-card {
+      box-shadow: var(--jp-card-gloss);
+    }
+  }
+
+  // 搜尋條件區：融進卡片，用細線分隔
+  .table-page-search-wrapper {
+    background: transparent;
+    border-bottom: 1px solid var(--jp-card-line);
+  }
+
+  // 表格：透明底、淡表頭、細分隔線、hover 淡藍
+  .ant-table-wrapper {
+    .ant-table,
+    .ant-table-container {
+      background: transparent;
+    }
+    .ant-table-thead > tr > th {
+      background: var(--jp-table-head) !important;
+      color: var(--jp-text-2);
+      font-weight: 600;
+      font-size: 13px;
+      border-bottom: 0 !important;
+      &::before {
+        display: none;
+      }
+    }
+    .ant-table-thead > tr > th:first-child {
+      border-start-start-radius: 12px !important;
+      border-end-start-radius: 12px !important;
+    }
+    .ant-table-thead > tr > th:last-child {
+      border-start-end-radius: 12px !important;
+      border-end-end-radius: 12px !important;
+    }
+    .ant-table-tbody > tr > td {
+      border-bottom-color: var(--jp-card-line) !important;
+      background: transparent;
+    }
+    .ant-table-tbody > tr.ant-table-row:hover > td {
+      background: var(--jp-primary-soft) !important;
+    }
+    .ant-table-tbody .ant-table-cell-fix-left,
+    .ant-table-tbody .ant-table-cell-fix-right {
+      background: var(--jp-card-solid) !important;
+    }
+  }
+  .ant-pagination-item-active {
+    background: var(--jp-brand-grad);
+    border-color: transparent !important;
+    a {
+      color: #fff !important;
+    }
+  }
+
+  // 分頁籤
+  .ant-tabs-ink-bar {
+    background: var(--jp-brand-grad);
+    height: 3px !important;
+    border-radius: 3px;
+  }
+  .ant-tabs-tab-active .ant-tabs-tab-btn {
+    font-weight: 600;
+  }
+
+  .ant-tag {
+    border-radius: 999px;
+    padding-inline: 10px;
+  }
+}
+
+// ───────── 共用元件（含掛在 body 的對話框、抽屜、下拉選單）─────────
+// 主要按鈕：品牌漸層＋光澤＋光暈（手機 .m-btn 同一套）
+.ant-btn-primary:not(.ant-btn-dangerous):not(:disabled):not(.ant-btn-background-ghost) {
+  background: var(--jp-brand-grad) !important;
+  border-color: transparent !important;
+  box-shadow:
+    0 4px 12px rgba(37, 99, 235, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.12);
+  &:hover {
+    filter: brightness(1.06);
+    box-shadow:
+      var(--jp-brand-glow),
+      inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  }
+}
+.ant-switch.ant-switch-checked:not(.ant-switch-disabled) {
+  background: var(--jp-brand-grad);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+}
+
+// 對話框與抽屜：大圓角、分層陰影
+.ant-modal .ant-modal-content {
+  border-radius: 22px;
+  border: 1px solid var(--jp-card-edge);
+  box-shadow: var(--jp-shadow-2), var(--jp-card-gloss);
+}
+.ant-modal .ant-modal-header {
+  background: transparent;
+  .ant-modal-title {
+    font-weight: 650;
+  }
+}
+.ant-drawer-right > .ant-drawer-content-wrapper {
+  box-shadow: var(--jp-shadow-2);
+  .ant-drawer-content {
+    border-radius: 22px 0 0 22px;
+  }
+}
+.ant-drawer .ant-drawer-header {
+  border-bottom-color: var(--jp-card-line);
+  .ant-drawer-title {
+    font-weight: 650;
+  }
+}
+.ant-dropdown .ant-dropdown-menu,
+.ant-select-dropdown,
+.ant-picker-dropdown .ant-picker-panel-container,
+.ant-popover .ant-popover-inner {
+  border-radius: 14px !important;
+  border: 1px solid var(--jp-card-edge);
+  box-shadow: var(--jp-shadow-2) !important;
+}

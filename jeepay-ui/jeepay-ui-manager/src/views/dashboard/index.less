@@ -3,12 +3,17 @@
   .top-left {
     min-height: 250px;
   }
+  // 卡片與手機版 .m-card 同一套：半透明淡漸層、頂部高光、分層陰影
   .chart-data {
     min-height: 100px;
     height: 100%;
     width: 100%;
-    border-radius: 6px;
-    background-color: var(--jp-surface);
+    border-radius: 18px;
+    background: var(--jp-card-bg);
+    border: 1px solid var(--jp-card-edge);
+    box-shadow: var(--jp-card-gloss), var(--jp-shadow-1);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
   }
   .chart-top, .chart-bottom {
     display: flex;

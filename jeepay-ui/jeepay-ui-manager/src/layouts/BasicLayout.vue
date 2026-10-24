@@ -15,111 +15,20 @@
     <div v-else class="m-desktop-page"><router-view /></div>
   </MobileShell>
 
-  <jeepayLayout
+  <!-- 電腦版：沒有左側選單，首頁依分類點進各頁面（與手機版主選單同一套分類） -->
+  <DesktopShell
     v-else
-    v-model:openKeys="vdata.openKeys"
-    v-model:selectedKeys="vdata.selectedKeys"
-    v-model:collapsed="proLayoutObject.collapsed"
-    layout="side"
-    :active-name="route.path"
-    :nav-theme="vdata.theme"
-    :sider-width="260"
-    :menu-data="vdata.menuData"
-    is-mobile="true"
-    :collapsed-button-render="false"
-    :collapsed-width="80"
-    @broken="(e) => (vdata.broken = e)"
-  >
-    <router-view v-if="vdata.isRouterAlive" />
-
-    <!-- 菜单头部渲染插槽 -->
-    <template #menuHeaderRender>
-      <router-link :to="{ path: '/' }" style="display: flex; align-items: center">
-        <!-- 代理帳號（團長、隊長、子帳號）的左側選單不顯示任何品牌名稱與標誌 -->
-        <div v-if="vdata.isAgentUser"></div>
-        <div v-else-if="!proLayoutObject.collapsed">
-          <img src="@/assets/logo-icon.png" alt="logo" style="height: 32px" />
-          <img
-            src="@/assets/logo-text.png"
-            alt="jeepay"
-            style="width: 90px; margin: 5px 0 0 5px"
-          />
-        </div>
-        <div v-else><img src="@/assets/logo-icon-collapsed.png" alt="logo" style="height: 32px" /></div>
-      </router-link>
-    </template>
-
-    <!-- 自定义顶部内容， 包括刷新按钮，面包屑 -->
-    <template #headerContentRender>
-      <!-- 最顶部header的宽度： 小屏时，菜单栏改为抽屉浮动，所以直接撑满100vh, 大屏时要根据折叠状态减80或260 -->
-      <div
-        class="customhead"
-        :style="{
-          width: `calc(100vw - ${vdata.broken ? '0px' : proLayoutObject.collapsed ? '90px' : '270px'})`,
-        }"
-      >
-        <div class="refash">
-          <!-- 收起菜单栏 -->
-          <MenuUnfoldOutlined
-            v-if="proLayoutObject.collapsed"
-            class="icon-style"
-            @click="proLayoutObject.collapsed = false"
-          />
-          <!-- 展开菜单栏 -->
-          <MenuFoldOutlined v-else class="icon-style" @click="proLayoutObject.collapsed = true" />
-
-          <!-- 刷新按钮 -->
-          <ReloadOutlined
-            :class="{ 'icon-rotate': vdata.isRouterAlive }"
-            class="icon-style"
-            @click="clickRefsh"
-          />
-          <!-- 回到首页 -->
-          <homeOutlined
-            key="layout-main"
-            :style="{ color: route.name === 'ENT_C_MAIN' ? 'var(--jp-primary)' : 'var(--jp-text-2)' }"
-            class="icon-style icon-main"
-            @click="toMain"
-          />
-
-          <a-breadcrumb style="margin-left: 20px">
-            <template v-for="(item, index) in vdata.matchList" :key="index">
-              <a-breadcrumb-item>{{ item.meta.title }}</a-breadcrumb-item>
-            </template>
-          </a-breadcrumb>
-        </div>
-
-        <!-- 个人信息部分 -->
-        <div style="display: flex; align-items: center; gap: 8px">
-          <LanguageButton />
-          <a-dropdown>
-            <template #overlay>
-              <a-menu>
-                <a-menu-item @click="userInfo">
-                  <setting-outlined style="margin-right: 10px" />
-                  <span style="cursor: hand">{{ $t('個人資訊') }}</span>
-                </a-menu-item>
-                <a-menu-item @click="logout">
-                  <LogoutOutlined style="margin-right: 10px" />
-                  <span style="cursor: hand">{{ $t('退出登入') }}</span>
-                </a-menu-item>
-              </a-menu>
-            </template>
-            <div class="self-info">
-              <a-avatar shape="square" class="square" :src="userStore.userInfo.avatarUrl" />
-              <span>{{ userStore.userInfo.realname }}</span>
-              <caret-down-outlined style="margin-left: 5px" />
-            </div>
-          </a-dropdown>
-        </div>
-      </div>
-    </template>
-  </jeepayLayout>
+    :groups="desktopGroups"
+    :is-agent-user="vdata.isAgentUser"
+    @home="router.push('/home')"
+    @open="(p) => p !== route.fullPath && router.push(p)"
+    @userinfo="userInfo"
+    @logout="logout"
+  />
 </template>
 <script lang="ts" setup>
 import { useRouter, useRoute, createRouterMatcher } from 'vue-router'
-import { reactive, computed, watch, watchEffect, nextTick, getCurrentInstance } from 'vue'
-import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons-vue'
+import { reactive, computed, watch, watchEffect, getCurrentInstance } from 'vue'
 import { generatorDynamicRouter } from '@/router/generator-routers'
 import { useUserStore } from '@/store/modules/user'
 import { isMobile } from '@/views/mobile/mobileKit'
@@ -129,7 +38,8 @@ import MobileMe from '@/views/mobile/MobileMe.vue'
 import { HomeOutlined, ProfileOutlined, WalletOutlined, UserOutlined } from '@ant-design/icons-vue'
 import { defineAsyncComponent } from 'vue'
 import { t } from '@/i18n'
-import LanguageButton from '@/components/LanguagePicker/LanguageButton.vue'
+import DesktopShell from './DesktopShell.vue'
+import { menuGroups, HOME_ROUTE_NAME } from '@/utils/menuGroups'
 
 const { $infoBox, $access, $hasAgentEnt } = getCurrentInstance()!.appContext.config.globalProperties
 
@@ -139,10 +49,6 @@ const userStore = useUserStore()
 const route = useRoute()
 
 const router = useRouter()
-
-const proLayoutObject = reactive({
-  collapsed: false,
-})
 
 const vdata: any = reactive({
   broken: false, // 页面宽度是否小于992 true小屏   false大屏
@@ -213,7 +119,7 @@ function groupAgentMenus(items) {
 generatorDynamicRouter().then((resRouter: any) => {
   // 过滤掉系统通用菜单
   const menus = resRouter[0].children.filter(
-    (item) => item.name != 'ENT_COMMONS' && item.name != 'ENT_C_USERINFO'
+    (item) => item.name != 'ENT_COMMONS' && item.name != 'ENT_C_USERINFO' && item.name != HOME_ROUTE_NAME
   )
   // 「代理後台」只給代理帳號：平台帳號（含超管）不顯示；代理帳號則把底下的選單攤平到第一層
   const belong = userStore.userInfo['belongInfoId']
@@ -348,39 +254,14 @@ function openFromLauncher(path) {
   mobile.launcher = false
   if (path !== route.fullPath) router.push(path)
 }
+// 換頁時離開主選單；直接打開 /home（登入後、按 Logo）時顯示主選單
 watch(
   () => route.fullPath,
-  () => (mobile.launcher = false)
+  () => (mobile.launcher = route.name === HOME_ROUTE_NAME),
 )
+// 電腦版首頁的分類（與手機主選單相同；不另加「查詢訂單」格，電腦版查其他日期用「歷史查詢」）
+const desktopGroups = computed(() => menuGroups(vdata.menuData, { showOther: true }))
 
-// 回主页
-function toMain() {
-  router.push({
-    path: '/main',
-  })
-}
-
-const breadcrumb = computed(() =>
-  router.currentRoute.value.matched.concat().map((item) => {
-    return {
-      path: item.path,
-      breadcrumbName: item.meta.title || '',
-    }
-  })
-)
-
-const handleCollapsed = () => {
-  vdata.collapsed = !vdata.collapsed
-}
-
-const clickRefsh = () => {
-  vdata.isSpin = true
-  vdata.isRouterAlive = false
-  nextTick(() => {
-    vdata.isRouterAlive = true
-  })
-  vdata.isSpin = false
-}
 </script>
 
 <style scoped lang="less">
@@ -439,7 +320,7 @@ const clickRefsh = () => {
 
   position: fixed;
   top: 0;
-  right: 10px;
+  right: 16px;
 
   display: flex;
   justify-content: space-between;

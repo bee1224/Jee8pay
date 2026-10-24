@@ -5,6 +5,7 @@ import App from './App.vue'
 // import { message } from 'ant-design-vue';
 
 import './global.less' // global style
+import './desktop-theme.less' // 電腦版質感層（與手機版同一套視覺）
 import infoBox from '@/utils/infoBox'
 
 // vue路由

@@ -40,7 +40,7 @@ export const isDark = computed(() => (themePref.value === 'auto' ? systemDark.va
 const FONT_FAMILY = 'var(--jp-font)'
 export const antTheme = () => ({
   algorithm: isDark.value ? theme.darkAlgorithm : theme.defaultAlgorithm,
-  token: { colorPrimary: '#2563eb', fontFamily: FONT_FAMILY, borderRadius: 8 },
+  token: { colorPrimary: '#2563eb', fontFamily: FONT_FAMILY, borderRadius: 10, borderRadiusLG: 16 },
 })
 
 function apply(dark: boolean) {

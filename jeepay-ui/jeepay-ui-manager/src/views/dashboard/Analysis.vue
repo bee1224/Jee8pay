@@ -484,12 +484,15 @@ function initPayAmount() {
 }
 function initPayCount() {
   vdata.columnPlot.render()
-  vdata.columnPlot.changeData(vdata.mainChart.payCount)
+  vdata.columnPlot.changeData(chartTypes(vdata.mainChart.payCount))
 }
 function initPayType() {
   vdata.piePlot.render()
-  vdata.piePlot.changeData(vdata.mainChart.payType)
+  vdata.piePlot.changeData(chartWays(vdata.mainChart.payType))
 }
+// 後端回傳的「收款／退款」與支付方式名稱是繁中，畫圖前換成目前語言
+const chartTypes = (list) => (list || []).map((d) => ({ ...d, type: t(d.type) }))
+const chartWays = (list) => (list || []).map((d) => ({ ...d, typeName: t(d.typeName) }))
 function renderStatistic(containerWidth, text, style) {
   const { width: textWidth, height: textHeight } = measureTextWidth(text, style)
   const R = containerWidth / 2
@@ -546,13 +549,13 @@ function transactionChange(dates, dateStrings) {
 function payCountOk() {
   getPayCount(vdata.searchData).then((res) => {
     res.length === 0 ? (vdata.isPayCount = false) : (vdata.isPayCount = true)
-    vdata.columnPlot.changeData(res)
+    vdata.columnPlot.changeData(chartTypes(res))
   })
 }
 function payTypeOk() {
   getPayType(vdata.searchData).then((res) => {
     res[0].length === 0 ? (vdata.isPayType = false) : (vdata.isPayType = true)
-    vdata.piePlot.changeData(res[0])
+    vdata.piePlot.changeData(chartWays(res[0]))
   })
 }
 
@@ -581,10 +584,13 @@ const quickMenuList = computed(() => {
 })
 
 onMounted(() => {
+  // 今日交易金額放在品牌漸層主卡上，折線用白色
   vdata.tinyArea = new TinyArea('payAmount', {
     autoFit: true,
     data: vdata.mainChart.payAmountData,
     smooth: true,
+    line: { color: 'rgba(255,255,255,0.95)', size: 2 },
+    areaStyle: { fill: 'l(90) 0:rgba(255,255,255,0.45) 1:rgba(255,255,255,0)' },
   })
 
   vdata.columnPlot = new Column('payCount', {
@@ -598,7 +604,7 @@ onMounted(() => {
     // appendPadding: 16,
     appendPadding: [0, 0, 0, 10], // 增加额外的边距，防止左侧的辅助文字被遮挡
     theme: {
-      colors10: ['#FFB238', '#F55536'],
+      colors10: ['#2563eb', '#38bdf8'],
     },
     label: {
       // 可配置附加的布局方法
@@ -619,6 +625,12 @@ onMounted(() => {
     innerRadius: 0.64,
     autoFit: true,
     color: [
+      '#2563eb',
+      '#38bdf8',
+      '#6366f1',
+      '#06b6d4',
+      '#93c5fd',
+      '#1e40af',
       '#FF6B3B',
       '#626681',
       '#FFC100',
@@ -720,13 +732,27 @@ onMounted(() => {
       padding: 0;
       margin-bottom: 0;
 
-      li {
-        margin-right: 20px;
-        margin-top: 10px;
-        text-align: left;
+      gap: 10px;
+      margin-top: 12px;
 
-        :hover {
-          color: @jee-inside-link;
+      // 快速開始：毛玻璃膠囊按鈕（與手機版篩選膠囊一致）
+      li {
+        a {
+          display: inline-block;
+          padding: 6px 14px;
+          border-radius: 999px;
+          background: var(--jp-card-bg);
+          border: 1px solid var(--jp-card-edge);
+          box-shadow: var(--jp-card-gloss), 0 1px 3px rgba(15, 23, 42, 0.05);
+          color: var(--jp-text);
+          font-weight: 500;
+          transition: all 0.2s ease;
+          &:hover {
+            background: var(--jp-brand-grad);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+          }
         }
       }
       li:hover {
@@ -746,7 +772,7 @@ onMounted(() => {
   padding-bottom: 20px;
   display: flex;
   justify-content: space-between;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--jp-card-line);
 
   .user-greet-all {
     display: flex;
@@ -757,8 +783,9 @@ onMounted(() => {
       height: 60px;
       border-radius: 50%;
       overflow: hidden;
-      background: #ddd;
-      margin-right: 10px;
+      background: var(--jp-brand-grad);
+      margin-right: 12px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
       img {
         width: 60px;
         height: 60px;
@@ -861,6 +888,45 @@ onMounted(() => {
 }
 
 #chart-card {
-  background-color: var(--jp-bg);
+  background: transparent;
+}
+
+// 今日交易金額：品牌漸層主卡＋光暈（與手機版第一張統計卡一致）
+// index.less 用 #chart-card 設卡片底色，這裡要同樣以 #chart-card 開頭才蓋得過
+#chart-card .top-left .chart-data {
+  position: relative;
+  overflow: hidden;
+  background: var(--jp-brand-grad);
+  border-color: transparent;
+  box-shadow: var(--jp-brand-glow), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  color: #fff;
+  .analy-title,
+  .payAmountSpan {
+    color: rgba(255, 255, 255, 0.82);
+  }
+  .pay-amount {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  &::after {
+    content: '';
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    right: -90px;
+    top: -130px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+  }
+}
+// 其他統計卡的數字加重、用等寬數字
+:deep(.ant-statistic-content),
+.pay-amount {
+  font-variant-numeric: tabular-nums;
+}
+.analy-title {
+  font-weight: 500;
+  color: var(--jp-text-2);
 }
 </style>
