@@ -4,15 +4,15 @@
       <div v-if="$access('ENT_UR_USER_SEARCH')" class="table-page-search-wrapper">
         <a-form layout="inline" class="table-head-ground">
           <div class="table-layer">
-            <jeepay-text-up :placeholder="'使用者ID'" v-model:value="vdata.searchData.sysUserId" />
-            <jeepay-text-up :placeholder="'使用者姓名'" v-model:value="vdata.searchData.realname" />
+            <jeepay-text-up :placeholder="$t('使用者ID')" v-model:value="vdata.searchData.sysUserId" />
+            <jeepay-text-up :placeholder="$t('使用者姓名')" v-model:value="vdata.searchData.realname" />
 
             <span class="table-page-search-submitButtons">
               <a-button type="primary" @click="searchFunc" :loading="vdata.btnLoading">
-                查詢
+                {{ $t('查詢') }}
               </a-button>
               <a-button style="margin-left: 8px" @click="() => (vdata.searchData = {})">
-                重置
+                {{ $t('重置') }}
               </a-button>
             </span>
           </div>
@@ -31,7 +31,7 @@
       >
         <template #opRow>
           <a-button v-if="$access('ENT_UR_USER_ADD')" type="primary" @click="addFunc">
-            新建
+            {{ $t('新建') }}
           </a-button>
         </template>
 
@@ -60,14 +60,14 @@
                 v-if="$access('ENT_UR_USER_UPD_ROLE')"
                 @click="roleDist(record.sysUserId)"
               >
-                變更角色
+                {{ $t('變更角色') }}
               </a-button>
               <a-button
                 type="link"
                 v-if="$access('ENT_UR_USER_EDIT')"
                 @click="editFunc(record.sysUserId)"
               >
-                修改
+                {{ $t('修改') }}
               </a-button>
               <a-button
                 v-if="$access('ENT_UR_USER_DELETE')"
@@ -75,7 +75,7 @@
                 danger
                 @click="delFunc(record.sysUserId)"
               >
-                刪除
+                {{ $t('刪除') }}
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -95,33 +95,34 @@ import { API_URL_SYS_USER_LIST, req, reqLoad } from '@/api/manage'
 import InfoAddOrEdit from './AddOrEdit.vue'
 import RoleDist from './RoleDist.vue'
 import { reactive, getCurrentInstance, ref } from 'vue'
+import { t } from '@/i18n'
 
 const tableColumns = [
-  { title: '使用者ID', dataIndex: 'sysUserId', fixed: 'left' },
-  { title: '姓名', dataIndex: 'realname' },
+  { title: t('使用者ID'), dataIndex: 'sysUserId', fixed: 'left' },
+  { title: t('姓名'), dataIndex: 'realname' },
   {
-    title: '性別',
+    title: t('性別'),
     dataIndex: 'sex',
     customRender: ({ record }) => {
-      return record.sex === 1 ? '男' : record.sex === 2 ? '女' : '未知'
+      return record.sex === 1 ? t('男') : record.sex === 2 ? t('女') : t('未知')
     },
   },
-  { title: '頭像', key: 'avatar', scopedSlots: { customRender: 'avatarSlot' } },
-  { title: '編號', dataIndex: 'userNo' },
-  { title: '手機號', dataIndex: 'telphone' },
+  { title: t('頭像'), key: 'avatar', scopedSlots: { customRender: 'avatarSlot' } },
+  { title: t('編號'), dataIndex: 'userNo' },
+  { title: t('手機號'), dataIndex: 'telphone' },
   {
-    title: '超管',
+    title: t('超管'),
     dataIndex: 'isAdmin',
     customRender: ({ record }) => {
-      return record.isAdmin === 1 ? '是' : '否'
+      return record.isAdmin === 1 ? t('是') : t('否')
     },
   },
-  { title: '狀態', key: 'state', scopedSlots: { customRender: 'stateSlot' }, align: 'center' },
-  { title: '建立時間', dataIndex: 'createdAt' },
-  { title: '修改時間', dataIndex: 'updatedAt' },
+  { title: t('狀態'), key: 'state', scopedSlots: { customRender: 'stateSlot' }, align: 'center' },
+  { title: t('建立時間'), dataIndex: 'createdAt' },
+  { title: t('修改時間'), dataIndex: 'updatedAt' },
   {
     key: 'op',
-    title: '操作',
+    title: t('操作'),
     width: '200px',
     fixed: 'right',
     align: 'center',
@@ -159,9 +160,9 @@ function addFunc() {
 
 function delFunc(recordId) {
   // 业务通用【删除】 函数
-  $infoBox.confirmDanger('確認刪除？', '', () => {
+  $infoBox.confirmDanger(t('確認刪除？'), '', () => {
     return req.delById(API_URL_SYS_USER_LIST, recordId).then((res) => {
-      $infoBox.message.success('刪除成功！')
+      $infoBox.message.success(t('刪除成功！'))
       infoTable.value.refTable(false)
     })
   })
@@ -178,9 +179,9 @@ function roleDist(recordId) {
 }
 function updateState(recordId, state) {
   // 【更新状态】
-  const title = state === 1 ? '確認[啟用]該使用者？' : '確認[停用]該使用者？'
+  const title = state === 1 ? t('確認[啟用]該使用者？') : t('確認[停用]該使用者？')
   const content =
-    state === 1 ? '啟用後使用者可進行登入等一系列操作' : '停用後該使用者將立即退出系統並不可再次登入'
+    state === 1 ? t('啟用後使用者可進行登入等一系列操作') : t('停用後該使用者將立即退出系統並不可再次登入')
 
   return new Promise((resolve, reject) => {
     $infoBox.confirmDanger(

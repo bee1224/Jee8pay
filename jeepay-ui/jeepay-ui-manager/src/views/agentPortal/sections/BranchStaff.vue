@@ -2,43 +2,43 @@
   <!-- 我的子帳號：建立員工帳號、逐項勾選權限、停用與重設密碼（比照競品「我的子帳號」） -->
   <div>
     <a-alert type="info" show-icon style="margin-bottom: 12px"
-      message="子帳號是給你自己的員工用的登入帳號。建立後沒有任何權限，請按「權限」勾選他可以看到的選單與按鈕。" />
-    <a-button type="primary" style="margin-bottom: 12px" @click="openForm">建立子帳號</a-button>
+      :message="$t('子帳號是給你自己的員工用的登入帳號。建立後沒有任何權限，請按「權限」勾選他可以看到的選單與按鈕。')" />
+    <a-button type="primary" style="margin-bottom: 12px" @click="openForm">{{ $t('建立子帳號') }}</a-button>
     <a-table :columns="columns" :data-source="vdata.list" size="small" row-key="sysUserId" :pagination="false">
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'ents'">
-          <a-tag v-if="!record.entCount" color="orange">尚未設定</a-tag>
-          <span v-else>已設定</span>
+          <a-tag v-if="!record.entCount" color="orange">{{ $t('尚未設定') }}</a-tag>
+          <span v-else>{{ $t('已設定') }}</span>
         </template>
         <template v-if="column.key === 'state'">
-          <a-switch :checked="record.state === 1" checked-children="啟用" un-checked-children="停用" @change="(v) => setState(record, v)" />
+          <a-switch :checked="record.state === 1" :checked-children="$t('啟用')" :un-checked-children="$t('停用')" @change="(v) => setState(record, v)" />
         </template>
         <template v-if="column.key === 'op'">
-          <a-button type="link" @click="openEnts(record)">權限</a-button>
-          <a-button type="link" @click="resetPwd(record)">重設密碼</a-button>
+          <a-button type="link" @click="openEnts(record)">{{ $t('權限') }}</a-button>
+          <a-button type="link" @click="resetPwd(record)">{{ $t('重設密碼') }}</a-button>
         </template>
       </template>
-      <template #emptyText>尚未建立子帳號</template>
+      <template #emptyText>{{ $t('尚未建立子帳號') }}</template>
     </a-table>
 
-    <a-modal v-model:open="vdata.form.open" title="建立子帳號" :confirm-loading="vdata.form.saving" ok-text="確定" cancel-text="取消" @ok="save">
+    <a-modal v-model:open="vdata.form.open" :title="$t('建立子帳號')" :confirm-loading="vdata.form.saving" :ok-text="$t('確定')" :cancel-text="$t('取消')" @ok="save">
       <a-form layout="vertical">
-        <a-form-item label="帳號" required extra="儲存後系統產生 8 碼隨機密碼並顯示一次。">
-          <a-input v-model:value="vdata.form.data.loginUsername" placeholder="2～32 碼中文、英文、數字或底線" autocomplete="off" />
+        <a-form-item :label="$t('帳號')" required :extra="$t('儲存後系統產生 8 碼隨機密碼並顯示一次。')">
+          <a-input v-model:value="vdata.form.data.loginUsername" :placeholder="$t('2～32 碼中文、英文、數字或底線')" autocomplete="off" />
         </a-form-item>
-        <a-form-item label="名稱" required><a-input v-model:value="vdata.form.data.realname" /></a-form-item>
-        <a-form-item label="手機號（選填）"><a-input v-model:value="vdata.form.data.telphone" placeholder="09 開頭 10 碼，可不填" /></a-form-item>
+        <a-form-item :label="$t('名稱')" required><a-input v-model:value="vdata.form.data.realname" /></a-form-item>
+        <a-form-item :label="$t('手機號（選填）')"><a-input v-model:value="vdata.form.data.telphone" :placeholder="$t('09 開頭 10 碼，可不填')" /></a-form-item>
       </a-form>
     </a-modal>
 
-    <a-modal v-model:open="vdata.ents.open" :title="'設定權限：' + vdata.ents.name" :confirm-loading="vdata.ents.saving" ok-text="儲存" cancel-text="取消" width="560px" @ok="saveEnts">
+    <a-modal v-model:open="vdata.ents.open" :title="$t('設定權限：') + vdata.ents.name" :confirm-loading="vdata.ents.saving" :ok-text="$t('儲存')" :cancel-text="$t('取消')" width="560px" @ok="saveEnts">
       <div style="margin-bottom: 8px">
-        <a-button size="small" @click="vdata.ents.checked = allKeys.slice()">全選</a-button>
-        <a-button size="small" style="margin-left: 8px" @click="vdata.ents.checked = []">全部取消</a-button>
+        <a-button size="small" @click="vdata.ents.checked = allKeys.slice()">{{ $t('全選') }}</a-button>
+        <a-button size="small" style="margin-left: 8px" @click="vdata.ents.checked = []">{{ $t('全部取消') }}</a-button>
       </div>
       <a-tree v-model:checkedKeys="vdata.ents.checked" checkable check-strictly default-expand-all :tree-data="tree" :selectable="false"
         style="max-height: 420px; overflow: auto" @check="onCheck" />
-      <div style="color: #888; font-size: 12px; margin-top: 8px">只能從你自己擁有的權限裡挑選；「我的子帳號」本身不能下放。儲存後立即生效。</div>
+      <div style="color: #888; font-size: 12px; margin-top: 8px">{{ $t('只能從你自己擁有的權限裡挑選；「我的子帳號」本身不能下放。儲存後立即生效。') }}</div>
     </a-modal>
 
     <AgentCredentialModal ref="credentialModal" />
@@ -49,6 +49,7 @@
 import { API_URL_AGENT_PORTAL, req } from '@/api/manage'
 import AgentCredentialModal from '@/views/agent/AgentCredentialModal.vue'
 import { computed, reactive, ref, getCurrentInstance } from 'vue'
+import { t } from '@/i18n'
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
 defineProps({ me: { type: Object, required: true } })
 
@@ -56,13 +57,13 @@ const URL = API_URL_AGENT_PORTAL + '/staff'
 // 所有子帳號都會自動帶上的基礎權限，不列在樹上
 const BASE = ['ENT_COMMONS', 'ENT_C_USERINFO', 'ENT_AGENT_PORTAL', 'ENT_AGENT_PORTAL_VIEW']
 const columns = [
-  { title: '帳號', dataIndex: 'loginUsername' },
-  { title: '名稱', dataIndex: 'realname' },
-  { title: '手機號', dataIndex: 'telphone' },
-  { key: 'ents', title: '權限' },
-  { key: 'state', title: '啟用狀態', width: 110 },
-  { title: '建立時間', dataIndex: 'createdAt', width: 170 },
-  { key: 'op', title: '操作', width: 170 },
+  { title: t('帳號'), dataIndex: 'loginUsername' },
+  { title: t('名稱'), dataIndex: 'realname' },
+  { title: t('手機號'), dataIndex: 'telphone' },
+  { key: 'ents', title: t('權限') },
+  { key: 'state', title: t('啟用狀態'), width: 110 },
+  { title: t('建立時間'), dataIndex: 'createdAt', width: 170 },
+  { key: 'op', title: t('操作'), width: 170 },
 ]
 const credentialModal = ref()
 const vdata: any = reactive({
@@ -90,11 +91,11 @@ function openForm() {
 function save() {
   const f = vdata.form.data
   if (!/^[A-Za-z0-9_一-鿿]{2,32}$/.test(f.loginUsername || '') || !f.realname) {
-    $infoBox.message.warning('請填寫2～32 碼中文、英文、數字或底線的帳號與名稱')
+    $infoBox.message.warning(t('請填寫2～32 碼中文、英文、數字或底線的帳號與名稱'))
     return
   }
   if (f.telphone && !/^09\d{8}$/.test(f.telphone)) {
-    $infoBox.message.warning('手機號格式不正確（09 開頭 10 碼），不填也可以')
+    $infoBox.message.warning(t('手機號格式不正確（09 開頭 10 碼），不填也可以'))
     return
   }
   vdata.form.saving = true
@@ -103,7 +104,7 @@ function save() {
     .then((res) => {
       vdata.form.open = false
       load()
-      credentialModal.value.show({ ...res, subjectLabel: '子帳號', loginAt: '營運平台（請先設定權限）' })
+      credentialModal.value.show({ ...res, subjectLabel: t('子帳號'), loginAt: t('營運平台（請先設定權限）') })
     })
     .finally(() => (vdata.form.saving = false))
 }
@@ -130,7 +131,7 @@ function saveEnts() {
   req
     .updateById(URL, e.sysUserId + '/ents', { entIds })
     .then(() => {
-      $infoBox.message.success('已儲存')
+      $infoBox.message.success(t('已儲存'))
       e.open = false
       load()
     })
@@ -138,14 +139,14 @@ function saveEnts() {
 }
 function setState(record, on) {
   req.updateById(URL, record.sysUserId + '/state', { state: on ? 1 : 0 }).then(() => {
-    $infoBox.message.success(on ? '已啟用' : '已停用，對方會被立即登出')
+    $infoBox.message.success(on ? t('已啟用') : t('已停用，對方會被立即登出'))
     load()
   })
 }
 function resetPwd(record) {
-  $infoBox.confirmPrimary('重設子帳號密碼？', `${record.realname || record.loginUsername} 的登入密碼會換成新的隨機密碼，舊密碼立即失效。`, () => {
+  $infoBox.confirmPrimary(t('重設子帳號密碼？'), t('{0} 的登入密碼會換成新的隨機密碼，舊密碼立即失效。', [record.realname || record.loginUsername]), () => {
     req.add(`${URL}/${record.sysUserId}/resetPassword`, {}).then((res) => {
-      credentialModal.value.show({ ...res, subjectLabel: '子帳號', loginAt: '營運平台' })
+      credentialModal.value.show({ ...res, subjectLabel: t('子帳號'), loginAt: t('營運平台') })
     })
   })
 }

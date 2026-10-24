@@ -2,6 +2,7 @@
 import { req } from '@/api/manage'
 import storage from '@/utils/jeepayStorageWrapper'
 import appConfig from '@/config/appConfig'
+import { t } from '@/i18n'
 
 export const EXPORT_API = '/api/exports'
 
@@ -19,7 +20,7 @@ export async function downloadExport(job: any) {
   })
   const type = resp.headers.get('Content-Type') || ''
   if (!resp.ok || type.includes('application/json')) {
-    let msg = '下載失敗'
+    let msg = t('下載失敗')
     try {
       msg = (await resp.json()).msg || msg
     } catch (e) {

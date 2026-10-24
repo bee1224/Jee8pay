@@ -42,6 +42,7 @@ declare module 'vue' {
     ASelect: typeof import('ant-design-vue/es')['Select']
     ASelectOption: typeof import('ant-design-vue/es')['SelectOption']
     ASkeleton: typeof import('ant-design-vue/es')['Skeleton']
+    ASpin: typeof import('ant-design-vue/es')['Spin']
     AStatistic: typeof import('ant-design-vue/es')['Statistic']
     AStep: typeof import('ant-design-vue/es')['Step']
     ASteps: typeof import('ant-design-vue/es')['Steps']
@@ -68,6 +69,9 @@ declare module 'vue' {
     JeepayTableColumns: typeof import('./src/components/JeepayTable/JeepayTableColumns.vue')['default']
     JeepayTextUp: typeof import('./src/components/JeepayTextUp/JeepayTextUp.vue')['default']
     JeepayUpload: typeof import('./src/components/JeepayUpload/JeepayUpload.vue')['default']
+    LanguageButton: typeof import('./src/components/LanguagePicker/LanguageButton.vue')['default']
+    LanguageModal: typeof import('./src/components/LanguagePicker/LanguageModal.vue')['default']
+    LanguageOptions: typeof import('./src/components/LanguagePicker/LanguageOptions.vue')['default']
     RightContent: typeof import('./src/components/GlobalHeader/RightContent.vue')['default']
     SubMenu: typeof import('./src/components/JeepayLayout/SubMenu.vue')['default']
   }

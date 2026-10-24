@@ -1,6 +1,6 @@
 <template>
   <a-drawer
-    :title="vdata.isAdd ? '新增操作員' : '修改操作員'"
+    :title="vdata.isAdd ? $t('新增操作員') : $t('修改操作員')"
     placement="right"
     :closable="true"
     @ok="handleOkFunc"
@@ -20,62 +20,62 @@
     >
       <a-row justify="space-between" type="flex">
         <a-col :span="10">
-          <a-form-item label="使用者登入名:" name="loginUsername">
+          <a-form-item :label="$t('使用者登入名:')" name="loginUsername">
             <a-input v-model:value="vdata.saveObject.loginUsername" :disabled="!vdata.isAdd" />
           </a-form-item>
         </a-col>
 
         <a-col :span="10">
-          <a-form-item label="使用者姓名：" name="realname">
+          <a-form-item :label="$t('使用者姓名：')" name="realname">
             <a-input v-model:value="vdata.saveObject.realname" />
           </a-form-item>
         </a-col>
 
         <a-col :span="10">
-          <a-form-item label="手機號：" name="telphone">
+          <a-form-item :label="$t('手機號：')" name="telphone">
             <a-input v-model:value="vdata.saveObject.telphone" />
           </a-form-item>
         </a-col>
 
         <a-col :span="10">
-          <a-form-item label="編號：" name="userNo">
+          <a-form-item :label="$t('編號：')" name="userNo">
             <a-input v-model:value="vdata.saveObject.userNo" />
           </a-form-item>
         </a-col>
 
         <a-col :span="10">
-          <a-form-item label="請選擇性別：" name="sex">
+          <a-form-item :label="$t('請選擇性別：')" name="sex">
             <a-radio-group v-model:value="vdata.saveObject.sex">
-              <a-radio :value="1">男</a-radio>
-              <a-radio :value="2">女</a-radio>
+              <a-radio :value="1">{{ $t('男') }}</a-radio>
+              <a-radio :value="2">{{ $t('女') }}</a-radio>
             </a-radio-group>
           </a-form-item>
         </a-col>
 
         <a-col :span="10">
-          <a-form-item label="狀態：" name="state">
+          <a-form-item :label="$t('狀態：')" name="state">
             <a-radio-group v-model:value="vdata.saveObject.state">
-              <a-radio :value="1">啟用</a-radio>
-              <a-radio :value="0">停用</a-radio>
+              <a-radio :value="1">{{ $t('啟用') }}</a-radio>
+              <a-radio :value="0">{{ $t('停用') }}</a-radio>
             </a-radio-group>
           </a-form-item>
         </a-col>
       </a-row>
       <a-divider orientation="left" v-if="vdata.resetIsShow">
-        <a-tag color="#FF4B33">帳戶安全</a-tag>
+        <a-tag color="#FF4B33">{{ $t('帳戶安全') }}</a-tag>
       </a-divider>
 
       <div style="display: flex; flex-direction: row">
         <a-row justify="space-between" type="flex" style="width: 100%">
           <a-col :span="10">
             <a-form-item label="" v-if="vdata.resetIsShow">
-              重置密碼：
+              {{ $t('重置密碼：') }}
               <a-checkbox v-model:checked="vdata.sysPassword.resetPass"></a-checkbox>
             </a-form-item>
           </a-col>
           <a-col :span="10">
             <a-form-item label="" v-if="vdata.sysPassword.resetPass">
-              恢復預設密碼：
+              {{ $t('恢復預設密碼：') }}
               <a-checkbox
                 v-model:checked="vdata.sysPassword.defaultPass"
                 @click="isResetPass"
@@ -89,7 +89,7 @@
         <div v-show="!vdata.sysPassword.defaultPass">
           <a-row justify="space-between" type="flex">
             <a-col :span="10">
-              <a-form-item label="新密碼：" name="newPwd">
+              <a-form-item :label="$t('新密碼：')" name="newPwd">
                 <a-input-password
                   autocomplete="new-password"
                   v-model:value="vdata.newPwd"
@@ -98,7 +98,7 @@
               </a-form-item>
             </a-col>
             <a-col :span="10">
-              <a-form-item label="確認新密碼：" name="confirmPwd">
+              <a-form-item :label="$t('確認新密碼：')" name="confirmPwd">
                 <a-input-password
                   autocomplete="new-password"
                   v-model:value="vdata.sysPassword.confirmPwd"
@@ -111,9 +111,9 @@
       </div>
 
       <div class="drawer-btn-center">
-        <a-button :style="{ marginRight: '8px' }" @click="onClose">取消</a-button>
+        <a-button :style="{ marginRight: '8px' }" @click="onClose">{{ $t('取消') }}</a-button>
         <a-button type="primary" @click="handleOkFunc" :loading="vdata.confirmLoading">
-          儲存
+          {{ $t('儲存') }}
         </a-button>
       </div>
     </a-form>
@@ -124,6 +124,7 @@
 import { req, API_URL_SYS_USER_LIST } from '@/api/manage'
 import { Base64 } from 'js-base64'
 import { reactive, getCurrentInstance, ref } from 'vue'
+import { t } from '@/i18n'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 const props = defineProps({
@@ -154,7 +155,7 @@ const vdata: any = reactive({
     realname: [
       {
         required: true,
-        message: '請輸入使用者姓名',
+        message: t('請輸入使用者姓名'),
         trigger: 'blur',
       },
     ],
@@ -162,14 +163,14 @@ const vdata: any = reactive({
       {
         required: true,
         pattern: /^09\d{8}$/,
-        message: '請輸入正確的手機號碼（09 開頭 10 碼）',
+        message: t('請輸入正確的手機號碼（09 開頭 10 碼）'),
         trigger: 'blur',
       },
     ],
     userNo: [
       {
         required: true,
-        message: '請輸入編號',
+        message: t('請輸入編號'),
         trigger: 'blur',
       },
     ],
@@ -183,7 +184,7 @@ const vdata: any = reactive({
         validator: (rule, value) => {
           if (!vdata.sysPassword.defaultPass) {
             if (vdata.newPwd.length < 6 || vdata.newPwd.length > 12) {
-              return Promise.reject('請輸入6-12位新密碼')
+              return Promise.reject(t('請輸入6-12位新密碼'))
             }
           }
           return Promise.resolve()
@@ -200,7 +201,7 @@ const vdata: any = reactive({
           if (!vdata.sysPassword.defaultPass && vdata.newPwd === vdata.sysPassword.confirmPwd) {
             return Promise.resolve()
           } else {
-            return Promise.reject('新密碼與確認密碼不一致')
+            return Promise.reject(t('新密碼與確認密碼不一致'))
           }
         },
       },
@@ -226,7 +227,7 @@ function show(recordId) {
     vdata.rules.loginUsername.push({
       required: true,
       pattern: /^[a-zA-Z][a-zA-Z0-9]{5,17}$/,
-      message: '請輸入字母開頭，長度為6-18位的登入名',
+      message: t('請輸入字母開頭，長度為6-18位的登入名'),
       trigger: 'blur',
     })
   }
@@ -255,7 +256,7 @@ function handleOkFunc() {
         req
           .add(API_URL_SYS_USER_LIST, vdata.saveObject)
           .then((res) => {
-            $infoBox.message.success('新增成功')
+            $infoBox.message.success(t('新增成功'))
             vdata.isShow = false
             vdata.loading = false
             props.callbackFunc() // 刷新列表
@@ -269,7 +270,7 @@ function handleOkFunc() {
         req
           .updateById(API_URL_SYS_USER_LIST, vdata.recordId, vdata.saveObject)
           .then((res) => {
-            $infoBox.message.success('修改成功')
+            $infoBox.message.success(t('修改成功'))
             vdata.isShow = false
             props.callbackFunc() // 刷新列表
             vdata.resetIsShow = false // 取消展示

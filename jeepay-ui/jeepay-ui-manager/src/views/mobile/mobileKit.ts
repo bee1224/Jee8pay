@@ -4,6 +4,7 @@
  */
 import { ref } from 'vue'
 import { API_URL_AGENT_PORTAL, req } from '@/api/manage'
+import { t } from '@/i18n'
 
 /** 手機寬度門檻：768 以下用手機版外框，其餘維持電腦版 */
 const media = window.matchMedia('(max-width: 768px)')
@@ -54,18 +55,18 @@ export function hhmm(dt: any) {
 }
 
 export const PAY_STATES: Record<number, [string, string]> = {
-  0: ['訂單生成', 'mute'],
-  1: ['支付中', 'warn'],
-  2: ['支付成功', 'ok'],
-  3: ['支付失敗', 'bad'],
-  4: ['已撤銷', 'bad'],
-  5: ['已退款', 'mute'],
-  6: ['已關閉', 'mute'],
+  0: [t('訂單生成'), 'mute'],
+  1: [t('支付中'), 'warn'],
+  2: [t('支付成功'), 'ok'],
+  3: [t('支付失敗'), 'bad'],
+  4: [t('已撤銷'), 'bad'],
+  5: [t('已退款'), 'mute'],
+  6: [t('已關閉'), 'mute'],
 }
 export const TRANSFER_STATES: Record<number, [string, string]> = {
-  0: ['訂單生成', 'mute'],
-  1: ['處理中', 'warn'],
-  2: ['代付成功', 'ok'],
-  3: ['代付失敗', 'bad'],
-  4: ['已關閉', 'mute'],
+  0: [t('訂單生成'), 'mute'],
+  1: [t('處理中'), 'warn'],
+  2: [t('代付成功'), 'ok'],
+  3: [t('代付失敗'), 'bad'],
+  4: [t('已關閉'), 'mute'],
 }

@@ -5,19 +5,19 @@
         <a-form layout="inline" v-if="$access('ENT_PC_WAY_SEARCH')" class="table-head-ground">
           <div class="table-layer">
             <jeepay-text-up
-              :placeholder="'支付方式代碼'"
+              :placeholder="$t('支付方式代碼')"
               v-model:value="vdata.searchData.wayCode"
             />
             <jeepay-text-up
-              :placeholder="'支付方式名稱'"
+              :placeholder="$t('支付方式名稱')"
               v-model:value="vdata.searchData.wayName"
             />
             <span class="table-page-search-submitButtons">
               <a-button type="primary" @click="searchFunc(true)" :loading="vdata.btnLoading">
-                查詢
+                {{ $t('查詢') }}
               </a-button>
               <a-button style="margin-left: 8px" @click="() => (vdata.searchData = {})">
-                重置
+                {{ $t('重置') }}
               </a-button>
             </span>
           </div>
@@ -41,7 +41,7 @@
             @click="addFunc"
             class="mg-b-30"
           >
-            新建
+            {{ $t('新建') }}
           </a-button>
         </template>
 
@@ -58,7 +58,7 @@
                 v-if="$access('ENT_PC_WAY_EDIT')"
                 @click="editFunc(record.wayCode)"
               >
-                修改
+                {{ $t('修改') }}
               </a-button>
               <a-button
                 type="link"
@@ -66,7 +66,7 @@
                 v-if="$access('ENT_PC_WAY_DEL')"
                 @click="delFunc(record.wayCode)"
               >
-                刪除
+                {{ $t('刪除') }}
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -82,6 +82,7 @@
 import { API_URL_PAYWAYS_LIST, req } from '@/api/manage'
 import InfoAddOrEdit from './AddOrEdit.vue'
 import { reactive, ref, nextTick, getCurrentInstance } from 'vue'
+import { t } from '@/i18n'
 
 const { $infoBox, $access, $hasAgentEnt } = getCurrentInstance()!.appContext.config.globalProperties
 
@@ -90,17 +91,17 @@ const tableColumns = [
   {
     key: 'wayCode', // key为必填项，用于标志该列的唯一
     fixed: 'left',
-    title: '支付方式代碼',
+    title: t('支付方式代碼'),
     scopedSlots: { customRender: 'wayCodeSlot' },
   },
   {
     key: 'wayName',
-    title: '支付方式名稱',
+    title: t('支付方式名稱'),
     dataIndex: 'wayName',
   },
   {
     key: 'op',
-    title: '操作',
+    title: t('操作'),
     width: '200px',
     fixed: 'right',
     align: 'center',
@@ -139,9 +140,9 @@ function editFunc(wayCode) {
 }
 
 function delFunc(wayCode) {
-  $infoBox.confirmDanger('確認刪除？', '', () => {
+  $infoBox.confirmDanger(t('確認刪除？'), '', () => {
     req.delById(API_URL_PAYWAYS_LIST, wayCode).then((res) => {
-      $infoBox.message.success('刪除成功！')
+      $infoBox.message.success(t('刪除成功！'))
       infoTable.value.refTable(false)
     })
   })

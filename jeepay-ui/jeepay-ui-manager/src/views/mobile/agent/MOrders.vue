@@ -3,8 +3,8 @@
        一般進入只顯示今天、每 30 秒自動更新；從主選單「查詢訂單」進入（?mode=query）時預設空白，選定日期按「查詢」才載入。
        員工最常做的事放最前面：今天收了多少、哪些還在等繳費、哪些商戶沒收到通知、貼上單號就查到 -->
   <div class="m-seg" role="tablist">
-    <button :class="{ on: kind === 'collect' }" @click="setKind('collect')">代收訂單</button>
-    <button :class="{ on: kind === 'payout' }" @click="setKind('payout')">代付訂單</button>
+    <button :class="{ on: kind === 'collect' }" @click="setKind('collect')">{{ $t('代收訂單') }}</button>
+    <button :class="{ on: kind === 'payout' }" @click="setKind('payout')">{{ $t('代付訂單') }}</button>
   </div>
   <template v-if="queryMode">
     <div class="m-chips">
@@ -16,18 +16,18 @@
   <!-- 摘要：點一下就篩選 -->
   <div v-if="kind === 'collect' && showData && vdata.sum" class="mo-sum">
     <button class="mo-hero" :class="{ on: vdata.filter === 'paid' }" @click="setFilter('paid')">
-      <small>{{ periodLabel }}已收款</small>
+      <small>{{ $t('{0}已收款', [periodLabel]) }}</small>
       <strong class="num">{{ ntd(sumAmount(2)) }}</strong>
-      <small>{{ sumCount(2) }} 筆・成功率 {{ successRate }}</small>
+      <small>{{ $t('{0} 筆・成功率 {1}', [sumCount(2), successRate]) }}</small>
     </button>
     <button class="mo-mini" :class="{ on: vdata.filter === 'waiting' }" @click="setFilter('waiting')">
-      <small>等待繳費</small><strong class="num">{{ sumCount(1) + sumCount(0) }}</strong>
+      <small>{{ $t('等待繳費') }}</small><strong class="num">{{ sumCount(1) + sumCount(0) }}</strong>
     </button>
     <button class="mo-mini" :class="{ on: vdata.filter === 'expired' }" @click="setFilter('expired')">
-      <small>逾期／失敗</small><strong class="num">{{ sumCount(6) + sumCount(3) }}</strong>
+      <small>{{ $t('逾期／失敗') }}</small><strong class="num">{{ sumCount(6) + sumCount(3) }}</strong>
     </button>
     <button class="mo-mini" :class="{ on: vdata.filter === 'unnotified', alert: vdata.sum.unnotified > 0 }" @click="setFilter('unnotified')">
-      <small>未通知商戶</small><strong class="num">{{ vdata.sum.unnotified }}</strong>
+      <small>{{ $t('未通知商戶') }}</small><strong class="num">{{ vdata.sum.unnotified }}</strong>
     </button>
   </div>
 
@@ -37,27 +37,27 @@
       v-model="vdata.q"
       type="search"
       inputmode="search"
-      :placeholder="kind === 'collect' ? '貼上任何單號：支付／商戶／渠道' : '代付單號或商戶單號'"
+      :placeholder="kind === 'collect' ? $t('貼上任何單號：支付／商戶／渠道') : $t('代付單號或商戶單號')"
       @input="onSearchInput"
       @search="reload"
     />
-    <button v-if="vdata.q" class="mo-clear" aria-label="清除" @click="clearSearch"><CloseCircleFilled /></button>
+    <button v-if="vdata.q" class="mo-clear" :aria-label="$t('清除')" @click="clearSearch"><CloseCircleFilled /></button>
   </div>
   <div class="m-chips">
     <button v-for="f in filters" :key="f.key" :class="{ on: vdata.filter === f.key }" @click="setFilter(f.key)">
       {{ f.label }}<span v-if="f.count != null" class="mo-count">{{ f.count }}</span>
     </button>
   </div>
-  <button v-if="queryMode" class="m-btn" :disabled="!rangeReady || vdata.loading" @click="submitQuery">查詢</button>
+  <button v-if="queryMode" class="m-btn" :disabled="!rangeReady || vdata.loading" @click="submitQuery">{{ $t('查詢') }}</button>
   <p v-if="showData" class="m-muted mo-status">
-    <span>{{ vdata.q.trim() ? `搜尋「${vdata.q.trim()}」` : periodLabel }}・{{ vdata.total }} 筆</span>
-    <span v-if="autoRefresh && vdata.updatedAt" class="mo-live"><i />{{ vdata.updatedAt }} 已更新</span>
+    <span>{{ $t('{0}・{1} 筆', [vdata.q.trim() ? $t('搜尋「{0}」', [vdata.q.trim()]) : periodLabel, vdata.total]) }}</span>
+    <span v-if="autoRefresh && vdata.updatedAt" class="mo-live"><i />{{ $t('{0} 已更新', [vdata.updatedAt]) }}</span>
   </p>
 
   <!-- 代收：依小時（今天）或日期（多日）分組 -->
   <template v-if="kind === 'collect' && showData">
     <section v-for="g in groups" :key="g.key" class="mo-group">
-      <div class="mo-group-head"><b>{{ g.label }}</b><span>{{ g.items.length }} 筆<template v-if="g.paid">・已收 {{ ntd(g.paid) }}</template></span></div>
+      <div class="mo-group-head"><b>{{ g.label }}</b><span>{{ $t('{0} 筆', [g.items.length]) }}<template v-if="g.paid">{{ $t('・已收 {0}', [ntd(g.paid)]) }}</template></span></div>
       <div class="m-list">
         <button v-for="o in g.items" :key="o.payOrderId" class="m-row tap" :class="{ 'mo-new': vdata.fresh[o.payOrderId] }" @click="openDetail(o)">
           <div class="main">
@@ -85,13 +85,13 @@
     </button>
   </div>
 
-  <div v-if="queryMode && !vdata.searched" class="m-empty">選擇日期後按「查詢」</div>
+  <div v-if="queryMode && !vdata.searched" class="m-empty">{{ $t('選擇日期後按「查詢」') }}</div>
   <div v-else-if="!vdata.records.length" class="m-empty">{{ emptyText }}</div>
-  <div v-if="vdata.records.length && vdata.records.length < vdata.total" ref="sentinel" class="mo-more">{{ vdata.loading ? '載入中…' : '往下滑載入更多' }}</div>
-  <p v-else-if="vdata.records.length > 10" class="m-muted" style="text-align: center">已經到底了</p>
+  <div v-if="vdata.records.length && vdata.records.length < vdata.total" ref="sentinel" class="mo-more">{{ vdata.loading ? $t('載入中…') : $t('往下滑載入更多') }}</div>
+  <p v-else-if="vdata.records.length > 10" class="m-muted" style="text-align: center">{{ $t('已經到底了') }}</p>
 
   <!-- 明細 -->
-  <MSheet :open="!!vdata.cur" :title="kind === 'collect' ? '代收明細' : '代付明細'" @update:open="(v) => !v && (vdata.cur = null)">
+  <MSheet :open="!!vdata.cur" :title="kind === 'collect' ? $t('代收明細') : $t('代付明細')" @update:open="(v) => !v && (vdata.cur = null)">
     <template v-if="vdata.cur && kind === 'collect'">
       <div class="mo-head">
         <div class="m-big num">{{ ntd(vdata.cur.amount) }}</div>
@@ -100,27 +100,27 @@
       </div>
 
       <ol class="mo-steps">
-        <li class="done"><b>建立訂單</b><span class="num">{{ vdata.cur.createdAt }}</span></li>
+        <li class="done"><b>{{ $t('建立訂單') }}</b><span class="num">{{ vdata.cur.createdAt }}</span></li>
         <li :class="payStep.cls"><b>{{ payStep.title }}</b><span>{{ payStep.text }}</span></li>
-        <li :class="notifyStep.cls"><b>通知商戶</b><span>{{ notifyStep.text }}</span></li>
+        <li :class="notifyStep.cls"><b>{{ $t('通知商戶') }}</b><span>{{ notifyStep.text }}</span></li>
       </ol>
 
       <dl class="m-kv">
-        <dt>支付單號</dt><dd><button class="mo-copy mono" @click="copy(vdata.cur.payOrderId)">{{ vdata.cur.payOrderId }} <CopyOutlined /></button></dd>
-        <dt>商戶單號</dt><dd><button class="mo-copy mono" @click="copy(vdata.cur.mchOrderNo)">{{ vdata.cur.mchOrderNo }} <CopyOutlined /></button></dd>
-        <dt>渠道單號</dt>
+        <dt>{{ $t('支付單號') }}</dt><dd><button class="mo-copy mono" @click="copy(vdata.cur.payOrderId)">{{ vdata.cur.payOrderId }} <CopyOutlined /></button></dd>
+        <dt>{{ $t('商戶單號') }}</dt><dd><button class="mo-copy mono" @click="copy(vdata.cur.mchOrderNo)">{{ vdata.cur.mchOrderNo }} <CopyOutlined /></button></dd>
+        <dt>{{ $t('渠道單號') }}</dt>
         <dd>
           <button v-if="vdata.cur.channelOrderNo" class="mo-copy mono" @click="copy(vdata.cur.channelOrderNo)">{{ vdata.cur.channelOrderNo }} <CopyOutlined /></button>
           <span v-else>—</span>
         </dd>
-        <dt>商戶號</dt><dd class="mono">{{ vdata.cur.mchNo }}</dd>
-        <dt>上游</dt><dd>{{ (vdata.cur.ifCode || '—').toUpperCase() }}</dd>
-        <dt>商戶手續費</dt><dd class="num">{{ ntd(vdata.cur.mchFeeAmount, 2) }}</dd>
-        <template v-if="vdata.cur.expiredTime"><dt>繳費期限</dt><dd class="num">{{ vdata.cur.expiredTime }}</dd></template>
+        <dt>{{ $t('商戶號') }}</dt><dd class="mono">{{ vdata.cur.mchNo }}</dd>
+        <dt>{{ $t('上游') }}</dt><dd>{{ (vdata.cur.ifCode || '—').toUpperCase() }}</dd>
+        <dt>{{ $t('商戶手續費') }}</dt><dd class="num">{{ ntd(vdata.cur.mchFeeAmount, 2) }}</dd>
+        <template v-if="vdata.cur.expiredTime"><dt>{{ $t('繳費期限') }}</dt><dd class="num">{{ vdata.cur.expiredTime }}</dd></template>
       </dl>
       <div class="m-actions">
-        <button v-if="canResend" class="m-btn ghost" :disabled="vdata.resending" @click="resend(vdata.cur)">{{ vdata.resending ? '送出中…' : '重送商戶通知' }}</button>
-        <button class="m-btn" @click="copy(shareText(vdata.cur), '訂單資訊已複製，可直接貼給商戶')">複製訂單資訊</button>
+        <button v-if="canResend" class="m-btn ghost" :disabled="vdata.resending" @click="resend(vdata.cur)">{{ vdata.resending ? $t('送出中…') : $t('重送商戶通知') }}</button>
+        <button class="m-btn" @click="copy(shareText(vdata.cur), $t('訂單資訊已複製，可直接貼給商戶'))">{{ $t('複製訂單資訊') }}</button>
       </div>
     </template>
     <template v-if="vdata.cur && kind === 'payout'">
@@ -129,14 +129,14 @@
         <span :class="['m-pill', (TRANSFER_STATES[vdata.cur.state] || [])[1]]">{{ (TRANSFER_STATES[vdata.cur.state] || [vdata.cur.state])[0] }}</span>
       </div>
       <dl class="m-kv">
-        <dt>付款商戶</dt><dd>{{ vdata.cur.mchName || vdata.cur.mchNo }}</dd>
-        <dt>收款人</dt><dd>{{ vdata.cur.accountName || '—' }}</dd>
-        <dt>收款帳戶</dt><dd>{{ vdata.cur.bankName || '' }} {{ maskAcc(vdata.cur.accountNo) }}</dd>
-        <dt>代付單號</dt><dd><button class="mo-copy mono" @click="copy(vdata.cur.transferId)">{{ vdata.cur.transferId }} <CopyOutlined /></button></dd>
-        <dt>商戶單號</dt><dd><button class="mo-copy mono" @click="copy(vdata.cur.mchOrderNo)">{{ vdata.cur.mchOrderNo }} <CopyOutlined /></button></dd>
-        <dt>上游</dt><dd>{{ vdata.cur.ifCode || '—' }}</dd>
-        <dt>建立時間</dt><dd class="num">{{ vdata.cur.createdAt }}</dd>
-        <template v-if="vdata.cur.errMsg"><dt>失敗原因</dt><dd style="color: var(--jp-bad)">{{ vdata.cur.errMsg }}</dd></template>
+        <dt>{{ $t('付款商戶') }}</dt><dd>{{ vdata.cur.mchName || vdata.cur.mchNo }}</dd>
+        <dt>{{ $t('收款人') }}</dt><dd>{{ vdata.cur.accountName || '—' }}</dd>
+        <dt>{{ $t('收款帳戶') }}</dt><dd>{{ vdata.cur.bankName || '' }} {{ maskAcc(vdata.cur.accountNo) }}</dd>
+        <dt>{{ $t('代付單號') }}</dt><dd><button class="mo-copy mono" @click="copy(vdata.cur.transferId)">{{ vdata.cur.transferId }} <CopyOutlined /></button></dd>
+        <dt>{{ $t('商戶單號') }}</dt><dd><button class="mo-copy mono" @click="copy(vdata.cur.mchOrderNo)">{{ vdata.cur.mchOrderNo }} <CopyOutlined /></button></dd>
+        <dt>{{ $t('上游') }}</dt><dd>{{ vdata.cur.ifCode || '—' }}</dd>
+        <dt>{{ $t('建立時間') }}</dt><dd class="num">{{ vdata.cur.createdAt }}</dd>
+        <template v-if="vdata.cur.errMsg"><dt>{{ $t('失敗原因') }}</dt><dd style="color: var(--jp-bad)">{{ vdata.cur.errMsg }}</dd></template>
       </dl>
     </template>
   </MSheet>
@@ -149,6 +149,7 @@ import { SearchOutlined, CloseCircleFilled, CopyOutlined } from '@ant-design/ico
 import { API_URL_AGENT_PORTAL, req } from '@/api/manage'
 import { ntd, todayStr, TRANSFER_STATES } from '../mobileKit'
 import MSheet from '../MSheet.vue'
+import { t, locale, intlLocale } from '@/i18n'
 
 const props = defineProps({
   // 上帝在團長詳情裡看某位團長的訂單：帶團長代理號，走平台 API 並依團長轄區篩選
@@ -165,21 +166,21 @@ const URLS = isPlatform
   : { collect: API_URL_AGENT_PORTAL + '/orders', payout: API_URL_AGENT_PORTAL + '/transferOrders', summary: API_URL_AGENT_PORTAL + '/orders/summary' }
 const canSeeNotify = isPlatform && $access('ENT_NOTIFY_LIST')
 const RANGES = [
-  { key: 'today', label: '今天' },
-  { key: 'yesterday', label: '昨天' },
-  { key: '7d', label: '近 7 天' },
-  { key: 'month', label: '本月' },
-  { key: 'custom', label: '自訂' },
+  { key: 'today', label: t('今天') },
+  { key: 'yesterday', label: t('昨天') },
+  { key: '7d', label: t('近 7 天') },
+  { key: 'month', label: t('本月') },
+  { key: 'custom', label: t('自訂') },
 ]
 // 員工看得懂的說法（ibon：支付中 = 已取號、等待顧客到超商繳費）
 const COLLECT_STATES: Record<number, [string, string]> = {
-  0: ['等待繳費', 'warn'],
-  1: ['等待繳費', 'warn'],
-  2: ['已收款', 'ok'],
-  3: ['失敗', 'bad'],
-  4: ['已撤銷', 'mute'],
-  5: ['已退款', 'mute'],
-  6: ['已逾期', 'mute'],
+  0: [t('等待繳費'), 'warn'],
+  1: [t('等待繳費'), 'warn'],
+  2: [t('已收款'), 'ok'],
+  3: [t('失敗'), 'bad'],
+  4: [t('已撤銷'), 'mute'],
+  5: [t('已退款'), 'mute'],
+  6: [t('已逾期'), 'mute'],
 }
 const st = (s) => COLLECT_STATES[s] || [String(s), 'mute']
 // 篩選鍵 → 查詢條件（未通知 = 已收款但商戶還沒回覆成功，後端判斷）
@@ -226,8 +227,8 @@ function period(): [string, string] {
   }
 }
 const periodLabel = computed(() => {
-  if (vdata.range === 'today') return '今天'
-  if (vdata.range === 'yesterday') return '昨天'
+  if (vdata.range === 'today') return t('今天')
+  if (vdata.range === 'yesterday') return t('昨天')
   const [a, b] = period()
   return a === b ? a : `${a.slice(5)}～${b.slice(5)} `
 })
@@ -249,25 +250,25 @@ function ago(v) {
   const mins = Math.floor((vdata.now - d.getTime()) / 60000)
   const hm = `${pad(d.getHours())}:${pad(d.getMinutes())}`
   if (isMultiDay.value || mins >= 60 * 12) return `${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${hm}`
-  if (mins < 1) return '剛剛'
-  if (mins < 60) return `${mins} 分鐘前`
+  if (mins < 1) return t('剛剛')
+  if (mins < 60) return t('{0} 分鐘前', [mins])
   return hm
 }
 function span(ms) {
   const m = Math.max(0, Math.round(ms / 60000))
-  if (m < 60) return `${m} 分鐘`
+  if (m < 60) return t('{0} 分鐘', [m])
   const h = Math.floor(m / 60)
-  return m % 60 ? `${h} 小時 ${m % 60} 分` : `${h} 小時`
+  return m % 60 ? t('{0} 小時 {1} 分', [h, m % 60]) : t('{0} 小時', [h])
 }
 // 列表上的提醒：等待繳費顯示剩餘時間；已收款的顯示通知結果（商戶回覆成功才算已通知，其餘要醒目）
-const NOTIFY_HINTS = { 1: { text: '通知中，等商戶回覆', cls: 'mo-warn' }, 2: { text: '已通知商戶', cls: 'mo-ok' }, 3: { text: '通知商戶失敗', cls: 'mo-warn' } }
+const NOTIFY_HINTS = { 1: { text: t('通知中，等商戶回覆'), cls: 'mo-warn' }, 2: { text: t('已通知商戶'), cls: 'mo-ok' }, 3: { text: t('通知商戶失敗'), cls: 'mo-warn' } }
 function hint(o) {
-  if (o.state === 2) return NOTIFY_HINTS[o.notifyResult] || { text: '尚未通知商戶', cls: 'mo-warn' }
+  if (o.state === 2) return NOTIFY_HINTS[o.notifyResult] || { text: t('尚未通知商戶'), cls: 'mo-warn' }
   if (o.state === 1 || o.state === 0) {
     const exp = toDate(o.expiredTime)
     if (exp) {
       const left = exp.getTime() - vdata.now
-      return left > 0 ? { text: `剩 ${span(left)}`, cls: left < 30 * 60000 ? 'mo-warn' : '' } : { text: '即將關閉', cls: 'mo-warn' }
+      return left > 0 ? { text: t('剩 {0}', [span(left)]), cls: left < 30 * 60000 ? 'mo-warn' : '' } : { text: t('即將關閉'), cls: 'mo-warn' }
     }
   }
   return null
@@ -279,9 +280,13 @@ const groups = computed(() => {
   for (const o of vdata.records) {
     const d = toDate(o.createdAt)
     const key = d ? (isMultiDay.value ? fmt(d) : `${fmt(d)} ${pad(d.getHours())}`) : '?'
-    let label = '其他'
+    let label = t('其他')
     if (d) {
-      if (isMultiDay.value) label = `${d.getMonth() + 1} 月 ${d.getDate()} 日（週${'日一二三四五六'[d.getDay()]}）`
+      // 中文維持「10 月 24 日（週五）」，其他語言交給 Intl 依語系排日期與星期
+      if (isMultiDay.value)
+        label = /^(zh|yue)/.test(locale.value)
+          ? t('{0} 月 {1} 日（週{2}）', [d.getMonth() + 1, d.getDate(), '日一二三四五六'[d.getDay()]])
+          : new Intl.DateTimeFormat(intlLocale(), { month: 'short', day: 'numeric', weekday: 'short' }).format(d)
       else label = `${pad(d.getHours())}:00 – ${pad(d.getHours())}:59`
     }
     if (!map.has(key)) map.set(key, { key, label, items: [], paid: 0 })
@@ -301,27 +306,27 @@ const successRate = computed(() => {
 const filters = computed(() =>
   kind.value === 'collect'
     ? [
-        { key: 'all', label: '全部', count: vdata.sum ? vdata.sum.total : null },
-        { key: 'paid', label: '已收款', count: vdata.sum ? sumCount(2) : null },
-        { key: 'waiting', label: '等待繳費', count: vdata.sum ? sumCount(1) + sumCount(0) : null },
-        { key: 'unnotified', label: '未通知商戶', count: vdata.sum ? vdata.sum.unnotified : null },
-        { key: 'expired', label: '已逾期', count: vdata.sum ? sumCount(6) : null },
-        { key: 'failed', label: '失敗', count: vdata.sum ? sumCount(3) : null },
+        { key: 'all', label: t('全部'), count: vdata.sum ? vdata.sum.total : null },
+        { key: 'paid', label: t('已收款'), count: vdata.sum ? sumCount(2) : null },
+        { key: 'waiting', label: t('等待繳費'), count: vdata.sum ? sumCount(1) + sumCount(0) : null },
+        { key: 'unnotified', label: t('未通知商戶'), count: vdata.sum ? vdata.sum.unnotified : null },
+        { key: 'expired', label: t('已逾期'), count: vdata.sum ? sumCount(6) : null },
+        { key: 'failed', label: t('失敗'), count: vdata.sum ? sumCount(3) : null },
       ]
     : [
-        { key: 'all', label: '全部' },
-        { key: 'ok', label: '代付成功' },
-        { key: 'ing', label: '處理中' },
-        { key: 'fail', label: '代付失敗' },
-        { key: 'closed', label: '已關閉' },
+        { key: 'all', label: t('全部') },
+        { key: 'ok', label: t('代付成功') },
+        { key: 'ing', label: t('處理中') },
+        { key: 'fail', label: t('代付失敗') },
+        { key: 'closed', label: t('已關閉') },
       ]
 )
 const emptyText = computed(() => {
-  if (vdata.loading) return '載入中…'
-  if (vdata.q.trim()) return `找不到「${vdata.q.trim()}」，請確認單號是否完整`
-  if (kind.value === 'payout') return `${periodLabel.value}沒有代付訂單（目前上游渠道未提供代付）`
-  if (vdata.filter === 'unnotified') return '很好，已收款的訂單都通知商戶了'
-  return `${periodLabel.value}沒有符合的代收訂單`
+  if (vdata.loading) return t('載入中…')
+  if (vdata.q.trim()) return t('找不到「{0}」，請確認單號是否完整', [vdata.q.trim()])
+  if (kind.value === 'payout') return t('{0}沒有代付訂單（目前上游渠道未提供代付）', [periodLabel.value])
+  if (vdata.filter === 'unnotified') return t('很好，已收款的訂單都通知商戶了')
+  return t('{0}沒有符合的代收訂單', [periodLabel.value])
 })
 function maskAcc(no) {
   const s = String(no || '')
@@ -442,65 +447,65 @@ const payStep = computed(() => {
   if (o.state === 2) {
     const a = toDate(o.createdAt)
     const b = toDate(o.successTime)
-    return { cls: 'done', title: '顧客已繳費', text: `${o.successTime || ''}${a && b ? `（${span(b.getTime() - a.getTime())}後繳費）` : ''}` }
+    return { cls: 'done', title: t('顧客已繳費'), text: `${o.successTime || ''}${a && b ? t('（{0}後繳費）', [span(b.getTime() - a.getTime())]) : ''}` }
   }
   if (o.state === 1 || o.state === 0) {
     const exp = toDate(o.expiredTime)
     const left = exp ? exp.getTime() - vdata.now : 0
-    return { cls: 'now', title: '等待顧客繳費', text: exp ? (left > 0 ? `還有 ${span(left)}，${o.expiredTime} 截止` : '已過期限，等待系統關閉') : '尚未繳費' }
+    return { cls: 'now', title: t('等待顧客繳費'), text: exp ? (left > 0 ? t('還有 {0}，{1} 截止', [span(left), o.expiredTime]) : t('已過期限，等待系統關閉')) : t('尚未繳費') }
   }
-  if (o.state === 6) return { cls: 'stop', title: '未繳費，已逾期', text: o.expiredTime ? `${o.expiredTime} 截止` : '' }
-  if (o.state === 3) return { cls: 'fail', title: '繳費失敗', text: o.errMsg || o.errCode || '' }
+  if (o.state === 6) return { cls: 'stop', title: t('未繳費，已逾期'), text: o.expiredTime ? t('{0} 截止', [o.expiredTime]) : '' }
+  if (o.state === 3) return { cls: 'fail', title: t('繳費失敗'), text: o.errMsg || o.errCode || '' }
   return { cls: 'stop', title: st(o.state)[0], text: '' }
 })
-const NOTIFY_STATES = { 1: '通知中', 2: '已通知商戶（商戶回覆成功）', 3: '通知失敗' }
+const NOTIFY_STATES = { 1: t('通知中'), 2: t('已通知商戶（商戶回覆成功）'), 3: t('通知失敗') }
 const notifyStep = computed(() => {
   const o = vdata.cur
-  if (!o || o.state !== 2) return { cls: 'todo', text: '繳費後自動通知' }
+  if (!o || o.state !== 2) return { cls: 'todo', text: t('繳費後自動通知') }
   const n = vdata.notify
   if (n) {
     const cls = n.state === 2 ? 'done' : n.state === 3 ? 'fail' : 'now'
-    const reply = n.state === 3 && n.resResult ? `・商戶回覆「${String(n.resResult).slice(0, 40)}」` : ''
-    return { cls, text: `${NOTIFY_STATES[n.state] || n.state}・共送 ${n.notifyCount || 0} 次${n.lastNotifyTime ? `・最後 ${n.lastNotifyTime}` : ''}${reply}` }
+    const reply = n.state === 3 && n.resResult ? t('・商戶回覆「{0}」', [String(n.resResult).slice(0, 40)]) : ''
+    return { cls, text: t('{0}・共送 {1} 次{2}{3}', [NOTIFY_STATES[n.state] || n.state, n.notifyCount || 0, n.lastNotifyTime ? t('・最後 {0}', [n.lastNotifyTime]) : '', reply]) }
   }
   // 團長沒有通知紀錄權限，改用列表帶回的通知結果
   if (n === null && o.notifyResult) return { cls: o.notifyResult === 2 ? 'done' : o.notifyResult === 3 ? 'fail' : 'now', text: NOTIFY_STATES[o.notifyResult] }
-  return { cls: 'fail', text: '尚未通知商戶' }
+  return { cls: 'fail', text: t('尚未通知商戶') }
 })
 const canResend = computed(() => kind.value === 'collect' && isPlatform && vdata.cur && vdata.cur.state === 2 && $access('ENT_MCH_NOTIFY_RESEND'))
 function resend(o) {
   // 二次確認：列出商戶、金額與單號，避免在明細裡誤觸
   const content = h('div', [
-    h('div', `商戶：${o.mchName || o.mchNo}`),
-    h('div', `金額：${ntd(o.amount)}`),
-    h('div', { class: 'mono' }, `支付單號：${o.payOrderId}`),
-    h('p', { style: 'margin: 10px 0 0' }, '會把這筆已收款訂單的結果再送一次給商戶，不會改變訂單狀態。'),
+    h('div', t('商戶：{0}', [o.mchName || o.mchNo])),
+    h('div', t('金額：{0}', [ntd(o.amount)])),
+    h('div', { class: 'mono' }, t('支付單號：{0}', [o.payOrderId])),
+    h('p', { style: 'margin: 10px 0 0' }, t('會把這筆已收款訂單的結果再送一次給商戶，不會改變訂單狀態。')),
   ])
-  $infoBox.confirmPrimary('確定要重送商戶通知？', content, () => {
+  $infoBox.confirmPrimary(t('確定要重送商戶通知？'), content, () => {
     vdata.resending = true
     req
       .add(`/api/mchNotify/send/${o.payOrderId}`, {})
       .then(() => {
-        $infoBox.message.success('已送出，稍後可在這裡看到商戶回覆')
+        $infoBox.message.success(t('已送出，稍後可在這裡看到商戶回覆'))
         setTimeout(() => vdata.cur === o && openDetail(o), 3000)
       })
       .finally(() => (vdata.resending = false))
-  }, () => {}, { okText: '確認重送', cancelText: '先不要', autoFocusButton: 'cancel' })
+  }, () => {}, { okText: t('確認重送'), cancelText: t('先不要'), autoFocusButton: 'cancel' })
 }
 function shareText(o) {
   return [
-    `商戶：${o.mchName || o.mchNo}`,
-    `金額：${ntd(o.amount)}`,
-    `狀態：${st(o.state)[0]}`,
-    `支付單號：${o.payOrderId}`,
-    `商戶單號：${o.mchOrderNo}`,
-    `建立時間：${o.createdAt}`,
-    o.successTime ? `繳費時間：${o.successTime}` : '',
+    t('商戶：{0}', [o.mchName || o.mchNo]),
+    t('金額：{0}', [ntd(o.amount)]),
+    t('狀態：{0}', [st(o.state)[0]]),
+    t('支付單號：{0}', [o.payOrderId]),
+    t('商戶單號：{0}', [o.mchOrderNo]),
+    t('建立時間：{0}', [o.createdAt]),
+    o.successTime ? t('繳費時間：{0}', [o.successTime]) : '',
   ]
     .filter(Boolean)
     .join('\n')
 }
-function copy(text, msg = '已複製') {
+function copy(text, msg = t('已複製')) {
   const done = () => $infoBox.message.success(msg)
   if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text).then(done)
   const ta = document.createElement('textarea')

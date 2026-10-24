@@ -4,25 +4,25 @@
       <div class="table-page-search-wrapper">
         <a-form layout="inline" class="table-head-ground">
           <div class="table-layer">
-            <jeepay-text-up v-model:value="vdata.searchData.mchNo" placeholder="商戶號" />
-            <jeepay-text-up v-model:value="vdata.searchData.appId" placeholder="應用AppId" />
-            <jeepay-text-up v-model:value="vdata.searchData.appName" placeholder="應用名稱" />
+            <jeepay-text-up v-model:value="vdata.searchData.mchNo" :placeholder="$t('商戶號')" />
+            <jeepay-text-up v-model:value="vdata.searchData.appId" :placeholder="$t('應用AppId')" />
+            <jeepay-text-up v-model:value="vdata.searchData.appName" :placeholder="$t('應用名稱')" />
             <a-select
               v-model:value="vdata.searchData.state"
-              placeholder="狀態"
+              :placeholder="$t('狀態')"
               class="table-head-layout"
             >
-              <a-select-option value="">全部</a-select-option>
+              <a-select-option value="">{{ $t('全部') }}</a-select-option>
 
-              <a-select-option value="0">停用</a-select-option>
-              <a-select-option value="1">啟用</a-select-option>
+              <a-select-option value="0">{{ $t('停用') }}</a-select-option>
+              <a-select-option value="1">{{ $t('啟用') }}</a-select-option>
             </a-select>
             <span class="table-page-search-submitButtons" style="flex-grow: 0; flex-shrink: 0">
               <a-button type="primary" :loading="vdata.btnLoading" @click="queryFunc">
-                查詢
+                {{ $t('查詢') }}
               </a-button>
               <a-button style="margin-left: 8px" @click="() => (vdata.searchData = {})">
-                重置
+                {{ $t('重置') }}
               </a-button>
             </span>
           </div>
@@ -46,7 +46,7 @@
             class="mg-b-30"
             @click="addFunc"
           >
-            新建
+            {{ $t('新建') }}
           </a-button>
         </template>
 
@@ -58,7 +58,7 @@
           <template v-if="column.key === 'state'">
             <a-badge
               :status="record.state === 0 ? 'error' : 'processing'"
-              :text="record.state === 0 ? '停用' : '啟用'"
+              :text="record.state === 0 ? $t('停用') : $t('啟用')"
             />
           </template>
           <template v-if="column.key === 'op'">
@@ -69,14 +69,14 @@
                 type="link"
                 @click="editFunc(record.appId)"
               >
-                修改
+                {{ $t('修改') }}
               </a-button>
               <a-button
                 v-if="$access('ENT_MCH_PAY_CONFIG_LIST') && record.state"
                 type="link"
                 @click="showPayIfConfigList(record.appId)"
               >
-                支付設定
+                {{ $t('支付設定') }}
               </a-button>
               <a-button
                 v-if="$access('ENT_MCH_APP_DEL')"
@@ -84,7 +84,7 @@
                 style="color: red"
                 @click="delFunc(record.appId)"
               >
-                刪除
+                {{ $t('刪除') }}
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -104,6 +104,7 @@ import MchAppAddOrEdit from './AddOrEdit.vue'
 import MchPayIfConfigList from './MchPayIfConfigList.vue'
 import { ref, reactive, onMounted, getCurrentInstance } from 'vue'
 import { useRoute } from 'vue-router'
+import { t } from '@/i18n'
 
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
@@ -118,16 +119,16 @@ const tableColumns = reactive([
     key: 'appId',
     fixed: 'left',
     width: '320px',
-    title: '應用AppId',
+    title: t('應用AppId'),
     scopedSlots: { customRender: 'appIdSlot' },
   },
-  { key: 'appName', title: '應用名稱', dataIndex: 'appName' },
-  { key: 'mchNo', title: '商戶號', dataIndex: 'mchNo' },
-  { key: 'state', title: '狀態', scopedSlots: { customRender: 'stateSlot' } },
-  { key: 'createdAt', dataIndex: 'createdAt', title: '建立日期' },
+  { key: 'appName', title: t('應用名稱'), dataIndex: 'appName' },
+  { key: 'mchNo', title: t('商戶號'), dataIndex: 'mchNo' },
+  { key: 'state', title: t('狀態'), scopedSlots: { customRender: 'stateSlot' } },
+  { key: 'createdAt', dataIndex: 'createdAt', title: t('建立日期') },
   {
     key: 'op',
-    title: '操作',
+    title: t('操作'),
     width: '260px',
     fixed: 'right',
     align: 'center',
@@ -171,9 +172,9 @@ function editFunc(recordId) {
 }
 
 function delFunc(appId) {
-  $infoBox.confirmDanger('確認刪除？', '', () => {
+  $infoBox.confirmDanger(t('確認刪除？'), '', () => {
     req.delById(API_URL_MCH_APP, appId).then((res) => {
-      $infoBox.message.success('刪除成功！')
+      $infoBox.message.success(t('刪除成功！'))
       searchFunc()
     })
   })

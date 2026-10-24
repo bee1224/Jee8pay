@@ -6,6 +6,7 @@
  * GPS：瀏覽器會詢問使用者是否允許；拒絕或逾時只記錄狀態，不影響登入。
  */
 import request from '@/http/request'
+import { t } from '@/i18n'
 
 const ID_KEY = 'jeepay-device-id'
 
@@ -27,7 +28,7 @@ async function modelAndOs(): Promise<{ deviceModel?: string; deviceOs?: string }
   if (uad && uad.getHighEntropyValues) {
     try {
       const v = await uad.getHighEntropyValues(['model', 'platform', 'platformVersion'])
-      return { deviceModel: v.model || (uad.mobile ? '' : '電腦'), deviceOs: [v.platform, v.platformVersion].filter(Boolean).join(' ') }
+      return { deviceModel: v.model || (uad.mobile ? '' : t('電腦')), deviceOs: [v.platform, v.platformVersion].filter(Boolean).join(' ') }
     } catch (e) {
       // 取不到就退回 User-Agent 判斷
     }
@@ -37,8 +38,8 @@ async function modelAndOs(): Promise<{ deviceModel?: string; deviceOs?: string }
   if (ios) return { deviceModel: ios[1], deviceOs: `iOS ${ios[2]}.${ios[3]}` }
   const android = ua.match(/Android ([\d.]+);\s*([^;)]+)/)
   if (android) return { deviceModel: android[2].replace(/\s*Build\/.*$/, '').trim(), deviceOs: `Android ${android[1]}` }
-  if (/Windows/.test(ua)) return { deviceModel: '電腦', deviceOs: 'Windows' }
-  if (/Mac OS X/.test(ua)) return { deviceModel: '電腦', deviceOs: 'macOS' }
+  if (/Windows/.test(ua)) return { deviceModel: t('電腦'), deviceOs: 'Windows' }
+  if (/Mac OS X/.test(ua)) return { deviceModel: t('電腦'), deviceOs: 'macOS' }
   return {}
 }
 

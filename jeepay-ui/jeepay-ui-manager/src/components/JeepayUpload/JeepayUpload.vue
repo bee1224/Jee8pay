@@ -23,6 +23,7 @@
 import appConfig from '@/config/appConfig'
 import storage from '@/utils/jeepayStorageWrapper'
 import { reactive, ref, getCurrentInstance } from 'vue'
+import { t } from '@/i18n'
 
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
 
@@ -62,14 +63,14 @@ function handleChange(info) {
     emit('uploadSuccess', res.data)
   } else if (info.file.status === 'error') {
     console.log(info)
-    $infoBox.message.error(`上傳失敗`)
+    $infoBox.message.error(t('上傳失敗'))
   }
 }
 // 上传图片前的校验
 function beforeUpload(file) {
   const validate = file.size / 1024 / 1024 < props.size
   if (!validate) {
-    $infoBox.message.error('檔案應小於' + props.size + 'M!')
+    $infoBox.message.error(t('檔案應小於') + props.size + 'M!')
   }
   return validate
 }

@@ -9,18 +9,18 @@
   <div>
     <template v-if="!showSwitchType">
       <div v-if="state == 0">
-        <a-badge status="error" text="停用" />
+        <a-badge status="error" :text="$t('停用')" />
       </div>
       <div v-else-if="state == 1">
-        <a-badge status="processing" text="啟用" />
+        <a-badge status="processing" :text="$t('啟用')" />
       </div>
       <div v-else>
-        <a-badge status="warning" text="未知" />
+        <a-badge status="warning" :text="$t('未知')" />
       </div>
     </template>
 
     <template v-if="showSwitchType">
-      <a-switch class="els" checked-children="啟用" un-checked-children="停用" :checked="switchChecked" @change="onChangeInner" />
+      <a-switch class="els" :checked-children="$t('啟用')" :un-checked-children="$t('停用')" :checked="switchChecked" @change="onChangeInner" />
     </template>
   </div>
 </template>

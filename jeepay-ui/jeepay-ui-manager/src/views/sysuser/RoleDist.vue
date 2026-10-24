@@ -1,7 +1,7 @@
 <template>
   <a-drawer
     v-model:open="vdata.isShow"
-    title="分配角色"
+    :title="$t('分配角色')"
     width="30%"
     :maskClosable="true"
     @close="vdata.isShow = false"
@@ -15,7 +15,7 @@
           :checked="vdata.checkedVal.length && vdata.allRoleList.length == vdata.checkedVal.length"
           @change="onCheckAllChange"
         >
-          全選
+          {{ $t('全選') }}
         </a-checkbox>
       </div>
       <br />
@@ -23,8 +23,8 @@
     </div>
 
     <div class="drawer-btn-center">
-      <a-button :style="{ marginRight: '8px' }" @click="vdata.isShow = false">取消</a-button>
-      <a-button type="primary" @click="handleOkFunc" :loading="vdata.confirmLoading">儲存</a-button>
+      <a-button :style="{ marginRight: '8px' }" @click="vdata.isShow = false">{{ $t('取消') }}</a-button>
+      <a-button type="primary" @click="handleOkFunc" :loading="vdata.confirmLoading">{{ $t('儲存') }}</a-button>
     </div>
   </a-drawer>
 </template>
@@ -38,6 +38,7 @@ import {
   API_URL_USER_ROLE_RELA_LIST,
 } from '@/api/manage'
 import { reactive, getCurrentInstance } from 'vue'
+import { t } from '@/i18n'
 
 const { $infoBox, $access, $hasAgentEnt } = getCurrentInstance()!.appContext.config.globalProperties
 
@@ -66,7 +67,7 @@ function show(recordId) {
   // 查询所有角色列表
   reqLoad.list(API_URL_ROLE_LIST, { pageSize: -1 }).then((res) => {
     if (res.total <= 0) {
-      return $infoBox.message.error(`當前暫無角色，請先行新增`)
+      return $infoBox.message.error(t('當前暫無角色，請先行新增'))
     }
 
     vdata.allRoleList = []
@@ -90,7 +91,7 @@ function handleOkFunc() {
   vdata.confirmLoading = true // 显示loading
   uSysUserRoleRela(vdata.recordId, vdata.checkedVal)
     .then((res) => {
-      $infoBox.message.success('更新成功！')
+      $infoBox.message.success(t('更新成功！'))
       vdata.isShow = false
 
       if (vdata.callbackFunc !== undefined) {

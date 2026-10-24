@@ -9,7 +9,7 @@
       <div class="auto_refre">
         <div v-if="autoRefTableConfig">
           <span style="margin-right: 10px; color: #a9b3b1">
-            自動重新整理：
+            {{ $t('自動重新整理：') }}
             <span style="margin-right: 5px; color: var(--jp-text)">{{ autoRefTableSubTime }}s</span>
           </span>
           <div>
@@ -73,6 +73,7 @@
 
 <script setup lang="ts">
 import { reactive, onMounted, nextTick, ref, onUnmounted } from 'vue'
+import { t } from '@/i18n'
 
 const emit = defineEmits(['btnLoadClose'])
 
@@ -103,7 +104,7 @@ let pagination = reactive({
   total: 0,
   current: 1,
   pageSize: props.pageSize,
-  showTotal: (total) => `共${total}筆`,
+  showTotal: (total) => t('共{0}筆', [total]),
 }) // ATable 分页配置项
 let showLoading = ref(false) // loading效果
 let apiResData = reactive({ total: 0, records: [] }) // 接口返回数据

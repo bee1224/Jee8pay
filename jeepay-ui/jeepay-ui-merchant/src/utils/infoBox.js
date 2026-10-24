@@ -6,6 +6,7 @@
  * @date 2021/5/8 07:18
  */
 import { Modal, notification, message } from 'ant-design-vue'
+import { t } from '@/i18n'
 
 // @ts-ignore
 /**
@@ -50,9 +51,9 @@ export const confirmResult = {
     return Modal.confirm(
       Object.assign(
         {
-          okText: '確定',
-          cancelText: '取消',
-          title: title || '提示',
+          okText: t('確定'),
+          cancelText: t('取消'),
+          title: title || t('提示'),
           content: content,
           onOk: okFunc,
           onCancel: cancelFunc,

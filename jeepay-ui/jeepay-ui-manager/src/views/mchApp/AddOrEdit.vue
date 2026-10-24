@@ -1,7 +1,7 @@
 <template>
   <a-drawer
     v-model:open="vdata.open"
-    :title="vdata.isAdd ? '新增應用' : '修改應用'"
+    :title="vdata.isAdd ? $t('新增應用') : $t('修改應用')"
     width="40%"
     :mask-closable="false"
     @close="onClose"
@@ -9,74 +9,74 @@
     <a-form ref="infoFormModel" :model="vdata.saveObject" layout="vertical" :rules="rules">
       <a-row :gutter="16">
         <a-col v-if="!vdata.isAdd" :span="12">
-          <a-form-item label="應用 AppId" name="appId">
+          <a-form-item :label="$t('應用 AppId')" name="appId">
             <a-input
               v-model:value="vdata.saveObject.appId"
-              placeholder="請輸入"
+              :placeholder="$t('請輸入')"
               :disabled="!vdata.isAdd"
             />
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="商戶號" name="mchNo">
+          <a-form-item :label="$t('商戶號')" name="mchNo">
             <a-input
               v-model:value="vdata.saveObject.mchNo"
-              placeholder="請輸入"
+              :placeholder="$t('請輸入')"
               :disabled="!vdata.isAdd"
             />
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="應用名稱" name="appName">
-            <a-input v-model:value="vdata.saveObject.appName" placeholder="請輸入" />
+          <a-form-item :label="$t('應用名稱')" name="appName">
+            <a-input v-model:value="vdata.saveObject.appName" :placeholder="$t('請輸入')" />
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="狀態" name="state">
+          <a-form-item :label="$t('狀態')" name="state">
             <a-radio-group v-model:value="vdata.saveObject.state">
-              <a-radio :value="1">啟用</a-radio>
-              <a-radio :value="0">停用</a-radio>
+              <a-radio :value="1">{{ $t('啟用') }}</a-radio>
+              <a-radio :value="0">{{ $t('停用') }}</a-radio>
             </a-radio-group>
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item label="商戶公鑰（ML-DSA-65）" name="mchPublicKey">
+          <a-form-item :label="$t('商戶公鑰（ML-DSA-65）')" name="mchPublicKey">
             <a-textarea
               v-model:value="vdata.saveObject.mchPublicKey"
               :auto-size="{ minRows: 4, maxRows: 10 }"
               style="font-family: monospace; font-size: 12px"
-              placeholder="-----BEGIN PUBLIC KEY-----&#10;商戶自行產生 ML-DSA-65 金鑰對後，只貼公鑰；私鑰留在商戶系統，不要交給任何人&#10;-----END PUBLIC KEY-----"
+              :placeholder="'-----BEGIN PUBLIC KEY-----\n' + $t('商戶自行產生 ML-DSA-65 金鑰對後，只貼公鑰；私鑰留在商戶系統，不要交給任何人') + '\n-----END PUBLIC KEY-----'"
             />
             <div style="color: rgba(0, 0, 0, 0.45); margin-top: 4px">
-              商戶 API 一律以 ML-DSA-65 簽名（signType=ML-DSA-65）。沒有公鑰的應用無法呼叫 API；修改時留空表示不變更。
+              {{ $t('商戶 API 一律以 ML-DSA-65 簽名（signType=ML-DSA-65）。沒有公鑰的應用無法呼叫 API；修改時留空表示不變更。') }}
             </div>
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item label="平台公鑰（交給商戶，用來驗證平台回應與通知）">
+          <a-form-item :label="$t('平台公鑰（交給商戶，用來驗證平台回應與通知）')">
             <a-textarea
               :value="vdata.platformPublicKey"
               readonly
               :auto-size="{ minRows: 4, maxRows: 10 }"
               style="font-family: monospace; font-size: 12px"
-              placeholder="系統尚未設定平台簽名公鑰"
+              :placeholder="$t('系統尚未設定平台簽名公鑰')"
             />
             <a-button style="margin-top: 10px" :disabled="!vdata.platformPublicKey" @click="copyPlatformKey">
-              複製平台公鑰
+              {{ $t('複製平台公鑰') }}
             </a-button>
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item label="備註" name="remark">
-            <a-textarea v-model:value="vdata.saveObject.remark" placeholder="請輸入" />
+          <a-form-item :label="$t('備註')" name="remark">
+            <a-textarea v-model:value="vdata.saveObject.remark" :placeholder="$t('請輸入')" />
           </a-form-item>
         </a-col>
       </a-row>
     </a-form>
 
     <div class="drawer-btn-center">
-      <a-button :style="{ marginRight: '8px' }" @click="onClose">取消</a-button>
-      <a-button type="primary" @click="onSubmit">儲存</a-button>
+      <a-button :style="{ marginRight: '8px' }" @click="onClose">{{ $t('取消') }}</a-button>
+      <a-button type="primary" @click="onSubmit">{{ $t('儲存') }}</a-button>
     </div>
   </a-drawer>
 </template>
@@ -84,6 +84,7 @@
 <script setup lang="ts">
 import { API_URL_MCH_APP, req } from '@/api/manage'
 import { reactive, ref, getCurrentInstance } from 'vue'
+import { t } from '@/i18n'
 const { $infoBox, $access, $hasAgentEnt, $SYS_NAME_MAP } =
   getCurrentInstance()!.appContext.config.globalProperties
 
@@ -101,8 +102,8 @@ const vdata: any = reactive({
 })
 
 const rules: any = reactive({
-  mchNo: [{ required: true, message: '請輸入商戶號', trigger: 'blur' }],
-  appName: [{ required: true, message: '請輸入應用名稱', trigger: 'blur' }],
+  mchNo: [{ required: true, message: t('請輸入商戶號'), trigger: 'blur' }],
+  appName: [{ required: true, message: t('請輸入應用名稱'), trigger: 'blur' }],
 })
 
 // 抽屉显示
@@ -141,7 +142,7 @@ function onSubmit() {
       // 请求接口
       if (vdata.isAdd) {
         req.add(API_URL_MCH_APP, vdata.saveObject).then((res) => {
-          $infoBox.message.success('新增成功')
+          $infoBox.message.success(t('新增成功'))
           vdata.open = false
           props.callbackFunc() // 刷新列表
         })
@@ -150,7 +151,7 @@ function onSubmit() {
           delete vdata.saveObject.mchPublicKey
         }
         req.updateById(API_URL_MCH_APP, vdata.appId, vdata.saveObject).then((res) => {
-          $infoBox.message.success('修改成功')
+          $infoBox.message.success(t('修改成功'))
           vdata.open = false
           props.callbackFunc() // 刷新列表
         })
@@ -168,8 +169,8 @@ function loadPlatformKey() {
 function copyPlatformKey() {
   navigator.clipboard
     .writeText(vdata.platformPublicKey)
-    .then(() => $infoBox.message.success('已複製平台公鑰'))
-    .catch(() => $infoBox.message.warning('無法自動複製，請手動選取文字複製'))
+    .then(() => $infoBox.message.success(t('已複製平台公鑰')))
+    .catch(() => $infoBox.message.warning(t('無法自動複製，請手動選取文字複製')))
 }
 function onClose() {
   vdata.open = false

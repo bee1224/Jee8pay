@@ -8,27 +8,27 @@
     <div v-if="vdata.tab !== 'verify'" class="m-card at-form">
       <a-form layout="vertical">
         <div class="at-grid">
-          <a-form-item label="商戶" required>
-            <a-select v-model:value="vdata.mchNo" show-search option-filter-prop="label" size="large" placeholder="選擇商戶" :options="mchOptions" @change="onMch" />
+          <a-form-item :label="$t('商戶')" required>
+            <a-select v-model:value="vdata.mchNo" show-search option-filter-prop="label" size="large" :placeholder="$t('選擇商戶')" :options="mchOptions" @change="onMch" />
           </a-form-item>
-          <a-form-item label="應用" required>
-            <a-select v-model:value="vdata.appId" size="large" placeholder="選擇應用" :options="appOptions" @change="onApp" />
+          <a-form-item :label="$t('應用')" required>
+            <a-select v-model:value="vdata.appId" size="large" :placeholder="$t('選擇應用')" :options="appOptions" @change="onApp" />
           </a-form-item>
           <template v-if="vdata.tab === 'order'">
-            <a-form-item label="支付方式" required>
-              <a-select v-model:value="vdata.wayCode" size="large" placeholder="選擇支付方式" :options="wayOptions" :not-found-content="vdata.appId ? '這個應用沒有開通支付方式' : '請先選擇應用'" />
+            <a-form-item :label="$t('支付方式')" required>
+              <a-select v-model:value="vdata.wayCode" size="large" :placeholder="$t('選擇支付方式')" :options="wayOptions" :not-found-content="vdata.appId ? $t('這個應用沒有開通支付方式') : $t('請先選擇應用')" />
             </a-form-item>
-            <a-form-item label="金額（元）" required>
+            <a-form-item :label="$t('金額（元）')" required>
               <a-input-number v-model:value="vdata.amount" :min="1" :max="20000" :precision="0" size="large" style="width: 100%" />
             </a-form-item>
           </template>
           <template v-else>
-            <a-form-item label="支付單號"><a-input v-model:value="vdata.payOrderId" size="large" allow-clear placeholder="P 開頭" /></a-form-item>
-            <a-form-item label="商戶單號"><a-input v-model:value="vdata.mchOrderNo" size="large" allow-clear placeholder="擇一填寫" /></a-form-item>
+            <a-form-item :label="$t('支付單號')"><a-input v-model:value="vdata.payOrderId" size="large" allow-clear :placeholder="$t('P 開頭')" /></a-form-item>
+            <a-form-item :label="$t('商戶單號')"><a-input v-model:value="vdata.mchOrderNo" size="large" allow-clear :placeholder="$t('擇一填寫')" /></a-form-item>
           </template>
         </div>
         <template v-if="vdata.tab === 'order'">
-          <p class="m-muted" style="margin: 0 0 10px">繳款人資料（ibon 上游必填；留空的欄位不送出，可用來觀察上游的錯誤回應）</p>
+          <p class="m-muted" style="margin: 0 0 10px">{{ $t('繳款人資料（ibon 上游必填；留空的欄位不送出，可用來觀察上游的錯誤回應）') }}</p>
           <div class="at-grid">
             <a-form-item v-for="f in PAYER" :key="f.key" :label="f.label"><a-input v-model:value="vdata.payer[f.key]" size="large" allow-clear /></a-form-item>
           </div>
@@ -36,54 +36,54 @@
       </a-form>
       <p class="m-muted" style="margin: 0 0 12px">
         {{ vdata.tab === 'order'
-          ? '會真的建立訂單並送到上游渠道（標題「API 測試單」，不繳費即逾期關閉）。平台不持有商戶私鑰，請求以平台內部金鑰簽名（PLATFORM-ML-DSA-65），其餘與商戶自己串接相同。'
-          : '查詢的是平台本地訂單狀態（與商戶呼叫查單 API 相同），不會打上游。' }}
+          ? $t('會真的建立訂單並送到上游渠道（標題「API 測試單」，不繳費即逾期關閉）。平台不持有商戶私鑰，請求以平台內部金鑰簽名（PLATFORM-ML-DSA-65），其餘與商戶自己串接相同。')
+          : $t('查詢的是平台本地訂單狀態（與商戶呼叫查單 API 相同），不會打上游。') }}
       </p>
-      <button class="m-btn" :disabled="vdata.running" @click="run">{{ vdata.running ? '送出中…' : vdata.tab === 'order' ? '送出下單' : '送出查單' }}</button>
+      <button class="m-btn" :disabled="vdata.running" @click="run">{{ vdata.running ? $t('送出中…') : vdata.tab === 'order' ? $t('送出下單') : $t('送出查單') }}</button>
     </div>
 
     <div v-else class="m-card at-form">
       <a-form layout="vertical">
-        <a-form-item label="商戶送出的請求 JSON（含 sign）" required>
+        <a-form-item :label="$t('商戶送出的請求 JSON（含 sign）')" required>
           <a-textarea v-model:value="vdata.verifyJson" :rows="8" placeholder='{"mchNo":"M...","appId":"...","signType":"ML-DSA-65","reqTime":"...","sign":"..."}' class="mono" />
         </a-form-item>
       </a-form>
-      <p class="m-muted" style="margin: 0 0 12px">貼上商戶實際送出的請求本文，平台會以該應用登記的公鑰驗簽，並列出平台組出的待簽字串，方便和商戶逐字比對。不會送出任何請求。</p>
-      <button class="m-btn" :disabled="vdata.running" @click="verify">{{ vdata.running ? '驗證中…' : '驗證簽名' }}</button>
+      <p class="m-muted" style="margin: 0 0 12px">{{ $t('貼上商戶實際送出的請求本文，平台會以該應用登記的公鑰驗簽，並列出平台組出的待簽字串，方便和商戶逐字比對。不會送出任何請求。') }}</p>
+      <button class="m-btn" :disabled="vdata.running" @click="verify">{{ vdata.running ? $t('驗證中…') : $t('驗證簽名') }}</button>
     </div>
 
     <!-- 下單／查單結果 -->
     <template v-if="vdata.tab !== 'verify' && vdata.result">
       <div v-if="vdata.result.error" class="m-card at-error">{{ vdata.result.error }}</div>
 
-      <div class="m-section-title"><h3>① 商戶 → 平台（請求）</h3><span class="m-muted">POST</span></div>
+      <div class="m-section-title"><h3>{{ $t('① 商戶 → 平台（請求）') }}</h3><span class="m-muted">POST</span></div>
       <div class="m-card at-block">
         <div class="at-line mono">{{ vdata.result.method }} {{ vdata.result.url }}</div>
         <CodeBox title="Headers" :text="pretty(vdata.result.requestHeaders)" />
         <CodeBox title="Body" :text="pretty(vdata.result.requestBody)" />
-        <CodeBox title="待簽字串（canonical）" :text="vdata.result.canonical" collapsed />
+        <CodeBox :title="$t('待簽字串（canonical）')" :text="vdata.result.canonical" collapsed />
       </div>
 
       <div class="m-section-title">
-        <h3>② 平台 → 商戶（回應）</h3>
+        <h3>{{ $t('② 平台 → 商戶（回應）') }}</h3>
         <span class="m-muted">{{ vdata.result.httpStatus ? 'HTTP ' + vdata.result.httpStatus : '' }} {{ vdata.result.latencyMillis != null ? vdata.result.latencyMillis + ' ms' : '' }}</span>
       </div>
       <div class="m-card at-block">
         <div v-if="vdata.result.responseSignCheck" class="at-line">
-          回應驗簽：<span :class="['m-pill', vdata.result.responseSignCheck.startsWith('通過') ? 'ok' : vdata.result.responseSignCheck.startsWith('失敗') ? 'bad' : 'mute']">{{ vdata.result.responseSignCheck }}</span>
+          {{ $t('回應驗簽：') }}<span :class="['m-pill', vdata.result.responseSignCheck.startsWith('通過') ? 'ok' : vdata.result.responseSignCheck.startsWith('失敗') ? 'bad' : 'mute']">{{ vdata.result.responseSignCheck }}</span>
         </div>
         <CodeBox title="Headers" :text="pretty(vdata.result.responseHeaders)" />
         <CodeBox title="Body" :text="pretty(vdata.result.responseBody)" />
       </div>
 
-      <div class="m-section-title"><h3>③ 平台 → 渠道（上游往來）</h3><span class="m-muted">{{ (vdata.result.channelTrace || []).length }} 次</span></div>
+      <div class="m-section-title"><h3>{{ $t('③ 平台 → 渠道（上游往來）') }}</h3><span class="m-muted">{{ $t('{0} 次', [(vdata.result.channelTrace || []).length]) }}</span></div>
       <div v-if="!(vdata.result.channelTrace || []).length" class="m-empty">
-        {{ vdata.tab === 'order' ? '這次沒有打到上游（可能在平台端就被擋下，請看上方回應）' : '查單只查平台本地訂單，不會打上游' }}
+        {{ vdata.tab === 'order' ? $t('這次沒有打到上游（可能在平台端就被擋下，請看上方回應）') : $t('查單只查平台本地訂單，不會打上游') }}
       </div>
       <div v-for="(t, i) in vdata.result.channelTrace || []" :key="i" class="m-card at-block">
         <div class="at-line">
           <b>#{{ i + 1 }} {{ t.provider }}</b>
-          <span :class="['m-pill', t.status >= 200 && t.status < 300 ? 'ok' : 'bad']">{{ t.status ? 'HTTP ' + t.status : '連線失敗' }}</span>
+          <span :class="['m-pill', t.status >= 200 && t.status < 300 ? 'ok' : 'bad']">{{ t.status ? 'HTTP ' + t.status : $t('連線失敗') }}</span>
           <span class="m-muted">{{ t.latencyMillis }} ms</span>
         </div>
         <div class="at-line mono">{{ t.method }} {{ t.url }}</div>
@@ -92,7 +92,7 @@
         <CodeBox title="Request body" :text="pretty(t.body)" />
         <CodeBox title="Response body" :text="pretty(t.responseBody)" />
       </div>
-      <p class="m-muted">渠道往來中的密碼、Bearer token、access_token 已遮蔽為 ****。</p>
+      <p class="m-muted">{{ $t('渠道往來中的密碼、Bearer token、access_token 已遮蔽為 ****。') }}</p>
     </template>
 
     <!-- 簽名驗證結果 -->
@@ -100,11 +100,11 @@
       <div class="m-list">
         <div v-for="c in vdata.verifyResult.checks" :key="c.item" class="m-row">
           <div class="main"><b class="mono">{{ c.item }}</b><small>{{ c.message }}</small></div>
-          <span :class="['m-pill', c.ok ? 'ok' : 'bad']">{{ c.ok ? '通過' : '不通過' }}</span>
+          <span :class="['m-pill', c.ok ? 'ok' : 'bad']">{{ c.ok ? $t('通過') : $t('不通過') }}</span>
         </div>
       </div>
       <div class="m-card at-block">
-        <CodeBox title="平台組出的待簽字串（canonical）" :text="vdata.verifyResult.canonical" />
+        <CodeBox :title="$t('平台組出的待簽字串（canonical）')" :text="vdata.verifyResult.canonical" />
       </div>
       <p class="m-muted">{{ vdata.verifyResult.note }}</p>
     </template>
@@ -115,32 +115,33 @@
 import { computed, defineComponent, h, reactive, ref, getCurrentInstance } from 'vue'
 import { req } from '@/api/manage'
 import '@/views/mobile/mobile.less'
+import { t } from '@/i18n'
 
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
 const URL = '/api/apiTest'
 const TABS = [
-  { key: 'order', label: '下單測試' },
-  { key: 'query', label: '查單測試' },
-  { key: 'verify', label: '簽名驗證' },
+  { key: 'order', label: t('下單測試') },
+  { key: 'query', label: t('查單測試') },
+  { key: 'verify', label: t('簽名驗證') },
 ]
 const PAYER = [
-  { key: 'payerName', label: '繳款人姓名' },
-  { key: 'payerMobile', label: '手機' },
+  { key: 'payerName', label: t('繳款人姓名') },
+  { key: 'payerMobile', label: t('手機') },
   { key: 'payerEmail', label: 'Email' },
-  { key: 'payerPostcode', label: '郵遞區號' },
-  { key: 'payerAddress', label: '地址' },
+  { key: 'payerPostcode', label: t('郵遞區號') },
+  { key: 'payerAddress', label: t('地址') },
 ]
 // 測試用假資料，技術人員可自行修改
 const vdata: any = reactive({
   tab: 'order', merchants: [], mchNo: undefined, appId: undefined, wayCode: undefined, amount: 100,
-  payer: { payerName: '測試人員', payerMobile: '0912345678', payerEmail: 'test@example.com', payerPostcode: '100', payerAddress: '台北市中正區測試路 1 號' },
+  payer: { payerName: t('測試人員'), payerMobile: '0912345678', payerEmail: 'test@example.com', payerPostcode: '100', payerAddress: t('台北市中正區測試路 1 號') },
   payOrderId: '', mchOrderNo: '', verifyJson: '', running: false, result: null, verifyResult: null,
 })
 
 const curMch = computed(() => vdata.merchants.find((m) => m.mchNo === vdata.mchNo))
 const curApp = computed(() => (curMch.value ? curMch.value.apps.find((a) => a.appId === vdata.appId) : null))
-const mchOptions = computed(() => vdata.merchants.map((m) => ({ value: m.mchNo, label: `${m.mchName}（${m.mchNo}）${m.state === 1 ? '' : '・停用'}` })))
-const appOptions = computed(() => (curMch.value ? curMch.value.apps.map((a) => ({ value: a.appId, label: `${a.appName || a.appId}${a.state === 1 ? '' : '・停用'}` })) : []))
+const mchOptions = computed(() => vdata.merchants.map((m) => ({ value: m.mchNo, label: `${m.mchName}（${m.mchNo}）${m.state === 1 ? '' : t('・停用')}` })))
+const appOptions = computed(() => (curMch.value ? curMch.value.apps.map((a) => ({ value: a.appId, label: `${a.appName || a.appId}${a.state === 1 ? '' : t('・停用')}` })) : []))
 const wayOptions = computed(() => (curApp.value ? curApp.value.ways.map((w) => ({ value: w.wayCode, label: `${w.wayName}（${w.wayCode}）` })) : []))
 
 function onMch() {
@@ -164,13 +165,13 @@ function pretty(v) {
 }
 
 function run() {
-  if (!vdata.mchNo || !vdata.appId) return $infoBox.message.warning('請選擇商戶與應用')
+  if (!vdata.mchNo || !vdata.appId) return $infoBox.message.warning(t('請選擇商戶與應用'))
   let params: any = { mchNo: vdata.mchNo, appId: vdata.appId }
   if (vdata.tab === 'order') {
-    if (!vdata.wayCode || !vdata.amount) return $infoBox.message.warning('請選擇支付方式並填寫金額')
+    if (!vdata.wayCode || !vdata.amount) return $infoBox.message.warning(t('請選擇支付方式並填寫金額'))
     params = { ...params, wayCode: vdata.wayCode, amount: vdata.amount, ...vdata.payer }
   } else {
-    if (!vdata.payOrderId && !vdata.mchOrderNo) return $infoBox.message.warning('請填寫支付單號或商戶單號')
+    if (!vdata.payOrderId && !vdata.mchOrderNo) return $infoBox.message.warning(t('請填寫支付單號或商戶單號'))
     params = { ...params, payOrderId: vdata.payOrderId, mchOrderNo: vdata.mchOrderNo }
   }
   const tab = vdata.tab
@@ -190,7 +191,7 @@ function run() {
 }
 
 function verify() {
-  if (!vdata.verifyJson.trim()) return $infoBox.message.warning('請貼上請求 JSON')
+  if (!vdata.verifyJson.trim()) return $infoBox.message.warning(t('請貼上請求 JSON'))
   vdata.running = true
   vdata.verifyResult = null
   req
@@ -200,7 +201,7 @@ function verify() {
 }
 
 function copy(text) {
-  const done = () => $infoBox.message.success('已複製')
+  const done = () => $infoBox.message.success(t('已複製'))
   if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text).then(done)
   const ta = document.createElement('textarea')
   ta.value = text
@@ -221,7 +222,7 @@ const CodeBox = defineComponent({
         ? h('div', { class: 'at-code' }, [
             h('div', { class: 'at-code-head' }, [
               h('button', { class: 'at-code-title', onClick: () => (open.value = !open.value) }, `${open.value ? '▼' : '▶'} ${props.title}`),
-              h('button', { class: 'm-btn sm ghost', onClick: () => copy(props.text) }, '複製'),
+              h('button', { class: 'm-btn sm ghost', onClick: () => copy(props.text) }, t('複製')),
             ]),
             open.value ? h('pre', { class: 'mono' }, props.text) : null,
           ])

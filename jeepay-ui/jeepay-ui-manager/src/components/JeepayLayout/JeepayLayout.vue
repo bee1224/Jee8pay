@@ -146,7 +146,7 @@
         <slot />
 
         <div class="foot">
-          Copyright © 2025-2026 三把扇科技 All rights reserved.
+          {{ $t('Copyright © 2025-2026 三把扇科技 All rights reserved.') }}
         </div>
       </a-layout-content>
     </a-layout>

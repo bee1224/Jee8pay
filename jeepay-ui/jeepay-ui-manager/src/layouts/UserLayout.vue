@@ -11,7 +11,7 @@
           </div>
           <div class="desc">
             <img src="~@/assets/svg/operate.svg" class="logo" alt="logo" />
-            <span>營運平台</span>
+            <span>{{ $t('營運平台') }}</span>
           </div>
         </div>
 

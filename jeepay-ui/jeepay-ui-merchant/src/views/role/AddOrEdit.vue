@@ -1,7 +1,7 @@
 <template>
   <a-drawer
     v-model:open="vdata.isShow"
-    :title="vdata.isAdd ? '新增角色' : '修改角色'"
+    :title="vdata.isAdd ? $t('新增角色') : $t('修改角色')"
     width="30%"
     :maskClosable="false"
     @close="vdata.isShow = false"
@@ -13,8 +13,8 @@
       :wrapper-col="{ span: 15 }"
       :rules="vdata.rules"
     >
-      <a-form-item label="角色名稱：" name="roleName">
-        <a-input v-model:value="vdata.saveObject.roleName" placeholder="請輸入角色名稱" />
+      <a-form-item :label="$t('角色名稱：')" name="roleName">
+        <a-input v-model:value="vdata.saveObject.roleName" :placeholder="$t('請輸入角色名稱')" />
       </a-form-item>
     </a-form>
 
@@ -22,8 +22,8 @@
     <RoleDist ref="roleDistRef" />
 
     <div class="drawer-btn-center">
-      <a-button :style="{ marginRight: '8px' }" @click="vdata.isShow = false">取消</a-button>
-      <a-button type="primary" @click="handleOkFunc" :loading="vdata.confirmLoading">儲存</a-button>
+      <a-button :style="{ marginRight: '8px' }" @click="vdata.isShow = false">{{ $t('取消') }}</a-button>
+      <a-button type="primary" @click="handleOkFunc" :loading="vdata.confirmLoading">{{ $t('儲存') }}</a-button>
     </div>
   </a-drawer>
 </template>
@@ -32,6 +32,7 @@
 import { API_URL_ROLE_LIST, req } from '@/api/manage'
 import RoleDist from './RoleDist.vue'
 import { reactive, ref, getCurrentInstance, nextTick } from 'vue'
+import { t } from '@/i18n'
 
 const props = defineProps({
   callbackFunc: { type: Function, default: () => {} },
@@ -46,7 +47,7 @@ const vdata: any = reactive({
   saveObject: {}, // 数据对象
   recordId: null, // 更新对象ID
   rules: {
-    roleName: [{ required: true, message: '請輸入角色名稱', trigger: 'blur' }],
+    roleName: [{ required: true, message: t('請輸入角色名稱'), trigger: 'blur' }],
   },
 })
 
@@ -92,7 +93,7 @@ function handleOkFunc() {
         req
           .add(API_URL_ROLE_LIST, vdata.saveObject)
           .then((res) => {
-            $infoBox.message.success('新增成功')
+            $infoBox.message.success(t('新增成功'))
             vdata.isShow = false
             props.callbackFunc() // 刷新列表
           })
@@ -103,7 +104,7 @@ function handleOkFunc() {
         req
           .updateById(API_URL_ROLE_LIST, vdata.recordId, vdata.saveObject)
           .then((res) => {
-            $infoBox.message.success('修改成功')
+            $infoBox.message.success(t('修改成功'))
             vdata.isShow = false
             props.callbackFunc() // 刷新列表
           })

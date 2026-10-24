@@ -18,7 +18,7 @@
             <div style="display: flex; justify-content: center">
               <a-form-item>
                 <a-button type="primary" @click="confirm" :loading="vdata.btnLoading">
-                  確認更新
+                  {{ $t('確認更新') }}
                 </a-button>
               </a-form-item>
             </div>
@@ -35,12 +35,13 @@
 <script setup lang="ts">
 import { API_URL_SYS_CONFIG, req, getConfigs } from '@/api/manage'
 import { reactive, ref, getCurrentInstance } from 'vue'
+import { t } from '@/i18n'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 // 群組對應 t_sys_config.group_key；walletConfig 為錢包與提現（ADR-0010）
 const TABS = [
-  { key: 'applicationConfig', name: '應用設定' },
-  { key: 'walletConfig', name: '錢包與提現' },
+  { key: 'applicationConfig', name: t('應用設定') },
+  { key: 'walletConfig', name: t('錢包與提現') },
 ]
 
 const vdata: any = reactive({
@@ -67,7 +68,7 @@ function selectTabs(key) {
 }
 function confirm(e) {
   // 确认更新
-  $infoBox.confirmPrimary('確認修改這組設定嗎？', '', () => {
+  $infoBox.confirmPrimary(t('確認修改這組設定嗎？'), '', () => {
     vdata.btnLoading = true // 打开按钮上的 loading
     const formData = new FormData()
     for (var i in vdata.configData) {
@@ -76,7 +77,7 @@ function confirm(e) {
     req
       .updateById(API_URL_SYS_CONFIG, vdata.groupKey, formData)
       .then((res) => {
-        $infoBox.message.success('修改成功')
+        $infoBox.message.success(t('修改成功'))
       })
       .finally((res) => {
         vdata.btnLoading = false

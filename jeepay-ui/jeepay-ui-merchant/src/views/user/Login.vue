@@ -1,7 +1,7 @@
 <template>
   <div id="userLayout" :class="['user-layout-wrapper']">
     <div class="container">
-      <div class="user-layout-lang" />
+      <div class="user-layout-lang"><LanguageButton variant="floating" /></div>
       <div class="user-layout-content">
         <div class="top">
           <div class="header">
@@ -11,7 +11,7 @@
           </div>
           <div class="desc">
             <img src="@/assets/svg/operate.svg" class="logo" alt="logo" />
-            <span>商戶平台</span>
+            <span>{{ $t('商戶平台') }}</span>
           </div>
         </div>
 
@@ -37,7 +37,7 @@
                 v-model:value="formState.username"
                 size="large"
                 type="text"
-                placeholder="請輸入帳戶"
+                :placeholder="$t('請輸入帳戶')"
               />
             </a-form-item>
 
@@ -45,7 +45,7 @@
               <a-input-password
                 v-model:value="formState.password"
                 size="large"
-                placeholder="請輸入密碼"
+                :placeholder="$t('請輸入密碼')"
               />
             </a-form-item>
 
@@ -56,23 +56,23 @@
                   class="code-input"
                   size="large"
                   type="text"
-                  placeholder="請輸入人機驗證碼"
+                  :placeholder="$t('請輸入人機驗證碼')"
                 />
               </a-form-item>
 
               <div class="code-img" style="position: relative; background: #ddd">
                 <img v-show="vercodeImgSrc" :src="vercodeImgSrc" @click="refVercode()" />
                 <div v-show="isOverdue" class="vercode-mask" @click="refVercode()">
-                  已過期 請刷新
+                  {{ $t('已過期 請刷新') }}
                 </div>
               </div>
             </div>
 
             <a-form-item>
               <!-- 自动登录 -->
-              <a-checkbox v-model="isAutoLogin">自動登入</a-checkbox>
+              <a-checkbox v-model="isAutoLogin">{{ $t('自動登入') }}</a-checkbox>
               <!-- 忘记密码 -->
-              <a class="forge-password" style="float: right">忘記密碼?</a>
+              <a class="forge-password" style="float: right">{{ $t('忘記密碼?') }}</a>
             </a-form-item>
 
             <a-form-item class="submit">
@@ -83,7 +83,7 @@
                 class="login-button"
                 :loading="loginBtnLoadingFlag"
               >
-                登入
+                {{ $t('登入') }}
               </a-button>
             </a-form-item>
           </a-form>
@@ -101,6 +101,8 @@ import router from '@/router'
 import { login } from '@/api/login'
 import { useUserStore } from '@/store/modules/user'
 import { ref, onMounted, reactive, getCurrentInstance } from 'vue'
+import { t } from '@/i18n'
+import LanguageButton from '@/components/LanguagePicker/LanguageButton.vue'
 
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
 
@@ -144,7 +146,7 @@ function handleSubmit(e) {
       router.push({ path: '/' })
       // 延迟 1 秒显示欢迎信息
       setTimeout(() => {
-        $infoBox.notification.success({ message: '歡迎', description: `${timeFix()}，歡迎回來` })
+        $infoBox.notification.success({ message: t('歡迎'), description: t('{0}，歡迎回來', [timeFix()]) })
       }, 1000)
       showLoginErrorInfo.value = ''
     })

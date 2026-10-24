@@ -1,6 +1,6 @@
 <template>
   <a-drawer
-    title="填寫參數"
+    :title="$t('填寫參數')"
     width="40%"
     :closable="true"
     :maskClosable="false"
@@ -11,22 +11,22 @@
     <a-form ref="infoFormModel" :model="vdata.saveObject" layout="vertical" :rules="vdata.rules">
       <a-row :gutter="16">
         <a-col :span="12">
-          <a-form-item label="狀態" name="state">
+          <a-form-item :label="$t('狀態')" name="state">
             <a-radio-group v-model:value="vdata.saveObject.state">
-              <a-radio :value="1">啟用</a-radio>
-              <a-radio :value="0">停用</a-radio>
+              <a-radio :value="1">{{ $t('啟用') }}</a-radio>
+              <a-radio :value="0">{{ $t('停用') }}</a-radio>
             </a-radio-group>
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item label="備註" name="remark">
-            <a-textarea v-model:value="vdata.saveObject.remark" placeholder="請輸入" />
+          <a-form-item :label="$t('備註')" name="remark">
+            <a-textarea v-model:value="vdata.saveObject.remark" :placeholder="$t('請輸入')" />
           </a-form-item>
         </a-col>
       </a-row>
     </a-form>
     <a-divider orientation="left">
-      <a-tag color="#FF4B33">{{ vdata.saveObject.ifCode }} 商戶參數配置</a-tag>
+      <a-tag color="#FF4B33">{{ $t('{0} 商戶參數配置', [vdata.saveObject.ifCode]) }}</a-tag>
     </a-divider>
     <a-form
       ref="mchParamFormModel"
@@ -47,7 +47,7 @@
           >
             <a-input
               v-model:value="vdata.ifParams[item.name]"
-              :placeholder="item.star === '1' ? vdata.ifParams[item.name + '_ph'] : '請輸入'"
+              :placeholder="item.star === '1' ? vdata.ifParams[item.name + '_ph'] : $t('請輸入')"
               :type="item.type"
             />
           </a-form-item>
@@ -72,7 +72,7 @@
               <template #uploadSlot="{ loading }">
                 <a-button style="margin-top: 5px">
                   <a-icon :type="loading ? 'loading' : 'upload'" />
-                  {{ loading ? '正在上傳' : '點擊上傳' }}
+                  {{ loading ? $t('正在上傳') : $t('點擊上傳') }}
                 </a-button>
               </template>
             </JeepayUpload>
@@ -81,8 +81,8 @@
       </a-row>
     </a-form>
     <div class="drawer-btn-center" v-if="$access('ENT_MCH_PAY_CONFIG_ADD')">
-      <a-button :style="{ marginRight: '8px' }" @click="onClose">取消</a-button>
-      <a-button type="primary" @click="onSubmit" :loading="vdata.btnLoading">儲存</a-button>
+      <a-button :style="{ marginRight: '8px' }" @click="onClose">{{ $t('取消') }}</a-button>
+      <a-button type="primary" @click="onSubmit" :loading="vdata.btnLoading">{{ $t('儲存') }}</a-button>
     </div>
   </a-drawer>
 </template>
@@ -91,6 +91,7 @@
 import { API_URL_MCH_PAYCONFIGS_LIST, req, getMchPayConfigUnique, upload } from '@/api/manage'
 
 import { reactive, ref, watch, getCurrentInstance } from 'vue'
+import { t } from '@/i18n'
 
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
@@ -183,7 +184,7 @@ function getMchPayConfig(record) {
           if (item.star === '1') {
             vdata.ifParams[item.name + '_ph'] = vdata.ifParams[item.name]
               ? vdata.ifParams[item.name]
-              : '請輸入'
+              : t('請輸入')
             if (vdata.ifParams[item.name]) {
               vdata.ifParams[item.name] = ''
             }
@@ -203,10 +204,10 @@ function getMchPayConfig(record) {
         vdata.open = true // 打开支付参数配置抽屉
         generoterRules()
       } else {
-        $infoBox.message.error('該渠道無法進行商戶參數配置')
+        $infoBox.message.error(t('該渠道無法進行商戶參數配置'))
       }
     } catch (error) {
-      $infoBox.message.error('該渠道無法進行商戶參數配置')
+      $infoBox.message.error(t('該渠道無法進行商戶參數配置'))
     }
   })
 }
@@ -225,7 +226,7 @@ function onSubmit() {
         reqParams.remark = vdata.saveObject.remark
         // 支付参数配置不能为空
         if (Object.keys(vdata.ifParams).length === 0) {
-          $infoBox.message.error('參數不能為空！')
+          $infoBox.message.error(t('參數不能為空！'))
           return
         }
         // 脱敏数据为空时，删除该key
@@ -238,11 +239,11 @@ function onSubmit() {
         reqParams.ifParams = JSON.stringify(vdata.ifParams)
         // 请求接口
         if (Object.keys(reqParams).length === 0) {
-          $infoBox.message.error('參數不能為空！')
+          $infoBox.message.error(t('參數不能為空！'))
           return
         }
         req.add(API_URL_MCH_PAYCONFIGS_LIST, reqParams).then((res) => {
-          $infoBox.message.success('儲存成功')
+          $infoBox.message.success(t('儲存成功'))
           vdata.open = false
           vdata.btnLoading = false
           props.callbackFunc()
@@ -266,7 +267,7 @@ function generoterRules() {
     if (item.verify === 'required' && item.star !== '1') {
       newItems.push({
         required: true,
-        message: '請輸入' + item.desc,
+        message: t('請輸入{0}', [item.desc]),
         trigger: 'blur',
       })
       rules[item.name] = newItems

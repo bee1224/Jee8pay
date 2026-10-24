@@ -2,72 +2,72 @@
   <!-- 家族樹：每張卡片是一位團長（第二代），裡面依序是他的直屬商戶、我的代理（第三代）與各自的商戶 -->
   <div>
     <div class="tree-summary">
-      <span>團長 <b>{{ seniors.length }}</b></span>
-      <span>隊長 <b>{{ agents.length - seniors.length }}</b></span>
-      <span>已歸屬商戶 <b>{{ relas.length }}</b></span>
-      <span v-if="orphans.length">未歸屬商戶 <b>{{ orphans.length }}</b></span>
-      <a-button size="small" @click="load">重新整理</a-button>
+      <span>{{ $t('團長') }} <b>{{ seniors.length }}</b></span>
+      <span>{{ $t('隊長') }} <b>{{ agents.length - seniors.length }}</b></span>
+      <span>{{ $t('已歸屬商戶') }} <b>{{ relas.length }}</b></span>
+      <span v-if="orphans.length">{{ $t('未歸屬商戶') }} <b>{{ orphans.length }}</b></span>
+      <a-button size="small" @click="load">{{ $t('重新整理') }}</a-button>
     </div>
-    <a-empty v-if="loaded && !seniors.length" description="還沒有團長，請先按「新建代理」" />
+    <a-empty v-if="loaded && !seniors.length" :description="$t('還沒有團長，請先按「新建代理」')" />
     <div class="tree-grid">
       <a-card v-for="senior in seniors" :key="senior.agentNo" class="family-card" size="small">
         <template #title>
           <div class="node-head">
-            <a-tag color="purple">團長</a-tag>
+            <a-tag color="purple">{{ $t('團長') }}</a-tag>
             <a @click="emit('open', senior)"><b>{{ senior.agentName }}</b></a>
-            <a-tag v-if="senior.isHouse === 1" color="gold">平台直屬</a-tag>
+            <a-tag v-if="senior.isHouse === 1" color="gold">{{ $t('平台直屬') }}</a-tag>
             <span class="no">{{ senior.agentNo }}</span>
-            <a-badge :status="senior.state === 0 ? 'error' : 'processing'" :text="senior.state === 0 ? '停用' : '啟用'" />
+            <a-badge :status="senior.state === 0 ? 'error' : 'processing'" :text="senior.state === 0 ? $t('停用') : $t('啟用')" />
           </div>
         </template>
         <template #extra>
-          <a-button type="link" size="small" @click="emit('open', senior)">進入</a-button>
+          <a-button type="link" size="small" @click="emit('open', senior)">{{ $t('進入') }}</a-button>
           <a-dropdown>
-            <a-button type="link" size="small">管理</a-button>
+            <a-button type="link" size="small">{{ $t('管理') }}</a-button>
             <template #overlay>
               <a-menu>
-                <a-menu-item v-if="$access('ENT_AGENT_INFO_EDIT')" @click="emit('edit', senior)">修改</a-menu-item>
-                <a-menu-item v-if="$access('ENT_AGENT_ACCOUNT')" @click="emit('accounts', senior)">登入帳號</a-menu-item>
-                <a-menu-item v-if="$access('ENT_AGENT_PROFIT')" @click="emit('profit', senior)">分潤</a-menu-item>
-                <a-menu-item v-if="$access('ENT_AGENT_INFO_DEL')" @click="emit('remove', senior)"><span style="color: #cf1322">刪除</span></a-menu-item>
+                <a-menu-item v-if="$access('ENT_AGENT_INFO_EDIT')" @click="emit('edit', senior)">{{ $t('修改') }}</a-menu-item>
+                <a-menu-item v-if="$access('ENT_AGENT_ACCOUNT')" @click="emit('accounts', senior)">{{ $t('登入帳號') }}</a-menu-item>
+                <a-menu-item v-if="$access('ENT_AGENT_PROFIT')" @click="emit('profit', senior)">{{ $t('分潤') }}</a-menu-item>
+                <a-menu-item v-if="$access('ENT_AGENT_INFO_DEL')" @click="emit('remove', senior)"><span style="color: #cf1322">{{ $t('刪除') }}</span></a-menu-item>
               </a-menu>
             </template>
           </a-dropdown>
         </template>
 
         <div class="branch">
-          <div class="branch-label">直屬商戶（{{ mchOf(senior.agentNo).length }}）</div>
+          <div class="branch-label">{{ $t('直屬商戶（{0}）', [mchOf(senior.agentNo).length]) }}</div>
           <div class="chips">
             <a-tag v-for="m in mchOf(senior.agentNo)" :key="m.mchNo" :color="m.state === 0 ? 'default' : 'green'">{{ m.name }}<span class="no">{{ m.mchNo }}</span></a-tag>
-            <span v-if="!mchOf(senior.agentNo).length" class="none">沒有</span>
+            <span v-if="!mchOf(senior.agentNo).length" class="none">{{ $t('沒有') }}</span>
           </div>
         </div>
 
         <div v-for="son in sonsOf(senior.agentNo)" :key="son.agentNo" class="son">
           <div class="node-head">
-            <a-tag color="blue">隊長</a-tag>
+            <a-tag color="blue">{{ $t('隊長') }}</a-tag>
             <b>{{ son.agentName }}</b>
             <span class="no">{{ son.agentNo }}</span>
-            <a-badge :status="son.state === 0 ? 'error' : 'processing'" :text="son.state === 0 ? '停用' : '啟用'" />
+            <a-badge :status="son.state === 0 ? 'error' : 'processing'" :text="son.state === 0 ? $t('停用') : $t('啟用')" />
             <span class="son-ops">
-              <a v-if="$access('ENT_AGENT_INFO_EDIT')" @click="emit('edit', son)">修改</a>
-              <a v-if="$access('ENT_AGENT_ACCOUNT')" @click="emit('accounts', son)">登入帳號</a>
-              <a v-if="$access('ENT_AGENT_PROFIT')" @click="emit('profit', son)">分潤</a>
+              <a v-if="$access('ENT_AGENT_INFO_EDIT')" @click="emit('edit', son)">{{ $t('修改') }}</a>
+              <a v-if="$access('ENT_AGENT_ACCOUNT')" @click="emit('accounts', son)">{{ $t('登入帳號') }}</a>
+              <a v-if="$access('ENT_AGENT_PROFIT')" @click="emit('profit', son)">{{ $t('分潤') }}</a>
             </span>
           </div>
           <div class="chips">
             <a-tag v-for="m in mchOf(son.agentNo)" :key="m.mchNo" :color="m.state === 0 ? 'default' : 'green'">{{ m.name }}<span class="no">{{ m.mchNo }}</span></a-tag>
-            <span v-if="!mchOf(son.agentNo).length" class="none">沒有商戶</span>
+            <span v-if="!mchOf(son.agentNo).length" class="none">{{ $t('沒有商戶') }}</span>
           </div>
         </div>
-        <div v-if="!sonsOf(senior.agentNo).length" class="none" style="margin-top: 10px">還沒有我的代理</div>
+        <div v-if="!sonsOf(senior.agentNo).length" class="none" style="margin-top: 10px">{{ $t('還沒有我的代理') }}</div>
       </a-card>
 
-      <a-card v-if="orphans.length" class="family-card" size="small" title="未歸屬任何代理的商戶">
+      <a-card v-if="orphans.length" class="family-card" size="small" :title="$t('未歸屬任何代理的商戶')">
         <div class="chips">
           <a-tag v-for="m in orphans" :key="m.mchNo">{{ m.mchShortName || m.mchName }}<span class="no">{{ m.mchNo }}</span></a-tag>
         </div>
-        <div class="none" style="margin-top: 8px">這些商戶還沒有歸屬，請聯絡系統管理者處理。</div>
+        <div class="none" style="margin-top: 8px">{{ $t('這些商戶還沒有歸屬，請聯絡系統管理者處理。') }}</div>
       </a-card>
     </div>
   </div>

@@ -4,14 +4,14 @@
       <div v-if="$access('ENT_UR_USER_SEARCH')" class="table-page-search-wrapper">
         <a-form layout="inline" class="table-head-ground">
           <div class="table-layer">
-            <jeepay-text-up :placeholder="'用戶ID'" v-model:value="vdata.searchData.sysUserId" />
-            <jeepay-text-up :placeholder="'用戶姓名'" v-model:value="vdata.searchData.realname" />
+            <jeepay-text-up :placeholder="$t('用戶ID')" v-model:value="vdata.searchData.sysUserId" />
+            <jeepay-text-up :placeholder="$t('用戶姓名')" v-model:value="vdata.searchData.realname" />
             <span class="table-page-search-submitButtons">
               <a-button type="primary" @click="searchFunc" :loading="vdata.btnLoading">
-                查詢
+                {{ $t('查詢') }}
               </a-button>
               <a-button style="margin-left: 8px" @click="() => (vdata.searchData = {})">
-                重置
+                {{ $t('重置') }}
               </a-button>
             </span>
           </div>
@@ -35,7 +35,7 @@
             @click="addFunc"
             class="mg-b-30"
           >
-            新建
+            {{ $t('新建') }}
           </a-button>
         </template>
 
@@ -64,14 +64,14 @@
                 v-if="$access('ENT_UR_USER_UPD_ROLE')"
                 @click="roleDist(record.sysUserId)"
               >
-                變更角色
+                {{ $t('變更角色') }}
               </a-button>
               <a-button
                 v-if="$access('ENT_UR_USER_EDIT')"
                 type="link"
                 @click="editFunc(record.sysUserId)"
               >
-                修改
+                {{ $t('修改') }}
               </a-button>
               <a-button
                 v-if="$access('ENT_UR_USER_DELETE')"
@@ -79,7 +79,7 @@
                 type="link"
                 @click="delFunc(record.sysUserId)"
               >
-                刪除
+                {{ $t('刪除') }}
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -99,37 +99,38 @@ import { API_URL_SYS_USER_LIST, req, reqLoad } from '@/api/manage'
 import InfoAddOrEdit from './AddOrEdit.vue'
 import RoleDist from './RoleDist.vue'
 import { reactive, getCurrentInstance, ref } from 'vue'
+import { t } from '@/i18n'
 
 // 导入全局函数
 const { $infoBox, $SYS_NAME_MAP, $access } =
   getCurrentInstance()!.appContext.config.globalProperties
 
 const tableColumns = [
-  { title: '用戶ID', dataIndex: 'sysUserId', fixed: 'left' },
-  { title: '姓名', dataIndex: 'realname' },
+  { title: t('用戶ID'), dataIndex: 'sysUserId', fixed: 'left' },
+  { title: t('姓名'), dataIndex: 'realname' },
   {
-    title: '性別',
+    title: t('性別'),
     dataIndex: 'sex',
     customRender: ({ text, record, index, column }) => {
-      return record.sex === 1 ? '男' : record.sex === 2 ? '女' : '未知'
+      return record.sex === 1 ? t('男') : record.sex === 2 ? t('女') : t('未知')
     },
   },
-  { title: '頭像', key: 'avatarUrl', scopedSlots: { customRender: 'avatarSlot' } },
-  { title: '編號', dataIndex: 'userNo' },
-  { title: '手機號', dataIndex: 'telphone', customRender: ({ text }) => (String(text || '').startsWith('-') ? '' : text) },
+  { title: t('頭像'), key: 'avatarUrl', scopedSlots: { customRender: 'avatarSlot' } },
+  { title: t('編號'), dataIndex: 'userNo' },
+  { title: t('手機號'), dataIndex: 'telphone', customRender: ({ text }) => (String(text || '').startsWith('-') ? '' : text) },
   {
-    title: '上帝',
+    title: t('上帝'),
     dataIndex: 'isAdmin',
     customRender: ({ text, record, index, column }) => {
-      return record.isAdmin === 1 ? '是' : '否'
+      return record.isAdmin === 1 ? t('是') : t('否')
     },
   },
-  { title: '狀態', key: 'state', align: 'center' },
-  { title: '建立時間', dataIndex: 'createdAt' },
-  { title: '修改時間', dataIndex: 'updatedAt' },
+  { title: t('狀態'), key: 'state', align: 'center' },
+  { title: t('建立時間'), dataIndex: 'createdAt' },
+  { title: t('修改時間'), dataIndex: 'updatedAt' },
   {
     key: 'op',
-    title: '操作',
+    title: t('操作'),
     width: 200,
     fixed: 'right',
     align: 'center',
@@ -170,9 +171,9 @@ function editFunc(recordId) {
 
 function delFunc(recordId) {
   // 业务通用【删除】 函数
-  $infoBox.confirmDanger('確認刪除？', '', () => {
+  $infoBox.confirmDanger(t('確認刪除？'), '', () => {
     return req.delById(API_URL_SYS_USER_LIST, recordId).then((res) => {
-      $infoBox.message.success('刪除成功！')
+      $infoBox.message.success(t('刪除成功！'))
       infoTable.value.refTable(false)
     })
   })
@@ -184,9 +185,9 @@ function roleDist(recordId) {
 
 function updateState(recordId, state) {
   // 【更新状态】
-  const title = state === 1 ? '確認[啟用]該用戶？' : '確認[停用]該用戶？'
+  const title = state === 1 ? t('確認[啟用]該用戶？') : t('確認[停用]該用戶？')
   const content =
-    state === 1 ? '啟用後用戶可進行登入等一系列操作' : '停用後該用戶將立即退出系統並不可再次登入'
+    state === 1 ? t('啟用後用戶可進行登入等一系列操作') : t('停用後該用戶將立即退出系統並不可再次登入')
 
   return new Promise((resolve, reject) => {
     $infoBox.confirmDanger(

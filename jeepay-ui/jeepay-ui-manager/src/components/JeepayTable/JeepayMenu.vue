@@ -1,6 +1,6 @@
 <template>
   <a-dropdown :trigger="['click']" placement="bottom">
-    <a-button type="link" class="ant-dropdown-link">更多<caret-down-filled /></a-button>
+    <a-button type="link" class="ant-dropdown-link">{{ $t('更多') }}<caret-down-filled /></a-button>
     <template #overlay>
       <a-menu class="selfe-cls-menu">
         <slot />

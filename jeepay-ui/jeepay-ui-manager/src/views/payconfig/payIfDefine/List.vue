@@ -36,10 +36,10 @@
             </div>
             <!-- 卡片底部操作栏 -->
             <div class="jeepay-card-ops">
-              <a-tooltip placement="top" title="編輯">
+              <a-tooltip placement="top" :title="$t('編輯')">
                 <EditOutlined key="edit" type="edit" @click="addOrEdit(record.ifCode)" />
               </a-tooltip>
-              <a-tooltip placement="top" title="刪除">
+              <a-tooltip placement="top" :title="$t('刪除')">
                 <DeleteOutlined key="delete" type="delete" @click="del(record.ifCode)" />
               </a-tooltip>
             </div>
@@ -56,11 +56,12 @@
 import { API_URL_IFDEFINES_LIST, req } from '@/api/manage'
 import PayIfDefineAddOrEdit from './AddOrEdit.vue'
 import { reactive, getCurrentInstance, ref } from 'vue'
+import { t } from '@/i18n'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 const vdata = reactive({
   jeepayCard: {
-    name: '支付介面',
+    name: t('支付介面'),
     height: 200,
     span: { xxl: 8, xl: 4, lg: 4, md: 3, sm: 2, xs: 1 },
     addAuthority: $access('ENT_PC_IF_DEFINE_ADD'),
@@ -82,9 +83,9 @@ function addOrEdit(ifCode) {
   payIfDefineAddOrEdit.value.show(ifCode)
 }
 function del(ifCode) {
-  $infoBox.confirmDanger('確認刪除？', '', () => {
+  $infoBox.confirmDanger(t('確認刪除？'), '', () => {
     req.delById(API_URL_IFDEFINES_LIST, ifCode).then((res) => {
-      $infoBox.message.success('刪除成功！')
+      $infoBox.message.success(t('刪除成功！'))
       refCardList()
     })
   })

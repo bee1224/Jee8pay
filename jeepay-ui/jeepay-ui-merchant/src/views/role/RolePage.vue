@@ -4,14 +4,14 @@
       <div v-if="$access('ENT_UR_ROLE_SEARCH')" class="table-page-search-wrapper">
         <a-form layout="inline" class="table-head-ground">
           <div class="table-layer">
-            <jeepay-text-up :placeholder="'角色ID'" v-model:value="vdata.searchData.roleId" />
-            <jeepay-text-up :placeholder="'角色名稱'" v-model:value="vdata.searchData.roleName" />
+            <jeepay-text-up :placeholder="$t('角色ID')" v-model:value="vdata.searchData.roleId" />
+            <jeepay-text-up :placeholder="$t('角色名稱')" v-model:value="vdata.searchData.roleName" />
             <span class="table-page-search-submitButtons">
               <a-button type="primary" @click="searchFunc" :loading="vdata.btnLoading">
-                查詢
+                {{ $t('查詢') }}
               </a-button>
               <a-button style="margin-left: 8px" @click="() => (vdata.searchData = {})">
-                重置
+                {{ $t('重置') }}
               </a-button>
             </span>
           </div>
@@ -30,7 +30,7 @@
       >
         <template #opRow>
           <a-button v-if="$access('ENT_UR_ROLE_ADD')" type="primary" @click="addFunc">
-            新建
+            {{ $t('新建') }}
           </a-button>
         </template>
 
@@ -47,7 +47,7 @@
                 v-if="$access('ENT_UR_ROLE_EDIT')"
                 @click="editFunc(record.roleId)"
               >
-                修改
+                {{ $t('修改') }}
               </a-button>
               <a-button
                 type="link"
@@ -55,7 +55,7 @@
                 v-if="$access('ENT_UR_ROLE_DEL')"
                 @click="delFunc(record.roleId)"
               >
-                刪除
+                {{ $t('刪除') }}
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -71,6 +71,7 @@
 import { API_URL_ROLE_LIST, req } from '@/api/manage'
 import InfoAddOrEdit from './AddOrEdit.vue'
 import { reactive, ref, getCurrentInstance } from 'vue'
+import { t } from '@/i18n'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 // eslint-disable-next-line no-unused-vars
@@ -78,20 +79,20 @@ const tableColumns = [
   {
     width: '40%',
     key: 'roleId', // key为必填项，用于标志该列的唯一
-    title: '角色ID',
+    title: t('角色ID'),
     sorter: true,
     scopedSlots: { customRender: 'roleIdSlot' },
   },
   {
     width: '40%',
     key: 'roleName',
-    title: '角色名稱',
+    title: t('角色名稱'),
     dataIndex: 'roleName',
     sorter: true,
   },
   {
     key: 'op',
-    title: '操作',
+    title: t('操作'),
     width: '200px',
     align: 'center',
     scopedSlots: { customRender: 'opSlot' },
@@ -130,10 +131,10 @@ function editFunc(recordId) {
 
 function delFunc(recordId) {
   // 业务通用【删除】 函数
-  $infoBox.confirmDanger('確認刪除？', '', () => {
+  $infoBox.confirmDanger(t('確認刪除？'), '', () => {
     // 需要【按钮】loading 请返回 promise对象， 不需要请直接返回null
     return req.delById(API_URL_ROLE_LIST, recordId).then((res) => {
-      $infoBox.message.success('刪除成功！')
+      $infoBox.message.success(t('刪除成功！'))
       infoTable.value.refTable(false)
     })
   })

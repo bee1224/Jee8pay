@@ -3,10 +3,10 @@
     <a-card>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px">
         <a-radio-group v-model:value="vdata.view" button-style="solid">
-          <a-radio-button value="tree">家族樹</a-radio-button>
-          <a-radio-button value="list">列表</a-radio-button>
+          <a-radio-button value="tree">{{ $t('家族樹') }}</a-radio-button>
+          <a-radio-button value="list">{{ $t('列表') }}</a-radio-button>
         </a-radio-group>
-        <a-button v-if="vdata.view === 'tree' && $access('ENT_AGENT_INFO_ADD')" type="primary" @click="addFunc">新建代理</a-button>
+        <a-button v-if="vdata.view === 'tree' && $access('ENT_AGENT_INFO_ADD')" type="primary" @click="addFunc">{{ $t('新建代理') }}</a-button>
       </div>
 
       <AgentFamilyTree v-if="vdata.view === 'tree'" ref="familyTree"
@@ -16,21 +16,21 @@
       <div class="table-page-search-wrapper">
         <a-form layout="inline" class="table-head-ground">
           <div class="table-layer">
-            <jeepay-text-up :placeholder="'代理號'" v-model:value="vdata.searchData.agentNo" />
-            <jeepay-text-up :placeholder="'代理名稱'" v-model:value="vdata.searchData.agentName" />
-            <a-select v-model:value="vdata.searchData.agentLevel" placeholder="代理層級" class="table-head-layout">
-              <a-select-option value="">全部層級</a-select-option>
-              <a-select-option value="1">團長</a-select-option>
-              <a-select-option value="2">隊長</a-select-option>
+            <jeepay-text-up :placeholder="$t('代理號')" v-model:value="vdata.searchData.agentNo" />
+            <jeepay-text-up :placeholder="$t('代理名稱')" v-model:value="vdata.searchData.agentName" />
+            <a-select v-model:value="vdata.searchData.agentLevel" :placeholder="$t('代理層級')" class="table-head-layout">
+              <a-select-option value="">{{ $t('全部層級') }}</a-select-option>
+              <a-select-option value="1">{{ $t('團長') }}</a-select-option>
+              <a-select-option value="2">{{ $t('隊長') }}</a-select-option>
             </a-select>
-            <a-select v-model:value="vdata.searchData.state" placeholder="狀態" class="table-head-layout">
-              <a-select-option value="">全部</a-select-option>
-              <a-select-option value="0">停用</a-select-option>
-              <a-select-option value="1">啟用</a-select-option>
+            <a-select v-model:value="vdata.searchData.state" :placeholder="$t('狀態')" class="table-head-layout">
+              <a-select-option value="">{{ $t('全部') }}</a-select-option>
+              <a-select-option value="0">{{ $t('停用') }}</a-select-option>
+              <a-select-option value="1">{{ $t('啟用') }}</a-select-option>
             </a-select>
             <span class="table-page-search-submitButtons">
-              <a-button type="primary" @click="queryFunc" :loading="vdata.btnLoading">搜尋</a-button>
-              <a-button style="margin-left: 8px" @click="() => (vdata.searchData = {})">重置</a-button>
+              <a-button type="primary" @click="queryFunc" :loading="vdata.btnLoading">{{ $t('搜尋') }}</a-button>
+              <a-button style="margin-left: 8px" @click="() => (vdata.searchData = {})">{{ $t('重置') }}</a-button>
             </span>
           </div>
         </a-form>
@@ -47,7 +47,7 @@
       >
         <template #opRow>
           <a-button v-if="$access('ENT_AGENT_INFO_ADD')" type="primary" @click="addFunc" style="margin-bottom: 30px">
-            新建代理
+            {{ $t('新建代理') }}
           </a-button>
         </template>
 
@@ -58,23 +58,23 @@
           </template>
           <template v-if="column.key === 'agentLevel'">
             <a-tag :color="record.agentLevel === 1 ? 'purple' : 'blue'">
-              {{ record.agentLevel === 1 ? '團長' : '隊長' }}
+              {{ record.agentLevel === 1 ? $t('團長') : $t('隊長') }}
             </a-tag>
           </template>
           <template v-if="column.key === 'parentAgentNo'">
             {{ record.parentAgentNo || '—' }}
           </template>
           <template v-if="column.key === 'state'">
-            <a-badge :status="record.state === 0 ? 'error' : 'processing'" :text="record.state === 0 ? '停用' : '啟用'" />
+            <a-badge :status="record.state === 0 ? 'error' : 'processing'" :text="record.state === 0 ? $t('停用') : $t('啟用')" />
           </template>
           <template v-if="column.key === 'op'">
             <JeepayTableColumns>
-              <a-button type="link" v-if="$access('ENT_AGENT_INFO_EDIT')" @click="editFunc(record.agentNo)">修改</a-button>
-              <a-button type="link" @click="showMchList(record)">我的商戶</a-button>
-              <a-button type="link" v-if="$access('ENT_AGENT_PROFIT')" @click="showProfit(record)">分潤</a-button>
-              <a-button type="link" v-if="$access('ENT_AGENT_ACCOUNT')" @click="showAccounts(record)">登入帳號</a-button>
+              <a-button type="link" v-if="$access('ENT_AGENT_INFO_EDIT')" @click="editFunc(record.agentNo)">{{ $t('修改') }}</a-button>
+              <a-button type="link" @click="showMchList(record)">{{ $t('我的商戶') }}</a-button>
+              <a-button type="link" v-if="$access('ENT_AGENT_PROFIT')" @click="showProfit(record)">{{ $t('分潤') }}</a-button>
+              <a-button type="link" v-if="$access('ENT_AGENT_ACCOUNT')" @click="showAccounts(record)">{{ $t('登入帳號') }}</a-button>
               <a-button type="link" v-if="$access('ENT_AGENT_INFO_DEL')" style="color: red" @click="delFunc(record.agentNo)">
-                刪除
+                {{ $t('刪除') }}
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -85,34 +85,34 @@
 
     <AgentAddOrEdit ref="infoAddOrEdit" :callbackFunc="searchFunc" />
 
-    <a-modal v-model:open="vdata.mchModal.open" :title="'我的商戶：' + vdata.mchModal.agentName" :footer="null" width="640px">
+    <a-modal v-model:open="vdata.mchModal.open" :title="$t('我的商戶：') + vdata.mchModal.agentName" :footer="null" width="640px">
       <a-table :columns="mchColumns" :data-source="vdata.mchModal.records" :pagination="false" size="small" row-key="mchNo">
-        <template #emptyText>尚未綁定商戶</template>
+        <template #emptyText>{{ $t('尚未綁定商戶') }}</template>
       </a-table>
     </a-modal>
 
-    <a-modal v-model:open="vdata.profit.open" :title="'分潤：' + vdata.profit.agentName" :footer="null" width="900px" destroyOnClose>
+    <a-modal v-model:open="vdata.profit.open" :title="$t('分潤：') + vdata.profit.agentName" :footer="null" width="900px" destroyOnClose>
       <AgentProfitPanel v-if="vdata.profit.open" :baseUrl="`${API_URL_AGENT_INFO}/${vdata.profit.agentNo}/profits`" />
     </a-modal>
 
-    <a-modal v-model:open="vdata.account.open" :title="'登入帳號：' + vdata.account.agentName" :footer="null" width="720px">
+    <a-modal v-model:open="vdata.account.open" :title="$t('登入帳號：') + vdata.account.agentName" :footer="null" width="720px">
       <a-alert
         type="info"
         show-icon
         style="margin-bottom: 12px"
-        message="代理帳號登入營運平台後只會看到「代理後台」。開通後系統產生 8 碼隨機密碼並顯示一次，請複製後交給代理；停用或刪除帳號請至「系統管理 → 操作員」。"
+        :message="$t('代理帳號登入營運平台後只會看到「代理後台」。開通後系統產生 8 碼隨機密碼並顯示一次，請複製後交給代理；停用或刪除帳號請至「系統管理 → 操作員」。')"
       />
       <a-table :columns="accountColumns" :data-source="vdata.account.records" :pagination="false" size="small" row-key="sysUserId" style="margin-bottom: 16px">
         <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'state'">{{ record.state === 1 ? '啟用' : '停用' }}</template>
+          <template v-if="column.key === 'state'">{{ record.state === 1 ? $t('啟用') : $t('停用') }}</template>
         </template>
-        <template #emptyText>尚未開通</template>
+        <template #emptyText>{{ $t('尚未開通') }}</template>
       </a-table>
       <a-form layout="inline">
-        <a-form-item label="登入帳號"><a-input v-model:value="vdata.account.form.loginUsername" style="width: 140px" /></a-form-item>
-        <a-form-item label="姓名"><a-input v-model:value="vdata.account.form.realname" style="width: 120px" /></a-form-item>
-        <a-form-item label="手機（選填）"><a-input v-model:value="vdata.account.form.telphone" placeholder="09 開頭 10 碼" style="width: 140px" /></a-form-item>
-        <a-form-item><a-button type="primary" @click="createAccount">開通</a-button></a-form-item>
+        <a-form-item :label="$t('登入帳號')"><a-input v-model:value="vdata.account.form.loginUsername" style="width: 140px" /></a-form-item>
+        <a-form-item :label="$t('姓名')"><a-input v-model:value="vdata.account.form.realname" style="width: 120px" /></a-form-item>
+        <a-form-item :label="$t('手機（選填）')"><a-input v-model:value="vdata.account.form.telphone" :placeholder="$t('09 開頭 10 碼')" style="width: 140px" /></a-form-item>
+        <a-form-item><a-button type="primary" @click="createAccount">{{ $t('開通') }}</a-button></a-form-item>
       </a-form>
     </a-modal>
     <AgentCredentialModal ref="credentialModal" />
@@ -126,34 +126,35 @@ import AgentCredentialModal from './AgentCredentialModal.vue'
 import AgentProfitPanel from '@/components/AgentProfit/AgentProfitPanel.vue'
 import { reactive, ref, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
+import { t } from '@/i18n'
 
 const router = useRouter()
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
 const credentialModal = ref()
 
 const tableColumns = [
-  { key: 'agentName', title: '代理名稱', width: '200px', fixed: 'left' },
-  { key: 'agentNo', title: '代理號', dataIndex: 'agentNo' },
-  { key: 'agentLevel', title: '層級' },
-  { key: 'parentAgentNo', title: '上級代理' },
-  { key: 'contactName', title: '聯絡人', dataIndex: 'contactName' },
-  { key: 'state', title: '狀態' },
-  { key: 'createdAt', dataIndex: 'createdAt', title: '建立日期' },
-  { key: 'op', title: '操作', width: '240px', fixed: 'right', align: 'center' },
+  { key: 'agentName', title: t('代理名稱'), width: '200px', fixed: 'left' },
+  { key: 'agentNo', title: t('代理號'), dataIndex: 'agentNo' },
+  { key: 'agentLevel', title: t('層級') },
+  { key: 'parentAgentNo', title: t('上級代理') },
+  { key: 'contactName', title: t('聯絡人'), dataIndex: 'contactName' },
+  { key: 'state', title: t('狀態') },
+  { key: 'createdAt', dataIndex: 'createdAt', title: t('建立日期') },
+  { key: 'op', title: t('操作'), width: '240px', fixed: 'right', align: 'center' },
 ]
 
 const mchColumns = [
-  { title: '商戶號', dataIndex: 'mchNo' },
-  { title: '關係', dataIndex: 'relation' },
-  { title: '最後修改', dataIndex: 'updatedAt' },
+  { title: t('商戶號'), dataIndex: 'mchNo' },
+  { title: t('關係'), dataIndex: 'relation' },
+  { title: t('最後修改'), dataIndex: 'updatedAt' },
 ]
 
 const accountColumns = [
-  { title: '登入帳號', dataIndex: 'loginUsername' },
-  { title: '姓名', dataIndex: 'realname' },
-  { title: '手機', dataIndex: 'telphone' },
-  { key: 'state', title: '狀態' },
-  { title: '建立時間', dataIndex: 'createdAt' },
+  { title: t('登入帳號'), dataIndex: 'loginUsername' },
+  { title: t('姓名'), dataIndex: 'realname' },
+  { title: t('手機'), dataIndex: 'telphone' },
+  { key: 'state', title: t('狀態') },
+  { title: t('建立時間'), dataIndex: 'createdAt' },
 ]
 
 const infoTable = ref()
@@ -191,11 +192,11 @@ function editFunc(agentNo) {
   infoAddOrEdit.value.show(agentNo)
 }
 function delFunc(agentNo) {
-  $infoBox.confirmDanger('確認刪除？', '需先移除旗下隊長與商戶綁定；該代理的費率規則會一併刪除並留下紀錄', () => {
+  $infoBox.confirmDanger(t('確認刪除？'), t('需先移除旗下隊長與商戶綁定；該代理的費率規則會一併刪除並留下紀錄'), () => {
     req.delById(API_URL_AGENT_INFO, agentNo).then(() => {
       infoTable.value.refTable(false)
       if (familyTree.value) familyTree.value.load()
-      $infoBox.message.success('刪除成功')
+      $infoBox.message.success(t('刪除成功'))
     })
   })
 }
@@ -204,7 +205,7 @@ function showMchList(record) {
   vdata.mchModal.records = []
   vdata.mchModal.open = true
   req.list(API_URL_AGENT_MCH_RELA, { agentNo: record.agentNo, pageSize: -1 }).then((direct) => {
-    vdata.mchModal.records = (direct.records || []).map((r) => ({ ...r, relation: '直屬代理' }))
+    vdata.mchModal.records = (direct.records || []).map((r) => ({ ...r, relation: t('直屬代理') }))
   })
 }
 function showProfit(record) {
@@ -222,11 +223,11 @@ function showAccounts(record) {
 function createAccount() {
   const f = vdata.account.form
   if (!/^[A-Za-z0-9_一-鿿]{2,32}$/.test(f.loginUsername || '') || !f.realname) {
-    $infoBox.message.warning('請填寫2～32 碼中文、英文、數字或底線的登入帳號與姓名')
+    $infoBox.message.warning(t('請填寫2～32 碼中文、英文、數字或底線的登入帳號與姓名'))
     return
   }
   if (f.telphone && !/^09\d{8}$/.test(f.telphone)) {
-    $infoBox.message.warning('手機號格式不正確（09 開頭 10 碼），不填也可以')
+    $infoBox.message.warning(t('手機號格式不正確（09 開頭 10 碼），不填也可以'))
     return
   }
   req.add(`${API_URL_AGENT_INFO}/${vdata.account.agentNo}/accounts`, f).then((res) => {

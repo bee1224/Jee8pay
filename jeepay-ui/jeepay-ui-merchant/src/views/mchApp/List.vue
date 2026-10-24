@@ -4,24 +4,24 @@
       <div class="table-page-search-wrapper">
         <a-form layout="inline" class="table-head-ground">
           <div class="table-layer">
-            <jeepay-text-up placeholder="應用AppId" v-model:value="vdata.searchData.appId" />
-            <jeepay-text-up placeholder="應用名稱" v-model:value="vdata.searchData.appName" />
+            <jeepay-text-up :placeholder="$t('應用AppId')" v-model:value="vdata.searchData.appId" />
+            <jeepay-text-up :placeholder="$t('應用名稱')" v-model:value="vdata.searchData.appName" />
             <a-select
               v-model:value="vdata.searchData.state"
-              placeholder="狀態"
+              :placeholder="$t('狀態')"
               class="table-head-layout"
             >
-              <a-select-option value="">全部</a-select-option>
+              <a-select-option value="">{{ $t('全部') }}</a-select-option>
 
-              <a-select-option value="0">禁用</a-select-option>
-              <a-select-option value="1">啟用</a-select-option>
+              <a-select-option value="0">{{ $t('禁用') }}</a-select-option>
+              <a-select-option value="1">{{ $t('啟用') }}</a-select-option>
             </a-select>
             <span class="table-page-search-submitButtons" style="flex-grow: 0; flex-shrink: 0">
               <a-button type="primary" @click="queryFunc" :loading="vdata.btnLoading">
-                查詢
+                {{ $t('查詢') }}
               </a-button>
               <a-button style="margin-left: 8px" @click="() => (vdata.searchData = {})">
-                重置
+                {{ $t('重置') }}
               </a-button>
             </span>
           </div>
@@ -39,7 +39,7 @@
       >
         <template #opRow>
           <a-button v-if="$access('ENT_MCH_APP_ADD')" type="primary" @click="addFunc">
-            新建
+            {{ $t('新建') }}
           </a-button>
         </template>
 
@@ -51,7 +51,7 @@
           <template v-if="column.key === 'state'">
             <a-badge
               :status="record.state === 0 ? 'error' : 'processing'"
-              :text="record.state === 0 ? '禁用' : '啟用'"
+              :text="record.state === 0 ? $t('禁用') : $t('啟用')"
             />
           </template>
           <template v-if="column.key === 'op'">
@@ -62,14 +62,14 @@
                 v-if="$access('ENT_MCH_APP_EDIT')"
                 @click="editFunc(record.appId)"
               >
-                修改
+                {{ $t('修改') }}
               </a-button>
               <a-button
                 type="link"
                 v-if="$access('ENT_MCH_PAY_CONFIG_LIST') && record.state"
                 @click="showPayIfConfigList(record.appId)"
               >
-                支付配置
+                {{ $t('支付配置') }}
               </a-button>
               <a-button
                 type="link"
@@ -77,7 +77,7 @@
                 style="color: red"
                 @click="delFunc(record.appId)"
               >
-                刪除
+                {{ $t('刪除') }}
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -96,6 +96,7 @@ import { API_URL_MCH_APP, req } from '@/api/manage'
 import MchAppAddOrEdit from './AddOrEdit.vue'
 import MchPayIfConfigList from './MchPayIfConfigList.vue'
 import { reactive, ref, getCurrentInstance } from 'vue'
+import { t } from '@/i18n'
 
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
@@ -105,14 +106,14 @@ const tableColumns = [
     key: 'appId',
     fixed: 'left',
     width: '320px',
-    title: '應用AppId',
+    title: t('應用AppId'),
   },
-  { key: 'appName', title: '應用名稱', dataIndex: 'appName' },
-  { key: 'state', title: '狀態', scopedSlots: { customRender: 'stateSlot' } },
-  { key: 'createdAt', dataIndex: 'createdAt', title: '建立日期' },
+  { key: 'appName', title: t('應用名稱'), dataIndex: 'appName' },
+  { key: 'state', title: t('狀態'), scopedSlots: { customRender: 'stateSlot' } },
+  { key: 'createdAt', dataIndex: 'createdAt', title: t('建立日期') },
   {
     key: 'op',
-    title: '操作',
+    title: t('操作'),
     width: '260px',
     fixed: 'right',
     align: 'center',
@@ -149,9 +150,9 @@ function editFunc(recordId) {
   mchAppAddOrEditRef.value.show(recordId)
 }
 function delFunc(appId) {
-  $infoBox.confirmDanger('確認刪除？', '', () => {
+  $infoBox.confirmDanger(t('確認刪除？'), '', () => {
     req.delById(API_URL_MCH_APP, appId).then((res) => {
-      $infoBox.message.success('刪除成功！')
+      $infoBox.message.success(t('刪除成功！'))
       searchFunc()
     })
   })

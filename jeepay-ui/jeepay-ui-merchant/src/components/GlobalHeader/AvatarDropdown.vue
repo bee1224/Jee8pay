@@ -9,14 +9,14 @@
 
         <a-menu-item v-if="$access('ENT_C_USERINFO')" key="settings" @click="handleToSettings">
           <a-icon type="setting" />
-          帳戶設定
+          {{ $t('帳戶設定') }}
         </a-menu-item>
 
         <a-menu-divider />
 
         <a-menu-item key="logout" @click="handleLogout">
           <a-icon type="logout" />
-          登出
+          {{ $t('登出') }}
         </a-menu-item>
 
       </a-menu>
@@ -24,7 +24,8 @@
   </a-dropdown>
 </template>
 
-<script>
+<script>import { t } from '@/i18n'
+
 export default {
   name: 'AvatarDropdown',
   props: {
@@ -49,7 +50,7 @@ export default {
       this.$router.push({ name: 'ENT_C_USERINFO' })
     },
     handleLogout: function (e) {
-      this.$infoBox.confirmPrimary('確認退出?', '', () => {
+      this.$infoBox.confirmPrimary(t('確認退出?'), '', () => {
         this.$store.dispatch('Logout').then(() => {
           this.$router.push({ name: 'login' })
         })

@@ -116,6 +116,15 @@
     gap: 3px;
     font-size: 11px;
     color: var(--jp-text-3);
+    min-width: 0;
+    padding: 0 4px;
+    // 其他語言的分頁名稱可能比中文長，超出就省略
+    span {
+      max-width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
     &.active {
       color: var(--jp-primary);
       font-weight: 500;

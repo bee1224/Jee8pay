@@ -16,7 +16,7 @@
               class="analy-title"
               style="padding: 20px; box-sizing: border-box; padding-bottom: 10px"
             >
-              <span>今日交易金額</span>
+              <span>{{ $t('今日交易金額') }}</span>
               <a-tooltip>
                 <template slot="title">
                   {{ vdata.mainTips.todayAmountTip }}
@@ -27,13 +27,13 @@
             <div v-show="vdata.ispayAmount">
               <div class="pay-amount-text">
                 <span class="pay-amount">NT${{ vdata.mainChart.todayAmount }}</span>
-                <span>共{{ vdata.mainChart.todayPayCount }}筆</span>
+                <span>{{ $t('共{0}筆', [vdata.mainChart.todayPayCount]) }}</span>
               </div>
               <div id="payAmount" style="height: 60px"></div>
             </div>
             <div class="payAmountSpan" v-show="vdata.ispayAmount">
-              <span>昨日交易金額：NT${{ vdata.mainChart.yesterdayAmount }}</span>
-              <span>近七天交易金額：NT${{ vdata.mainChart.payWeek }}</span>
+              <span>{{ $t('昨日交易金額：NT${0}', [vdata.mainChart.yesterdayAmount]) }}</span>
+              <span>{{ $t('近七天交易金額：NT${0}', [vdata.mainChart.payWeek]) }}</span>
             </div>
             <empty v-show="!vdata.ispayAmount" />
           </div>
@@ -46,7 +46,7 @@
             <div class="chart-data">
               <a-skeleton active :loading="vdata.skeletonIsShow" :paragraph="{ rows: 1 }">
                 <div class="analy-title">
-                  <span>交易總金額</span>
+                  <span>{{ $t('交易總金額') }}</span>
                   <a-tooltip>
                     <template #title>
                       {{ vdata.mainTips.totalAmountTip }}
@@ -67,7 +67,7 @@
             <div class="chart-data">
               <a-skeleton active :loading="vdata.skeletonIsShow" :paragraph="{ rows: 1 }">
                 <div class="analy-title">
-                  <span>服務商數量</span>
+                  <span>{{ $t('服務商數量') }}</span>
                   <a-tooltip>
                     <template #title>
                       {{ vdata.mainTips.totalIsvTip }}
@@ -86,7 +86,7 @@
             <div class="chart-data">
               <a-skeleton active :loading="vdata.skeletonIsShow" :paragraph="{ rows: 1 }">
                 <div class="analy-title">
-                  <span>交易總筆數</span>
+                  <span>{{ $t('交易總筆數') }}</span>
                   <a-tooltip>
                     <template #title>
                       {{ vdata.mainTips.totalPayCountTip }}
@@ -96,7 +96,7 @@
                 </div>
                 <a-statistic
                   style="margin-top: 10px"
-                  :value="vdata.mainChart.totalPayCount + ' 筆'"
+                  :value="$t('{0} 筆', [vdata.mainChart.totalPayCount])"
                 />
               </a-skeleton>
             </div>
@@ -105,7 +105,7 @@
             <div class="chart-data">
               <a-skeleton active :loading="vdata.skeletonIsShow" :paragraph="{ rows: 1 }">
                 <div class="analy-title">
-                  <span>商戶數量</span>
+                  <span>{{ $t('商戶數量') }}</span>
                   <a-tooltip>
                     <template #title>
                       {{ vdata.mainTips.totalMchTip }}
@@ -131,8 +131,8 @@
                 <div class="user-greet-all">
                   <span style="">{{ vdata.mainTips.helloTitle }}</span>
                   <div>
-                    <span style="font-size: 12px" v-if="vdata.isAdmin === 1">上帝</span>
-                    <span style="font-size: 12px" v-else>操作員</span>
+                    <span style="font-size: 12px" v-if="vdata.isAdmin === 1">{{ $t('上帝') }}</span>
+                    <span style="font-size: 12px" v-else>{{ $t('操作員') }}</span>
                   </div>
                 </div>
               </div>
@@ -140,13 +140,13 @@
               <img
                 src="@/assets/svg/more.svg"
                 class="there-spot"
-                alt="更多"
+                :alt="$t('更多')"
                 slot="extra"
                 @click="showDrawer"
               />
             </div>
             <div class="quick-start">
-              <p class="quick-start-title">快速開始</p>
+              <p class="quick-start-title">{{ $t('快速開始') }}</p>
               <ul class="quick-start-ul">
                 <template v-for="menu in quickMenuList" :key="menu.entId">
                   <li>
@@ -167,7 +167,7 @@
           <div v-show="!vdata.skeletonIsShow">
             <div>
               <div class="pay-count-title">
-                <span class="chart-title">交易統計</span>
+                <span class="chart-title">{{ $t('交易統計') }}</span>
                 <div class="chart-padding">
                   <a-range-picker
                     ref="jeeRange"
@@ -182,7 +182,7 @@
                     :allowClear="false"
                   >
                     <div class="change-date-layout">
-                      {{ vdata.jeeDate ? vdata.jeeDate : '最近七天' }}
+                      {{ vdata.jeeDate ? vdata.jeeDate : $t('最近七天') }}
                       <div class="pay-icon">
                         <div v-if="vdata.lastSevenDays" class="change-date-icon">
                           <a-icon type="down" />
@@ -198,7 +198,7 @@
               <div style="position: relative">
                 <div v-show="vdata.isPayCount">
                   <div id="payCount"></div>
-                  <span style="right: 30px; position: absolute; top: 0">單位：新臺幣（元）</span>
+                  <span style="right: 30px; position: absolute; top: 0">{{ $t('單位：新臺幣（元）') }}</span>
                 </div>
                 <empty v-show="!vdata.isPayCount" />
               </div>
@@ -212,7 +212,7 @@
           <a-skeleton active :loading="vdata.skeletonIsShow" :paragraph="{ rows: 6 }" />
           <div v-show="!vdata.skeletonIsShow">
             <div class="pay-count-title">
-              <span class="chart-title">支付方式</span>
+              <span class="chart-title">{{ $t('支付方式') }}</span>
               <div class="chart-padding">
                 <a-range-picker
                   style="width: 100%"
@@ -227,7 +227,7 @@
                   :allowClear="false"
                 >
                   <div class="change-date-layout">
-                    {{ vdata.jeeDatePie ? vdata.jeeDatePie : '最近七天' }}
+                    {{ vdata.jeeDatePie ? vdata.jeeDatePie : $t('最近七天') }}
                     <div class="pay-icon">
                       <div v-if="!vdata.pieDays" class="change-date-icon">
                         <a-icon type="down" />
@@ -253,7 +253,7 @@
     <template>
       <div>
         <a-drawer
-          title="用戶資訊"
+          :title="$t('用戶資訊')"
           placement="right"
           :closable="true"
           v-model:open="vdata.visible"
@@ -262,64 +262,64 @@
           <a-row>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="所屬系統">
+                <a-descriptions-item :label="$t('所屬系統')">
                   {{
                     userStore.userInfo.sysType === 'MGR'
-                      ? '營運平台'
+                      ? $t('營運平台')
                       : userStore.userInfo.sysType === 'MCH'
-                        ? '商戶系統'
-                        : '未知'
+                        ? $t('商戶系統')
+                        : $t('未知')
                   }}
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="登入用戶名稱">
+                <a-descriptions-item :label="$t('登入用戶名稱')">
                   {{ userStore.userInfo.loginUsername }}
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="真實姓名">
+                <a-descriptions-item :label="$t('真實姓名')">
                   {{ userStore.userInfo.realname }}
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="手機號">
+                <a-descriptions-item :label="$t('手機號')">
                   {{ userStore.userInfo.telphone }}
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="性別">
+                <a-descriptions-item :label="$t('性別')">
                   {{
                     userStore.userInfo.sex == '1'
-                      ? '男'
+                      ? $t('男')
                       : userStore.userInfo.sex == '2'
-                        ? '女'
-                        : '未知'
+                        ? $t('女')
+                        : $t('未知')
                   }}
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="權限">
-                  <a-tag color="#2db7f5" v-if="userStore.userInfo.isAdmin == '1'">上帝</a-tag>
-                  <a-tag color="#87d068" v-if="userStore.userInfo.isAdmin == '0'">操作員</a-tag>
+                <a-descriptions-item :label="$t('權限')">
+                  <a-tag color="#2db7f5" v-if="userStore.userInfo.isAdmin == '1'">{{ $t('上帝') }}</a-tag>
+                  <a-tag color="#87d068" v-if="userStore.userInfo.isAdmin == '0'">{{ $t('操作員') }}</a-tag>
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
             <a-col :span="24">
               <a-descriptions>
-                <a-descriptions-item label="用戶狀態">
-                  <a-tag color="green" v-if="userStore.userInfo.state == '1'">啟用</a-tag>
-                  <a-tag color="red" v-if="userStore.userInfo.state == '0'">停用</a-tag>
+                <a-descriptions-item :label="$t('用戶狀態')">
+                  <a-tag color="green" v-if="userStore.userInfo.state == '1'">{{ $t('啟用') }}</a-tag>
+                  <a-tag color="red" v-if="userStore.userInfo.state == '0'">{{ $t('停用') }}</a-tag>
                 </a-descriptions-item>
               </a-descriptions>
             </a-col>
@@ -340,6 +340,7 @@ import { useUserStore } from '@/store/modules/user'
 import { timeFix } from '@/utils/util'
 import empty from './empty.vue' // 空数据展示的组件，首页自用
 import { reactive, getCurrentInstance, ref, onMounted, computed } from 'vue'
+import { t } from '@/i18n'
 
 const { $infoBox, $access, $hasAgentEnt } = getCurrentInstance()!.appContext.config.globalProperties
 
@@ -368,11 +369,11 @@ const vdata: any = reactive({
   isAdmin: userStore.userInfo.isAdmin, // 是否为超级管理员
   mainTips: {
     // 主页提示
-    todayAmountTip: '今日成功交易金額及筆數', // 今日交易提示文字
-    totalAmountTip: '成功交易總金額', // 交易总金额提示文字
-    totalPayCountTip: '成功交易總筆數', // 交易总笔数提示文字
-    totalIsvTip: '服務商數量', // 服务商数量提示文字
-    totalMchTip: '商戶數量', // 商户数量提示文字
+    todayAmountTip: t('今日成功交易金額及筆數'), // 今日交易提示文字
+    totalAmountTip: t('成功交易總金額'), // 交易总金额提示文字
+    totalPayCountTip: t('成功交易總筆數'), // 交易总笔数提示文字
+    totalIsvTip: t('服務商數量'), // 服务商数量提示文字
+    totalMchTip: t('商戶數量'), // 商户数量提示文字
     helloTitle: '',
   },
   mainChart: {
@@ -520,7 +521,7 @@ function iconClick(dates) {
   vdata.searchData.createdStart = dayjs().subtract(7, 'days').format('YYYY-MM-DD') // 开始时间
   vdata.searchData.createdEnd = dayjs().format('YYYY-MM-DD') // 结束时间
   payCountOk()
-  vdata.jeeDate = '最近七天'
+  vdata.jeeDate = t('最近七天')
   vdata.lastSevenDays = true
 }
 // 支付方式，日期选择器，关闭按钮点击事件
@@ -528,7 +529,7 @@ function iconPieClick() {
   vdata.searchData.createdStart = dayjs().subtract(7, 'days').format('YYYY-MM-DD') // 开始时间
   vdata.searchData.createdEnd = dayjs().format('YYYY-MM-DD') // 结束时间
   payTypeOk()
-  vdata.jeeDatePie = '最近七天'
+  vdata.jeeDatePie = t('最近七天')
   vdata.pieDays = false
 }
 // ,
@@ -659,7 +660,7 @@ onMounted(() => {
         customHtml: (container, view, datum) => {
           const { width, height } = container.getBoundingClientRect()
           const d = Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2))
-          const text = datum ? datum.typeName : '總計'
+          const text = datum ? datum.typeName : t('總計')
           return renderStatistic(d, text, { fontSize: 28 })
         },
       },
@@ -686,7 +687,7 @@ onMounted(() => {
   })
 
   // 用户名信息以及时间问候语句。由于退出登陆才让他更改成功，所以这里的数据先从 vuex中获取
-  vdata.mainTips.helloTitle = `${timeFix()}，` + userStore.userInfo.realname
+  vdata.mainTips.helloTitle = t('{0}，{1}', [timeFix(), userStore.userInfo.realname])
   init()
   // 去掉交易统计 日期选择框，原生的边框
   // jeeRange.value.$refs.picker.$el.firstChild.style.border = 'none'

@@ -8,21 +8,22 @@
       <a-menu class="ant-pro-drop-down menu" :selected-keys="[]">
         <a-menu-item v-if="$access('ENT_C_USERINFO')" key="settings" @click="handleToSettings">
           <a-icon type="setting" />
-          帳戶設定
+          {{ $t('帳戶設定') }}
         </a-menu-item>
 
         <a-menu-divider />
 
         <a-menu-item key="logout" @click="handleLogout">
           <a-icon type="logout" />
-          退出登入
+          {{ $t('退出登入') }}
         </a-menu-item>
       </a-menu>
     </template>
   </a-dropdown>
 </template>
 
-<script>
+<script>import { t } from '@/i18n'
+
 export default {
   name: 'AvatarDropdown',
   props: {},
@@ -47,7 +48,7 @@ export default {
       this.$router.push({ name: 'ENT_C_USERINFO' })
     },
     handleLogout: function (e) {
-      this.$infoBox.confirmPrimary('確認退出?', '', () => {
+      this.$infoBox.confirmPrimary(t('確認退出?'), '', () => {
         this.$store.dispatch('Logout').then(() => {
           this.$router.push({ name: 'login' })
         })

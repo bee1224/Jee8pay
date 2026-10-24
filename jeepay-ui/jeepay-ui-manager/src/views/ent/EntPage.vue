@@ -10,12 +10,12 @@
                   <a-form-item label="">
                     <a-select
                       v-model:value="vdata.querySysType"
-                      placeholder="選擇系統選單"
+                      :placeholder="$t('選擇系統選單')"
                       @change="refTable"
                       class="table-head-layout"
                     >
-                      <a-select-option value="MGR">顯示選單：營運平台</a-select-option>
-                      <a-select-option value="MCH">顯示選單：商戶系統</a-select-option>
+                      <a-select-option value="MGR">{{ $t('顯示選單：營運平台') }}</a-select-option>
+                      <a-select-option value="MCH">{{ $t('顯示選單：商戶系統') }}</a-select-option>
                     </a-select>
                   </a-form-item>
                 </a-col>
@@ -55,7 +55,7 @@
                 type="link"
                 @click="editFunc(record.entId)"
               >
-                修改
+                {{ $t('修改') }}
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -71,21 +71,22 @@
 import { getEntTree, API_URL_ENT_LIST, reqLoad } from '@/api/manage'
 import InfoAddOrEdit from './AddOrEdit.vue'
 import { reactive, getCurrentInstance, ref, onMounted } from 'vue'
+import { t } from '@/i18n'
 
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 const tableColumns = [
-  { title: '資源權限ID', dataIndex: 'entId' }, // key为必填项，用于标志该列的唯一
-  { title: '資源名稱', dataIndex: 'entName' },
-  { title: '圖示', dataIndex: 'menuIcon' },
-  { title: '路徑', dataIndex: 'menuUri' },
-  { title: '元件名稱', dataIndex: 'componentName' },
-  { title: '類型', dataIndex: 'entType' },
-  { title: '狀態', key: 'state', align: 'center' },
-  { title: '排序', dataIndex: 'entSort' },
-  { title: '修改時間', dataIndex: 'updatedAt' },
+  { title: t('資源權限ID'), dataIndex: 'entId' }, // key为必填项，用于标志该列的唯一
+  { title: t('資源名稱'), dataIndex: 'entName' },
+  { title: t('圖示'), dataIndex: 'menuIcon' },
+  { title: t('路徑'), dataIndex: 'menuUri' },
+  { title: t('元件名稱'), dataIndex: 'componentName' },
+  { title: t('類型'), dataIndex: 'entType' },
+  { title: t('狀態'), key: 'state', align: 'center' },
+  { title: t('排序'), dataIndex: 'entSort' },
+  { title: t('修改時間'), dataIndex: 'updatedAt' },
   {
-    title: '操作',
+    title: t('操作'),
     width: '100px',
     fixed: 'right',
     align: 'center',
@@ -128,7 +129,7 @@ function updateState(recordId, state) {
   return reqLoad
     .updateById(API_URL_ENT_LIST, recordId, { state: state, sysType: vdata.querySysType })
     .then((res) => {
-      $infoBox.message.success('更新成功')
+      $infoBox.message.success(t('更新成功'))
       refTable() // 刷新页面
     })
 }

@@ -1,24 +1,24 @@
 <template>
   <page-header-wrapper>
     <a-card :bordered="false">
-      <template #title>餘額流水</template>
+      <template #title>{{ $t('餘額流水') }}</template>
       <a-form layout="inline" style="margin-bottom: 12px">
         <a-form-item>
-          <a-select v-model:value="vdata.query.ownerType" style="width: 130px" placeholder="帳戶類型" allow-clear>
+          <a-select v-model:value="vdata.query.ownerType" style="width: 130px" :placeholder="$t('帳戶類型')" allow-clear>
             <a-select-option v-for="(n, k) in OWNER_TYPE_NAMES" :key="k" :value="k">{{ n }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item><a-input v-model:value="vdata.query.ownerId" placeholder="商戶號／代理號" allow-clear /></a-form-item>
+        <a-form-item><a-input v-model:value="vdata.query.ownerId" :placeholder="$t('商戶號／代理號')" allow-clear /></a-form-item>
         <a-form-item>
-          <a-select v-model:value="vdata.query.bizType" style="width: 140px" placeholder="類型" allow-clear>
+          <a-select v-model:value="vdata.query.bizType" style="width: 140px" :placeholder="$t('類型')" allow-clear>
             <a-select-option v-for="(n, k) in BIZ_TYPE_NAMES" :key="k" :value="k">{{ n }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item><a-input v-model:value="vdata.query.bizId" placeholder="訂單號／提現單號" allow-clear /></a-form-item>
+        <a-form-item><a-input v-model:value="vdata.query.bizId" :placeholder="$t('訂單號／提現單號')" allow-clear /></a-form-item>
         <a-form-item><a-range-picker v-model:value="vdata.range" value-format="YYYY-MM-DD" /></a-form-item>
-        <a-form-item><a-button type="primary" @click="search">搜尋</a-button></a-form-item>
-        <a-form-item v-if="$access('ENT_EXPORT_CENTER')"><a-button @click="exportFunc">匯出</a-button></a-form-item>
-        <a-form-item v-if="$access('ENT_EXPORT_CENTER')"><a-button @click="exportDrawer.open()">匯出紀錄</a-button></a-form-item>
+        <a-form-item><a-button type="primary" @click="search">{{ $t('搜尋') }}</a-button></a-form-item>
+        <a-form-item v-if="$access('ENT_EXPORT_CENTER')"><a-button @click="exportFunc">{{ $t('匯出') }}</a-button></a-form-item>
+        <a-form-item v-if="$access('ENT_EXPORT_CENTER')"><a-button @click="exportDrawer.open()">{{ $t('匯出紀錄') }}</a-button></a-form-item>
       </a-form>
       <a-table :columns="columns" :data-source="vdata.records" size="small" row-key="ledgerId"
         :pagination="{ current: vdata.page, pageSize: 20, total: vdata.total, onChange: (p) => { vdata.page = p; load() } }">
@@ -44,17 +44,18 @@ import { submitExport } from '@/utils/exportJob'
 import ExportJobsDrawer from '@/components/ExportJobs/ExportJobsDrawer.vue'
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
 import { BIZ_TYPE_NAMES, OWNER_TYPE_NAMES, yuan } from '@/components/WalletPanel/walletText'
+import { t } from '@/i18n'
 
 const columns = [
-  { title: '時間', dataIndex: 'createdAt', width: '170px' },
-  { key: 'owner', title: '帳戶' },
-  { key: 'bizType', title: '類型' },
-  { title: '單號', dataIndex: 'bizId' },
-  { key: 'amount', title: '可用變動（元）' },
-  { key: 'frozenChange', title: '凍結變動（元）' },
-  { key: 'balance', title: '可用餘額（元）' },
-  { title: '說明', dataIndex: 'remark' },
-  { title: '操作者', dataIndex: 'operatorName' },
+  { title: t('時間'), dataIndex: 'createdAt', width: '170px' },
+  { key: 'owner', title: t('帳戶') },
+  { key: 'bizType', title: t('類型') },
+  { title: t('單號'), dataIndex: 'bizId' },
+  { key: 'amount', title: t('可用變動（元）') },
+  { key: 'frozenChange', title: t('凍結變動（元）') },
+  { key: 'balance', title: t('可用餘額（元）') },
+  { title: t('說明'), dataIndex: 'remark' },
+  { title: t('操作者'), dataIndex: 'operatorName' },
 ]
 
 const exportDrawer = ref()
@@ -70,7 +71,7 @@ function load() {
 function exportFunc() {
   const [startDate, endDate] = vdata.range || []
   submitExport('WALLET_LEDGER', { ...vdata.query, startDate, endDate }).then(() => {
-    $infoBox.message.success('已建立匯出，完成後可在匯出紀錄下載')
+    $infoBox.message.success(t('已建立匯出，完成後可在匯出紀錄下載'))
     exportDrawer.value.open()
   })
 }

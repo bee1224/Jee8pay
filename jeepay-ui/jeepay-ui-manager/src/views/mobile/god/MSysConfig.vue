@@ -10,20 +10,21 @@
       <a-input v-else v-model:value="c.configVal" size="large" autocomplete="off" />
       <small v-if="c.configDesc" class="m-muted" style="margin: 0">{{ c.configDesc }}</small>
     </label>
-    <p v-if="!vdata.items.length" class="m-muted" style="margin: 0">{{ vdata.loaded ? '這一組沒有設定' : '載入中…' }}</p>
+    <p v-if="!vdata.items.length" class="m-muted" style="margin: 0">{{ vdata.loaded ? $t('這一組沒有設定') : $t('載入中…') }}</p>
   </div>
-  <button v-if="$access('ENT_SYS_CONFIG_EDIT') && vdata.items.length" class="m-btn" :disabled="vdata.saving" @click="save">儲存這一組</button>
+  <button v-if="$access('ENT_SYS_CONFIG_EDIT') && vdata.items.length" class="m-btn" :disabled="vdata.saving" @click="save">{{ $t('儲存這一組') }}</button>
 </template>
 
 <script setup lang="ts">
 import { reactive, getCurrentInstance } from 'vue'
 import { API_URL_SYS_CONFIG, getConfigs, req } from '@/api/manage'
+import { t } from '@/i18n'
 
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
 // 與電腦版相同的群組（t_sys_config.group_key）；容量上限在「流量監控」裡修改
 const TABS = [
-  { key: 'applicationConfig', name: '應用設定' },
-  { key: 'walletConfig', name: '錢包與提現' },
+  { key: 'applicationConfig', name: t('應用設定') },
+  { key: 'walletConfig', name: t('錢包與提現') },
 ]
 const vdata: any = reactive({ group: 'applicationConfig', items: [], loaded: false, saving: false })
 function load() {
@@ -38,11 +39,11 @@ function setGroup(g) {
   load()
 }
 function save() {
-  $infoBox.confirmPrimary('確認修改這組設定嗎？', '', () => {
+  $infoBox.confirmPrimary(t('確認修改這組設定嗎？'), '', () => {
     const form = new FormData()
     vdata.items.forEach((c) => form.append(c.configKey, c.configVal))
     vdata.saving = true
-    req.updateById(API_URL_SYS_CONFIG, vdata.group, form).then(() => $infoBox.message.success('已儲存')).finally(() => (vdata.saving = false))
+    req.updateById(API_URL_SYS_CONFIG, vdata.group, form).then(() => $infoBox.message.success(t('已儲存'))).finally(() => (vdata.saving = false))
   })
 }
 load()

@@ -1,7 +1,7 @@
 <template>
   <a-modal
     v-model:open="vdata.isShow"
-    :title="vdata.isAdd ? '新增選單' : '修改選單'"
+    :title="vdata.isAdd ? $t('新增選單') : $t('修改選單')"
     @ok="handleOkFunc"
     :confirmLoading="vdata.confirmLoading"
   >
@@ -12,32 +12,32 @@
       :wrapper-col="{ span: 15 }"
       :rules="vdata.rules"
     >
-      <a-form-item label="資源名稱：" name="entName">
+      <a-form-item :label="$t('資源名稱：')" name="entName">
         <a-input v-model:value="vdata.saveObject.entName" />
       </a-form-item>
 
-      <a-form-item label="路徑地址：" name="menuUri">
+      <a-form-item :label="$t('路徑地址：')" name="menuUri">
         <a-input v-model:value="vdata.saveObject.menuUri" />
       </a-form-item>
 
-      <a-form-item label="排序（正序顯示）：" name="entSort">
+      <a-form-item :label="$t('排序（正序顯示）：')" name="entSort">
         <a-input v-model:value="vdata.saveObject.entSort" />
       </a-form-item>
 
-      <a-form-item label="快速開始：" name="quickJump">
+      <a-form-item :label="$t('快速開始：')" name="quickJump">
         <a-radio-group
           v-model:value="vdata.saveObject.quickJump"
           :disabled="vdata.saveObject.menuType == 'PB' || !vdata.saveObject.menuUri"
         >
-          <a-radio :value="1">是</a-radio>
-          <a-radio :value="0">否</a-radio>
+          <a-radio :value="1">{{ $t('是') }}</a-radio>
+          <a-radio :value="0">{{ $t('否') }}</a-radio>
         </a-radio-group>
       </a-form-item>
 
-      <a-form-item label="狀態：" name="state">
+      <a-form-item :label="$t('狀態：')" name="state">
         <a-radio-group v-model:value="vdata.saveObject.state">
-          <a-radio :value="1">啟用</a-radio>
-          <a-radio :value="0">停用</a-radio>
+          <a-radio :value="1">{{ $t('啟用') }}</a-radio>
+          <a-radio :value="0">{{ $t('停用') }}</a-radio>
         </a-radio-group>
       </a-form-item>
     </a-form>
@@ -47,6 +47,7 @@
 <script setup lang="ts">
 import { API_URL_ENT_LIST, req, getEntBySysType } from '@/api/manage'
 import { reactive, ref, getCurrentInstance } from 'vue'
+import { t } from '@/i18n'
 
 const { $infoBox, $access, $hasAgentEnt } = getCurrentInstance()!.appContext.config.globalProperties
 
@@ -62,7 +63,7 @@ const vdata: any = reactive({
   recordId: null, // 更新对象ID
   sysType: 'MGR', // 菜单类型
   rules: {
-    entName: [{ required: true, message: '請輸入資源名稱', trigger: 'blur' }],
+    entName: [{ required: true, message: t('請輸入資源名稱'), trigger: 'blur' }],
   },
 })
 
@@ -105,7 +106,7 @@ function handleOkFunc() {
         req
           .updateById(API_URL_ENT_LIST, vdata.recordId, vdata.saveObject)
           .then((res) => {
-            $infoBox.message.success('修改成功')
+            $infoBox.message.success(t('修改成功'))
             vdata.isShow = false
             props.callbackFunc() // 刷新列表
           })

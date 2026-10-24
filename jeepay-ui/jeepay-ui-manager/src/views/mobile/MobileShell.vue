@@ -3,7 +3,7 @@
   <div class="m-app">
     <header class="m-topbar">
       <div>
-        <button v-if="showBack" class="m-back" aria-label="返回主選單" @click="emit('back')"><LeftOutlined /></button>
+        <button v-if="showBack" class="m-back" :aria-label="$t('返回主選單')" @click="emit('back')"><LeftOutlined /></button>
       </div>
       <h2>{{ title }}</h2>
       <div />
@@ -11,7 +11,7 @@
     <main ref="contentRef" class="m-content">
       <slot />
     </main>
-    <nav class="m-tabbar" aria-label="主要分頁">
+    <nav class="m-tabbar" :aria-label="$t('主要分頁')">
       <button v-for="t in tabs" :key="t.key" :class="{ active: t.key === activeTab }" @click="emit('tab', t)">
         <component :is="t.icon" style="font-size: 21px" />
         <span>{{ t.label }}</span>

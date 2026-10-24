@@ -20,7 +20,7 @@
             class="jeepay-card-add-icon-hover"
           />
         </div>
-        <div class="jeepay-card-add-text">新建{{ name }}</div>
+        <div class="jeepay-card-add-text">{{ $t('新建{0}', [name]) }}</div>
       </div>
     </a-col>
     <!-- 数据 -->

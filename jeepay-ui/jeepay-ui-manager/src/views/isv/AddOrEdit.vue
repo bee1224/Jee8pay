@@ -2,7 +2,7 @@
   <a-drawer
     :maskClosable="false"
     v-model:open="vdata.open"
-    :title="vdata.isAdd ? '新增服務商' : '修改服務商'"
+    :title="vdata.isAdd ? $t('新增服務商') : $t('修改服務商')"
     @close="onClose"
     :body-style="{ paddingBottom: '80px' }"
     width="40%"
@@ -10,27 +10,27 @@
     <a-form ref="infoFormModel" :model="vdata.saveObject" layout="vertical" :rules="vdata.rules">
       <a-row justify="space-between" type="flex">
         <a-col :span="10">
-          <a-form-item label="服務商名稱" name="isvName">
-            <a-input placeholder="請輸入服務商名稱" v-model:value="vdata.saveObject.isvName" />
+          <a-form-item :label="$t('服務商名稱')" name="isvName">
+            <a-input :placeholder="$t('請輸入服務商名稱')" v-model:value="vdata.saveObject.isvName" />
           </a-form-item>
         </a-col>
         <a-col :span="10">
-          <a-form-item label="服務商簡稱" name="isvShortName">
-            <a-input placeholder="請輸入服務商簡稱" v-model:value="vdata.saveObject.isvShortName" />
+          <a-form-item :label="$t('服務商簡稱')" name="isvShortName">
+            <a-input :placeholder="$t('請輸入服務商簡稱')" v-model:value="vdata.saveObject.isvShortName" />
           </a-form-item>
         </a-col>
       </a-row>
 
       <a-row justify="space-between" type="flex">
         <a-col :span="10">
-          <a-form-item label="聯絡人姓名" name="contactName">
-            <a-input placeholder="請輸入聯絡人姓名" v-model:value="vdata.saveObject.contactName" />
+          <a-form-item :label="$t('聯絡人姓名')" name="contactName">
+            <a-input :placeholder="$t('請輸入聯絡人姓名')" v-model:value="vdata.saveObject.contactName" />
           </a-form-item>
         </a-col>
         <a-col :span="10">
-          <a-form-item label="聯絡人手機號" name="contactTel">
+          <a-form-item :label="$t('聯絡人手機號')" name="contactTel">
             <a-input
-              placeholder="請輸入聯絡人手機號"
+              :placeholder="$t('請輸入聯絡人手機號')"
               v-model:value="vdata.saveObject.contactTel"
             ></a-input>
           </a-form-item>
@@ -38,39 +38,39 @@
       </a-row>
       <a-row justify="space-between" type="flex">
         <a-col :span="10">
-          <a-form-item label="聯絡人郵箱" name="contactEmail">
+          <a-form-item :label="$t('聯絡人郵箱')" name="contactEmail">
             <a-input
-              placeholder="請輸入聯絡人郵箱"
+              :placeholder="$t('請輸入聯絡人郵箱')"
               v-model:value="vdata.saveObject.contactEmail"
             ></a-input>
           </a-form-item>
         </a-col>
         <a-col :span="10">
-          <a-form-item label="狀態" name="state">
+          <a-form-item :label="$t('狀態')" name="state">
             <a-radio-group v-model:value="vdata.saveObject.state" :defaultValue="1">
-              <a-radio :value="1">啟用</a-radio>
-              <a-radio :value="0">停用</a-radio>
+              <a-radio :value="1">{{ $t('啟用') }}</a-radio>
+              <a-radio :value="0">{{ $t('停用') }}</a-radio>
             </a-radio-group>
           </a-form-item>
         </a-col>
       </a-row>
       <a-row justify="space-between" type="flex">
         <a-col :span="24">
-          <a-form-item label="備註" name="remark">
-            <a-textarea v-model:value="vdata.saveObject.remark" placeholder="請輸入備註" />
+          <a-form-item :label="$t('備註')" name="remark">
+            <a-textarea v-model:value="vdata.saveObject.remark" :placeholder="$t('請輸入備註')" />
           </a-form-item>
         </a-col>
       </a-row>
     </a-form>
     <div class="drawer-btn-center">
-      <a-button @click="onClose" style="margin-right: 8px">取消</a-button>
+      <a-button @click="onClose" style="margin-right: 8px">{{ $t('取消') }}</a-button>
       <a-button
         type="primary"
         style="margin-right: 8px"
         @click="handleOkFunc"
         :loading="vdata.btnLoading"
       >
-        儲存
+        {{ $t('儲存') }}
       </a-button>
     </div>
   </a-drawer>
@@ -79,6 +79,7 @@
 <script setup lang="ts">
 import { API_URL_ISV_LIST, req } from '@/api/manage'
 import { reactive, getCurrentInstance, ref } from 'vue'
+import { t } from '@/i18n'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 const props = defineProps({
@@ -95,18 +96,18 @@ const vdata: any = reactive({
   recordId: null, // 更新对象ID
   open: false, // 是否显示弹层/抽屉
   rules: {
-    isvName: [{ required: true, message: '請輸入服務商名稱', trigger: 'blur' }],
-    isvShortName: [{ required: true, message: '請輸入服務商簡稱', trigger: 'blur' }],
+    isvName: [{ required: true, message: t('請輸入服務商名稱'), trigger: 'blur' }],
+    isvShortName: [{ required: true, message: t('請輸入服務商簡稱'), trigger: 'blur' }],
     contactEmail: [
       {
         required: false,
         pattern: /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/,
-        message: '請輸入正確的郵箱地址',
+        message: t('請輸入正確的郵箱地址'),
         trigger: 'blur',
       },
     ],
     contactTel: [
-      { required: false, pattern: /^09\d{8}$/, message: '請輸入正確的手機號（09 開頭 10 碼）', trigger: 'blur' },
+      { required: false, pattern: /^09\d{8}$/, message: t('請輸入正確的手機號（09 開頭 10 碼）'), trigger: 'blur' },
     ],
   },
 })
@@ -142,7 +143,7 @@ function handleOkFunc() {
         req
           .add(API_URL_ISV_LIST, vdata.saveObject)
           .then((res) => {
-            $infoBox.message.success('新增成功')
+            $infoBox.message.success(t('新增成功'))
             vdata.open = false
             props.callbackFunc() // 刷新列表
             vdata.btnLoading = false
@@ -154,7 +155,7 @@ function handleOkFunc() {
         req
           .updateById(API_URL_ISV_LIST, vdata.recordId, vdata.saveObject)
           .then((res) => {
-            $infoBox.message.success('修改成功')
+            $infoBox.message.success(t('修改成功'))
             vdata.open = false
             props.callbackFunc() // 刷新列表
             vdata.btnLoading = false

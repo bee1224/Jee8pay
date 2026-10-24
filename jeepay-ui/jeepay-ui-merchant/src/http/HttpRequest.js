@@ -12,6 +12,7 @@ import storage from '@/utils/jeepayStorageWrapper'
 import appConfig from '@/config/appConfig'
 import { useUserStore } from '@/store/modules/user'
 import $infoBox from '@/utils/infoBox'
+import { t, translateListLabels } from '@/i18n'
 class HttpRequest {
   constructor(baseUrl = process.env.VITE_API_BASE_URL) {
     this.baseUrl = baseUrl
@@ -59,13 +60,15 @@ class HttpRequest {
 
         if (resData.code !== 0) {
           // 相应结果不为0， 说明异常
+          // 後端訊息有翻譯就換成目前語言（頁面自己顯示 err.msg 時也一樣）
+          if (typeof resData.msg === 'string') resData.msg = t(resData.msg)
           if (showErrorMsg) {
             $infoBox.message.error(resData.msg) // 显示异常信息
           }
 
           return Promise.reject(resData)
         } else {
-          return resData.data
+          return translateListLabels(resData.data)
         }
       },
       (error) => {
@@ -87,9 +90,9 @@ class HttpRequest {
 
           // 同一帳號只能在一部裝置登入：被其他裝置的登入擠掉時，提示原因
           const kicked = error.response.headers && error.response.headers['x-jeepay-session'] === 'kicked'
-          $infoBox.confirmDanger(kicked ? '你的帳號已在其他裝置登入' : '會話逾時，請重新登入', kicked ? '這台裝置已被登出；如果不是你本人操作，請立即修改密碼。' : '3s後將自動登出...', () => {}, {
-            okText: '重新登入',
-            cancelText: '關閉對話',
+          $infoBox.confirmDanger(kicked ? t('你的帳號已在其他裝置登入') : t('會話逾時，請重新登入'), kicked ? t('這台裝置已被登出；如果不是你本人操作，請立即修改密碼。') : t('3s後將自動登出...'), () => {}, {
+            okText: t('重新登入'),
+            cancelText: t('關閉對話'),
           })
         } else {
           if (showErrorMsg) {

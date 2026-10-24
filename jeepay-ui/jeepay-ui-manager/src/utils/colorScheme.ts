@@ -4,6 +4,7 @@
  */
 import { computed, ref, watch } from 'vue'
 import { ConfigProvider, theme } from 'ant-design-vue'
+import { t } from '@/i18n'
 
 export type ThemePref = 'auto' | 'light' | 'dark'
 const KEY = 'jeepay-theme'
@@ -30,12 +31,13 @@ export function setThemePref(p: ThemePref) {
     // 無痕模式等無法儲存時，只在這次使用期間生效
   }
 }
-export const THEME_LABELS: Record<ThemePref, string> = { auto: '跟隨裝置', light: '亮色', dark: '深色' }
+export const THEME_LABELS: Record<ThemePref, string> = { auto: t('跟隨裝置'), light: t('亮色'), dark: t('深色') }
 
 export const isDark = computed(() => (themePref.value === 'auto' ? systemDark.value : themePref.value === 'dark'))
 
 // Ant Design 元件沿用同一套字形與藍色主色（與 global.less 的 --jp-* 一致）
-const FONT_FAMILY = "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+// 字形清單依介面語言切換，定義在 global.less 的 --jp-font
+const FONT_FAMILY = 'var(--jp-font)'
 export const antTheme = () => ({
   algorithm: isDark.value ? theme.darkAlgorithm : theme.defaultAlgorithm,
   token: { colorPrimary: '#2563eb', fontFamily: FONT_FAMILY, borderRadius: 8 },

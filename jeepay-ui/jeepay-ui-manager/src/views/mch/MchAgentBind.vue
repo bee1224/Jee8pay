@@ -1,29 +1,30 @@
 <template>
-  <a-modal v-model:open="vdata.open" :title="'代理綁定：' + vdata.mchNo" :confirm-loading="vdata.btnLoading" @ok="saveFunc" ok-text="儲存">
+  <a-modal v-model:open="vdata.open" :title="$t('代理綁定：') + vdata.mchNo" :confirm-loading="vdata.btnLoading" @ok="saveFunc" :ok-text="$t('儲存')">
     <a-alert
       type="info"
       show-icon
       style="margin-bottom: 16px"
-      message="直屬代理決定這個商戶的團長費與隊長費歸誰。"
+      :message="$t('直屬代理決定這個商戶的團長費與隊長費歸誰。')"
     />
     <a-form layout="vertical">
-      <a-form-item label="直屬代理（必填）">
+      <a-form-item :label="$t('直屬代理（必填）')">
         <a-select
           v-model:value="vdata.agentNo"
-          placeholder="請選擇直屬代理"
+          :placeholder="$t('請選擇直屬代理')"
           show-search
           option-filter-prop="label"
           :options="vdata.agentOptions"
         />
       </a-form-item>
     </a-form>
-    <a-button v-if="vdata.bound" danger @click="unbindFunc">解除綁定</a-button>
+    <a-button v-if="vdata.bound" danger @click="unbindFunc">{{ $t('解除綁定') }}</a-button>
   </a-modal>
 </template>
 
 <script setup lang="ts">
 import { API_URL_AGENT_INFO, API_URL_AGENT_MCH_RELA, req } from '@/api/manage'
 import { reactive, getCurrentInstance } from 'vue'
+import { t } from '@/i18n'
 const { $infoBox } = getCurrentInstance()!.appContext.config.globalProperties
 
 const props = defineProps({
@@ -40,7 +41,7 @@ const vdata: any = reactive({
 })
 
 function label(a) {
-  return `${a.agentLevel === 1 ? '［高級］' : '［一般］'}${a.agentName}（${a.agentNo}）`
+  return `${a.agentLevel === 1 ? t('［高級］') : t('［一般］')}${a.agentName}（${a.agentNo}）`
 }
 
 function show(mchNo) {
@@ -62,14 +63,14 @@ function show(mchNo) {
 
 function saveFunc() {
   if (!vdata.agentNo) {
-    $infoBox.message.warning('請選擇直屬代理')
+    $infoBox.message.warning(t('請選擇直屬代理'))
     return
   }
   vdata.btnLoading = true
   req
     .updateById(API_URL_AGENT_MCH_RELA, vdata.mchNo, { agentNo: vdata.agentNo })
     .then(() => {
-      $infoBox.message.success('綁定成功')
+      $infoBox.message.success(t('綁定成功'))
       vdata.open = false
       props.callbackFunc()
     })
@@ -79,9 +80,9 @@ function saveFunc() {
 }
 
 function unbindFunc() {
-  $infoBox.confirmDanger('確認解除綁定？', '解除後該商戶不再計算團長費與隊長費', () => {
+  $infoBox.confirmDanger(t('確認解除綁定？'), t('解除後該商戶不再計算團長費與隊長費'), () => {
     req.delById(API_URL_AGENT_MCH_RELA, vdata.mchNo).then(() => {
-      $infoBox.message.success('已解除綁定')
+      $infoBox.message.success(t('已解除綁定'))
       vdata.open = false
       props.callbackFunc()
     })

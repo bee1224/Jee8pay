@@ -2,7 +2,7 @@
   <!-- 手機版（768 以下）：頂部標題列＋底部分頁列；按「主選單」（Home）一律回到主選單畫面，沒有重新整理按鈕 -->
   <MobileShell
     v-if="isMobile"
-    :title="mobile.launcher ? '主選單' : mobileTitle"
+    :title="mobile.launcher ? $t('主選單') : mobileTitle"
     :show-back="!mobile.launcher"
     :tabs="mobileTabs"
     :active-tab="mobileActiveTab"
@@ -90,17 +90,18 @@
         </div>
 
         <!-- 个人信息部分 -->
-        <div style="display: flex; align-items: center">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <LanguageButton />
           <a-dropdown>
             <template #overlay>
               <a-menu>
                 <a-menu-item @click="userInfo">
                   <setting-outlined style="margin-right: 10px" />
-                  <span style="cursor: hand">個人資訊</span>
+                  <span style="cursor: hand">{{ $t('個人資訊') }}</span>
                 </a-menu-item>
                 <a-menu-item @click="logout">
                   <LogoutOutlined style="margin-right: 10px" />
-                  <span style="cursor: hand">退出登入</span>
+                  <span style="cursor: hand">{{ $t('退出登入') }}</span>
                 </a-menu-item>
               </a-menu>
             </template>
@@ -127,6 +128,8 @@ import MobileLauncher from '@/views/mobile/MobileLauncher.vue'
 import MobileMe from '@/views/mobile/MobileMe.vue'
 import { HomeOutlined, ProfileOutlined, WalletOutlined, UserOutlined } from '@ant-design/icons-vue'
 import { defineAsyncComponent } from 'vue'
+import { t } from '@/i18n'
+import LanguageButton from '@/components/LanguagePicker/LanguageButton.vue'
 
 const { $infoBox, $access, $hasAgentEnt } = getCurrentInstance()!.appContext.config.globalProperties
 
@@ -169,8 +172,8 @@ function userInfo() {
 // 登出函数
 function logout() {
   $infoBox.confirmDanger(
-    '是否退出登入？',
-    `你好${userStore.userInfo['realname']}確認退出登入嗎？`,
+    t('是否退出登入？'),
+    t('你好{0}確認退出登入嗎？', [userStore.userInfo['realname']]),
     () => {
       userStore.logout()
     }
@@ -189,11 +192,11 @@ const matchHandle = (currentMatch) => {
 // 代理後台的選單分類（比照競品側邊欄）；分類只影響選單顯示，頁面路由不變。
 // 沒列到的選單排在最後；一個分類只有一項時直接放在第一層，不另開資料夾。
 const AGENT_MENU_GROUPS = [
-  { key: 'users', title: '用戶管理', icon: 'team-outlined', items: ['ENT_AGENT_PORTAL_MCH', 'ENT_AGENT_PORTAL_SUB', 'ENT_AGENT_PORTAL_STAFF'] },
-  { key: 'orders', title: '訂單與報表', icon: 'account-book-outlined', items: ['ENT_AGENT_PORTAL_ORDER', 'ENT_AGENT_PORTAL_REPORT'] },
-  { key: 'money', title: '帳務管理', icon: 'wallet-outlined', items: ['ENT_AGENT_PORTAL_HOME', 'ENT_AGENT_PORTAL_PROFIT', 'ENT_AGENT_PORTAL_BRANCH_WALLET', 'ENT_AGENT_PORTAL_WITHDRAW_AUDIT'] },
-  { key: 'channels', title: '渠道設定', icon: 'branches-outlined', items: ['ENT_AGENT_PORTAL_CHANNEL', 'ENT_AGENT_PORTAL_FEE', 'ENT_AGENT_PORTAL_ROUTE'] },
-  { key: 'system', title: '系統設定', icon: 'setting-outlined', items: ['ENT_AGENT_PORTAL_BLACKLIST', 'ENT_AGENT_PORTAL_OPLOG'] },
+  { key: 'users', title: t('用戶管理'), icon: 'team-outlined', items: ['ENT_AGENT_PORTAL_MCH', 'ENT_AGENT_PORTAL_SUB', 'ENT_AGENT_PORTAL_STAFF'] },
+  { key: 'orders', title: t('訂單與報表'), icon: 'account-book-outlined', items: ['ENT_AGENT_PORTAL_ORDER', 'ENT_AGENT_PORTAL_REPORT'] },
+  { key: 'money', title: t('帳務管理'), icon: 'wallet-outlined', items: ['ENT_AGENT_PORTAL_HOME', 'ENT_AGENT_PORTAL_PROFIT', 'ENT_AGENT_PORTAL_BRANCH_WALLET', 'ENT_AGENT_PORTAL_WITHDRAW_AUDIT'] },
+  { key: 'channels', title: t('渠道設定'), icon: 'branches-outlined', items: ['ENT_AGENT_PORTAL_CHANNEL', 'ENT_AGENT_PORTAL_FEE', 'ENT_AGENT_PORTAL_ROUTE'] },
+  { key: 'system', title: t('系統設定'), icon: 'setting-outlined', items: ['ENT_AGENT_PORTAL_BLACKLIST', 'ENT_AGENT_PORTAL_OPLOG'] },
 ]
 function groupAgentMenus(items) {
   const used = new Set(AGENT_MENU_GROUPS.flatMap((g) => g.items))
@@ -299,7 +302,7 @@ const MOBILE_VIEWS = {
 const mobile = reactive({ launcher: true })
 const mobileView = computed(() => MOBILE_VIEWS[route.name as string] || null)
 const mobileTitle = computed(() =>
-  route.name === 'ENT_C_USERINFO' ? '我的' : route.query.mode === 'query' ? '查詢訂單' : (route.meta.title as string) || ''
+  route.name === 'ENT_C_USERINFO' ? t('我的') : route.query.mode === 'query' ? t('查詢訂單') : (route.meta.title as string) || ''
 )
 
 function findMenu(names: string[]) {
@@ -317,12 +320,12 @@ function findMenu(names: string[]) {
 const ORDER_NAMES = ['ENT_AGENT_PORTAL_ORDER', 'ENT_PAY_ORDER']
 const WALLET_NAMES = ['ENT_AGENT_PORTAL_HOME', 'ENT_WALLET_ACCOUNT']
 const mobileTabs = computed(() => {
-  const tabs: any[] = [{ key: 'home', label: '主選單', icon: HomeOutlined }]
+  const tabs: any[] = [{ key: 'home', label: t('主選單'), icon: HomeOutlined }]
   const order = findMenu(ORDER_NAMES)
-  if (order) tabs.push({ key: 'order', label: '訂單', icon: ProfileOutlined, path: order.path })
+  if (order) tabs.push({ key: 'order', label: t('訂單'), icon: ProfileOutlined, path: order.path })
   const wallet = findMenu(WALLET_NAMES)
-  if (wallet) tabs.push({ key: 'wallet', label: '錢包', icon: WalletOutlined, path: wallet.path })
-  tabs.push({ key: 'me', label: '我的', icon: UserOutlined, path: '/current/userinfo' })
+  if (wallet) tabs.push({ key: 'wallet', label: t('錢包'), icon: WalletOutlined, path: wallet.path })
+  tabs.push({ key: 'me', label: t('我的'), icon: UserOutlined, path: '/current/userinfo' })
   return tabs
 })
 const mobileActiveTab = computed(() => {

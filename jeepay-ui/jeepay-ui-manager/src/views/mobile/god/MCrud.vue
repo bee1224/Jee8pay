@@ -28,9 +28,9 @@
         <span v-if="cfg.row.pill && cfg.row.pill(r)" :class="['m-pill', cfg.row.pill(r)[1]]">{{ cfg.row.pill(r)[0] }}</span>
       </div>
     </button>
-    <div v-if="!shown.length" class="m-empty">{{ vdata.loading ? '載入中…' : cfg.empty || '沒有資料' }}</div>
+    <div v-if="!shown.length" class="m-empty">{{ vdata.loading ? $t('載入中…') : cfg.empty || $t('沒有資料') }}</div>
   </div>
-  <button v-if="vdata.rows.length < vdata.total" class="m-btn ghost" :disabled="vdata.loading" @click="more">載入更多</button>
+  <button v-if="vdata.rows.length < vdata.total" class="m-btn ghost" :disabled="vdata.loading" @click="more">{{ $t('載入更多') }}</button>
 
   <!-- 明細 -->
   <MSheet :open="!!vdata.cur" :title="vdata.cur ? cfg.row.title(vdata.cur) : ''" @update:open="(v) => !v && (vdata.cur = null)">
@@ -62,8 +62,8 @@
     </a-form>
     <p v-if="vdata.form.note" class="m-muted">{{ vdata.form.note }}</p>
     <div class="m-actions">
-      <button class="m-btn ghost" @click="vdata.form.open = false">取消</button>
-      <button :class="['m-btn', vdata.form.cls]" :disabled="vdata.form.saving" @click="submitForm">{{ vdata.form.submitText || '儲存' }}</button>
+      <button class="m-btn ghost" @click="vdata.form.open = false">{{ $t('取消') }}</button>
+      <button :class="['m-btn', vdata.form.cls]" :disabled="vdata.form.saving" @click="submitForm">{{ vdata.form.submitText || $t('儲存') }}</button>
     </div>
   </MSheet>
 
@@ -77,16 +77,17 @@ import { SearchOutlined } from '@ant-design/icons-vue'
 import { req } from '@/api/manage'
 import { todayStr } from '../mobileKit'
 import MSheet from '../MSheet.vue'
+import { t } from '@/i18n'
 
 const props = defineProps({ cfg: { type: Object, required: true } })
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 const cfg: any = props.cfg
 const editorRefs: any = {}
 const DATES = [
-  { key: 'today', label: '今天' },
-  { key: '7d', label: '近 7 天' },
-  { key: 'month', label: '本月' },
-  { key: 'all', label: '全部' },
+  { key: 'today', label: t('今天') },
+  { key: '7d', label: t('近 7 天') },
+  { key: 'month', label: t('本月') },
+  { key: 'all', label: t('全部') },
 ]
 const vdata: any = reactive({ q: '', filter: 0, date: cfg.dates ? cfg.defaultDate || 'today' : 'all', rows: [], total: 0, page: 1, loading: false, loaded: false, cur: null, extra: {}, form: { open: false, fields: [], values: {} } })
 
@@ -116,7 +117,7 @@ function range(): [string, string] | null {
   }
   return null
 }
-const rangeLabel = computed(() => ({ today: '今天', '7d': '近 7 天', month: '本月', all: '全部' })[vdata.date] || '')
+const rangeLabel = computed(() => ({ today: t('今天'), '7d': t('近 7 天'), month: t('本月'), all: t('全部') })[vdata.date] || '')
 
 function params() {
   const p: any = { ...(cfg.params || {}), ...((cfg.filters && cfg.filters[vdata.filter].params) || {}) }
@@ -186,12 +187,12 @@ function openForm(a, row) {
 function submitForm() {
   const f = vdata.form
   const miss = f.fields.find((x) => x.required && (f.values[x.key] === undefined || f.values[x.key] === null || f.values[x.key] === '' || (Array.isArray(f.values[x.key]) && !f.values[x.key].length)))
-  if (miss) return $infoBox.message.warning('請填寫' + miss.label)
+  if (miss) return $infoBox.message.warning(t('請填寫') + miss.label)
   f.saving = true
   Promise.resolve(f.submit(f.values, f.row, ctx))
     .then((msg) => {
       if (msg === false) return
-      $infoBox.message.success(typeof msg === 'string' ? msg : '已儲存')
+      $infoBox.message.success(typeof msg === 'string' ? msg : t('已儲存'))
       f.open = false
       reload()
     })

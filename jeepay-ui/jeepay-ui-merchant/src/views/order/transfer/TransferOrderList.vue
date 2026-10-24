@@ -15,27 +15,27 @@
               <a-icon slot="suffixIcon" type="sync" />
             </a-range-picker>
             <jeepay-text-up
-              :placeholder="'轉帳/商戶/渠道訂單號'"
+              :placeholder="$t('轉帳/商戶/渠道訂單號')"
               v-model:value="vdata.searchData.unionOrderId"
             />
             <!--            <jeepay-text-up :placeholder="'转账订单号'" :msg="searchData.transferId" v-model:value="searchData.transferId" />-->
             <!--            <jeepay-text-up :placeholder="'商户订单号'" :msg="searchData.mchOrderNo" v-model:value="searchData.mchOrderNo" />-->
             <!--            <jeepay-text-up :placeholder="'渠道支付订单号'" :msg="searchData.channelOrderNo" v-model:value="searchData.channelOrderNo" />-->
-            <jeepay-text-up :placeholder="'應用AppId'" v-model:value="vdata.searchData.appId" />
+            <jeepay-text-up :placeholder="$t('應用AppId')" v-model:value="vdata.searchData.appId" />
             <a-select
               v-model:value="vdata.searchData.state"
-              placeholder="轉帳狀態"
+              :placeholder="$t('轉帳狀態')"
               class="table-head-layout"
             >
-              <a-select-option value="">全部</a-select-option>
-              <a-select-option value="0">訂單生成</a-select-option>
-              <a-select-option value="1">轉帳中</a-select-option>
-              <a-select-option value="2">轉帳成功</a-select-option>
-              <a-select-option value="3">轉帳失敗</a-select-option>
+              <a-select-option value="">{{ $t('全部') }}</a-select-option>
+              <a-select-option value="0">{{ $t('訂單生成') }}</a-select-option>
+              <a-select-option value="1">{{ $t('轉帳中') }}</a-select-option>
+              <a-select-option value="2">{{ $t('轉帳成功') }}</a-select-option>
+              <a-select-option value="3">{{ $t('轉帳失敗') }}</a-select-option>
             </a-select>
             <span class="table-page-search-submitButtons">
               <a-button type="primary" @click="queryFunc" :loading="vdata.btnLoading">
-                搜尋
+                {{ $t('搜尋') }}
               </a-button>
               <a-button
                 style="margin-left: 8px"
@@ -46,7 +46,7 @@
                   }
                 "
               >
-                重置
+                {{ $t('重置') }}
               </a-button>
             </span>
           </div>
@@ -84,27 +84,27 @@
             >
               {{
                 record.state === 0
-                  ? '訂單生成'
+                  ? $t('訂單生成')
                   : record.state === 1
-                    ? '轉帳中'
+                    ? $t('轉帳中')
                     : record.state === 2
-                      ? '轉帳成功'
+                      ? $t('轉帳成功')
                       : record.state === 3
-                        ? '轉帳失敗'
+                        ? $t('轉帳失敗')
                         : record.state === 4
-                          ? '任務關閉'
-                          : '未知'
+                          ? $t('任務關閉')
+                          : $t('未知')
               }}
             </a-tag>
           </template>
           <template v-if="column.key === 'orderNo'">
             <div class="order-list">
               <p>
-                <span style="color: #729ed5; background: #e7f5f7">轉帳</span>
+                <span style="color: #729ed5; background: #e7f5f7">{{ $t('轉帳') }}</span>
                 {{ record.transferId }}
               </p>
               <p style="margin-bottom: 0">
-                <span style="color: #56cf56; background: #d8eadf">商戶</span>
+                <span style="color: #56cf56; background: #d8eadf">{{ $t('商戶') }}</span>
                 <a-tooltip
                   v-if="record.mchOrderNo.length > record.transferId.length"
                   placement="bottom"
@@ -118,7 +118,7 @@
                 <span style="font-weight: normal" v-else>{{ record.mchOrderNo }}</span>
               </p>
               <p v-if="record.channelOrderNo" style="margin-bottom: 0; margin-top: 10px">
-                <span style="color: #fff; background: #e09c4d">渠道</span>
+                <span style="color: #fff; background: #e09c4d">{{ $t('渠道') }}</span>
                 <a-tooltip
                   v-if="record.channelOrderNo.length > record.transferId.length"
                   placement="bottom"
@@ -141,7 +141,7 @@
                 v-if="$access('ENT_TRANSFER_ORDER_VIEW')"
                 @click="detailFunc(record.transferId)"
               >
-                詳情
+                {{ $t('詳情') }}
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -158,23 +158,24 @@ import { API_URL_TRANSFER_ORDER_LIST, req } from '@/api/manage'
 import dayjs from 'dayjs'
 import { reactive, ref, getCurrentInstance } from 'vue'
 import TransferOrderDetail from './TransferOrderDetail.vue'
+import { t } from '@/i18n'
 
 const { $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 // eslint-disable-next-line no-unused-vars
 const tableColumns = [
-  { title: '轉帳金額', key: 'amount' },
-  { key: 'orderNo', title: '訂單號', scopedSlots: { customRender: 'orderSlot' }, width: 260 },
+  { title: t('轉帳金額'), key: 'amount' },
+  { key: 'orderNo', title: t('訂單號'), scopedSlots: { customRender: 'orderSlot' }, width: 260 },
   // { title: '转账订单号', dataIndex: 'transferId' },
   // { title: '商户转账单号', dataIndex: 'mchOrderNo' },
   // { title: '渠道订单号', dataIndex: 'channelOrderNo' },
-  { title: '收款帳號', dataIndex: 'accountNo', width: 200 },
-  { title: '收款人姓名', dataIndex: 'accountName' },
-  { title: '轉帳備註', dataIndex: 'transferDesc' },
-  { title: '狀態', key: 'state', width: 100 },
-  { title: '建立日期', dataIndex: 'createdAt' },
+  { title: t('收款帳號'), dataIndex: 'accountNo', width: 200 },
+  { title: t('收款人姓名'), dataIndex: 'accountName' },
+  { title: t('轉帳備註'), dataIndex: 'transferDesc' },
+  { title: t('狀態'), key: 'state', width: 100 },
+  { title: t('建立日期'), dataIndex: 'createdAt' },
   {
-    title: '操作',
+    title: t('操作'),
     width: '100px',
     fixed: 'right',
     align: 'center',

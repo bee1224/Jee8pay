@@ -1,39 +1,39 @@
 <template>
   <!-- 上帝：登入裝置。自己的最近登入，以及每位團長、隊長（含其操作員）最近一次登入的 IP、裝置與 GPS -->
   <div class="m-page ld-page">
-    <div class="m-section-title"><h3>我的登入</h3><span class="m-muted">最近 {{ vdata.mine.length }} 次</span></div>
+    <div class="m-section-title"><h3>{{ $t('我的登入') }}</h3><span class="m-muted">{{ $t('最近 {0} 次', [vdata.mine.length]) }}</span></div>
     <div v-if="vdata.mine.length" class="m-card">
       <DeviceKv :d="vdata.mine[0]" />
     </div>
-    <div v-else class="m-empty">{{ vdata.loaded ? '還沒有登入紀錄（下次登入後會出現）' : '載入中…' }}</div>
+    <div v-else class="m-empty">{{ vdata.loaded ? $t('還沒有登入紀錄（下次登入後會出現）') : $t('載入中…') }}</div>
     <div v-if="vdata.mine.length > 1" class="m-list">
-      <button v-for="d in vdata.mine.slice(1)" :key="d.id" class="m-row tap" @click="openOne('我的登入', d)">
+      <button v-for="d in vdata.mine.slice(1)" :key="d.id" class="m-row tap" @click="openOne($t('我的登入'), d)">
         <div class="main"><b>{{ fmt(d.createdAt) }}</b><small>{{ d.userIp }}・{{ deviceText(d) }}</small></div>
-        <span :class="['m-pill', d.latitude != null ? 'ok' : 'mute']">{{ d.latitude != null ? 'GPS' : GEO[d.geoState] || '無 GPS' }}</span>
+        <span :class="['m-pill', d.latitude != null ? 'ok' : 'mute']">{{ d.latitude != null ? 'GPS' : GEO[d.geoState] || $t('無 GPS') }}</span>
       </button>
     </div>
 
-    <div class="m-section-title"><h3>團長與隊長</h3><span class="m-muted">{{ rows.length }} 位</span></div>
-    <div class="m-search"><SearchOutlined /><input v-model="vdata.q" type="search" placeholder="搜尋名稱、編號或 IP" /></div>
+    <div class="m-section-title"><h3>{{ $t('團長與隊長') }}</h3><span class="m-muted">{{ $t('{0} 位', [rows.length]) }}</span></div>
+    <div class="m-search"><SearchOutlined /><input v-model="vdata.q" type="search" :placeholder="$t('搜尋名稱、編號或 IP')" /></div>
     <div class="m-chips">
       <button v-for="f in FILTERS" :key="f.key" :class="{ on: vdata.filter === f.key }" @click="vdata.filter = f.key">{{ f.label }}</button>
     </div>
     <div class="m-list">
       <button v-for="a in rows" :key="a.agentNo" class="m-row tap" @click="openAgent(a)">
         <div class="main">
-          <b>{{ a.agentName }}<span class="m-role">{{ a.agentLevel === 1 ? '團長' : '隊長' }}</span><span v-if="a.state !== 1" class="m-pill mute" style="margin-left: 6px">停用</span></b>
+          <b>{{ a.agentName }}<span class="m-role">{{ a.agentLevel === 1 ? $t('團長') : $t('隊長') }}</span><span v-if="a.state !== 1" class="m-pill mute" style="margin-left: 6px">{{ $t('停用') }}</span></b>
           <small v-if="a.lastLogin">{{ fmt(a.lastLogin.createdAt) }}・{{ a.lastLogin.userIp }}・{{ deviceText(a.lastLogin) }}</small>
-          <small v-else>沒有登入紀錄</small>
-          <small v-if="a.agentLevel !== 1 && parentName(a)">上級團長 {{ parentName(a) }}</small>
+          <small v-else>{{ $t('沒有登入紀錄') }}</small>
+          <small v-if="a.agentLevel !== 1 && parentName(a)">{{ $t('上級團長 {0}', [parentName(a)]) }}</small>
         </div>
-        <span v-if="a.lastLogin" :class="['m-pill', a.lastLogin.latitude != null ? 'ok' : 'mute']">{{ a.lastLogin.latitude != null ? 'GPS' : GEO[a.lastLogin.geoState] || '無 GPS' }}</span>
+        <span v-if="a.lastLogin" :class="['m-pill', a.lastLogin.latitude != null ? 'ok' : 'mute']">{{ a.lastLogin.latitude != null ? 'GPS' : GEO[a.lastLogin.geoState] || $t('無 GPS') }}</span>
       </button>
-      <div v-if="!rows.length" class="m-empty">{{ vdata.loaded ? '沒有符合的代理' : '載入中…' }}</div>
+      <div v-if="!rows.length" class="m-empty">{{ vdata.loaded ? $t('沒有符合的代理') : $t('載入中…') }}</div>
     </div>
 
     <MSheet v-model:open="vdata.sheet.open" :title="vdata.sheet.title">
-      <div v-if="vdata.sheet.loading" class="m-empty">載入中…</div>
-      <div v-else-if="!vdata.sheet.list.length" class="m-empty">沒有登入紀錄</div>
+      <div v-if="vdata.sheet.loading" class="m-empty">{{ $t('載入中…') }}</div>
+      <div v-else-if="!vdata.sheet.list.length" class="m-empty">{{ $t('沒有登入紀錄') }}</div>
       <div v-for="d in vdata.sheet.list" :key="d.id" class="m-card" style="margin-bottom: 10px">
         <DeviceKv :d="d" />
       </div>
@@ -47,19 +47,20 @@ import { SearchOutlined } from '@ant-design/icons-vue'
 import { req } from '@/api/manage'
 import MSheet from '@/views/mobile/MSheet.vue'
 import '@/views/mobile/mobile.less'
+import { t } from '@/i18n'
 
-const GEO = { GRANTED: '已授權', DENIED: '拒絕定位', UNAVAILABLE: '無法定位', TIMEOUT: '定位逾時', UNSUPPORTED: '不支援定位' }
+const GEO = { GRANTED: t('已授權'), DENIED: t('拒絕定位'), UNAVAILABLE: t('無法定位'), TIMEOUT: t('定位逾時'), UNSUPPORTED: t('不支援定位') }
 const FILTERS = [
-  { key: 'all', label: '全部' },
-  { key: 'leader', label: '團長' },
-  { key: 'captain', label: '隊長' },
-  { key: 'gps', label: '有 GPS' },
-  { key: 'never', label: '沒登入過' },
+  { key: 'all', label: t('全部') },
+  { key: 'leader', label: t('團長') },
+  { key: 'captain', label: t('隊長') },
+  { key: 'gps', label: t('有 GPS') },
+  { key: 'never', label: t('沒登入過') },
 ]
 const vdata: any = reactive({ mine: [], agents: [], loaded: false, q: '', filter: 'all', sheet: { open: false, title: '', list: [], loading: false } })
 
 const fmt = (t) => (t ? String(t).replace('T', ' ').slice(0, 19) : '—')
-const deviceText = (d) => [d.deviceModel, d.deviceOs].filter(Boolean).join(' ') || '未知裝置'
+const deviceText = (d) => [d.deviceModel, d.deviceOs].filter(Boolean).join(' ') || t('未知裝置')
 const parentName = (a) => (vdata.agents.find((x) => x.agentNo === a.parentAgentNo) || {}).agentName
 const mapUrl = (d) => `https://www.google.com/maps?q=${d.latitude},${d.longitude}`
 
@@ -83,17 +84,17 @@ const DeviceKv = defineComponent({
     return () => {
       const d = props.d
       const gps = d.latitude != null
-        ? h('a', { href: mapUrl(d), target: '_blank', rel: 'noopener' }, `${d.latitude}, ${d.longitude}${d.accuracy != null ? `（±${d.accuracy} 公尺）` : ''}`)
+        ? h('a', { href: mapUrl(d), target: '_blank', rel: 'noopener' }, `${d.latitude}, ${d.longitude}${d.accuracy != null ? t('（±{0} 公尺）', [d.accuracy]) : ''}`)
         : GEO[d.geoState] || '—'
       return h('dl', { class: 'm-kv' }, [
-        ...kv('時間', fmt(d.createdAt)),
-        ...kv('帳號', d.userName || '—'),
+        ...kv(t('時間'), fmt(d.createdAt)),
+        ...kv(t('帳號'), d.userName || '—'),
         ...kv('IP', h('span', { class: 'mono' }, d.userIp || '—')),
-        ...kv('裝置識別碼', h('span', { class: 'mono' }, d.deviceId || '—')),
-        ...kv('型號', d.deviceModel || '—'),
-        ...kv('系統', d.deviceOs || '—'),
+        ...kv(t('裝置識別碼'), h('span', { class: 'mono' }, d.deviceId || '—')),
+        ...kv(t('型號'), d.deviceModel || '—'),
+        ...kv(t('系統'), d.deviceOs || '—'),
         ...kv('GPS', gps),
-        ...kv('瀏覽器', h('small', { class: 'ld-ua' }, d.userAgent || '—')),
+        ...kv(t('瀏覽器'), h('small', { class: 'ld-ua' }, d.userAgent || '—')),
       ])
     }
   },
@@ -103,7 +104,7 @@ function openOne(title, d) {
   vdata.sheet = { open: true, title, list: [d], loading: false }
 }
 function openAgent(a) {
-  vdata.sheet = { open: true, title: `${a.agentName}・最近 20 次登入`, list: [], loading: true }
+  vdata.sheet = { open: true, title: t('{0}・最近 20 次登入', [a.agentName]), list: [], loading: true }
   req.list('/api/loginDevices/agent', { agentNo: a.agentNo }).then((r) => {
     vdata.sheet.list = r || []
     vdata.sheet.loading = false

@@ -1,7 +1,7 @@
 <template>
   <a-drawer
     v-model:open="vdata.open"
-    title="設定支付通道"
+    :title="$t('設定支付通道')"
     :closable="true"
     :maskClosable="false"
     :body-style="{ paddingBottom: '80px' }"
@@ -51,7 +51,7 @@
                 {{ record.ifName }}
               </div>
               <a-form :labelCol="{ span: 8 }" :wrapperCol="{ span: 14 }">
-                <a-form-item label="費率：" :validate-status="record.error" :help="record.help">
+                <a-form-item :label="$t('費率：')" :validate-status="record.error" :help="record.help">
                   <a-input
                     v-model:value="record.rate"
                     :disabled="!record.state && record.passageId != ''"
@@ -64,8 +64,8 @@
             <div class="jeepay-card-ops">
               <a-switch
                 v-model:checked="record.state"
-                checked-children="啟用"
-                un-checked-children="停用"
+                :checked-children="$t('啟用')"
+                :un-checked-children="$t('停用')"
               />
             </div>
           </div>
@@ -78,7 +78,7 @@
         type="info"
         show-icon
         style="margin-top: 8px"
-        message="要讓商戶以同一個代碼（例如 IBON）在多個通道間分流，請到「支付配置 → 通道路由」設定路由規則。"
+        :message="$t('要讓商戶以同一個代碼（例如 IBON）在多個通道間分流，請到「支付配置 → 通道路由」設定路由規則。')"
       />
 
       <div
@@ -95,9 +95,9 @@
           zIndex: 1,
         }"
       >
-        <a-button :style="{ marginRight: '8px' }" @click="onClose">取消</a-button>
+        <a-button :style="{ marginRight: '8px' }" @click="onClose">{{ $t('取消') }}</a-button>
         <a-button v-if="$access('ENT_MCH_PAY_PASSAGE_ADD')" type="primary" @click="handleOkFunc">
-          儲存
+          {{ $t('儲存') }}
         </a-button>
       </div>
     </div>
@@ -107,6 +107,7 @@
 <script setup lang="ts">
 import { API_URL_MCH_PAYPASSAGE_LIST, req, getAvailablePayInterfaceList } from '@/api/manage'
 import { reactive, ref, getCurrentInstance } from 'vue'
+import { t } from '@/i18n'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 const props = defineProps({
@@ -168,12 +169,12 @@ function handleOkFunc() {
       if (item.state) {
         if (!item.rate) {
           item.error = 'error'
-          item.help = '請輸入費率'
+          item.help = t('請輸入費率')
           throw new Error('error')
         }
         if (!reg.test(item.rate) || item.rate > 100) {
           item.error = 'error'
-          item.help = '最多四位小數'
+          item.help = t('最多四位小數')
           throw new Error('error')
         }
       }
@@ -195,7 +196,7 @@ function handleOkFunc() {
   }
   // 请求接口
   req.add(API_URL_MCH_PAYPASSAGE_LIST, { reqParams: JSON.stringify(reqParams) }).then((res) => {
-    $infoBox.message.success('儲存成功')
+    $infoBox.message.success(t('儲存成功'))
     vdata.open = false
     props.callbackFunc()
   })

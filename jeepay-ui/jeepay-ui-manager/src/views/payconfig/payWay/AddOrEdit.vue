@@ -1,7 +1,7 @@
 <template>
   <a-modal
     v-model:open="vdata.isShow"
-    :title="vdata.isAdd ? '新增支付方式' : '修改支付方式'"
+    :title="vdata.isAdd ? $t('新增支付方式') : $t('修改支付方式')"
     @ok="handleOkFunc"
   >
     <a-form
@@ -11,10 +11,10 @@
       :wrapper-col="{ span: 15 }"
       :rules="vdata.rules"
     >
-      <a-form-item label="支付方式代碼：" name="wayCode">
+      <a-form-item :label="$t('支付方式代碼：')" name="wayCode">
         <a-input v-model:value="vdata.saveObject.wayCode" :disabled="!vdata.isAdd" />
       </a-form-item>
-      <a-form-item label="支付方式名稱：" name="wayName">
+      <a-form-item :label="$t('支付方式名稱：')" name="wayName">
         <a-input v-model:value="vdata.saveObject.wayName" />
       </a-form-item>
     </a-form>
@@ -23,6 +23,7 @@
 <script setup lang="ts">
 import { API_URL_PAYWAYS_LIST, req } from '@/api/manage'
 import { reactive, ref, getCurrentInstance } from 'vue'
+import { t } from '@/i18n'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 const props = defineProps({
@@ -35,8 +36,8 @@ const vdata: any = reactive({
   saveObject: {}, // 数据对象
   wayCode: null, // 更新对象ID
   rules: {
-    wayCode: [{ required: true, message: '請輸入支付方式代碼', trigger: 'blur' }],
-    wayName: [{ required: true, message: '請輸入支付方式名稱', trigger: 'blur' }],
+    wayCode: [{ required: true, message: t('請輸入支付方式代碼'), trigger: 'blur' }],
+    wayName: [{ required: true, message: t('請輸入支付方式名稱'), trigger: 'blur' }],
   },
 })
 
@@ -71,13 +72,13 @@ function handleOkFunc() {
       // 请求接口
       if (vdata.isAdd) {
         req.add(API_URL_PAYWAYS_LIST, vdata.saveObject).then((res) => {
-          $infoBox.message.success('新增成功')
+          $infoBox.message.success(t('新增成功'))
           vdata.isShow = false
           props.callbackFunc() // 刷新列表
         })
       } else {
         req.updateById(API_URL_PAYWAYS_LIST, vdata.wayCode, vdata.saveObject).then((res) => {
-          $infoBox.message.success('修改成功')
+          $infoBox.message.success(t('修改成功'))
           vdata.isShow = false
           props.callbackFunc() // 刷新列表
         })

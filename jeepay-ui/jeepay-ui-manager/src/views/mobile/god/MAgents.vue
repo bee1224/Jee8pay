@@ -1,42 +1,42 @@
 <template>
   <!-- 上帝：團長列表＋家族樹（團長 → 隊長 → 商戶），可直接啟用／停用；點名稱進團長詳情 -->
   <div class="m-stats">
-    <div class="m-stat"><small>團長</small><strong class="num">{{ leaders.length }}</strong></div>
-    <div class="m-stat"><small>隊長</small><strong class="num">{{ vdata.agents.length - leaders.length }}</strong></div>
-    <div class="m-stat"><small>商戶</small><strong class="num">{{ vdata.relas.length }}</strong></div>
+    <div class="m-stat"><small>{{ $t('團長') }}</small><strong class="num">{{ leaders.length }}</strong></div>
+    <div class="m-stat"><small>{{ $t('隊長') }}</small><strong class="num">{{ vdata.agents.length - leaders.length }}</strong></div>
+    <div class="m-stat"><small>{{ $t('商戶') }}</small><strong class="num">{{ vdata.relas.length }}</strong></div>
   </div>
   <div class="m-search">
     <SearchOutlined />
-    <input v-model="vdata.q" type="search" placeholder="搜尋團長、隊長、商戶名稱或編號" />
+    <input v-model="vdata.q" type="search" :placeholder="$t('搜尋團長、隊長、商戶名稱或編號')" />
   </div>
   <div class="m-chips">
     <button v-for="f in FILTERS" :key="f.key" :class="{ on: vdata.filter === f.key }" @click="vdata.filter = f.key">{{ f.label }}</button>
   </div>
-  <button v-if="$access('ENT_AGENT_INFO_ADD')" class="m-btn" @click="addOrEdit.show()">＋ 新增團長</button>
+  <button v-if="$access('ENT_AGENT_INFO_ADD')" class="m-btn" @click="addOrEdit.show()">{{ $t('＋ 新增團長') }}</button>
 
   <div v-for="a in shown" :key="a.agentNo" class="m-card" style="display: grid; gap: 10px; padding: 14px">
     <div style="display: flex; align-items: center; gap: 10px">
-      <button class="m-avatar" style="width: 40px; height: 40px; font-size: 16px" :aria-label="vdata.open[a.agentNo] ? '收合' : '展開家族樹'" @click="toggle(a.agentNo)"><DownOutlined v-if="vdata.open[a.agentNo]" /><RightOutlined v-else /></button>
+      <button class="m-avatar" style="width: 40px; height: 40px; font-size: 16px" :aria-label="vdata.open[a.agentNo] ? $t('收合') : $t('展開家族樹')" @click="toggle(a.agentNo)"><DownOutlined v-if="vdata.open[a.agentNo]" /><RightOutlined v-else /></button>
       <button style="flex: 1; min-width: 0; text-align: left" @click="openDetail(a)">
-        <b>{{ a.agentName }}</b><span class="m-role">團長</span><span v-if="a.isHouse === 1" class="m-role">平台直屬</span>
+        <b>{{ a.agentName }}</b><span class="m-role">{{ $t('團長') }}</span><span v-if="a.isHouse === 1" class="m-role">{{ $t('平台直屬') }}</span>
         <div class="m-muted" style="margin: 2px 0 0">
-          <span class="mono">{{ a.agentNo }}</span>・隊長 {{ subsOf(a.agentNo).length }}・商戶 {{ mchCount(a.agentNo) }}
+          <span class="mono">{{ a.agentNo }}</span>{{ $t('・隊長 {0}・商戶 {1}', [subsOf(a.agentNo).length, mchCount(a.agentNo)]) }}
         </div>
       </button>
       <a-switch :checked="a.state === 1" :disabled="!canEdit" @change="(v) => setState(a, v)" />
     </div>
 
     <div v-if="vdata.open[a.agentNo]" class="m-tree">
-      <div class="m-tree-label">團長直屬商戶（{{ mchOf(a.agentNo).length }}）</div>
+      <div class="m-tree-label">{{ $t('團長直屬商戶（{0}）', [mchOf(a.agentNo).length]) }}</div>
       <div class="m-tree-chips">
         <span v-for="m in mchOf(a.agentNo)" :key="m.mchNo" :class="['m-pill', m.state === 0 ? 'mute' : 'ok']">{{ m.name || m.mchNo }}</span>
-        <span v-if="!mchOf(a.agentNo).length" class="m-muted" style="margin: 0">沒有</span>
+        <span v-if="!mchOf(a.agentNo).length" class="m-muted" style="margin: 0">{{ $t('沒有') }}</span>
       </div>
       <div v-for="s in subsOf(a.agentNo)" :key="s.agentNo" class="m-tree-son">
         <div style="display: flex; align-items: center; gap: 8px">
           <div style="flex: 1; min-width: 0">
-            <b>{{ s.agentName }}</b><span class="m-role">隊長</span>
-            <div class="m-muted" style="margin: 2px 0 0"><span class="mono">{{ s.agentNo }}</span>・商戶 {{ mchOf(s.agentNo).length }}</div>
+            <b>{{ s.agentName }}</b><span class="m-role">{{ $t('隊長') }}</span>
+            <div class="m-muted" style="margin: 2px 0 0"><span class="mono">{{ s.agentNo }}</span>{{ $t('・商戶 {0}', [mchOf(s.agentNo).length]) }}</div>
           </div>
           <a-switch size="small" :checked="s.state === 1" :disabled="!canEdit" @change="(v) => setState(s, v)" />
         </div>
@@ -46,7 +46,7 @@
       </div>
     </div>
   </div>
-  <div v-if="!shown.length" class="m-empty">{{ vdata.loaded ? '沒有符合的團長' : '載入中…' }}</div>
+  <div v-if="!shown.length" class="m-empty">{{ vdata.loaded ? $t('沒有符合的團長') : $t('載入中…') }}</div>
 
   <AgentAddOrEdit ref="addOrEdit" :callback-func="load" />
 </template>
@@ -57,15 +57,16 @@ import { useRouter } from 'vue-router'
 import { SearchOutlined, DownOutlined, RightOutlined } from '@ant-design/icons-vue'
 import { API_URL_AGENT_INFO, API_URL_AGENT_MCH_RELA, API_URL_MCH_LIST, req } from '@/api/manage'
 import AgentAddOrEdit from '@/views/agent/AgentAddOrEdit.vue'
+import { t } from '@/i18n'
 
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 const router = useRouter()
 const addOrEdit = ref()
 const canEdit = $access('ENT_AGENT_INFO_EDIT')
 const FILTERS = [
-  { key: 'all', label: '全部' },
-  { key: 'on', label: '啟用中' },
-  { key: 'off', label: '已停用' },
+  { key: 'all', label: t('全部') },
+  { key: 'on', label: t('啟用中') },
+  { key: 'off', label: t('已停用') },
 ]
 const vdata: any = reactive({ agents: [], relas: [], mchs: [], loaded: false, q: '', filter: 'all', open: {} })
 
@@ -107,11 +108,11 @@ function openDetail(a) {
 function setState(a, on) {
   const doIt = () =>
     req.updateById(API_URL_AGENT_INFO, a.agentNo, { state: on ? 1 : 0 }).then(() => {
-      $infoBox.message.success(on ? '已啟用' : '已停用')
+      $infoBox.message.success(on ? t('已啟用') : t('已停用'))
       a.state = on ? 1 : 0
     })
   if (on) doIt()
-  else $infoBox.confirmDanger(`停用「${a.agentName}」？`, '停用後這位代理與他的子帳號無法使用代理後台，也不能再綁定新商戶；旗下商戶照常收款。', doIt)
+  else $infoBox.confirmDanger(t('停用「{0}」？', [a.agentName]), t('停用後這位代理與他的子帳號無法使用代理後台，也不能再綁定新商戶；旗下商戶照常收款。'), doIt)
 }
 function load() {
   Promise.all([

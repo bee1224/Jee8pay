@@ -4,32 +4,32 @@
       <div class="table-page-search-wrapper">
         <a-form layout="inline" class="table-head-ground">
           <div class="table-layer">
-            <jeepay-text-up v-model:value="searchData.mchNo" :placeholder="'商戶號'" />
-            <jeepay-text-up v-model:value="searchData.isvNo" :placeholder="'服務商號'" />
-            <jeepay-text-up v-model:value="searchData.mchName" :placeholder="'商戶名稱'" />
+            <jeepay-text-up v-model:value="searchData.mchNo" :placeholder="$t('商戶號')" />
+            <jeepay-text-up v-model:value="searchData.isvNo" :placeholder="$t('服務商號')" />
+            <jeepay-text-up v-model:value="searchData.mchName" :placeholder="$t('商戶名稱')" />
             <a-select
               v-model:value="searchData.state"
-              placeholder="商戶狀態"
+              :placeholder="$t('商戶狀態')"
               class="table-head-layout"
             >
-              <a-select-option value="">全部</a-select-option>
-              <a-select-option value="0">停用</a-select-option>
-              <a-select-option value="1">啟用</a-select-option>
+              <a-select-option value="">{{ $t('全部') }}</a-select-option>
+              <a-select-option value="0">{{ $t('停用') }}</a-select-option>
+              <a-select-option value="1">{{ $t('啟用') }}</a-select-option>
             </a-select>
             <a-select
               v-model:value="searchData.type"
-              placeholder="商戶類型"
+              :placeholder="$t('商戶類型')"
               class="table-head-layout"
             >
-              <a-select-option value="">全部</a-select-option>
-              <a-select-option value="1">普通商戶</a-select-option>
-              <a-select-option value="2">特約商戶</a-select-option>
+              <a-select-option value="">{{ $t('全部') }}</a-select-option>
+              <a-select-option value="1">{{ $t('普通商戶') }}</a-select-option>
+              <a-select-option value="2">{{ $t('特約商戶') }}</a-select-option>
             </a-select>
             <span class="table-page-search-submitButtons" style="flex-grow: 0; flex-shrink: 0">
               <a-button type="primary" :loading="vdata.btnLoading" @click="queryFunc">
-                查詢
+                {{ $t('查詢') }}
               </a-button>
-              <a-button style="margin-left: 8px" @click="searchData = {}">重置</a-button>
+              <a-button style="margin-left: 8px" @click="searchData = {}">{{ $t('重置') }}</a-button>
             </span>
           </div>
         </a-form>
@@ -47,7 +47,7 @@
       >
         <template #opRow>
           <a-button type="primary" @click="addFunc" v-if="$access('ENT_MCH_INFO_ADD')">
-            新建
+            {{ $t('新建') }}
           </a-button>
         </template>
 
@@ -64,13 +64,13 @@
           <template v-if="column.key === 'state'">
             <a-badge
               :status="record.state === 0 ? 'error' : 'processing'"
-              :text="record.state === 0 ? '停用' : '啟用'"
+              :text="record.state === 0 ? $t('停用') : $t('啟用')"
             />
           </template>
 
           <template v-if="column.key === 'type'">
             <a-tag :color="record.type === 1 ? 'green' : 'orange'">
-              {{ record.type === 1 ? '普通商戶' : '特約商戶' }}
+              {{ record.type === 1 ? $t('普通商戶') : $t('特約商戶') }}
             </a-tag>
           </template>
 
@@ -80,21 +80,21 @@
               @click="editFunc(record.mchNo)"
               v-if="$access('ENT_MCH_INFO_EDIT')"
             >
-              修改
+              {{ $t('修改') }}
             </a-button>
             <a-button
               type="link"
               @click="mchAppConfig(record.mchNo)"
               v-if="$access('ENT_MCH_APP_CONFIG')"
             >
-              應用設定
+              {{ $t('應用設定') }}
             </a-button>
             <a-button
               type="link"
               @click="agentBindFunc(record.mchNo)"
               v-if="$access('ENT_MCH_AGENT_BIND')"
             >
-              代理綁定
+              {{ $t('代理綁定') }}
             </a-button>
             <a-button
               type="link"
@@ -102,7 +102,7 @@
               @click="delFunc(record.mchNo)"
               v-if="$access('ENT_MCH_INFO_DEL')"
             >
-              刪除
+              {{ $t('刪除') }}
             </a-button>
           </template>
         </template>
@@ -123,6 +123,7 @@ import InfoDetail from './Detail.vue'
 import MchAgentBind from './MchAgentBind.vue'
 import { ref, reactive, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
+import { t } from '@/i18n'
 
 const router = useRouter()
 
@@ -135,13 +136,13 @@ const infoTable = ref()
 
 // eslint-disable-next-line no-unused-vars
 let tableColumns = reactive([
-  { key: 'mchName', fixed: 'left', width: '200px', title: '商戶名稱' },
-  { key: 'mchNo', title: '商戶號', dataIndex: 'mchNo' },
-  { key: 'isvNo', title: '服務商號', dataIndex: 'isvNo' },
-  { key: 'state', title: '狀態', width: '130px' },
-  { key: 'type', title: '商戶類型', width: '130px' },
-  { key: 'createdAt', dataIndex: 'createdAt', title: '建立日期' },
-  { key: 'operation', title: '操作', width: '260px', fixed: 'right', align: 'center' },
+  { key: 'mchName', fixed: 'left', width: '200px', title: t('商戶名稱') },
+  { key: 'mchNo', title: t('商戶號'), dataIndex: 'mchNo' },
+  { key: 'isvNo', title: t('服務商號'), dataIndex: 'isvNo' },
+  { key: 'state', title: t('狀態'), width: '130px' },
+  { key: 'type', title: t('商戶類型'), width: '130px' },
+  { key: 'createdAt', dataIndex: 'createdAt', title: t('建立日期') },
+  { key: 'operation', title: t('操作'), width: '260px', fixed: 'right', align: 'center' },
 ])
 
 const vdata: any = reactive({
@@ -176,10 +177,10 @@ function detailFunc(recordId) {
 }
 // 删除商户
 function delFunc(recordId) {
-  $infoBox.confirmDanger('確認刪除？', '該操作將刪除商戶下所有設定及用戶資訊', () => {
+  $infoBox.confirmDanger(t('確認刪除？'), t('該操作將刪除商戶下所有設定及用戶資訊'), () => {
     reqLoad.delById(API_URL_MCH_LIST, recordId).then((res) => {
       infoTable.value.refTable(true)
-      $infoBox.message.success('刪除成功')
+      $infoBox.message.success(t('刪除成功'))
     })
   })
 }

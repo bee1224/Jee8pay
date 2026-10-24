@@ -7,15 +7,15 @@
     </div>
     <div style="min-width: 0">
       <b>{{ userStore.userInfo.realname }}<span class="m-role">{{ roleLabel }}</span></b>
-      <span v-if="vdata.me">代理編號 <span class="mono">{{ vdata.me.agentNo }}</span></span>
+      <span v-if="vdata.me">{{ $t('代理編號') }} <span class="mono">{{ vdata.me.agentNo }}</span></span>
       <span v-else>{{ userStore.userInfo.loginUsername }}</span>
     </div>
   </div>
 
   <button v-if="vdata.stat" class="m-glance" @click="openByName('ENT_AGENT_PORTAL_DASH')">
-    <div><small>今日成交</small><strong class="num">{{ ntd(vdata.stat.todayAmount) }}</strong></div>
-    <div><small>今日成功</small><strong class="num">{{ vdata.stat.todayPaid || 0 }} 筆</strong></div>
-    <div><small>可提現</small><strong class="num">{{ vdata.wallet ? ntd(vdata.wallet.balance) : '—' }}</strong></div>
+    <div><small>{{ $t('今日成交') }}</small><strong class="num">{{ ntd(vdata.stat.todayAmount) }}</strong></div>
+    <div><small>{{ $t('今日成功') }}</small><strong class="num">{{ $t('{0} 筆', [vdata.stat.todayPaid || 0]) }}</strong></div>
+    <div><small>{{ $t('可提現') }}</small><strong class="num">{{ vdata.wallet ? ntd(vdata.wallet.balance) : '—' }}</strong></div>
   </button>
 
   <section v-for="g in groups" :key="g.key" class="m-group">
@@ -35,6 +35,7 @@ import { computed, reactive, watch, getCurrentInstance } from 'vue'
 import { API_URL_AGENT_PORTAL, req } from '@/api/manage'
 import { useUserStore } from '@/store/modules/user'
 import { agentMe, ntd, todayDateRange } from './mobileKit'
+import { t } from '@/i18n'
 
 const props = defineProps({
   menuData: { type: Array as () => any[], default: () => [] },
@@ -53,7 +54,7 @@ function leaves(r) {
 // 「訂單」（代理）／「訂單管理」（平台）後面多一格「查詢訂單」：同一頁、可選日期區間（不需另開權限）
 function withQuery(r) {
   if (r.name !== 'ENT_AGENT_PORTAL_ORDER' && r.name !== 'ENT_PAY_ORDER') return [r]
-  return [r, { name: '_ORDER_QUERY', path: r.path + '?mode=query', meta: { title: '查詢訂單', icon: 'search-outlined' } }]
+  return [r, { name: '_ORDER_QUERY', path: r.path + '?mode=query', meta: { title: t('查詢訂單'), icon: 'search-outlined' } }]
 }
 // 沒有子選單的直接放最上面一組；有子選單的依分組名稱各一組
 const groups = computed(() => {
@@ -73,9 +74,9 @@ function openByName(name) {
 }
 
 const roleLabel = computed(() => {
-  if (!props.isAgentUser) return '平台'
-  if (!vdata.me) return '代理'
-  return vdata.me.agentLevel === 1 ? '團長' : '隊長'
+  if (!props.isAgentUser) return t('平台')
+  if (!vdata.me) return t('代理')
+  return vdata.me.agentLevel === 1 ? t('團長') : t('隊長')
 })
 
 // 選單載入後才知道是不是代理帳號，所以用 watch 而不是只在建立時判斷一次

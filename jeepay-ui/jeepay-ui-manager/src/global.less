@@ -118,6 +118,21 @@ html[data-theme='dark'] {
 
 // @import './default.less';
 
+// 字形依介面語言（html[lang] 由 i18n 設定）：英數字一律 Plus Jakarta Sans，其餘文字用該語言的系統字形，
+// 例如日文不要落到繁中字形、泰文與印地文用有對應字母的字形
+:root {
+  --jp-font-local: 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei';
+  --jp-font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, var(--jp-font-local), 'Segoe UI', 'Helvetica Neue', Arial, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji';
+}
+:root:lang(yue) { --jp-font-local: 'PingFang HK', 'Noto Sans HK', 'Noto Sans TC', 'Microsoft JhengHei'; }
+:root:lang(zh-CN) { --jp-font-local: 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei'; }
+:root:lang(ja) { --jp-font-local: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic UI', Meiryo; }
+:root:lang(ko) { --jp-font-local: 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic'; }
+:root:lang(th) { --jp-font-local: Thonburi, 'Noto Sans Thai', 'Leelawadee UI', Tahoma; }
+:root:lang(hi) { --jp-font-local: 'Kohinoor Devanagari', 'Noto Sans Devanagari', 'Nirmala UI', Mangal; }
+:root:lang(ru), :root:lang(vi) { --jp-font-local: 'Segoe UI', Roboto, 'Noto Sans'; }
+
 html,
 body,
 #app,
@@ -125,19 +140,7 @@ body,
   height: 100%;
   // 英數字用 Plus Jakarta Sans（圓潤、現代，隨前端打包不連外）；中文優先繁體字形，
   // 避免 Windows 落到微軟雅黑（簡體字形）
-  font-family:
-    'Plus Jakarta Sans',
-    -apple-system,
-    BlinkMacSystemFont,
-    'PingFang TC',
-    'Noto Sans TC',
-    'Microsoft JhengHei',
-    'Segoe UI',
-    'Helvetica Neue',
-    Arial,
-    sans-serif,
-    'Apple Color Emoji',
-    'Segoe UI Emoji';
+  font-family: var(--jp-font);
   letter-spacing: 0.2px;
   // Plus Jakarta Sans 的空白字元偏窄，日期與時間、英文字之間會像黏在一起
   word-spacing: 0.12em;

@@ -1,7 +1,7 @@
 <template>
   <div>
     <a-modal
-      title="退款"
+      :title="$t('退款')"
       v-model:open="vdata.open"
       :confirm-loading="vdata.confirmLoading"
       @ok="handleOk"
@@ -11,7 +11,7 @@
       <a-row>
         <a-col :sm="24">
           <a-descriptions>
-            <a-descriptions-item label="支付訂單號">
+            <a-descriptions-item :label="$t('支付訂單號')">
               <a-tag color="purple">
                 {{ vdata.detailData.payOrderId }}
               </a-tag>
@@ -20,7 +20,7 @@
         </a-col>
         <a-col :sm="24">
           <a-descriptions>
-            <a-descriptions-item label="支付金額">
+            <a-descriptions-item :label="$t('支付金額')">
               <a-tag color="green">
                 {{ vdata.detailData.amount / 100 }}
               </a-tag>
@@ -29,7 +29,7 @@
         </a-col>
         <a-col :sm="24">
           <a-descriptions>
-            <a-descriptions-item label="可退金額">
+            <a-descriptions-item :label="$t('可退金額')">
               <a-tag color="pink">
                 {{ nowRefundAmount }}
               </a-tag>
@@ -39,7 +39,7 @@
       </a-row>
 
       <a-form :rules="vdata.rules" :model="vdata.refund" ref="refundInfo">
-        <a-form-item label="退款金額" name="refundAmount">
+        <a-form-item :label="$t('退款金額')" name="refundAmount">
           <a-input-number
             v-model:value="vdata.refund.refundAmount"
             :precision="2"
@@ -47,7 +47,7 @@
           />
         </a-form-item>
 
-        <a-form-item label="退款原因" name="refundReason">
+        <a-form-item :label="$t('退款原因')" name="refundReason">
           <a-textarea v-model:value="vdata.refund.refundReason" />
         </a-form-item>
       </a-form>
@@ -58,6 +58,7 @@
 import { API_URL_PAY_ORDER_LIST, req, payOrderRefund } from '@/api/manage'
 import { reactive, computed, ref, getCurrentInstance, h } from 'vue'
 import { useRouter } from 'vue-router'
+import { t } from '@/i18n'
 
 const router = useRouter()
 
@@ -89,15 +90,15 @@ const vdata: any = reactive({
         max: 256,
         required: true,
         trigger: 'blur',
-        message: '請輸入退款原因，最長不超過256個字符',
+        message: t('請輸入退款原因，最長不超過256個字符'),
       },
     ],
     refundAmount: [
-      { required: true, message: '請輸入金額', trigger: 'blur' },
+      { required: true, message: t('請輸入金額'), trigger: 'blur' },
       {
         validator: (rule, value) => {
           if (value < 0.01 || value > vdata.nowRefundAmount) {
-            return Promise.reject('退款金額不能小於0.01，或者大於可退金額')
+            return Promise.reject(t('退款金額不能小於0.01，或者大於可退金額'))
           }
           return Promise.resolve()
         },
@@ -133,17 +134,17 @@ function handleOk(e) {
 
           if (res.state === 0 || res.state === 3) {
             // 订单生成 || 失败
-            vdata.refundErrorModal = $infoBox.modalError('退款失敗', buildModalText(res))
+            vdata.refundErrorModal = $infoBox.modalError(t('退款失敗'), buildModalText(res))
           } else if (res.state === 1) {
             // 退款中
-            vdata.refundErrorModal = $infoBox.modalWarning('退款中', buildModalText(res))
+            vdata.refundErrorModal = $infoBox.modalWarning(t('退款中'), buildModalText(res))
             props.callbackFunc()
           } else if (res.state === 2) {
             // 退款成功
-            $infoBox.message.success('退款成功')
+            $infoBox.message.success(t('退款成功'))
             props.callbackFunc()
           } else {
-            vdata.refundErrorModal = $infoBox.modalWarning('退款狀態未知', buildModalText(res))
+            vdata.refundErrorModal = $infoBox.modalWarning(t('退款狀態未知'), buildModalText(res))
           }
         })
         .catch(() => {

@@ -15,29 +15,29 @@
               <a-icon slot="suffixIcon" type="sync" />
             </a-range-picker>
             <jeepay-text-up
-              placeholder="支付/退款列訂單號"
+              :placeholder="$t('支付/退款列訂單號')"
               v-model:value="vdata.searchData.unionOrderId"
             />
             <!--            <jeepay-text-up :placeholder="'退款订单号'" :msg="searchData.refundOrderId" v-model:value="searchData.refundOrderId" />-->
             <!--            <jeepay-text-up :placeholder="'商户退款单号'" :msg="searchData.mchRefundNo" v-model:value="searchData.mchRefundNo" />-->
             <!--            <jeepay-text-up :placeholder="'支付订单号'" :msg="searchData.payOrderId" v-model:value="searchData.payOrderId" />-->
             <!--            <jeepay-text-up :placeholder="'渠道订单号'" :msg="searchData.channelPayOrderNo" v-model:value="searchData.channelPayOrderNo" />-->
-            <jeepay-text-up placeholder="應用AppId" v-model:value="vdata.searchData.appId" />
+            <jeepay-text-up :placeholder="$t('應用AppId')" v-model:value="vdata.searchData.appId" />
             <a-select
               v-model:value="vdata.searchData.state"
-              placeholder="退款狀態"
+              :placeholder="$t('退款狀態')"
               class="table-head-layout"
             >
-              <a-select-option value="">全部</a-select-option>
-              <a-select-option value="0">訂單生成</a-select-option>
-              <a-select-option value="1">退款中</a-select-option>
-              <a-select-option value="2">退款成功</a-select-option>
-              <a-select-option value="3">退款失敗</a-select-option>
+              <a-select-option value="">{{ $t('全部') }}</a-select-option>
+              <a-select-option value="0">{{ $t('訂單生成') }}</a-select-option>
+              <a-select-option value="1">{{ $t('退款中') }}</a-select-option>
+              <a-select-option value="2">{{ $t('退款成功') }}</a-select-option>
+              <a-select-option value="3">{{ $t('退款失敗') }}</a-select-option>
             </a-select>
 
             <span class="table-page-search-submitButtons">
               <a-button type="primary" @click="queryFunc" :loading="vdata.btnLoading">
-                搜尋
+                {{ $t('搜尋') }}
               </a-button>
               <a-button
                 style="margin-left: 8px"
@@ -48,7 +48,7 @@
                   }
                 "
               >
-                重置
+                {{ $t('重置') }}
               </a-button>
             </span>
           </div>
@@ -92,16 +92,16 @@
               >
                 {{
                   record.state === 0
-                    ? '訂單生成'
+                    ? $t('訂單生成')
                     : record.state === 1
-                      ? '退款中'
+                      ? $t('退款中')
                       : record.state === 2
-                        ? '退款成功'
+                        ? $t('退款成功')
                         : record.state === 3
-                          ? '退款失敗'
+                          ? $t('退款失敗')
                           : record.state === 4
-                            ? '任務關閉'
-                            : '未知'
+                            ? $t('任務關閉')
+                            : $t('未知')
                 }}
               </a-tag>
             </div>
@@ -110,11 +110,11 @@
           <template v-if="column.key === 'pay'">
             <div class="order-list">
               <p>
-                <span style="color: #729ed5; background: #e7f5f7">支付</span>
+                <span style="color: #729ed5; background: #e7f5f7">{{ $t('支付') }}</span>
                 {{ record.payOrderId }}
               </p>
               <p v-if="record.channelPayOrderNo" style="margin-bottom: 0">
-                <span style="color: #fff; background: #e09c4d">渠道</span>
+                <span style="color: #fff; background: #e09c4d">{{ $t('渠道') }}</span>
                 <a-tooltip
                   placement="bottom"
                   style="font-weight: normal"
@@ -133,11 +133,11 @@
           <template v-if="column.key === 'refund'">
             <div class="order-list">
               <p>
-                <span style="color: #729ed5; background: #e7f5f7">退款</span>
+                <span style="color: #729ed5; background: #e7f5f7">{{ $t('退款') }}</span>
                 {{ record.refundOrderId }}
               </p>
               <p style="margin-bottom: 0">
-                <span style="color: #56cf56; background: #d8eadf">商戶</span>
+                <span style="color: #56cf56; background: #d8eadf">{{ $t('商戶') }}</span>
                 <a-tooltip
                   placement="bottom"
                   style="font-weight: normal"
@@ -160,7 +160,7 @@
                 v-if="$access('ENT_REFUND_ORDER_VIEW')"
                 @click="detailFunc(record.refundOrderId)"
               >
-                詳情
+                {{ $t('詳情') }}
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -174,33 +174,33 @@
         placement="right"
         :closable="true"
         v-model:open="vdata.open"
-        :title="vdata.open === true ? '退款訂單詳情' : ''"
+        :title="vdata.open === true ? $t('退款訂單詳情') : ''"
         @close="onClose"
       >
         <a-row justify="space-between" type="flex">
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="所屬系統">
+              <a-descriptions-item :label="$t('所屬系統')">
                 {{
                   vdata.detailData.mchType === 1
-                    ? '普通商戶'
+                    ? $t('普通商戶')
                     : vdata.detailData.mchType === 2
-                      ? '特約商戶'
-                      : '未知'
+                      ? $t('特約商戶')
+                      : $t('未知')
                 }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="服務商號">
+              <a-descriptions-item :label="$t('服務商號')">
                 {{ vdata.detailData.isvNo }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="退款訂單號">
+              <a-descriptions-item :label="$t('退款訂單號')">
                 <a-tag color="purple">
                   {{ vdata.detailData.refundOrderId }}
                 </a-tag>
@@ -209,42 +209,42 @@
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="商戶號">
+              <a-descriptions-item :label="$t('商戶號')">
                 {{ vdata.detailData.mchNo }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="支付訂單號">
+              <a-descriptions-item :label="$t('支付訂單號')">
                 {{ vdata.detailData.payOrderId }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="商戶退款單號">
+              <a-descriptions-item :label="$t('商戶退款單號')">
                 {{ vdata.detailData.mchRefundNo }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="渠道支付訂單號">
+              <a-descriptions-item :label="$t('渠道支付訂單號')">
                 {{ vdata.detailData.channelPayOrderNo }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="應用APPID">
+              <a-descriptions-item :label="$t('應用APPID')">
                 {{ vdata.detailData.appId }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="支付金額">
+              <a-descriptions-item :label="$t('支付金額')">
                 <a-tag color="green">
                   {{ vdata.detailData.payAmount / 100 }}
                 </a-tag>
@@ -253,7 +253,7 @@
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="退款金額">
+              <a-descriptions-item :label="$t('退款金額')">
                 <a-tag color="green">
                   {{ vdata.detailData.refundAmount / 100 }}
                 </a-tag>
@@ -262,7 +262,7 @@
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="訂單狀態">
+              <a-descriptions-item :label="$t('訂單狀態')">
                 <a-tag
                   :color="
                     vdata.detailData.state === 0
@@ -276,16 +276,16 @@
                 >
                   {{
                     vdata.detailData.state === 0
-                      ? '訂單生成'
+                      ? $t('訂單生成')
                       : vdata.detailData.state === 1
-                        ? '退款中'
+                        ? $t('退款中')
                         : vdata.detailData.state === 2
-                          ? '退款成功'
+                          ? $t('退款成功')
                           : vdata.detailData.state === 3
-                            ? '退款失敗'
+                            ? $t('退款失敗')
                             : vdata.detailData.state === 4
-                              ? '任務關閉'
-                              : '未知'
+                              ? $t('任務關閉')
+                              : $t('未知')
                   }}
                 </a-tag>
               </a-descriptions-item>
@@ -293,21 +293,21 @@
           </a-col>
           <a-col :sm="24">
             <a-descriptions>
-              <a-descriptions-item label="退款成功時間">
+              <a-descriptions-item :label="$t('退款成功時間')">
                 {{ vdata.detailData.successTime }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="建立時間">
+              <a-descriptions-item :label="$t('建立時間')">
                 {{ vdata.detailData.createdAt }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="更新時間">
+              <a-descriptions-item :label="$t('更新時間')">
                 {{ vdata.detailData.updatedAt }}
               </a-descriptions-item>
             </a-descriptions>
@@ -315,35 +315,35 @@
           <a-divider />
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="接口代碼">
+              <a-descriptions-item :label="$t('接口代碼')">
                 {{ vdata.detailData.ifCode }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="貨幣代碼">
+              <a-descriptions-item :label="$t('貨幣代碼')">
                 {{ vdata.detailData.currency }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="方式代碼">
+              <a-descriptions-item :label="$t('方式代碼')">
                 {{ vdata.detailData.wayCode }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="客戶端IP">
+              <a-descriptions-item :label="$t('客戶端IP')">
                 {{ vdata.detailData.clientIp }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="24">
             <a-descriptions>
-              <a-descriptions-item label="異步通知地址">
+              <a-descriptions-item :label="$t('異步通知地址')">
                 {{ vdata.detailData.notifyUrl }}
               </a-descriptions-item>
             </a-descriptions>
@@ -352,28 +352,28 @@
         <a-divider />
         <a-col :sm="12">
           <a-descriptions>
-            <a-descriptions-item label="渠道訂單號">
+            <a-descriptions-item :label="$t('渠道訂單號')">
               {{ vdata.detailData.channelOrderNo }}
             </a-descriptions-item>
           </a-descriptions>
         </a-col>
         <a-col :sm="12">
           <a-descriptions>
-            <a-descriptions-item label="渠道錯誤碼">
+            <a-descriptions-item :label="$t('渠道錯誤碼')">
               {{ vdata.detailData.errCode }}
             </a-descriptions-item>
           </a-descriptions>
         </a-col>
         <a-col :sm="12">
           <a-descriptions>
-            <a-descriptions-item label="渠道錯誤描述">
+            <a-descriptions-item :label="$t('渠道錯誤描述')">
               {{ vdata.detailData.errMsg }}
             </a-descriptions-item>
           </a-descriptions>
         </a-col>
         <a-form layout="vertical">
           <a-col :sm="24">
-            <a-form-item label="渠道額外參數:">
+            <a-form-item :label="$t('渠道額外參數:')">
               <a-textarea
                 disabled="disabled"
                 style="height: 100px; color: black"
@@ -383,7 +383,7 @@
           </a-col>
           <a-divider />
           <a-col :sm="24">
-            <a-form-item label="擴展參數:">
+            <a-form-item :label="$t('擴展參數:')">
               <a-textarea
                 disabled="disabled"
                 style="height: 100px; color: black"
@@ -392,7 +392,7 @@
             </a-form-item>
           </a-col>
           <a-col :sm="24">
-            <a-form-item label="備註:">
+            <a-form-item :label="$t('備註:')">
               <a-textarea
                 disabled="disabled"
                 style="height: 100px; color: black"
@@ -409,21 +409,22 @@
 import { API_URL_REFUND_ORDER_LIST, req } from '@/api/manage'
 import dayjs from 'dayjs'
 import { reactive, getCurrentInstance, ref } from 'vue'
+import { t } from '@/i18n'
 
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 const tableColumns = [
-  { key: 'payAmount', title: '支付金額', scopedSlots: { customRender: 'payAmountSlot' } },
-  { key: 'refundAmount', title: '退款金額', scopedSlots: { customRender: 'refundAmountSlot' } },
+  { key: 'payAmount', title: t('支付金額'), scopedSlots: { customRender: 'payAmountSlot' } },
+  { key: 'refundAmount', title: t('退款金額'), scopedSlots: { customRender: 'refundAmountSlot' } },
   {
     key: 'refund',
-    title: '退款訂單號',
+    title: t('退款訂單號'),
     scopedSlots: { customRender: 'refundOrderSlot' },
     width: '260px',
   },
   {
     key: 'pay',
-    title: '支付訂單號',
+    title: t('支付訂單號'),
     scopedSlots: { customRender: 'payOrderSlot' },
     width: '260px',
   },
@@ -431,11 +432,11 @@ const tableColumns = [
   // { key: 'mchRefundNo', title: '商户退款单号', dataIndex: 'mchRefundNo' },
   // { key: 'payOrderId', title: '支付订单号', dataIndex: 'payOrderId' },
   // { key: 'channelPayOrderNo', title: '渠道订单号', dataIndex: 'channelPayOrderNo' },
-  { key: 'state', title: '支付狀態', scopedSlots: { customRender: 'stateSlot' } },
-  { key: 'createdAt', dataIndex: 'createdAt', title: '建立日期' },
+  { key: 'state', title: t('支付狀態'), scopedSlots: { customRender: 'stateSlot' } },
+  { key: 'createdAt', dataIndex: 'createdAt', title: t('建立日期') },
   {
     key: 'op',
-    title: '操作',
+    title: t('操作'),
     width: '100px',
     fixed: 'right',
     align: 'center',

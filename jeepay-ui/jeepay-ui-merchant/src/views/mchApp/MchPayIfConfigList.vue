@@ -9,8 +9,8 @@
   >
     <template #title>
       <a-steps :current="vdata.currentStep" type="navigation" style="width: 80%">
-        <a-step title="支付參數配置" @click="stepChange(0)" />
-        <a-step title="支付通道配置" @click="stepChange(1)" />
+        <a-step :title="$t('支付參數配置')" @click="stepChange(0)" />
+        <a-step :title="$t('支付通道配置')" @click="stepChange(1)" />
       </a-steps>
     </template>
 
@@ -46,17 +46,17 @@
               </div>
               <a-badge
                 :status="record.ifConfigState === 1 ? 'processing' : 'error'"
-                :text="record.ifConfigState === 1 ? '啟用' : '未開通'"
+                :text="record.ifConfigState === 1 ? $t('啟用') : $t('未開通')"
               />
             </div>
             <!-- 卡片底部操作栏 -->
             <div class="jeepay-card-ops">
 
               <a v-if="$access('ENT_MCH_PAY_CONFIG_ADD')" @click="editPayIfConfigFunc(record)">
-                填寫參數
+                {{ $t('填寫參數') }}
                 <a-icon key="right" type="right" style="font-size: 13px" />
               </a>
-              <a v-else>暫無操作</a>
+              <a v-else>{{ $t('暫無操作') }}</a>
             </div>
           </div>
         </template>
@@ -69,19 +69,19 @@
             <a-row :gutter="4">
               <a-col :md="9">
                 <a-form-item label="">
-                  <a-input v-model:value="vdata.searchData2.wayCode" placeholder="支付方式代碼" />
+                  <a-input v-model:value="vdata.searchData2.wayCode" :placeholder="$t('支付方式代碼')" />
                 </a-form-item>
               </a-col>
               <a-col :md="9">
                 <a-form-item label="">
-                  <a-input v-model:value="vdata.searchData2.wayName" placeholder="支付方式名稱" />
+                  <a-input v-model:value="vdata.searchData2.wayName" :placeholder="$t('支付方式名稱')" />
                 </a-form-item>
               </a-col>
               <a-col :sm="6">
                 <span class="table-page-search-submitButtons">
-                  <a-button type="primary" @click="searchFunc(true)">查詢</a-button>
+                  <a-button type="primary" @click="searchFunc(true)">{{ $t('查詢') }}</a-button>
                   <a-button style="margin-left: 8px" @click="() => (vdata.searchData2 = {})">
-                    重置
+                    {{ $t('重置') }}
                   </a-button>
                 </span>
               </a-col>
@@ -102,7 +102,7 @@
             <template v-if="column.key === 'passageState'">
               <a-badge
                 :status="record.passageState === 0 ? 'error' : 'processing'"
-                :text="record.passageState === 0 ? '禁用' : '啟用'"
+                :text="record.passageState === 0 ? $t('禁用') : $t('啟用')"
               />
             </template>
             <template v-if="column.key === 'op'">
@@ -113,7 +113,7 @@
                   type="link"
                   @click="editPayPassageFunc(record)"
                 >
-                  配置
+                  {{ $t('配置') }}
                 </a-button>
               </JeepayTableColumns>
             </template>
@@ -122,20 +122,20 @@
       </a-card>
     </div>
     <div class="drawer-btn-center">
-      <a-button :style="{ marginRight: '8px' }" @click="onClose">關閉</a-button>
+      <a-button :style="{ marginRight: '8px' }" @click="onClose">{{ $t('關閉') }}</a-button>
       <a-button
         v-if="$access('ENT_MCH_PAY_CONFIG_LIST') && vdata.currentStep === 1"
         type="primary"
         @click="stepChange(0)"
       >
-        上一步
+        {{ $t('上一步') }}
       </a-button>
       <a-button
         v-if="$access('ENT_MCH_PAY_PASSAGE_LIST') && vdata.currentStep === 0"
         type="primary"
         @click="stepChange(1)"
       >
-        下一步
+        {{ $t('下一步') }}
       </a-button>
     </div>
 
@@ -156,16 +156,17 @@ import {
 import MchPayConfigAddOrEdit from './MchPayConfigAddOrEdit.vue'
 import MchPayPassageAddOrEdit from './MchPayPassageAddOrEdit.vue'
 import { reactive, ref, getCurrentInstance } from 'vue'
+import { t } from '@/i18n'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 // eslint-disable-next-line no-unused-vars
 const tableColumns = [
-  { key: 'wayCode', title: '支付方式代碼', dataIndex: 'wayCode' },
-  { key: 'wayName', title: '支付方式名稱', dataIndex: 'wayName' },
-  { key: 'passageState', title: '狀態', scopedSlots: { customRender: 'stateSlot' } },
+  { key: 'wayCode', title: t('支付方式代碼'), dataIndex: 'wayCode' },
+  { key: 'wayName', title: t('支付方式名稱'), dataIndex: 'wayName' },
+  { key: 'passageState', title: t('狀態'), scopedSlots: { customRender: 'stateSlot' } },
   {
     key: 'op',
-    title: '操作',
+    title: t('操作'),
     width: '200px',
     fixed: 'right',
     align: 'center',
@@ -231,8 +232,8 @@ function editPayIfConfigFunc(record) {
 
   if (record.subMchIsvConfig === 0) {
     $infoBox.message.error({
-      title: '提示',
-      content: '當前應用所屬商戶為特約商戶，請先配置服務商支付參數！',
+      title: t('提示'),
+      content: t('當前應用所屬商戶為特約商戶，請先配置服務商支付參數！'),
     })
   } else if (record.configPageType === 1) {
     mchPayConfigAddOrEdit.value.show(vdata.appId, record)
@@ -243,8 +244,8 @@ function editPayPassageFunc(record) {
   getAvailablePayInterfaceList(vdata.appId, record.wayCode).then((resData) => {
     if (!resData || resData.length === 0) {
       $infoBox.message.error({
-        title: '提示',
-        content: '暫無可用支付接口配置',
+        title: t('提示'),
+        content: t('暫無可用支付接口配置'),
       })
     } else {
       mchPayPassageAddOrEdit.value.show(vdata.appId, record.wayCode)

@@ -15,7 +15,7 @@
         <div class="jeepay-card-add" :style="{'height': height + 'px'}">
           <img src="~@/assets/svg/add-icon.svg" alt="add-icon" :style="{'width': height/3 + 'px', 'height': height/3 + 'px'}">
           <div class="jeepay-card-add-text">
-            新建{{ name }}
+            {{ $t('新建{0}', [name]) }}
           </div>
         </div>
       </a-col>

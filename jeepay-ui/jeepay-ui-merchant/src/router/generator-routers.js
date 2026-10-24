@@ -1,6 +1,7 @@
 import { BasicLayout, BlankLayout, PageView, RouteView } from '@/layouts'
 import { useUserStore } from '@/store/modules/user'
 import { asyncRouteDefine } from '@/config/appConfig'
+import { t } from '@/i18n'
 
 // 前端路由表 = 基础定义 + 动态组件
 const constantRouterComponents = Object.assign(
@@ -30,7 +31,7 @@ const rootRouter = {
   component: BasicLayout,
   redirect: redirectFunc, // 根页面【/】默认跳转 地址
   children: [],
-  meta: { title: '主頁' },
+  meta: { title: t('主頁') },
 }
 
 // 动态跳转路径 func

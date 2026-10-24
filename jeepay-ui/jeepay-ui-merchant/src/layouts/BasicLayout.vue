@@ -71,17 +71,18 @@
         </div>
 
         <!-- 个人信息部分 -->
-        <div style="display: flex; align-items: center">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <LanguageButton />
           <a-dropdown>
             <template #overlay>
               <a-menu>
                 <a-menu-item @click="userInfo">
                   <setting-outlined style="margin-right: 10px" />
-                  <span style="cursor: hand">個人資料</span>
+                  <span style="cursor: hand">{{ $t('個人資料') }}</span>
                 </a-menu-item>
                 <a-menu-item @click="logout">
                   <LogoutOutlined style="margin-right: 10px" />
-                  <span style="cursor: hand">登出</span>
+                  <span style="cursor: hand">{{ $t('登出') }}</span>
                 </a-menu-item>
               </a-menu>
             </template>
@@ -102,6 +103,8 @@ import { reactive, computed, watchEffect, nextTick, getCurrentInstance } from 'v
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons-vue'
 import { generatorDynamicRouter } from '@/router/generator-routers'
 import { useUserStore } from '@/store/modules/user'
+import { t } from '@/i18n'
+import LanguageButton from '@/components/LanguagePicker/LanguageButton.vue'
 
 const { $infoBox, $access, $hasAgentEnt } = getCurrentInstance()!.appContext.config.globalProperties
 
@@ -143,8 +146,8 @@ function userInfo() {
 // 登出函数
 function logout() {
   $infoBox.confirmDanger(
-    '是否登出？',
-    `你好${userStore.userInfo['realname']}確認登出嗎？`,
+    t('是否登出？'),
+    t('你好{0}確認登出嗎？', [userStore.userInfo['realname']]),
     () => {
       userStore.logout()
     }

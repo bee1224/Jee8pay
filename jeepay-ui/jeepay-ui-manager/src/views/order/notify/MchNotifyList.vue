@@ -14,38 +14,38 @@
             >
               <a-icon slot="suffixIcon" type="sync" />
             </a-range-picker>
-            <jeepay-text-up :placeholder="'訂單ID'" v-model:value="vdata.searchData.orderId" />
+            <jeepay-text-up :placeholder="$t('訂單ID')" v-model:value="vdata.searchData.orderId" />
             <jeepay-text-up
-              :placeholder="'商戶訂單號'"
+              :placeholder="$t('商戶訂單號')"
               v-model:value="vdata.searchData.mchOrderNo"
             />
-            <jeepay-text-up :placeholder="'商戶號'" v-model:value="vdata.searchData.mchNo" />
-            <jeepay-text-up :placeholder="'服務商號'" v-model:value="vdata.searchData.isvNo" />
-            <jeepay-text-up :placeholder="'應用AppId'" v-model:value="vdata.searchData.appId" />
+            <jeepay-text-up :placeholder="$t('商戶號')" v-model:value="vdata.searchData.mchNo" />
+            <jeepay-text-up :placeholder="$t('服務商號')" v-model:value="vdata.searchData.isvNo" />
+            <jeepay-text-up :placeholder="$t('應用AppId')" v-model:value="vdata.searchData.appId" />
             <a-select
               v-model:value="vdata.searchData.state"
-              placeholder="通知狀態"
+              :placeholder="$t('通知狀態')"
               class="table-head-layout"
             >
-              <a-select-option value="">全部</a-select-option>
-              <a-select-option value="1">通知中</a-select-option>
-              <a-select-option value="2">通知成功</a-select-option>
-              <a-select-option value="3">通知失敗</a-select-option>
+              <a-select-option value="">{{ $t('全部') }}</a-select-option>
+              <a-select-option value="1">{{ $t('通知中') }}</a-select-option>
+              <a-select-option value="2">{{ $t('通知成功') }}</a-select-option>
+              <a-select-option value="3">{{ $t('通知失敗') }}</a-select-option>
             </a-select>
             <a-select
               v-model:value="vdata.searchData.orderType"
-              placeholder="訂單類型"
+              :placeholder="$t('訂單類型')"
               class="table-head-layout"
             >
-              <a-select-option value="">全部</a-select-option>
-              <a-select-option value="1">支付</a-select-option>
-              <a-select-option value="2">退款</a-select-option>
-              <a-select-option value="3">轉帳</a-select-option>
+              <a-select-option value="">{{ $t('全部') }}</a-select-option>
+              <a-select-option value="1">{{ $t('支付') }}</a-select-option>
+              <a-select-option value="2">{{ $t('退款') }}</a-select-option>
+              <a-select-option value="3">{{ $t('轉帳') }}</a-select-option>
             </a-select>
 
             <span class="table-page-search-submitButtons">
               <a-button type="primary" @click="queryFunc" :loading="vdata.btnLoading">
-                搜尋
+                {{ $t('搜尋') }}
               </a-button>
               <a-button
                 style="margin-left: 8px"
@@ -56,7 +56,7 @@
                   }
                 "
               >
-                重置
+                {{ $t('重置') }}
               </a-button>
             </span>
           </div>
@@ -81,17 +81,17 @@
               :key="record.orderId"
               :color="record.state === 1 ? 'orange' : record.state === 2 ? 'green' : 'volcano'"
             >
-              <template v-if="record.state == 1">通知中</template>
-              <template v-else-if="record.state == 2">通知成功</template>
-              <template v-else-if="record.state == 3">通知失敗</template>
-              <template v-else>未知</template>
+              <template v-if="record.state == 1">{{ $t('通知中') }}</template>
+              <template v-else-if="record.state == 2">{{ $t('通知成功') }}</template>
+              <template v-else-if="record.state == 3">{{ $t('通知失敗') }}</template>
+              <template v-else>{{ $t('未知') }}</template>
             </a-tag>
           </template>
           <template v-if="column.key === 'orderType'">
-            <a-tag v-if="record.orderType == 1" color="green">支付</a-tag>
-            <a-tag v-else-if="record.orderType == 1" color="volcano">退款</a-tag>
-            <a-tag v-else-if="record.orderType == 1" color="blue">轉帳</a-tag>
-            <a-tag v-else color="orange">未知</a-tag>
+            <a-tag v-if="record.orderType == 1" color="green">{{ $t('支付') }}</a-tag>
+            <a-tag v-else-if="record.orderType == 1" color="volcano">{{ $t('退款') }}</a-tag>
+            <a-tag v-else-if="record.orderType == 1" color="blue">{{ $t('轉帳') }}</a-tag>
+            <a-tag v-else color="orange">{{ $t('未知') }}</a-tag>
           </template>
           <template v-if="column.key === 'op'">
             <!-- 操作列插槽 -->
@@ -101,14 +101,14 @@
                 v-if="$access('ENT_MCH_NOTIFY_VIEW')"
                 @click="detailFunc(record.notifyId)"
               >
-                詳情
+                {{ $t('詳情') }}
               </a-button>
               <a-button
                 type="link"
                 v-if="$access('ENT_MCH_NOTIFY_RESEND') && record.state === 3"
                 @click="resendFunc(record.notifyId)"
               >
-                重發通知
+                {{ $t('重發通知') }}
               </a-button>
             </JeepayTableColumns>
           </template>
@@ -122,13 +122,13 @@
         placement="right"
         :closable="true"
         v-model:open="vdata.open"
-        :title="vdata.open === true ? '商戶通知詳情' : ''"
+        :title="vdata.open === true ? $t('商戶通知詳情') : ''"
         @close="onClose"
       >
         <a-row justify="space-between" type="flex">
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="訂單ID">
+              <a-descriptions-item :label="$t('訂單ID')">
                 <a-tag color="purple">
                   {{ vdata.detailData.orderId }}
                 </a-tag>
@@ -137,76 +137,76 @@
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="服務商號">
+              <a-descriptions-item :label="$t('服務商號')">
                 {{ vdata.detailData.isvNo }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="商戶訂單號">
+              <a-descriptions-item :label="$t('商戶訂單號')">
                 {{ vdata.detailData.mchOrderNo }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="商戶號">
+              <a-descriptions-item :label="$t('商戶號')">
                 {{ vdata.detailData.mchNo }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="訂單類型">
-                <a-tag v-if="vdata.detailData.orderType == 1" color="green">支付</a-tag>
-                <a-tag v-else-if="vdata.detailData.orderType == 1" color="volcano">退款</a-tag>
-                <a-tag v-else-if="vdata.detailData.orderType == 1" color="blue">轉帳</a-tag>
-                <a-tag v-else color="orange">未知</a-tag>
+              <a-descriptions-item :label="$t('訂單類型')">
+                <a-tag v-if="vdata.detailData.orderType == 1" color="green">{{ $t('支付') }}</a-tag>
+                <a-tag v-else-if="vdata.detailData.orderType == 1" color="volcano">{{ $t('退款') }}</a-tag>
+                <a-tag v-else-if="vdata.detailData.orderType == 1" color="blue">{{ $t('轉帳') }}</a-tag>
+                <a-tag v-else color="orange">{{ $t('未知') }}</a-tag>
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="應用APPID">
+              <a-descriptions-item :label="$t('應用APPID')">
                 {{ vdata.detailData.appId }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="通知狀態">
-                <a-tag v-if="vdata.detailData.state == 1" color="orange">通知中</a-tag>
-                <a-tag v-else-if="vdata.detailData.state == 2" color="green">通知成功</a-tag>
-                <a-tag v-else-if="vdata.detailData.state == 3" color="volcano">通知失敗</a-tag>
-                <a-tag v-else color="volcano">未知</a-tag>
+              <a-descriptions-item :label="$t('通知狀態')">
+                <a-tag v-if="vdata.detailData.state == 1" color="orange">{{ $t('通知中') }}</a-tag>
+                <a-tag v-else-if="vdata.detailData.state == 2" color="green">{{ $t('通知成功') }}</a-tag>
+                <a-tag v-else-if="vdata.detailData.state == 3" color="volcano">{{ $t('通知失敗') }}</a-tag>
+                <a-tag v-else color="volcano">{{ $t('未知') }}</a-tag>
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="通知次數">
+              <a-descriptions-item :label="$t('通知次數')">
                 {{ vdata.detailData.notifyCount }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="24">
             <a-descriptions>
-              <a-descriptions-item label="最後通知時間">
+              <a-descriptions-item :label="$t('最後通知時間')">
                 {{ vdata.detailData.lastNotifyTime }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="建立時間">
+              <a-descriptions-item :label="$t('建立時間')">
                 {{ vdata.detailData.createdAt }}
               </a-descriptions-item>
             </a-descriptions>
           </a-col>
           <a-col :sm="12">
             <a-descriptions>
-              <a-descriptions-item label="更新時間">
+              <a-descriptions-item :label="$t('更新時間')">
                 {{ vdata.detailData.updatedAt }}
               </a-descriptions-item>
             </a-descriptions>
@@ -214,7 +214,7 @@
 
           <a-col :sm="24">
             <a-form layout="vertical">
-              <a-form-item label="通知地址:">
+              <a-form-item :label="$t('通知地址:')">
                 <a-textarea
                   disabled="disabled"
                   style="height: 100px; color: black"
@@ -225,7 +225,7 @@
           </a-col>
           <a-col :sm="24">
             <a-form layout="vertical">
-              <a-form-item label="回應結果:">
+              <a-form-item :label="$t('回應結果:')">
                 <a-textarea
                   disabled="disabled"
                   style="height: 100px; color: black"
@@ -243,23 +243,24 @@
 import { API_URL_MCH_NOTIFY_LIST, req, mchNotifyResend } from '@/api/manage'
 import moment from 'moment'
 import { reactive, computed, ref, getCurrentInstance } from 'vue'
+import { t } from '@/i18n'
 const { $infoBox, $access } = getCurrentInstance()!.appContext.config.globalProperties
 
 // eslint-disable-next-line no-unused-vars
 const tableColumns = [
-  { key: 'orderId', title: '訂單ID', fixed: 'left', dataIndex: 'orderId' },
-  { key: 'mchOrderNo', title: '商戶訂單號', dataIndex: 'mchOrderNo' },
-  { key: 'state', title: '通知狀態', width: '130px', scopedSlots: { customRender: 'stateSlot' } },
+  { key: 'orderId', title: t('訂單ID'), fixed: 'left', dataIndex: 'orderId' },
+  { key: 'mchOrderNo', title: t('商戶訂單號'), dataIndex: 'mchOrderNo' },
+  { key: 'state', title: t('通知狀態'), width: '130px', scopedSlots: { customRender: 'stateSlot' } },
   {
     key: 'orderType',
-    title: '訂單類型',
+    title: t('訂單類型'),
     width: '130px',
     scopedSlots: { customRender: 'orderTypeSlot' },
   },
-  { key: 'createdAt', dataIndex: 'createdAt', title: '建立日期' },
+  { key: 'createdAt', dataIndex: 'createdAt', title: t('建立日期') },
   {
     key: 'op',
-    title: '操作',
+    title: t('操作'),
     fixed: 'right',
     align: 'center',
     scopedSlots: { customRender: 'opSlot' },
@@ -332,9 +333,9 @@ function onClose() {
 
 function resendFunc(notifyId) {
   // 重发通知
-  $infoBox.confirmPrimary('確認重發通知？', '', () => {
+  $infoBox.confirmPrimary(t('確認重發通知？'), '', () => {
     mchNotifyResend(notifyId).then((res) => {
-      $infoBox.message.success('任務更新成功，請稍後檢視最新狀態！')
+      $infoBox.message.success(t('任務更新成功，請稍後檢視最新狀態！'))
       searchFunc()
     })
   })

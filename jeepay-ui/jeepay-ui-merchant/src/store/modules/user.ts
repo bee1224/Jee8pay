@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import jeepayStorageWrapper from '@/utils/jeepayStorageWrapper'
 import { getCurrentUserInfo } from '@/api/login'
+import { translateMenuTree } from '@/i18n'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -36,6 +37,7 @@ export const useUserStore = defineStore('user', {
       // 刷新用户信息
       if (val) return (this.userInfo = Object.assign({}, val))
       return getCurrentUserInfo().then((bizData: any) => {
+        translateMenuTree(bizData.allMenuRouteTree)
         this.userInfo = Object.assign({}, bizData)
       })
     },
