@@ -19,7 +19,7 @@
 |---|---|
 | 根因 | `sync-edge-certificate.sh`（prod、dev）改用 `docker exec <edge> nginx -s reload`，不再 `docker kill`。舊檔備份為 `*.bak-<timestamp>`。 |
 | 重啟政策 | prod edge 改為 `restart: always`：repo `compose.yml` 已改；執行中容器以 `docker update --restart=always` 套用，未重建。 |
-| 監控 | `scripts/edge-watchdog.sh` + `/etc/cron.d/jee8pay-edge-watchdog`（每分鐘與開機後 90 秒）。edge 停止時自動 `docker start`；停止、連續 3 分鐘不健康、恢復時以 Daily Report 同一個 bot 通知營運群組，只在狀態改變時發送。log：`/var/log/jee8pay-edge-watchdog.log`。 |
+| 監控 | `scripts/edge-watchdog.sh` + `/etc/cron.d/jee8pay-edge-watchdog`（每分鐘與開機後 90 秒）。edge 停止時自動 `docker start`；停止、連續 3 分鐘不健康、恢復時以 Daily Report 同一個 bot 通知營運群組，只在狀態改變時發送，通知 24 小時後自動刪除（`AUTO_DELETE_HOURS`）；事件紀錄保留在 log：`/var/log/jee8pay-edge-watchdog.log`。 |
 
 **注意**：正式機目前 `current/compose.yml` 的 edge 仍是 `unless-stopped`；下一次 release 帶入 repo 的 compose 前，若重建 edge，restart 政策會退回 `unless-stopped`。根因已修正，看門狗仍會兜底。
 
