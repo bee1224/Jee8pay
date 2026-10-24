@@ -21,6 +21,8 @@
 | 重啟政策 | prod edge 改為 `restart: always`：repo `compose.yml` 已改；執行中容器以 `docker update --restart=always` 套用，未重建。 |
 | 監控 | 已由「服務看門狗」取代原 edge 看門狗，見下方〈服務看門狗與關機通知〉。 |
 
+**2026-10-24 23:5x 追加**：兩台主機所有常駐容器改為 `restart: always`（`volume-init` 維持 `no`）。repo 的 `deploy/jee8pay-v2-production/compose.yml`、`deploy/jee8pay-v2-dev/compose.yml`、`edge/compose.edge.yaml`、`merchant-uat/compose.yaml` 已改；主機上以 `docker update --restart=always` 套用到執行中容器（未重建），並同步改各自 `current` 的 compose（備份為 `*.bak-<timestamp>`）。原因：`unless-stopped` 在容器曾被送過訊號（`HasBeenManuallyStopped`）時開機不會拉起，即本次 edge 停機的根因。
+
 **注意**：2026-10-24 20:33 起正式機 `current`（release `169bb30d7eac-tgdel`）的 compose 已是 edge `restart: always`，與 repo 一致。
 
 ## 服務看門狗與關機通知
@@ -38,7 +40,14 @@
 
 測試機同樣安裝（2026-10-24）：設定檔 `/etc/jee8pay-watchdog.conf` 監看 `jee8pay-v2-dev`、`jee8pay-v2-dev-edge`（sandbox-edge，最後啟動並檢查 `159.198.40.128:443`）、`jee8pay-v2-dev-merchant-uat` 三個 compose 專案；關機通知 unit 見 `deploy/jee8pay-v2-dev/systemd/`。2026-10-24 起測試機設定 `PEER_ONLY=1`：只通知正式機無回應／恢復；每日報備、資源警戒、本機容器告警、關機通知與重開機總結都不發（cron 與 unit 保留，本機停止的容器仍會自動啟動）。測試機同日 17:20 也被 hypervisor 關機（正式機為 17:05）。
 
-關機通知尚未在正式機實際關機下驗證（避免為測試重開正式機），已驗證 unit 為 enabled/active 且排在 network-online、docker 之後（關機時先執行）。
+**重開機實測（2026-10-24／25）**：改為 `restart: always` 後兩台各以 `systemctl reboot` 實測一次，重開前後比對容器狀態、主機服務、監聽 port、ufw、edge 健康檢查與管理後台網址，除開機 ID 外完全相同，無須人工介入。
+
+| 主機 | 重開時間 | SSH 恢復 | 全部容器 healthy | 備註 |
+|---|---|---|---|---|
+| 測試機 | 2026-10-24 23:53 | 25 秒 | 47 秒 | `PEER_ONLY=1` 不發本機通知 |
+| 正式機 | 2026-10-25 00:25（等到連續 5 分鐘無新訂單） | 19 秒 | 72 秒（`admin-v2` 74 秒回 200） | 看門狗開機總結「上次為正常關機」，關機通知首次實際驗證；payment 41 秒啟動、MQ consumer 正常，開機後 payment／manager／merchant／mq-broker 無 ERROR |
+
+測試機的 V1 遺留 unit `nnviopp-sandbox-edge-egress.service`（限制 V1 網段 172.21–172.25 的對外連線，白名單已於 V1 退役時封存）每次開機都失敗；V2 網段為 172.29–172.31，此 unit 未套用任何規則。2026-10-25 已 disable 並 reset-failed，unit 與腳本備份於 `state/v1-retirement-20260822-222906/`。
 
 ## 重開機後檢查
 

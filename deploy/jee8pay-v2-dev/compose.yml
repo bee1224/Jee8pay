@@ -1,7 +1,7 @@
 name: jee8pay-v2-dev
 
 x-backend-common: &backend-common
-  restart: unless-stopped
+  restart: always
   environment:
     SPRING_CONFIG_IMPORT: configtree:/run/secrets/
     TZ: Asia/Taipei
@@ -34,7 +34,7 @@ services:
   db:
     platform: linux/amd64
     image: ${DB_IMAGE:-mariadb:10.11}
-    restart: unless-stopped
+    restart: always
     environment:
       LANG: C.UTF-8
       TZ: Asia/Taipei
@@ -62,7 +62,7 @@ services:
 
   redis:
     image: ${REDIS_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/redis:6.2.14}
-    restart: unless-stopped
+    restart: always
     # maxmemory 低於 mem_limit 96m：滿了先淘汰有 TTL 的 key，而不是整個容器被 OOM kill
     command: ["redis-server", "--appendonly", "yes", "--maxmemory", "64mb", "--maxmemory-policy", "volatile-lru"]
     volumes:
@@ -80,7 +80,7 @@ services:
   mq-namesrv:
     platform: linux/amd64
     image: ${ROCKETMQ_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:5.3.1}
-    restart: unless-stopped
+    restart: always
     user: "0:0"
     command: sh mqnamesrv
     environment:
@@ -100,7 +100,7 @@ services:
   mq-broker:
     platform: linux/amd64
     image: ${ROCKETMQ_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:5.3.1}
-    restart: unless-stopped
+    restart: always
     user: "0:0"
     command: sh mqbroker -n mq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.1/conf/broker.conf
     environment:
@@ -159,7 +159,7 @@ services:
 
   callback-ingress:
     image: nginx:alpine
-    restart: unless-stopped
+    restart: always
     depends_on:
       payment:
         condition: service_healthy
@@ -259,7 +259,7 @@ services:
       args:
         UI_DIR: ui-manager
     image: jee8pay-v2-dev-manager-ui:de94ab8fd19d-b20899e885
-    restart: unless-stopped
+    restart: always
     environment:
       BACKEND_HOST: manager:9217
     depends_on:
@@ -283,7 +283,7 @@ services:
       args:
         UI_DIR: ui-merchant
     image: jee8pay-v2-dev-merchant-ui:de94ab8fd19d-b20899e885
-    restart: unless-stopped
+    restart: always
     environment:
       BACKEND_HOST: merchant:9218
     depends_on:
