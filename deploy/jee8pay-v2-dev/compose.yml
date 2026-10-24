@@ -104,7 +104,7 @@ services:
     command: sh mqbroker -n mq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.1/conf/broker.conf
     environment:
       NAMESRV_ADDR: mq-namesrv:9876
-      JAVA_OPT_EXT: -Xms448m -Xmx448m -Xmn224m
+      JAVA_OPT_EXT: -Xms448m -Xmx448m -Xmn224m -XX:MaxDirectMemorySize=256m
     depends_on:
       mq-namesrv:
         condition: service_healthy
@@ -118,7 +118,7 @@ services:
       timeout: 10s
       retries: 18
       start_period: 120s
-    mem_limit: 768m
+    mem_limit: 1024m
     networks:
       - v2
 
