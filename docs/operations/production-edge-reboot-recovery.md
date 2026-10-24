@@ -19,16 +19,28 @@
 |---|---|
 | 根因 | `sync-edge-certificate.sh`（prod、dev）改用 `docker exec <edge> nginx -s reload`，不再 `docker kill`。舊檔備份為 `*.bak-<timestamp>`。 |
 | 重啟政策 | prod edge 改為 `restart: always`：repo `compose.yml` 已改；執行中容器以 `docker update --restart=always` 套用，未重建。 |
-| 監控 | `scripts/edge-watchdog.sh` + `/etc/cron.d/jee8pay-edge-watchdog`（每分鐘與開機後 90 秒）。edge 停止時自動 `docker start`；停止、連續 3 分鐘不健康、恢復時以 Daily Report 同一個 bot 通知營運群組，只在狀態改變時發送，通知 24 小時後自動刪除（`AUTO_DELETE_HOURS`）；事件紀錄保留在 log：`/var/log/jee8pay-edge-watchdog.log`。 |
+| 監控 | 已由「服務看門狗」取代原 edge 看門狗，見下方〈服務看門狗與關機通知〉。 |
 
-**注意**：正式機目前 `current/compose.yml` 的 edge 仍是 `unless-stopped`；下一次 release 帶入 repo 的 compose 前，若重建 edge，restart 政策會退回 `unless-stopped`。根因已修正，看門狗仍會兜底。
+**注意**：2026-10-24 20:33 起正式機 `current`（release `169bb30d7eac-tgdel`）的 compose 已是 edge `restart: always`，與 repo 一致。
+
+## 服務看門狗與關機通知
+
+`scripts/service-watchdog.sh`（取代 `edge-watchdog.sh`），由 `/etc/cron.d/jee8pay-service-watchdog` 每分鐘及開機後 90 秒以 root 執行：
+
+- **容器**：檢查 `current/compose.yml` 的全部服務（restart 政策為 `no` 的一次性工作如 `volume-init` 除外）。停止的容器依序自動 `docker start`（db、redis、mq-namesrv、mq-broker 先，edge 最後，其餘依 compose 順序）；連續 3 分鐘 unhealthy 告警；edge 另檢查 `162.0.233.203:443` 是否監聽。
+- **主機服務**：docker、containerd、cron、ssh、fail2ban、ufw、qemu-guest-agent 未執行即告警。
+- **重開機總結**：偵測到 `boot_id` 改變時發一則總結，含開機時間、上次是否正常關機、容器與主機服務的正常數量，以及自動啟動結果。
+- **關機通知**：`systemd/jee8pay-shutdown-notify.service`（安裝於 `/etc/systemd/system/`，已 enable）。關機或重開機開始時執行 `service-watchdog.sh shutdown`，此時網路與 docker 尚未停止；通知含關機類型與 logind 記錄的來源（例如 `hypervisor initiated shutdown`），並留下正常關機標記。斷電或強制關機無法通知，開機總結會顯示「未偵測到正常關機通知」。
+- 通知只在狀態改變時發送，24 小時後自動刪除（`AUTO_DELETE_HOURS`）；事件紀錄保留在 `/var/log/jee8pay-service-watchdog.log`。狀態檔：`/var/lib/jee8pay-service-watchdog/`。
+
+關機通知尚未在正式機實際關機下驗證（避免為測試重開正式機），已驗證 unit 為 enabled/active 且排在 network-online、docker 之後（關機時先執行）。
 
 ## 重開機後檢查
 
 ```bash
 sudo docker ps -a --format '{{.Names}} {{.Status}}' | grep jee8pay-v2-production
 sudo docker inspect -f '{{.HostConfig.RestartPolicy.Name}} {{.State.Status}} {{.State.Health.Status}}' jee8pay-v2-production-edge
-sudo tail -5 /var/log/jee8pay-edge-watchdog.log
+sudo tail -5 /var/log/jee8pay-service-watchdog.log
 ```
 
 不要再對任何容器使用 `docker kill --signal ...` 做 reload；改用 `docker exec <container> <reload 指令>`。

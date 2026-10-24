@@ -1,0 +1,17 @@
+# 關機／重開機開始時以 Telegram 通知營運群組（見 scripts/service-watchdog.sh shutdown）。
+# After= 的反向順序：關機時本服務的 ExecStop 會在 network-online、docker 停止「之前」執行，
+# 所以通知送得出去。斷電或強制關機無法通知，由開機後看門狗的重開機總結補報。
+[Unit]
+Description=Jee8pay shutdown/reboot Telegram notice
+Wants=network-online.target
+After=network-online.target nss-lookup.target docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/true
+ExecStop=/opt/jee8pay-v2-production/scripts/service-watchdog.sh shutdown
+TimeoutStopSec=20
+
+[Install]
+WantedBy=multi-user.target
