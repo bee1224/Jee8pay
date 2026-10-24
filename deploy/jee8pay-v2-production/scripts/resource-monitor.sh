@@ -5,6 +5,9 @@
 # 解除門檻比警戒低 5 個百分點，避免數值在 70% 上下抖動時反覆通知。
 set -uo pipefail
 
+# 主機差異（測試機）放在設定檔覆寫；正式機無設定檔，使用下列預設值
+[[ -r ${WATCHDOG_CONFIG:-/etc/jee8pay-watchdog.conf} ]] && . "${WATCHDOG_CONFIG:-/etc/jee8pay-watchdog.conf}"
+
 readonly threshold=${THRESHOLD:-70}
 readonly clear_below=$((threshold - 5))
 # CPU 為瞬間值，連續幾分鐘超標才算，避開排程/GC 的短暫尖峰
@@ -13,6 +16,8 @@ readonly remind_seconds=$(( ${REMIND_HOURS:-6} * 3600 ))
 readonly chat_id=${TELEGRAM_CHAT_ID:--5211710664}
 readonly token_file=${TELEGRAM_TOKEN_FILE:-/opt/jee8pay-v2-production/secrets/telegram-bot-token}
 readonly state_dir=${RESOURCE_MONITOR_STATE_DIR:-/var/lib/jee8pay-resource-monitor}
+# 要監測的容器（名稱 regex）與通知時去掉的名稱前綴
+readonly container_match=${CONTAINER_MATCH:-^jee8pay-v2-production}
 readonly container_prefix=${CONTAINER_PREFIX:-jee8pay-v2-production}
 # 警戒／解除通知發出後自動刪除的時間（Telegram 只允許 bot 刪除 48 小時內的訊息）
 readonly auto_delete_seconds=$(( ${AUTO_DELETE_HOURS:-24} * 3600 ))
@@ -27,7 +32,7 @@ host=$(hostname)
 tg() {
   local method=$1 token
   shift
-  token=$(cat "$token_file" 2>/dev/null) || { log 'telegram token unreadable'; return 1; }
+  token=$(cat "$token_file" 2>/dev/null) || { log 'telegram token unreadable' >&2; return 1; }
   # token 經 stdin 交給 curl，不出現在 process list 或 log
   printf 'url = "https://api.telegram.org/bot%s/%s"\n' "$token" "$method" |
     curl -sS -m 15 -w '\n%{http_code}' -K - --data-urlencode "chat_id=$chat_id" "$@" 2>/dev/null
@@ -126,6 +131,6 @@ while read -r name memperc usage; do
   pct=${memperc%\%}
   check "ctr-$name" "容器 ${name#"$container_prefix"-} 記憶體" "${pct%.*}" "$usage"
 done < <(docker stats --no-stream --format '{{.Name}} {{.MemPerc}} {{.MemUsage}}' 2>/dev/null |
-  awk -v p="$container_prefix" 'index($1, p) == 1 {print $1, $2, $3 "/" $5}')
+  awk -v m="$container_match" '$1 ~ m {print $1, $2, $3 "/" $5}')
 
 exit 0

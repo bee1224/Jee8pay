@@ -10,15 +10,19 @@
 # 只在狀態改變時通知；通知 24 小時後自動刪除，事件紀錄保留在 log。
 set -uo pipefail
 
-readonly project=${COMPOSE_PROJECT:-jee8pay-v2-production}
-readonly compose_file=${COMPOSE_FILE_PATH:-/opt/jee8pay-v2-production/current/compose.yml}
+# 主機差異（測試機）放在設定檔覆寫；正式機無設定檔，使用下列預設值
+[[ -r ${WATCHDOG_CONFIG:-/etc/jee8pay-watchdog.conf} ]] && . "${WATCHDOG_CONFIG:-/etc/jee8pay-watchdog.conf}"
+
+# 監看的 compose 專案：「專案=compose 檔」以空白分隔。有 compose 檔時以其服務清單為準（可偵測容器被刪除）；
+# 沒有時以該專案現有容器為準。第一個專案是主專案，通知中只顯示服務名。
+readonly projects=${WATCH_PROJECTS:-jee8pay-v2-production=/opt/jee8pay-v2-production/current/compose.yml}
 readonly secret_dir=${V2_SECRET_DIR:-/opt/jee8pay-v2-production/secrets}
-readonly edge_service=edge
+# 對外入口：「專案/服務」，另檢查 listen_ip:443 是否監聽
+readonly edge_key=${EDGE_KEY:-jee8pay-v2-production/edge}
 readonly listen_ip=${EDGE_LISTEN_IP:-162.0.233.203}
 readonly host_units=${HOST_UNITS:-docker containerd cron ssh fail2ban ufw qemu-guest-agent}
-# 啟動順序：資料層先、edge 最後，其餘照 compose 順序
+# 啟動順序：資料層先、對外入口最後，其餘照 compose 順序
 readonly start_first="db redis mq-namesrv mq-broker"
-readonly start_last="edge"
 readonly chat_id=${TELEGRAM_CHAT_ID:--5211710664}
 readonly token_file=${TELEGRAM_TOKEN_FILE:-/opt/jee8pay-v2-production/secrets/telegram-bot-token}
 readonly state_dir=${WATCHDOG_STATE_DIR:-/var/lib/jee8pay-service-watchdog}
@@ -37,7 +41,7 @@ host=$(hostname)
 tg() {
   local method=$1 token
   shift
-  token=$(cat "$token_file" 2>/dev/null) || { log 'telegram token unreadable'; return 1; }
+  token=$(cat "$token_file" 2>/dev/null) || { log 'telegram token unreadable' >&2; return 1; }
   # token 經 stdin 交給 curl，不出現在 process list 或 log
   printf 'url = "https://api.telegram.org/bot%s/%s"\n' "$token" "$method" |
     curl -sS -m 10 -w '\n%{http_code}' -K - --data-urlencode "chat_id=$chat_id" "$@" 2>/dev/null
@@ -89,17 +93,38 @@ fi
 purge_old_notices
 
 # ---------------- 容器 ----------------
-services=$(env V2_SECRET_DIR="$secret_dir" docker compose -p "$project" -f "$compose_file" config --services 2>/dev/null)
-[[ -n $services ]] || services=$(docker ps -a --filter "label=com.docker.compose.project=$project" \
-  --format '{{.Label "com.docker.compose.service"}}' 2>/dev/null)
+primary=${projects%%=*}
+primary=${primary%% *}
+keys_first=() keys_mid=() keys_last=()
+for entry in $projects; do
+  proj=${entry%%=*}
+  file=${entry#*=}
+  [[ $entry == *=* ]] || file=
+  svcs=
+  [[ -n $file ]] && svcs=$(env V2_SECRET_DIR="$secret_dir" docker compose -p "$proj" -f "$file" config --services 2>/dev/null)
+  [[ -n $svcs ]] || svcs=$(docker ps -a --filter "label=com.docker.compose.project=$proj" \
+    --format '{{.Label "com.docker.compose.service"}}' 2>/dev/null)
+  for s in $svcs; do
+    k="$proj/$s"
+    if [[ $k == "$edge_key" ]]; then keys_last+=("$k")
+    elif [[ " $start_first " == *" $s "* ]]; then keys_first+=("$k")
+    else keys_mid+=("$k"); fi
+  done
+done
+# start_first 內部依其列出的順序
 ordered=()
-for s in $start_first; do grep -qx "$s" <<<"$services" && ordered+=("$s"); done
-for s in $services; do [[ " $start_first $start_last " == *" $s "* ]] || ordered+=("$s"); done
-for s in $start_last; do grep -qx "$s" <<<"$services" && ordered+=("$s"); done
+for f in $start_first; do for k in "${keys_first[@]}"; do [[ ${k#*/} == "$f" ]] && ordered+=("$k"); done; done
+ordered+=("${keys_mid[@]}" "${keys_last[@]}")
 
 container_of() {
-  docker ps -aq --filter "label=com.docker.compose.project=$project" \
-    --filter "label=com.docker.compose.service=$1" 2>/dev/null | head -1
+  docker ps -aq --filter "label=com.docker.compose.project=${1%%/*}" \
+    --filter "label=com.docker.compose.service=${1#*/}" 2>/dev/null | head -1
+}
+
+# 通知用名稱：主專案只顯示服務名，其他專案加上專案後綴
+label_of() {
+  local proj=${1%%/*}
+  if [[ $proj == "$primary" ]]; then echo "${1#*/}"; else echo "${proj#"$primary"-}/${1#*/}"; fi
 }
 
 svc_status() {
@@ -112,7 +137,7 @@ svc_status() {
   [[ $running == true ]] || { echo stopped; return; }
   health=$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$c")
   if [[ $health == unhealthy ]]; then echo unhealthy; return; fi
-  if [[ $1 == "$edge_service" ]] && ! ss -ltnH 'sport = :443' | grep -q "$listen_ip:443"; then echo unhealthy; return; fi
+  if [[ $1 == "$edge_key" ]] && ! ss -ltnH 'sport = :443' | grep -q "$listen_ip:443"; then echo unhealthy; return; fi
   echo ok
 }
 
@@ -133,29 +158,31 @@ done
 for s in "${ordered[@]}"; do
   st=$(svc_status "$s")
   [[ $st == oneshot ]] && continue
+  sf="$state_dir/svc/${s//\//__}"
+  name=$(label_of "$s")
   checked=$((checked + 1))
-  prev=$(cat "$state_dir/svc/$s" 2>/dev/null || echo ok)
+  prev=$(cat "$sf" 2>/dev/null || echo ok)
   was_started=false
   [[ " ${to_start[*]} " == *" $s "* ]] && was_started=true
   case $st in
     ok)
       healthy=$((healthy + 1))
-      if $was_started; then started+=("$s"); elif [[ $prev == down ]]; then recovered+=("$s"); fi
-      echo ok >"$state_dir/svc/$s"; echo 0 >"$state_dir/svc/$s.fails"
+      if $was_started; then started+=("$name"); elif [[ $prev == down ]]; then recovered+=("$name"); fi
+      echo ok >"$sf"; echo 0 >"$sf.fails"
       ;;
     stopped)
-      [[ $prev == down ]] || start_failed+=("$s")
-      echo down >"$state_dir/svc/$s"
+      [[ $prev == down ]] || start_failed+=("$name")
+      echo down >"$sf"
       ;;
     missing)
-      [[ $prev == down ]] || missing+=("$s")
-      echo down >"$state_dir/svc/$s"
+      [[ $prev == down ]] || missing+=("$name")
+      echo down >"$sf"
       ;;
     unhealthy)
-      fails=$(( $(cat "$state_dir/svc/$s.fails" 2>/dev/null || echo 0) + 1 ))
-      echo "$fails" >"$state_dir/svc/$s.fails"
+      fails=$(( $(cat "$sf.fails" 2>/dev/null || echo 0) + 1 ))
+      echo "$fails" >"$sf.fails"
       if ((fails >= unhealthy_alert_after)) && [[ $prev != down ]]; then
-        unhealthy_new+=("$s"); echo down >"$state_dir/svc/$s"
+        unhealthy_new+=("$name"); echo down >"$sf"
       fi
       ;;
   esac

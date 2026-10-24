@@ -33,6 +33,8 @@
 - **關機通知**：`systemd/jee8pay-shutdown-notify.service`（安裝於 `/etc/systemd/system/`，已 enable）。關機或重開機開始時執行 `service-watchdog.sh shutdown`，此時網路與 docker 尚未停止；通知含關機類型與 logind 記錄的來源（例如 `hypervisor initiated shutdown`），並留下正常關機標記。斷電或強制關機無法通知，開機總結會顯示「未偵測到正常關機通知」。
 - 通知只在狀態改變時發送，24 小時後自動刪除（`AUTO_DELETE_HOURS`）；事件紀錄保留在 `/var/log/jee8pay-service-watchdog.log`。狀態檔：`/var/lib/jee8pay-service-watchdog/`。
 
+測試機同樣安裝（2026-10-24）：設定檔 `/etc/jee8pay-watchdog.conf` 監看 `jee8pay-v2-dev`、`jee8pay-v2-dev-edge`（sandbox-edge，最後啟動並檢查 `159.198.40.128:443`）、`jee8pay-v2-dev-merchant-uat` 三個 compose 專案；關機通知 unit 見 `deploy/jee8pay-v2-dev/systemd/`。測試機同日 17:20 也被 hypervisor 關機（正式機為 17:05）。
+
 關機通知尚未在正式機實際關機下驗證（避免為測試重開正式機），已驗證 unit 為 enabled/active 且排在 network-online、docker 之後（關機時先執行）。
 
 ## 重開機後檢查

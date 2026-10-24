@@ -22,6 +22,10 @@
 
 已知：mq-broker（RocketMQ，`mem_limit` 1 GiB）平常約 68%，接近門檻；若持續警戒，應評估調高其 `mem_limit` 或 JVM heap，而非放寬全域門檻。
 
+## 測試機
+
+測試機（server1.nnviopp.com）安裝同一支腳本（`/opt/jee8pay-v2-dev/scripts/`），主機差異寫在 `/etc/jee8pay-watchdog.conf`（repo：`deploy/jee8pay-v2-dev/config/jee8pay-watchdog.conf`）：監測 `jee8pay-v2-dev*` 與 `nnviopp-sandbox-edge` 容器、時區 Asia/Taipei、token 讀自 `/opt/jee8pay-v2-dev/secrets/telegram-bot-token`。通知發到同一個營運群組，以 `[主機名]` 區分。
+
 ## 停用
 
 ```bash
