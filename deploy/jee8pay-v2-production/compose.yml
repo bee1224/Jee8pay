@@ -1,7 +1,7 @@
 name: jee8pay-v2-production
 
 x-backend-common: &backend-common
-  restart: unless-stopped
+  restart: always
   environment:
     PLATFORM_ENVIRONMENT: PRODUCTION
     SPRING_CONFIG_IMPORT: configtree:/run/secrets/
@@ -35,7 +35,7 @@ services:
   db:
     platform: linux/amd64
     image: ${DB_IMAGE:-mariadb:10.11}
-    restart: unless-stopped
+    restart: always
     environment:
       LANG: C.UTF-8
       TZ: Asia/Taipei
@@ -64,7 +64,7 @@ services:
 
   redis:
     image: ${REDIS_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/redis:6.2.14}
-    restart: unless-stopped
+    restart: always
     # maxmemory 低於 mem_limit 96m：滿了先淘汰有 TTL 的 key，而不是整個容器被 OOM kill
     command: ["redis-server", "--appendonly", "yes", "--maxmemory", "64mb", "--maxmemory-policy", "volatile-lru"]
     volumes:
@@ -82,7 +82,7 @@ services:
   mq-namesrv:
     platform: linux/amd64
     image: ${ROCKETMQ_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:5.3.1}
-    restart: unless-stopped
+    restart: always
     user: "0:0"
     command: sh mqnamesrv
     environment:
@@ -102,7 +102,7 @@ services:
   mq-broker:
     platform: linux/amd64
     image: ${ROCKETMQ_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/rocketmq:5.3.1}
-    restart: unless-stopped
+    restart: always
     user: "0:0"
     command: sh mqbroker -n mq-namesrv:9876 -c /home/rocketmq/rocketmq-5.3.1/conf/broker.conf
     environment:
@@ -159,7 +159,7 @@ services:
 
   callback-ingress:
     image: nginx:alpine
-    restart: unless-stopped
+    restart: always
     depends_on:
       payment:
         condition: service_healthy
@@ -255,7 +255,7 @@ services:
       args:
         UI_DIR: ui-cashier
     image: jee8pay-v2-production-cashier:654df8b6b1ed
-    restart: unless-stopped
+    restart: always
     environment:
       BACKEND_HOST: payment:9216
     depends_on:
@@ -279,7 +279,7 @@ services:
       args:
         UI_DIR: ui-manager
     image: jee8pay-v2-production-manager-ui:654df8b6b1ed
-    restart: unless-stopped
+    restart: always
     environment:
       BACKEND_HOST: manager:9217
     depends_on:
@@ -303,7 +303,7 @@ services:
       args:
         UI_DIR: ui-merchant
     image: jee8pay-v2-production-merchant-ui:654df8b6b1ed
-    restart: unless-stopped
+    restart: always
     environment:
       BACKEND_HOST: merchant:9218
     depends_on:
@@ -325,7 +325,7 @@ services:
   # nginx:alpine 以 root 啟動、worker 為 nginx(101)；tmpfs 需 uid=101 供 cache 寫入。
   edge:
     image: nginx:alpine
-    restart: unless-stopped
+    restart: always
     container_name: jee8pay-v2-production-edge
     security_opt:
       - no-new-privileges:true
