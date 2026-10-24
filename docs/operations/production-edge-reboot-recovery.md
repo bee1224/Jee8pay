@@ -31,6 +31,8 @@
 - **主機服務**：docker、containerd、cron、ssh、fail2ban、ufw、qemu-guest-agent 未執行即告警。
 - **重開機總結**：偵測到 `boot_id` 改變時發一則總結，含開機時間、上次是否正常關機、容器與主機服務的正常數量，以及自動啟動結果。
 - **關機通知**：`systemd/jee8pay-shutdown-notify.service`（安裝於 `/etc/systemd/system/`，已 enable）。關機或重開機開始時執行 `service-watchdog.sh shutdown`，此時網路與 docker 尚未停止；通知含關機類型與 logind 記錄的來源（例如 `hypervisor initiated shutdown`），並留下正常關機標記。斷電或強制關機無法通知，開機總結會顯示「未偵測到正常關機通知」。
+- **互相監控**：正式機與測試機每分鐘以 `http://<對方 IP>/edge-health` 檢查對方（`PEER_NAME`／`PEER_HOST`，正式機預設監看測試機 159.198.40.128，測試機設定檔監看正式機 162.0.233.203）。連續 3 分鐘無回應即通知，並以 443 連線區分「可能已關機或網路中斷」與「主機有回應但對外入口異常」；恢復時通知中斷分鐘數。一台被關機時，另一台會發出通知。
+- 通知開頭標示 `[正式機 主機名]`／`[測試機 主機名]`（`HOST_LABEL`）。
 - 通知只在狀態改變時發送，24 小時後自動刪除（`AUTO_DELETE_HOURS`）；事件紀錄保留在 `/var/log/jee8pay-service-watchdog.log`。狀態檔：`/var/lib/jee8pay-service-watchdog/`。
 
 測試機同樣安裝（2026-10-24）：設定檔 `/etc/jee8pay-watchdog.conf` 監看 `jee8pay-v2-dev`、`jee8pay-v2-dev-edge`（sandbox-edge，最後啟動並檢查 `159.198.40.128:443`）、`jee8pay-v2-dev-merchant-uat` 三個 compose 專案；關機通知 unit 見 `deploy/jee8pay-v2-dev/systemd/`。測試機同日 17:20 也被 hypervisor 關機（正式機為 17:05）。

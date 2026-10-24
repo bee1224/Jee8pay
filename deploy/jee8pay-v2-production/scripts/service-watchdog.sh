@@ -26,6 +26,10 @@ readonly start_first="db redis mq-namesrv mq-broker"
 readonly chat_id=${TELEGRAM_CHAT_ID:--5211710664}
 readonly token_file=${TELEGRAM_TOKEN_FILE:-/opt/jee8pay-v2-production/secrets/telegram-bot-token}
 readonly state_dir=${WATCHDOG_STATE_DIR:-/var/lib/jee8pay-service-watchdog}
+# 對端主機互相監控：每分鐘檢查對方 http://<IP>/edge-health 與 443，連續幾分鐘無回應才通知
+readonly peer_name=${PEER_NAME:-測試機}
+readonly peer_host=${PEER_HOST:-159.198.40.128}
+readonly peer_alert_after=${PEER_ALERT_MINUTES:-3}
 # 連續幾次不健康才告警，避開 reload / 剛啟動時的短暫狀態
 readonly unhealthy_alert_after=3
 # 通知發出後自動刪除的時間（Telegram 只允許 bot 刪除 48 小時內的訊息）
@@ -35,7 +39,7 @@ log() { echo "$(date -Is) $*"; }
 
 [[ $EUID -eq 0 ]] || { echo 'run as root' >&2; exit 1; }
 install -d -m 0700 "$state_dir" "$state_dir/svc" "$state_dir/unit"
-host=$(hostname)
+host="${HOST_LABEL:-正式機} $(hostname)"
 
 # tg <method> <curl 參數...>：輸出 response body，最後一行為 HTTP code
 tg() {
@@ -203,6 +207,34 @@ for u in $host_units; do
   fi
 done
 
+# ---------------- 對端主機 ----------------
+peer_lines=()
+if [[ -n $peer_host ]]; then
+  pf="$state_dir/peer"
+  now=$(date +%s)
+  prev=$(cat "$pf" 2>/dev/null || echo ok)
+  if [[ $(curl -s -m 8 "http://$peer_host/edge-health" 2>/dev/null) == OK ]]; then
+    if [[ $prev == down ]]; then
+      since=$(cat "$pf.since" 2>/dev/null || echo "$now")
+      peer_lines+=("✅ ${peer_name}（$peer_host）恢復回應，中斷約 $(( (now - since) / 60 + 1 )) 分鐘")
+    fi
+    echo ok >"$pf"; echo 0 >"$pf.fails"; rm -f "$pf.since"
+  else
+    n=$(( $(cat "$pf.fails" 2>/dev/null || echo 0) + 1 ))
+    echo "$n" >"$pf.fails"
+    [[ -f $pf.since ]] || echo "$now" >"$pf.since"
+    if ((n >= peer_alert_after)) && [[ $prev != down ]]; then
+      if timeout 5 bash -c "echo > /dev/tcp/$peer_host/443" 2>/dev/null; then
+        reason='主機有回應，但對外入口健康檢查失敗'
+      else
+        reason='HTTP 與 443 都連不上，可能已關機或網路中斷'
+      fi
+      peer_lines+=("🚨 ${peer_name}（$peer_host）已 ${n} 分鐘無回應：$reason")
+      echo down >"$pf"
+    fi
+  fi
+fi
+
 join() { local IFS='、'; echo "$*"; }
 lines=()
 ((${#started[@]})) && lines+=("🚨 容器已停止，已自動啟動：$(join "${started[@]}")")
@@ -212,6 +244,7 @@ lines=()
 ((${#units_down[@]})) && lines+=("⚠️ 主機服務未執行：$(join "${units_down[@]}")")
 ((${#recovered[@]})) && lines+=("✅ 容器已恢復：$(join "${recovered[@]}")")
 ((${#units_recovered[@]})) && lines+=("✅ 主機服務已恢復：$(join "${units_recovered[@]}")")
+lines+=("${peer_lines[@]}")
 
 # ---------------- 重開機總結 ----------------
 boot_id=$(cat /proc/sys/kernel/random/boot_id)

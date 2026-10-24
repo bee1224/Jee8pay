@@ -26,7 +26,7 @@ log() { echo "$(date -Is) $*"; }
 
 [[ $EUID -eq 0 ]] || { echo 'run as root' >&2; exit 1; }
 install -d -m 0700 "$state_dir"
-host=$(hostname)
+host="${HOST_LABEL:-正式機} $(hostname)"
 
 # tg <method> <curl 參數...>：輸出 response body，最後一行為 HTTP code
 tg() {
