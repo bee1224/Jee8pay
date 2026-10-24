@@ -10,6 +10,10 @@
 > - cert renewal 現以 V2 腳本 `/opt/jee8pay-v2-dev/scripts/sync-edge-certificate.sh` 為 renew/deploy hook（取代 `/opt/payment/.../sync-sandbox-edge-certificate.sh`）。
 > - 完整 gap 與驗證見下文「V1 retirement（2026-08-23 盤點）」。
 
+## 2026-10-24 登入 token TTL 修正與 Redis 記憶體上限（release `b2ffeaa-redis-ttl-r16`）
+
+從 r15 複製，只重建 manager、merchant（jar 由工作目錄 build，merchant 一併帶上 r4 之後 `jeepay-service` 的改動，與 r15 manager 相同）。修正：`AuthService.refAuthentication`（manager、merchant）重寫 `TOKEN_*` 時用不帶 TTL 的 `SET`，使改過權限的登入憑證永不過期；改為重設 2 小時。Redis 加上 `--maxmemory 64mb --maxmemory-policy volatile-lru`（容器上限 96m），已以 `CONFIG SET` 線上套用，compose 供下次重建使用，Redis 未重啟。後端 47 個測試通過；部署後 manager、merchant healthy，驗證碼 API 200，重啟後無 ERROR log。未以實際登入走一次改權限流程。回滾：`current` 指回 `releases/b2ffeaa-feedback-r15` 後 `up -d --no-deps manager merchant`；Redis 以 `CONFIG SET maxmemory 0` 還原。
+
 ## 2026-10-09 改名、簡轉繁與 ADR-0012 第一階段（release `b93be3d-channel-p1`）
 
 來源：分支 `test-env-overhaul` 的 `b93be3d` 加上尚未 commit 的工作目錄。正式環境未變更。2026-10-09 20:2x（台北時間）已部署：`current` 指向 `releases/b93be3d-channel-p1`；payment、manager、merchant 皆 healthy，manager 登入驗證碼 API 回 200，公開回呼 ryo／jay／chi／jhd 在 payment 重建後皆回 400（未 reload `callback-ingress`，TD-018 的修正首次以實際重建驗證）。渠道帳號 `CAHOUSERYO01`、`CAHOUSECHI01`、`CAHOUSEJAY01` 已建立並派發給 `A_HOUSE`，兩個既有商戶已歸到 `A_HOUSE`。回滾：把 `current` 指回 `releases/b93be3d-no-referrer` 後 `up -d --no-deps payment manager merchant manager-ui`，並依三個 SQL 檔尾的回滾段落還原。

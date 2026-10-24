@@ -63,7 +63,8 @@ services:
   redis:
     image: ${REDIS_IMAGE:-swr.cn-south-1.myhuaweicloud.com/jeepay/redis:6.2.14}
     restart: unless-stopped
-    command: ["redis-server", "--appendonly", "yes"]
+    # maxmemory 低於 mem_limit 96m：滿了先淘汰有 TTL 的 key，而不是整個容器被 OOM kill
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "64mb", "--maxmemory-policy", "volatile-lru"]
     volumes:
       - redis_data:/data
     healthcheck:

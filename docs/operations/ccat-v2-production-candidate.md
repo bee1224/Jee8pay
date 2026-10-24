@@ -11,6 +11,10 @@
 > - **仍未完成**：正式付款 APN 全流程（pilot 已到出單，未付款）。`jay` / `chi` credentials 已綁定（populate + db rows）。
 > - 完整 V1 retirement gap 分析見下文「V1 retirement gap」。
 
+## 2026-10-24 登入 token TTL 修正與 Redis 記憶體上限（release `169bb30d7eac-tgdel-redisttl`）
+
+從 `169bb30d7eac-tgdel` 複製。manager、merchant 的 jar 只替換 `AuthService.class`（manager 由 `41eb1b0`、merchant 由 `654df8b6b1ed` 加上修正後以 Java 17 編譯），其他位元組不變；只重建這兩個容器，payment 與其他服務未重啟。修正內容同測試機 r16：`refAuthentication` 重寫 `TOKEN_*` 時重設 2 小時 TTL。Redis `maxmemory 64mb volatile-lru` 已以 `CONFIG SET` 線上套用（套用時 Redis 0.85 MB、db1／db2 無 key，無永不過期的 token），compose 供下次重建使用。部署後 manager、merchant healthy，`admin-v2.lp33ing.com` 回 200，無 ERROR log。回滾：`current` 指回 `releases/169bb30d7eac-tgdel` 後 `up -d --no-deps manager merchant`（舊 image `manager:169bb30d7eac-tgdel-8c98a895`、`merchant:654df8b6b1ed` 保留）；Redis 以 `CONFIG SET maxmemory 0` 還原。
+
 ## Current binding
 
 JEE-E04 binds source `654df8b6b1ed01b03612e8dff204ae146730261c` to
