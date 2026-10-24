@@ -14,6 +14,8 @@ readonly chat_id=${TELEGRAM_CHAT_ID:--5211710664}
 readonly token_file=${TELEGRAM_TOKEN_FILE:-/opt/jee8pay-v2-production/secrets/telegram-bot-token}
 readonly state_dir=${RESOURCE_MONITOR_STATE_DIR:-/var/lib/jee8pay-resource-monitor}
 readonly container_prefix=${CONTAINER_PREFIX:-jee8pay-v2-production}
+# 警戒／解除通知發出後自動刪除的時間（Telegram 只允許 bot 刪除 48 小時內的訊息）
+readonly auto_delete_seconds=$(( ${AUTO_DELETE_HOURS:-24} * 3600 ))
 
 log() { echo "$(date -Is) $*"; }
 
@@ -21,14 +23,44 @@ log() { echo "$(date -Is) $*"; }
 install -d -m 0700 "$state_dir"
 host=$(hostname)
 
-notify() {
-  local token code
+# tg <method> <curl 參數...>：輸出 response body，最後一行為 HTTP code
+tg() {
+  local method=$1 token
+  shift
   token=$(cat "$token_file" 2>/dev/null) || { log 'telegram token unreadable'; return 1; }
   # token 經 stdin 交給 curl，不出現在 process list 或 log
-  code=$(printf 'url = "https://api.telegram.org/bot%s/sendMessage"\n' "$token" |
-    curl -sS -m 15 -o /dev/null -w '%{http_code}' -K - \
-      --data-urlencode "chat_id=$chat_id" --data-urlencode "text=$1" 2>/dev/null)
-  [[ $code == 200 ]] || { log "telegram send failed http=$code"; return 1; }
+  printf 'url = "https://api.telegram.org/bot%s/%s"\n' "$token" "$method" |
+    curl -sS -m 15 -w '\n%{http_code}' -K - --data-urlencode "chat_id=$chat_id" "$@" 2>/dev/null
+}
+
+# 發出的警戒記在 sent 檔（<epoch> <message_id>），滿 AUTO_DELETE_HOURS 後自動刪除
+notify() {
+  local resp id
+  resp=$(tg sendMessage --data-urlencode "text=$1")
+  [[ ${resp##*$'\n'} == 200 ]] || { log "telegram send failed http=${resp##*$'\n'}"; return 1; }
+  id=$(grep -o '"message_id":[0-9]*' <<<"$resp" | head -1 | cut -d: -f2)
+  [[ -n $id ]] && echo "$(date +%s) $id" >>"$state_dir/sent"
+  return 0
+}
+
+purge_old_alerts() {
+  local f="$state_dir/sent" now keep ts id resp
+  [[ -s $f ]] || return 0
+  now=$(date +%s)
+  keep=$(mktemp)
+  while read -r ts id; do
+    if ((now - ts < auto_delete_seconds)); then
+      echo "$ts $id" >>"$keep"
+      continue
+    fi
+    resp=$(tg deleteMessage --data-urlencode "message_id=$id")
+    # 失敗且還在 Telegram 48 小時可刪範圍內就保留重試；超過就放棄（已刪不掉）
+    if [[ ${resp##*$'\n'} != 200 ]] && ((now - ts < 47 * 3600)) && ! grep -q 'message to delete not found' <<<"$resp"; then
+      echo "$ts $id" >>"$keep"
+      log "delete message $id failed, will retry"
+    fi
+  done <"$f"
+  mv "$keep" "$f"
 }
 
 # check <key> <label> <percent 整數> [detail]
@@ -50,6 +82,8 @@ check() {
       echo "alert $now $now" >"$f"
   fi
 }
+
+purge_old_alerts
 
 # ---- 主機 CPU：/proc/stat 取 5 秒區間使用率 ----
 read -r _ u1 n1 s1 i1 w1 q1 sq1 st1 _ </proc/stat
