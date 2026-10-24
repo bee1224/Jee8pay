@@ -42,12 +42,26 @@ public class TelegramBotClient {
         this.transport = transport;
     }
 
-    public void sendMessage(String text) {
-        String form = "chat_id=" + encode(chatId) + "&text=" + encode(text);
+    /** @return Telegram message_id，供之後刪除 */
+    public long sendMessage(String text) {
+        JSONObject body = call("sendMessage", "chat_id=" + encode(chatId) + "&text=" + encode(text));
+        JSONObject result = body.getJSONObject("result");
+        if (result == null || result.getLong("message_id") == null) {
+            throw new IllegalStateException("Telegram Bot API response is malformed");
+        }
+        return result.getLongValue("message_id");
+    }
+
+    /** Bot 只能刪除 48 小時內自己發的訊息 */
+    public void deleteMessage(long messageId) {
+        call("deleteMessage", "chat_id=" + encode(chatId) + "&message_id=" + messageId);
+    }
+
+    private JSONObject call(String method, String form) {
         TransportResponse response;
         try {
             response = transport.post(
-                    URI.create("https://api.telegram.org/bot" + botToken + "/sendMessage"),
+                    URI.create("https://api.telegram.org/bot" + botToken + "/" + method),
                     form,
                     REQUEST_TIMEOUT);
         } catch (IOException e) {
@@ -65,8 +79,9 @@ public class TelegramBotClient {
         }
         if (response.statusCode < 200 || response.statusCode >= 300
                 || body == null || !body.getBooleanValue("ok")) {
-            throw new IllegalStateException("Telegram Bot API rejected the message");
+            throw new IllegalStateException("Telegram Bot API rejected " + method);
         }
+        return body;
     }
 
     private static String encode(String value) {
