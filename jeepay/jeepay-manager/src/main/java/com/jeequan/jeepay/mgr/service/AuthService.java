@@ -158,8 +158,8 @@ public class AuthService {
                 //查询放置权限数据
                 jwtBaseUser.setAuthorities(getUserAuthority(jwtBaseUser.getSysUser()));
 
-                //保存token  失效时间不变
-                RedisUtil.set(cacheKey, jwtBaseUser);
+                //保存token：SET 會清掉原 TTL，需重設 2 小時（與每次請求的續期相同），否則 token 永不過期
+                RedisUtil.set(cacheKey, jwtBaseUser, CS.TOKEN_TIME);
             }
         }
 
