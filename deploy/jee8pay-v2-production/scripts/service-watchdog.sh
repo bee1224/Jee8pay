@@ -8,6 +8,7 @@
 # - 容器連續 3 分鐘 unhealthy、主機服務未執行：通知
 # - 偵測到重開機：發一則總結（上次是否正常關機、全部檢查點結果）
 # 只在狀態改變時通知；通知 24 小時後自動刪除，事件紀錄保留在 log。
+# PEER_ONLY=1（測試機）：只通知對端主機（正式機）無回應／恢復；本機容器仍自動啟動，但不通知、不發關機通知與重開機總結。
 set -uo pipefail
 
 # 主機差異（測試機）放在設定檔覆寫；正式機無設定檔，使用下列預設值
@@ -84,6 +85,7 @@ purge_old_notices() {
 
 # ---------------- 關機通知 ----------------
 if [[ ${1:-} == shutdown ]]; then
+  [[ ${PEER_ONLY:-0} == 1 ]] && exit 0
   kind=關機
   systemctl list-jobs --no-legend 2>/dev/null | grep -q 'reboot.target' && kind=重新開機
   # logind 會記錄關機來源，例如「System is powering down (hypervisor initiated shutdown).」
@@ -245,12 +247,13 @@ lines=()
 ((${#recovered[@]})) && lines+=("✅ 容器已恢復：$(join "${recovered[@]}")")
 ((${#units_recovered[@]})) && lines+=("✅ 主機服務已恢復：$(join "${units_recovered[@]}")")
 lines+=("${peer_lines[@]}")
+[[ ${PEER_ONLY:-0} == 1 ]] && lines=("${peer_lines[@]}")
 
 # ---------------- 重開機總結 ----------------
 boot_id=$(cat /proc/sys/kernel/random/boot_id)
 last_boot=$(cat "$state_dir/boot_id" 2>/dev/null || true)
 echo "$boot_id" >"$state_dir/boot_id"
-if [[ -n $last_boot && $last_boot != "$boot_id" ]]; then
+if [[ ${PEER_ONLY:-0} != 1 && -n $last_boot && $last_boot != "$boot_id" ]]; then
   if [[ -f $state_dir/clean-shutdown ]]; then
     last="上次為正常關機（$(cat "$state_dir/clean-shutdown")）"
   else

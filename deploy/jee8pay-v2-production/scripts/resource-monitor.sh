@@ -7,6 +7,8 @@ set -uo pipefail
 
 # 主機差異（測試機）放在設定檔覆寫；正式機無設定檔，使用下列預設值
 [[ -r ${WATCHDOG_CONFIG:-/etc/jee8pay-watchdog.conf} ]] && . "${WATCHDOG_CONFIG:-/etc/jee8pay-watchdog.conf}"
+# PEER_ONLY=1 的主機（測試機）不發資源警戒
+[[ ${PEER_ONLY:-0} == 1 ]] && exit 0
 
 readonly threshold=${THRESHOLD:-70}
 readonly clear_below=$((threshold - 5))

@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# 每日狀態報備（root cron 每日 00:00，與收款總結同時；兩台主機各自發送）。
+# 每日狀態報備（root cron 每日 00:00，與收款總結同時）。只有正式機發送；PEER_ONLY=1 的主機（測試機）直接結束。
 # 彙整主機、容器、主機服務、對外入口與憑證、對端主機、監控本身、資源警戒與過去 24 小時事件。
 # 報備訊息記入服務看門狗的 sent 檔，由看門狗在 24 小時後自動刪除（隔天的報備取代前一天）。
 set -uo pipefail
 
 [[ -r ${WATCHDOG_CONFIG:-/etc/jee8pay-watchdog.conf} ]] && . "${WATCHDOG_CONFIG:-/etc/jee8pay-watchdog.conf}"
+[[ ${PEER_ONLY:-0} == 1 ]] && exit 0
 
 readonly projects=${WATCH_PROJECTS:-jee8pay-v2-production=/opt/jee8pay-v2-production/current/compose.yml}
 readonly secret_dir=${V2_SECRET_DIR:-/opt/jee8pay-v2-production/secrets}

@@ -32,11 +32,11 @@
 - **重開機總結**：偵測到 `boot_id` 改變時發一則總結，含開機時間、上次是否正常關機、容器與主機服務的正常數量，以及自動啟動結果。
 - **關機通知**：`systemd/jee8pay-shutdown-notify.service`（安裝於 `/etc/systemd/system/`，已 enable）。關機或重開機開始時執行 `service-watchdog.sh shutdown`，此時網路與 docker 尚未停止；通知含關機類型與 logind 記錄的來源（例如 `hypervisor initiated shutdown`），並留下正常關機標記。斷電或強制關機無法通知，開機總結會顯示「未偵測到正常關機通知」。
 - **互相監控**：正式機與測試機每分鐘以 `http://<對方 IP>/edge-health` 檢查對方（`PEER_NAME`／`PEER_HOST`，正式機預設監看測試機 159.198.40.128，測試機設定檔監看正式機 162.0.233.203）。連續 3 分鐘無回應即通知，並以 443 連線區分「可能已關機或網路中斷」與「主機有回應但對外入口異常」；恢復時通知中斷分鐘數。一台被關機時，另一台會發出通知。
-- **每日狀態報備**：`scripts/daily-status.sh` 由 `/etc/cron.d/jee8pay-daily-status` 每日 00:00 執行（延遲 30 秒，讓收款總結先送出），兩台各發一則：主機運行時間／load／記憶體／磁碟、容器與主機服務正常數、對外入口與憑證剩餘天數、對端主機、監控本身（看門狗、資源警戒、關機通知）、資源警戒中項目、收款總結送出與自動刪除次數（僅正式機）、過去 24 小時通知與重開機次數。報備 24 小時後由看門狗刪除。`DRY_RUN=1 daily-status.sh now` 可預覽不發送。
+- **每日狀態報備**：`scripts/daily-status.sh` 由 `/etc/cron.d/jee8pay-daily-status` 每日 00:00 執行（延遲 30 秒，讓收款總結先送出），只有正式機發送：主機運行時間／load／記憶體／磁碟、容器與主機服務正常數、對外入口與憑證剩餘天數、對端主機、監控本身（看門狗、資源警戒、關機通知）、資源警戒中項目、收款總結送出與自動刪除次數、過去 24 小時通知與重開機次數。報備 24 小時後由看門狗刪除。`DRY_RUN=1 daily-status.sh now` 可預覽不發送。
 - 通知開頭標示 `[正式機 主機名]`／`[測試機 主機名]`（`HOST_LABEL`）。
 - 通知只在狀態改變時發送，24 小時後自動刪除（`AUTO_DELETE_HOURS`）；事件紀錄保留在 `/var/log/jee8pay-service-watchdog.log`。狀態檔：`/var/lib/jee8pay-service-watchdog/`。
 
-測試機同樣安裝（2026-10-24）：設定檔 `/etc/jee8pay-watchdog.conf` 監看 `jee8pay-v2-dev`、`jee8pay-v2-dev-edge`（sandbox-edge，最後啟動並檢查 `159.198.40.128:443`）、`jee8pay-v2-dev-merchant-uat` 三個 compose 專案；關機通知 unit 見 `deploy/jee8pay-v2-dev/systemd/`。測試機同日 17:20 也被 hypervisor 關機（正式機為 17:05）。
+測試機同樣安裝（2026-10-24）：設定檔 `/etc/jee8pay-watchdog.conf` 監看 `jee8pay-v2-dev`、`jee8pay-v2-dev-edge`（sandbox-edge，最後啟動並檢查 `159.198.40.128:443`）、`jee8pay-v2-dev-merchant-uat` 三個 compose 專案；關機通知 unit 見 `deploy/jee8pay-v2-dev/systemd/`。2026-10-24 起測試機設定 `PEER_ONLY=1`：只通知正式機無回應／恢復；每日報備、資源警戒、本機容器告警、關機通知與重開機總結都不發（cron 與 unit 保留，本機停止的容器仍會自動啟動）。測試機同日 17:20 也被 hypervisor 關機（正式機為 17:05）。
 
 關機通知尚未在正式機實際關機下驗證（避免為測試重開正式機），已驗證 unit 為 enabled/active 且排在 network-online、docker 之後（關機時先執行）。
 
